@@ -30,7 +30,7 @@ export async function signUp(formData: FormData): Promise<ActionResult> {
   };
 }
 
-export async function signIn(formData: FormData): Promise<ActionResult> {
+export async function signIn(_prevState: ActionResult | null, formData: FormData): Promise<ActionResult> {
   const supabase = await createClient();
 
   const email = formData.get('email') as string;

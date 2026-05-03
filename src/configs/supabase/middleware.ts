@@ -18,7 +18,10 @@ export async function updateSession(request: NextRequest) {
           );
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, {
+              ...options,
+              secure: process.env.NODE_ENV === 'production',
+            })
           );
         },
       },
@@ -27,8 +30,9 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: Do not add logic between createServerClient and supabase.auth.getUser()
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
 
   // Protected routes
   const pathname = request.nextUrl.pathname;

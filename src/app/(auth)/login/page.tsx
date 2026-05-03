@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useActionState, useEffect } from 'react';
 import Link from 'next/link';
 import { signIn } from '@/actions/auth-action';
 import { Button } from '@/components/ui/button';
@@ -10,25 +10,20 @@ import { toast } from 'sonner';
 import { Loader2, Mail, Lock } from 'lucide-react';
 
 export default function LoginPage() {
-  const [loading, setLoading] = useState(false);
+  const [state, formAction, isPending] = useActionState(signIn, null);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    const formData = new FormData(e.currentTarget);
-    const result = await signIn(formData);
-    if (result?.error) {
-      toast.error('Login gagal', { description: result.error });
-      setLoading(false);
+  useEffect(() => {
+    if (state?.error) {
+      toast.error('Login gagal', { description: state.error });
     }
-  }
+  }, [state]);
 
   return (
     <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
       <h2 className="text-xl font-semibold text-white mb-1">Selamat datang kembali</h2>
       <p className="text-slate-400 text-sm mb-6">Masuk ke akun CatatZ Anda</p>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form action={formAction} method="POST" className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email" className="text-slate-300">Email</Label>
           <div className="relative">
@@ -61,10 +56,10 @@ export default function LoginPage() {
 
         <Button
           type="submit"
-          disabled={loading}
+          disabled={isPending}
           className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium h-11 mt-2 transition-all duration-200"
         >
-          {loading ? (
+          {isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Masuk...

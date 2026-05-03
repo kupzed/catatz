@@ -10,5 +10,6 @@ AI_API_KEY=
 AI_MODEL=gemini-2.5-flash-lite
 
 # App
-NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_APP_NAME=CatatZ
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+ALLOWED_DEV_ORIGINS=[IP_ADDRESS]
