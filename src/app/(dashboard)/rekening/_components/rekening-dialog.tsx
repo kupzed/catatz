@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   rekeningSchema,
@@ -16,6 +16,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -63,13 +64,12 @@ export default function RekeningDialog({
 }: Props) {
   const isEdit = !!editData;
   const [submitting, setSubmitting] = useState(false);
-  const [selectedBank, setSelectedBank] = useState<string>("");
 
   const {
+    control,
     register,
     handleSubmit,
     setValue,
-    watch,
     reset,
     formState: { errors },
   } = useForm<RekeningSchema>({
@@ -82,8 +82,10 @@ export default function RekeningDialog({
     } as RekeningSchema,
   });
 
-  const warna = watch("warna");
-  const jenis = watch("jenis");
+  const warna = useWatch({ control, name: "warna" });
+  const jenis = useWatch({ control, name: "jenis" });
+  const logo = useWatch({ control, name: "logo" });
+  const exclude_total = useWatch({ control, name: "exclude_total" });
 
   useEffect(() => {
     if (editData) {
@@ -95,7 +97,6 @@ export default function RekeningDialog({
         logo: editData.logo ?? "",
         exclude_total: editData.exclude_total,
       });
-      setSelectedBank(editData.logo ?? "");
     } else {
       reset({
         jenis: "Bank",
@@ -103,12 +104,10 @@ export default function RekeningDialog({
         warna: "#6366f1",
         exclude_total: false,
       });
-      setSelectedBank("");
     }
   }, [editData, reset, open]);
 
   function handleBankSelect(slug: string) {
-    setSelectedBank(slug);
     setValue("logo", slug);
     const bank = DAFTAR_BANK.find((b) => b.slug === slug);
     if (bank) {
@@ -150,6 +149,9 @@ export default function RekeningDialog({
           <DialogTitle>
             {isEdit ? "Edit Rekening" : "Tambah Rekening"}
           </DialogTitle>
+          <DialogDescription>
+            {isEdit ? "Perbarui informasi rekening Anda." : "Tambahkan rekening baru untuk mulai mencatat transaksi."}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -185,7 +187,7 @@ export default function RekeningDialog({
                             onClick={() => handleBankSelect(bank.slug)}
                             className={cn(
                               "rounded-lg border p-2 text-center transition-all text-xs font-medium hover:border-indigo-400",
-                              selectedBank === bank.slug
+                              logo === bank.slug
                                 ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950"
                                 : "border-border",
                             )}
@@ -227,7 +229,7 @@ export default function RekeningDialog({
             <Label>Jenis Rekening</Label>
             <Select
               value={jenis}
-              onValueChange={(v) => setValue("jenis", v as any)}
+              onValueChange={(v) => setValue("jenis", v as RekeningSchema["jenis"])}
             >
               <SelectTrigger id="rek-jenis">
                 <SelectValue />
@@ -288,7 +290,7 @@ export default function RekeningDialog({
           <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
             <Switch
               id="exclude-total"
-              checked={watch("exclude_total")}
+              checked={exclude_total}
               onCheckedChange={(v) => setValue("exclude_total", v)}
             />
             <div>

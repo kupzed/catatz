@@ -104,7 +104,7 @@ export default function RekeningPageClient({ initialRekening }: Props) {
       </div>
 
       {/* Total Balance Card */}
-      <div className="rounded-2xl border bg-gradient-to-br from-indigo-600 to-violet-600 p-6 text-white shadow-lg">
+      <div className="rounded-2xl border bg-linear-to-br from-indigo-600 to-violet-600 p-6 text-white shadow-lg">
         <p className="text-sm text-indigo-200 mb-1">Total Saldo (aktif)</p>
         <p className="text-3xl font-bold">{formatRupiah(totalSaldo)}</p>
         <p className="text-xs text-indigo-300 mt-2">

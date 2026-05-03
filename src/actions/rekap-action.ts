@@ -84,7 +84,9 @@ export async function getRekapKategori(
   const grouped: Record<string, { nama: string; ikon: string; warna: string; total: number }> = {};
   let grandTotal = 0;
 
-  (data ?? []).forEach((t: any) => {
+  const transaksi = (data as unknown as { nominal: number; kategori: { id: string; nama: string; ikon: string; warna: string } | null }[]) ?? [];
+
+  transaksi.forEach((t) => {
     const k = t.kategori;
     if (!k) return;
     if (!grouped[k.id]) grouped[k.id] = { nama: k.nama, ikon: k.ikon, warna: k.warna, total: 0 };
@@ -125,14 +127,19 @@ export async function getBudgetWithUsage(bulan: number, tahun: number): Promise<
     .eq('tipe', 'expense')
     .gte('tanggal', startDate)
     .lte('tanggal', endDate)
-    .in('kategori_id', budgets.map((b: any) => b.kategori_id));
+    .in('kategori_id', budgets.map((b) => b.kategori_id));
 
   const usage: Record<string, number> = {};
-  (transaksi ?? []).forEach((t: any) => {
+  (transaksi as { nominal: number; kategori_id: string }[] ?? []).forEach((t) => {
     usage[t.kategori_id] = (usage[t.kategori_id] || 0) + Number(t.nominal);
   });
 
-  return (budgets as any[]).map((b) => {
+  return (budgets as unknown as {
+    id: string;
+    kategori_id: string;
+    limit_nominal: number;
+    kategori: { nama: string; ikon: string } | null;
+  }[]).map((b) => {
     const dipakai = usage[b.kategori_id] || 0;
     const persentase = Math.min(Math.round((dipakai / b.limit_nominal) * 100), 100);
     return {

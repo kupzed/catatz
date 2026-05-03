@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   hutangSchema,
@@ -16,6 +16,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -43,10 +44,10 @@ export default function HutangDialog({
   const [submitting, setSubmitting] = useState(false);
 
   const {
+    control,
     register,
     handleSubmit,
     setValue,
-    watch,
     reset,
     formState: { errors },
   } = useForm<HutangSchema>({
@@ -54,7 +55,7 @@ export default function HutangDialog({
     defaultValues: { tipe: "menerima", tanggal_mulai: todayISODate() },
   });
 
-  const tipe = watch("tipe");
+  const tipe = useWatch({ control, name: "tipe" });
 
   useEffect(() => {
     if (editData) {
@@ -103,11 +104,14 @@ export default function HutangDialog({
           <DialogTitle>
             {isEdit ? "Edit Hutang" : "Catat Hutang/Piutang"}
           </DialogTitle>
+          <DialogDescription>
+            {isEdit ? "Perbarui detail hutang atau piutang Anda." : "Masukkan detail hutang atau piutang baru."}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Tipe */}
-          <Tabs value={tipe} onValueChange={(v) => setValue("tipe", v as any)}>
+          <Tabs value={tipe} onValueChange={(v) => setValue("tipe", v as HutangSchema["tipe"])}>
             <TabsList className="w-full grid grid-cols-2">
               <TabsTrigger value="menerima">📥 Saya Berhutang</TabsTrigger>
               <TabsTrigger value="memberi">📤 Saya Meminjamkan</TabsTrigger>

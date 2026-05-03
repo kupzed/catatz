@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   transaksiSchema,
@@ -22,6 +22,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -84,10 +85,10 @@ export default function TransaksiDialog({
   const [aiLoading, setAiLoading] = useState(false);
 
   const {
+    control,
     register,
     handleSubmit,
     setValue,
-    watch,
     reset,
     formState: { errors },
   } = useForm<TransaksiSchema>({
@@ -99,8 +100,8 @@ export default function TransaksiDialog({
     },
   });
 
-  const tipe = watch("tipe");
-  const catatan = watch("catatan");
+  const tipe = useWatch({ control, name: "tipe" });
+  const catatan = useWatch({ control, name: "catatan" });
 
   useEffect(() => {
     if (editData) {
@@ -150,7 +151,7 @@ export default function TransaksiDialog({
       );
       if (matchedRek) setValue("rekening_id", matchedRek.id);
       toast.success("AI berhasil mem-parse transaksi!");
-    } catch (err) {
+    } catch {
       toast.error("Gagal mem-parse dengan AI");
     } finally {
       setAiLoading(false);
@@ -197,6 +198,9 @@ export default function TransaksiDialog({
           <DialogTitle>
             {isEdit ? "Edit Transaksi" : "Tambah Transaksi"}
           </DialogTitle>
+          <DialogDescription>
+            {isEdit ? "Perbarui rincian transaksi Anda." : "Catat pengeluaran, pemasukan, atau transfer baru."}
+          </DialogDescription>
         </DialogHeader>
 
         {/* AI Input */}
@@ -234,7 +238,7 @@ export default function TransaksiDialog({
           {/* Tipe Tabs */}
           <Tabs
             value={tipe}
-            onValueChange={(v) => setValue("tipe", v as any)}
+            onValueChange={(v) => setValue("tipe", v as TransaksiSchema["tipe"])}
           >
             <TabsList className="w-full grid grid-cols-3">
               {TIPE_TABS.map((t) => (

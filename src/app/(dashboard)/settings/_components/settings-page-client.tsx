@@ -13,9 +13,16 @@ import { useTheme } from "next-themes";
 import { User, Palette, Tags, Download, Moon } from "lucide-react";
 import { toast } from "sonner";
 
+type Profile = {
+  id: string;
+  email: string;
+  name: string | null;
+  avatar_url?: string | null;
+};
+
 type Props = {
   kategori: Kategori[];
-  profile: any;
+  profile: Profile | null;
 };
 
 export default function SettingsPageClient({ kategori, profile }: Props) {

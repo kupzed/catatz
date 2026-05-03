@@ -22,7 +22,6 @@ import {
   LogOut,
 } from 'lucide-react';
 import { signOut } from '@/actions/auth-action';
-import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
   {

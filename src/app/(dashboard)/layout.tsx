@@ -10,7 +10,6 @@ import {
 import DashboardBreadcrumb from './_components/dashboard-breadcrumb';
 import { createClient } from '@/configs/supabase/server';
 import { redirect } from 'next/navigation';
-import type { Metadata } from 'next';
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient();

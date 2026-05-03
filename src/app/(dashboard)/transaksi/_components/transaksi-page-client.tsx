@@ -1,12 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import {
-  Transaksi,
-  Kategori,
-  TransaksiFilter,
-  TipeTransaksi,
-} from "@/types/transaksi";
+import { Transaksi, Kategori, TransaksiFilter } from "@/types/transaksi";
 import { Rekening } from "@/types/rekening";
 import { formatRupiah, formatTanggal } from "@/lib/utils";
 import { deleteTransaksi } from "@/actions/transaksi-action";
@@ -21,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -30,7 +24,6 @@ import {
   Search,
   Trash2,
   Pencil,
-  SlidersHorizontal,
   Sparkles,
 } from "lucide-react";
 import TransaksiDialog from "./transaksi-dialog";
@@ -194,7 +187,7 @@ export default function TransaksiPageClient({
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 items-center">
-        <div className="relative flex-1 min-w-[200px]">
+        <div className="relative flex-1 min-w-50">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             placeholder="Cari catatan..."
@@ -205,7 +198,9 @@ export default function TransaksiPageClient({
         </div>
         <Select
           value={filter.tipe ?? "all"}
-          onValueChange={(v) => setFilter((f) => ({ ...f, tipe: v as any }))}
+          onValueChange={(v) =>
+            setFilter((f) => ({ ...f, tipe: v as TransaksiFilter["tipe"] }))
+          }
         >
           <SelectTrigger className="w-36 h-8 text-sm" id="filter-tipe">
             <SelectValue placeholder="Semua tipe" />

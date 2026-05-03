@@ -1,11 +1,10 @@
 'use client';
 
-import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell,
 } from 'recharts';
-import { formatRupiah, percentage } from '@/lib/utils';
+import { formatRupiah } from '@/lib/utils';
 import type { RekapBulanan, RekapKategori, BudgetWithUsage } from '@/actions/rekap-action';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -94,7 +93,7 @@ export default function RekapPageClient({ initialBulanan, initialKategori, initi
                   outerRadius={85}
                   paddingAngle={2}
                 >
-                  {initialKategori.map((entry, i) => (
+                  {initialKategori.map((entry) => (
                     <Cell key={entry.kategori_id} fill={entry.kategori_warna} />
                   ))}
                 </Pie>
