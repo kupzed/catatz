@@ -77,9 +77,9 @@ export default function HutangDialog({
     try {
       if (isEdit) {
         const res = await updateHutang(editData!.id, values);
-        if (res.success) {
+        if (res.success && res.data) {
           toast.success("Hutang diperbarui");
-          onUpdated({ ...editData!, ...values });
+          onUpdated(res.data);
         } else {
           toast.error(res.error ?? "Gagal");
         }
