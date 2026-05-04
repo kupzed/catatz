@@ -1,13 +1,11 @@
 import type { NextConfig } from "next";
-
-const devOrigins =
-  process.env.ALLOWED_DEV_ORIGINS?.split(",").map((s) => s.trim()) ?? [];
+import { environment } from "./src/configs/environment";
 
 const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
-  allowedDevOrigins: devOrigins,
+  allowedDevOrigins: environment.allowedDevOrigins,
 };
 
 export default nextConfig;

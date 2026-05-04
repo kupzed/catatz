@@ -1,8 +1,9 @@
 'use server';
 
 import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
+import { environment } from '@/configs/environment';
 
-const genAI = new GoogleGenerativeAI(process.env.AI_API_KEY!);
+const genAI = new GoogleGenerativeAI(environment.aiApiKey);
 
 export type ParsedTransaksi = {
   tipe: 'income' | 'expense' | 'transfer';
@@ -44,7 +45,7 @@ ATURAN PENTING:
  * // => { tipe: 'expense', nominal: 25000, kategori_hint: 'Makan & Minum', rekening_hint: 'GoPay', catatan: 'Beli nasi padang 25rb pakai GoPay' }
  */
 export async function parseTransaksiFromText(input: string): Promise<ParsedTransaksi> {
-  const modelName = process.env.AI_MODEL ?? 'gemini-2.5-flash-lite';
+  const modelName = environment.aiModel;
 
   const model = genAI.getGenerativeModel({
     model: modelName,
