@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { NominalInput } from "@/components/common/nominal-input";
 import {
   Dialog,
   DialogContent,
@@ -165,14 +166,18 @@ export default function HutangDialog({
           {/* Total */}
           <div className="space-y-1.5">
             <Label htmlFor="total-pinjaman">Total Pinjaman (Rp)</Label>
-            <Input
-              id="total-pinjaman"
-              type="number"
-              min={0}
-              step="any"
-              placeholder="0"
-              {...register("total_pinjaman", { valueAsNumber: true })}
-              className={errors.total_pinjaman ? "border-rose-500" : ""}
+            <Controller
+              control={control}
+              name="total_pinjaman"
+              render={({ field }) => (
+                <NominalInput
+                  id="total-pinjaman"
+                  placeholder="0"
+                  value={field.value || ""}
+                  onValueChange={field.onChange}
+                  className={errors.total_pinjaman ? "border-rose-500" : ""}
+                />
+              )}
             />
             {errors.total_pinjaman && (
               <p className="text-xs text-rose-500">

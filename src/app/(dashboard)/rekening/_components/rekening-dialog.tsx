@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   rekeningSchema,
@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { NominalInput } from "@/components/common/nominal-input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -150,7 +151,9 @@ export default function RekeningDialog({
             {isEdit ? "Edit Rekening" : "Tambah Rekening"}
           </DialogTitle>
           <DialogDescription>
-            {isEdit ? "Perbarui informasi rekening Anda." : "Tambahkan rekening baru untuk mulai mencatat transaksi."}
+            {isEdit
+              ? "Perbarui informasi rekening Anda."
+              : "Tambahkan rekening baru untuk mulai mencatat transaksi."}
           </DialogDescription>
         </DialogHeader>
 
@@ -229,7 +232,9 @@ export default function RekeningDialog({
             <Label>Jenis Rekening</Label>
             <Select
               value={jenis}
-              onValueChange={(v) => setValue("jenis", v as RekeningSchema["jenis"])}
+              onValueChange={(v) =>
+                setValue("jenis", v as RekeningSchema["jenis"])
+              }
             >
               <SelectTrigger id="rek-jenis">
                 <SelectValue />
@@ -248,13 +253,17 @@ export default function RekeningDialog({
             <Label htmlFor="saldo-awal">
               {isEdit ? "Saldo Awal" : "Saldo Awal (Rp)"}
             </Label>
-            <Input
-              id="saldo-awal"
-              type="number"
-              min={0}
-              step={1000}
-              placeholder="0"
-              {...register("saldo_awal", { valueAsNumber: true })}
+            <Controller
+              control={control}
+              name="saldo_awal"
+              render={({ field }) => (
+                <NominalInput
+                  id="saldo-awal"
+                  placeholder="0"
+                  value={field.value || ""}
+                  onValueChange={field.onChange}
+                />
+              )}
             />
           </div>
 

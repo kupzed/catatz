@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   transaksiSchema,
@@ -36,6 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { NominalInput } from "@/components/common/nominal-input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Sparkles, Wand2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -284,16 +285,20 @@ export default function TransaksiDialog({
           {/* Nominal */}
           <div className="space-y-1.5">
             <Label htmlFor="nominal">Nominal (Rp)</Label>
-            <Input
-              id="nominal"
-              type="number"
-              min={0}
-              step="any"
-              placeholder="0"
-              {...register("nominal", { valueAsNumber: true })}
-              className={cn(
-                "text-lg font-semibold",
-                errors.nominal && "border-rose-500",
+            <Controller
+              control={control}
+              name="nominal"
+              render={({ field }) => (
+                <NominalInput
+                  id="nominal"
+                  placeholder="0"
+                  value={field.value || ""}
+                  onValueChange={field.onChange}
+                  className={cn(
+                    "text-lg font-semibold",
+                    errors.nominal && "border-rose-500",
+                  )}
+                />
               )}
             />
             {errors.nominal && (

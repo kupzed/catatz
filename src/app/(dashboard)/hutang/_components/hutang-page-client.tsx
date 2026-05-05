@@ -21,7 +21,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Plus,
@@ -36,6 +35,7 @@ import {
 import HutangDialog from "./hutang-dialog";
 import { cn } from "@/lib/utils";
 import { todayISODate, currentTime } from "@/lib/utils";
+import { NominalInput } from "@/components/common/nominal-input";
 
 type Props = { initialHutang: Hutang[]; rekening: Rekening[] };
 
@@ -290,18 +290,15 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                     <div className="flex gap-2">
                       <div className="flex-1 space-y-1">
                         <Label className="text-xs">Nominal Cicilan (Rp)</Label>
-                        <Input
-                          type="number"
-                          min={0}
-                          step="any"
+                        <NominalInput
                           placeholder="0"
                           value={cicilanData[h.id]?.nominal ?? ""}
-                          onChange={(e) =>
+                          onValueChange={(val) =>
                             setCicilanData((prev) => ({
                               ...prev,
                               [h.id]: {
                                 ...prev[h.id],
-                                nominal: e.target.value,
+                                nominal: val.toString(),
                               },
                             }))
                           }
