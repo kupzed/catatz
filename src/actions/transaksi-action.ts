@@ -26,8 +26,11 @@ export async function getTransaksi(filter: TransaksiFilter = {}): Promise<Transa
       rekening:rekening_id(id, nama, jenis, logo, warna),
       rekening_tujuan_data:rekening_tujuan(id, nama, jenis, logo, warna)
     `)
-    .order('tanggal', { ascending: false })
-    .order('created_at', { ascending: false });
+    .order(filter.sortBy ?? 'tanggal', { ascending: filter.sortOrder === 'asc' });
+
+  if (!filter.sortBy || filter.sortBy === 'tanggal') {
+    query = query.order('waktu', { ascending: filter.sortOrder === 'asc' }).order('created_at', { ascending: filter.sortOrder === 'asc' });
+  }
 
   if (filter.tipe && filter.tipe !== 'all') {
     query = query.eq('tipe', filter.tipe);

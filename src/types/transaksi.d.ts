@@ -53,6 +53,8 @@ export type TransaksiFilter = {
   dari?: string;
   sampai?: string;
   q?: string;
+  sortBy?: 'tanggal' | 'nominal' | 'created_at';
+  sortOrder?: 'asc' | 'desc';
 };
 
 export type IntervalRecurring = 'harian' | 'mingguan' | 'bulanan' | 'tahunan';
