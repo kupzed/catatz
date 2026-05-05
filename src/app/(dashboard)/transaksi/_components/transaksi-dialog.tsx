@@ -8,6 +8,7 @@ import {
   type TransaksiSchema,
 } from "@/validations/transaksi-validation";
 import {
+  createTransaksi,
   updateTransaksi,
   suggestKategori,
   getNamaSuggestions,
@@ -83,7 +84,9 @@ export default function TransaksiDialog({
   const [submitting, setSubmitting] = useState(false);
   const [aiText, setAiText] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
-  const [suggestions, setSuggestions] = useState<Array<{ catatan: string, kategori_id: string | null }>>([]);
+  const [suggestions, setSuggestions] = useState<
+    Array<{ catatan: string; kategori_id: string | null }>
+  >([]);
 
   const {
     control,
@@ -119,11 +122,11 @@ export default function TransaksiDialog({
         tags: editData.tags ?? [],
       });
     } else {
-      reset({ 
-        tipe: "expense", 
-        tanggal: todayISODate(), 
-        waktu: currentTime(), 
-        tags: [] 
+      reset({
+        tipe: "expense",
+        tanggal: todayISODate(),
+        waktu: currentTime(),
+        tags: [],
       });
     }
   }, [editData, reset, open]);
@@ -131,9 +134,9 @@ export default function TransaksiDialog({
   // Auto-suggest category when catatan changes
   useEffect(() => {
     if (!catatan || catatan.length < 2 || isEdit) return;
-    
+
     // Check if catatan exactly matches a suggestion
-    const exactMatch = suggestions.find(s => s.catatan === catatan);
+    const exactMatch = suggestions.find((s) => s.catatan === catatan);
     if (exactMatch && exactMatch.kategori_id) {
       setValue("kategori_id", exactMatch.kategori_id);
     }
@@ -141,7 +144,7 @@ export default function TransaksiDialog({
     const timeout = setTimeout(async () => {
       const sugg = await getNamaSuggestions(catatan);
       setSuggestions(sugg);
-      
+
       // Fallback to old suggest mechanism if no suggestions
       if (sugg.length === 0 && catatan.length >= 3) {
         const suggested = await suggestKategori(catatan);
@@ -220,7 +223,9 @@ export default function TransaksiDialog({
             {isEdit ? "Edit Transaksi" : "Tambah Transaksi"}
           </DialogTitle>
           <DialogDescription>
-            {isEdit ? "Perbarui rincian transaksi Anda." : "Catat pengeluaran, pemasukan, atau transfer baru."}
+            {isEdit
+              ? "Perbarui rincian transaksi Anda."
+              : "Catat pengeluaran, pemasukan, atau transfer baru."}
           </DialogDescription>
         </DialogHeader>
 
@@ -259,7 +264,9 @@ export default function TransaksiDialog({
           {/* Tipe Tabs */}
           <Tabs
             value={tipe}
-            onValueChange={(v) => setValue("tipe", v as TransaksiSchema["tipe"])}
+            onValueChange={(v) =>
+              setValue("tipe", v as TransaksiSchema["tipe"])
+            }
           >
             <TabsList className="w-full grid grid-cols-3">
               {TIPE_TABS.map((t) => (
