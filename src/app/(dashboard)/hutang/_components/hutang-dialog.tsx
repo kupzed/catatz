@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   hutangSchema,
@@ -10,7 +10,15 @@ import {
 import { createHutang, updateHutang } from "@/actions/hutang-action";
 import { toast } from "sonner";
 import type { Hutang } from "@/types/hutang";
-import { todayISODate } from "@/lib/utils";
+import type { Rekening } from "@/types/rekening";
+import { todayISODate, currentTime } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +37,7 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   editData?: Hutang | null;
+  rekening: Rekening[];
   onCreated: (h: Hutang) => void;
   onUpdated: (h: Hutang) => void;
 };
@@ -37,6 +46,7 @@ export default function HutangDialog({
   open,
   onOpenChange,
   editData,
+  rekening,
   onCreated,
   onUpdated,
 }: Props) {
@@ -52,7 +62,11 @@ export default function HutangDialog({
     formState: { errors },
   } = useForm<HutangSchema>({
     resolver: zodResolver(hutangSchema),
-    defaultValues: { tipe: "menerima", tanggal_mulai: todayISODate() },
+    defaultValues: {
+      tipe: "menerima",
+      tanggal_mulai: todayISODate(),
+      waktu: currentTime(),
+    },
   });
 
   const tipe = useWatch({ control, name: "tipe" });
@@ -65,10 +79,17 @@ export default function HutangDialog({
         total_pinjaman: Number(editData.total_pinjaman),
         tanggal_mulai: editData.tanggal_mulai,
         tanggal_jatuh_tempo: editData.tanggal_jatuh_tempo ?? undefined,
+        waktu:
+          editData.waktu?.substring(0, 5) ?? currentTime(),
+        rekening_id: editData.rekening_id ?? undefined,
         catatan: editData.catatan ?? "",
       });
     } else {
-      reset({ tipe: "menerima", tanggal_mulai: todayISODate() });
+      reset({
+        tipe: "menerima",
+        tanggal_mulai: todayISODate(),
+        waktu: currentTime(),
+      });
     }
   }, [editData, reset, open]);
 
@@ -105,13 +126,18 @@ export default function HutangDialog({
             {isEdit ? "Edit Hutang" : "Catat Hutang/Piutang"}
           </DialogTitle>
           <DialogDescription>
-            {isEdit ? "Perbarui detail hutang atau piutang Anda." : "Masukkan detail hutang atau piutang baru."}
+            {isEdit
+              ? "Perbarui detail hutang atau piutang Anda."
+              : "Masukkan detail hutang atau piutang baru."}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Tipe */}
-          <Tabs value={tipe} onValueChange={(v) => setValue("tipe", v as HutangSchema["tipe"])}>
+          <Tabs
+            value={tipe}
+            onValueChange={(v) => setValue("tipe", v as HutangSchema["tipe"])}
+          >
             <TabsList className="w-full grid grid-cols-2">
               <TabsTrigger value="menerima">📥 Saya Berhutang</TabsTrigger>
               <TabsTrigger value="memberi">📤 Saya Meminjamkan</TabsTrigger>
@@ -143,7 +169,7 @@ export default function HutangDialog({
               id="total-pinjaman"
               type="number"
               min={0}
-              step={1000}
+              step="any"
               placeholder="0"
               {...register("total_pinjaman", { valueAsNumber: true })}
               className={errors.total_pinjaman ? "border-rose-500" : ""}
@@ -155,24 +181,79 @@ export default function HutangDialog({
             )}
           </div>
 
-          {/* Dates */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Dates & Waktu */}
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="tgl-mulai">Tanggal Mulai</Label>
+              <Label htmlFor="tgl-mulai" className="text-xs">
+                Tanggal Mulai
+              </Label>
               <Input
                 id="tgl-mulai"
                 type="date"
+                className="text-xs h-9"
                 {...register("tanggal_mulai")}
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="tgl-jatuh">Jatuh Tempo</Label>
+              <Label htmlFor="waktu" className="text-xs">
+                Waktu
+              </Label>
+              <Input
+                id="waktu"
+                type="time"
+                className="text-xs h-9"
+                {...register("waktu")}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="tgl-jatuh" className="text-xs">
+                Jatuh Tempo
+              </Label>
               <Input
                 id="tgl-jatuh"
                 type="date"
+                className="text-xs h-9"
                 {...register("tanggal_jatuh_tempo")}
               />
             </div>
+          </div>
+
+          {/* Rekening */}
+          <div className="space-y-1.5">
+            <Label htmlFor="rekening-id">Dari / Ke Rekening</Label>
+            <Controller
+              control={control}
+              name="rekening_id"
+              render={({ field }) => (
+                <Select
+                  value={field.value || ""}
+                  onValueChange={(val) =>
+                    field.onChange(val === "none" ? "" : val)
+                  }
+                >
+                  <SelectTrigger className="h-10 text-sm">
+                    <SelectValue placeholder="(Tanpa Rekening)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">(Tanpa Rekening)</SelectItem>
+                    {rekening.map((r) => (
+                      <SelectItem key={r.id} value={r.id}>
+                        <span className="flex items-center gap-2">
+                          <span
+                            className="w-2 h-2 rounded-full"
+                            style={{ background: r.warna }}
+                          />
+                          {r.nama}{" "}
+                          <span className="text-muted-foreground text-xs ml-1">
+                            ({r.jenis})
+                          </span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
 
           {/* Catatan */}

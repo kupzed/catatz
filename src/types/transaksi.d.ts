@@ -17,6 +17,7 @@ export type Transaksi = {
   tipe: TipeTransaksi;
   nominal: number;
   tanggal: string;
+  waktu: string;
   kategori_id: string | null;
   rekening_id: string | null;
   rekening_tujuan: string | null;
@@ -36,6 +37,7 @@ export type TransaksiFormValues = {
   tipe: TipeTransaksi;
   nominal: number;
   tanggal: string;
+  waktu?: string;
   kategori_id?: string;
   rekening_id: string;
   rekening_tujuan?: string;

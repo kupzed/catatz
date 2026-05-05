@@ -8,15 +8,15 @@ import {
   type TransaksiSchema,
 } from "@/validations/transaksi-validation";
 import {
-  createTransaksi,
   updateTransaksi,
   suggestKategori,
+  getNamaSuggestions,
 } from "@/actions/transaksi-action";
 import { parseTransaksiFromText } from "@/lib/ai-parser";
 import { toast } from "sonner";
 import type { Transaksi, Kategori } from "@/types/transaksi";
 import type { Rekening } from "@/types/rekening";
-import { todayISODate } from "@/lib/utils";
+import { todayISODate, currentTime } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -83,6 +83,7 @@ export default function TransaksiDialog({
   const [submitting, setSubmitting] = useState(false);
   const [aiText, setAiText] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState<Array<{ catatan: string, kategori_id: string | null }>>([]);
 
   const {
     control,
@@ -96,6 +97,7 @@ export default function TransaksiDialog({
     defaultValues: {
       tipe: "expense",
       tanggal: todayISODate(),
+      waktu: currentTime(),
       tags: [],
     },
   });
@@ -109,6 +111,7 @@ export default function TransaksiDialog({
         tipe: editData.tipe,
         nominal: Number(editData.nominal),
         tanggal: editData.tanggal,
+        waktu: editData.waktu?.substring(0, 5) ?? currentTime(),
         kategori_id: editData.kategori_id ?? undefined,
         rekening_id: editData.rekening_id ?? "",
         rekening_tujuan: editData.rekening_tujuan ?? undefined,
@@ -116,19 +119,37 @@ export default function TransaksiDialog({
         tags: editData.tags ?? [],
       });
     } else {
-      reset({ tipe: "expense", tanggal: todayISODate(), tags: [] });
+      reset({ 
+        tipe: "expense", 
+        tanggal: todayISODate(), 
+        waktu: currentTime(), 
+        tags: [] 
+      });
     }
   }, [editData, reset, open]);
 
   // Auto-suggest category when catatan changes
   useEffect(() => {
-    if (!catatan || catatan.length < 3 || isEdit) return;
+    if (!catatan || catatan.length < 2 || isEdit) return;
+    
+    // Check if catatan exactly matches a suggestion
+    const exactMatch = suggestions.find(s => s.catatan === catatan);
+    if (exactMatch && exactMatch.kategori_id) {
+      setValue("kategori_id", exactMatch.kategori_id);
+    }
+
     const timeout = setTimeout(async () => {
-      const suggested = await suggestKategori(catatan);
-      if (suggested) setValue("kategori_id", suggested);
-    }, 800);
+      const sugg = await getNamaSuggestions(catatan);
+      setSuggestions(sugg);
+      
+      // Fallback to old suggest mechanism if no suggestions
+      if (sugg.length === 0 && catatan.length >= 3) {
+        const suggested = await suggestKategori(catatan);
+        if (suggested) setValue("kategori_id", suggested);
+      }
+    }, 500);
     return () => clearTimeout(timeout);
-  }, [catatan, isEdit, setValue]);
+  }, [catatan, isEdit, setValue, suggestions]);
 
   async function handleAiParse() {
     if (!aiText.trim()) return;
@@ -260,7 +281,7 @@ export default function TransaksiDialog({
               id="nominal"
               type="number"
               min={0}
-              step={1000}
+              step="any"
               placeholder="0"
               {...register("nominal", { valueAsNumber: true })}
               className={cn(
@@ -273,10 +294,16 @@ export default function TransaksiDialog({
             )}
           </div>
 
-          {/* Tanggal */}
-          <div className="space-y-1.5">
-            <Label htmlFor="tanggal">Tanggal</Label>
-            <Input id="tanggal" type="date" {...register("tanggal")} />
+          {/* Tanggal & Waktu */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="tanggal">Tanggal</Label>
+              <Input id="tanggal" type="date" {...register("tanggal")} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="waktu">Waktu</Label>
+              <Input id="waktu" type="time" {...register("waktu")} />
+            </div>
           </div>
 
           {/* Rekening */}
@@ -376,12 +403,19 @@ export default function TransaksiDialog({
 
           {/* Catatan */}
           <div className="space-y-1.5">
-            <Label htmlFor="catatan">Catatan</Label>
+            <Label htmlFor="catatan">Nama / Catatan</Label>
             <Input
               id="catatan"
-              placeholder="Deskripsi singkat transaksi..."
+              list="catatan-suggestions"
+              placeholder="Beli makan, gaji bulanan..."
+              autoComplete="off"
               {...register("catatan")}
             />
+            <datalist id="catatan-suggestions">
+              {suggestions.map((s, idx) => (
+                <option key={idx} value={s.catatan} />
+              ))}
+            </datalist>
           </div>
 
           <DialogFooter className="pt-2">

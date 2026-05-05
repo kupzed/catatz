@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getHutang } from '@/actions/hutang-action';
+import { getRekening } from '@/actions/rekening-action';
 import HutangPageClient from './_components/hutang-page-client';
 
 export const metadata: Metadata = {
@@ -9,5 +10,6 @@ export const metadata: Metadata = {
 
 export default async function HutangPage() {
   const hutang = await getHutang();
-  return <HutangPageClient initialHutang={hutang} />;
+  const rekening = await getRekening();
+  return <HutangPageClient initialHutang={hutang} rekening={rekening} />;
 }

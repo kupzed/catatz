@@ -7,6 +7,7 @@ export const transaksiSchema = z
       .number({ error: "Nominal harus berupa angka" })
       .positive("Nominal harus lebih dari 0"),
     tanggal: z.string().min(1, "Tanggal wajib diisi"),
+    waktu: z.string().optional(),
     kategori_id: z.string().uuid().optional(),
     rekening_id: z.string().uuid("Pilih rekening terlebih dahulu"),
     rekening_tujuan: z.string().uuid().optional(),

@@ -25,6 +25,9 @@ export async function createHutang(values: HutangFormValues): Promise<ActionResu
     .insert({
       user_id: user.id,
       ...values,
+      rekening_id: values.rekening_id === "" ? null : values.rekening_id,
+      tanggal_jatuh_tempo: values.tanggal_jatuh_tempo === "" ? null : values.tanggal_jatuh_tempo,
+      waktu: values.waktu === "" ? null : values.waktu,
       sisa_tagihan: values.total_pinjaman,
     })
     .select()
@@ -56,6 +59,9 @@ export async function updateHutang(id: string, values: Partial<HutangFormValues>
     .from('hutang')
     .update({ 
       ...values, 
+      rekening_id: values.rekening_id === "" ? null : values.rekening_id,
+      tanggal_jatuh_tempo: values.tanggal_jatuh_tempo === "" ? null : values.tanggal_jatuh_tempo,
+      waktu: values.waktu === "" ? null : values.waktu,
       ...(sisa_tagihan !== undefined ? { sisa_tagihan, status } : {}),
       updated_at: new Date().toISOString() 
     })
@@ -80,7 +86,11 @@ export async function createCicilan(values: CicilanFormValues): Promise<ActionRe
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('hutang_cicilan')
-    .insert(values)
+    .insert({
+      ...values,
+      rekening_id: values.rekening_id === "" ? null : values.rekening_id,
+      waktu: values.waktu === "" ? null : values.waktu,
+    })
     .select()
     .single();
   if (error) return { success: false, error: error.message };

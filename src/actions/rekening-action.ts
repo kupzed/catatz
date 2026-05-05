@@ -4,6 +4,7 @@ import { createClient } from '@/configs/supabase/server';
 import { revalidatePath } from 'next/cache';
 import type { ActionResult } from '@/types/general';
 import type { Rekening, RekeningFormValues } from '@/types/rekening';
+import { currentTime } from '@/lib/utils';
 
 export async function getRekening(): Promise<Rekening[]> {
   const supabase = await createClient();
@@ -42,6 +43,32 @@ export async function updateRekening(
   values: Partial<RekeningFormValues>
 ): Promise<ActionResult<Rekening>> {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (values.saldo_awal !== undefined && user) {
+    const { data: oldData } = await supabase
+      .from('rekening')
+      .select('saldo_awal')
+      .eq('id', id)
+      .single();
+
+    if (oldData && oldData.saldo_awal !== values.saldo_awal) {
+      const selisih = values.saldo_awal - oldData.saldo_awal;
+      
+      // Buat transaksi koreksi saldo
+      // Trigger di DB otomatis akan mengupdate saldo_saat_ini dari rekening
+      await supabase.from('transaksi').insert({
+        user_id: user.id,
+        tipe: selisih > 0 ? 'income' : 'expense',
+        nominal: Math.abs(selisih),
+        tanggal: new Date().toISOString().split('T')[0],
+        waktu: currentTime(),
+        rekening_id: id,
+        catatan: 'Koreksi Saldo',
+        kategori_id: null,
+      });
+    }
+  }
 
   const { data, error } = await supabase
     .from('rekening')
@@ -52,6 +79,7 @@ export async function updateRekening(
 
   if (error) return { success: false, error: error.message };
   revalidatePath('/rekening');
+  revalidatePath('/transaksi');
   return { success: true, data: data as Rekening };
 }
 

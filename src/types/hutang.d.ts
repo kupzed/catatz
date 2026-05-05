@@ -10,6 +10,8 @@ export type Hutang = {
   sisa_tagihan: number;
   tanggal_mulai: string;
   tanggal_jatuh_tempo: string | null;
+  waktu: string;
+  rekening_id: string | null;
   status: StatusHutang;
   catatan: string | null;
   created_at: string;
@@ -21,8 +23,10 @@ export type Hutang = {
 export type HutangCicilan = {
   id: string;
   hutang_id: string;
+  rekening_id: string | null;
   nominal: number;
   tanggal: string;
+  waktu: string;
   catatan: string | null;
   created_at: string;
 };
@@ -33,12 +37,16 @@ export type HutangFormValues = {
   total_pinjaman: number;
   tanggal_mulai: string;
   tanggal_jatuh_tempo?: string;
+  waktu?: string;
+  rekening_id?: string;
   catatan?: string;
 };
 
 export type CicilanFormValues = {
   hutang_id: string;
+  rekening_id?: string;
   nominal: number;
   tanggal: string;
+  waktu?: string;
   catatan?: string;
 };

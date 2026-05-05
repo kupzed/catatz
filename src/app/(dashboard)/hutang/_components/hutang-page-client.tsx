@@ -2,18 +2,22 @@
 
 import { useState } from "react";
 import type { Hutang } from "@/types/hutang";
+import type { Rekening } from "@/types/rekening";
 import {
   formatRupiah,
   formatTanggal,
   percentage,
   waReminderUrl,
 } from "@/lib/utils";
-import {
-  deleteHutang,
-  markHutangLunas,
-  createCicilan,
-} from "@/actions/hutang-action";
+import { deleteHutang, createCicilan } from "@/actions/hutang-action";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -31,9 +35,9 @@ import {
 } from "lucide-react";
 import HutangDialog from "./hutang-dialog";
 import { cn } from "@/lib/utils";
-import { todayISODate } from "@/lib/utils";
+import { todayISODate, currentTime } from "@/lib/utils";
 
-type Props = { initialHutang: Hutang[] };
+type Props = { initialHutang: Hutang[]; rekening: Rekening[] };
 
 const STATUS_BADGE: Record<string, string> = {
   aktif: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
@@ -41,14 +45,14 @@ const STATUS_BADGE: Record<string, string> = {
   overdue: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
 };
 
-export default function HutangPageClient({ initialHutang }: Props) {
+export default function HutangPageClient({ initialHutang, rekening }: Props) {
   const [hutang, setHutang] = useState(initialHutang);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editData, setEditData] = useState<Hutang | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
-  const [cicilanNominal, setCicilanNominal] = useState<Record<string, string>>(
-    {},
-  );
+  const [cicilanData, setCicilanData] = useState<
+    Record<string, { nominal: string; rekening_id: string }>
+  >({});
   const [loadingCicilan, setLoadingCicilan] = useState<string | null>(null);
 
   const memberi = hutang.filter((h) => h.tipe === "memberi");
@@ -64,16 +68,34 @@ export default function HutangPageClient({ initialHutang }: Props) {
     }
   }
 
-  async function handleLunas(id: string) {
-    const res = await markHutangLunas(id);
+  async function handleLunas(h: Hutang) {
+    if (h.sisa_tagihan <= 0) return;
+    setLoadingCicilan(h.id);
+    const res = await createCicilan({
+      hutang_id: h.id,
+      nominal: h.sisa_tagihan,
+      rekening_id: h.rekening_id ?? undefined,
+      tanggal: todayISODate(),
+      waktu: currentTime(),
+    });
     if (res.success) {
       setHutang((prev) =>
-        prev.map((h) =>
-          h.id === id ? { ...h, status: "lunas", sisa_tagihan: 0 } : h,
+        prev.map((prevH) =>
+          prevH.id === h.id
+            ? {
+                ...prevH,
+                status: "lunas",
+                sisa_tagihan: 0,
+                cicilan: [...(prevH.cicilan ?? []), res.data!],
+              }
+            : prevH,
         ),
       );
-      toast.success("Hutang ditandai lunas");
+      toast.success("Hutang dilunaskan");
+    } else {
+      toast.error(res.error ?? "Gagal melunaskan hutang");
     }
+    setLoadingCicilan(null);
   }
 
   async function handleCicilan(
@@ -81,7 +103,8 @@ export default function HutangPageClient({ initialHutang }: Props) {
     totalPinjaman: number,
     sisaTagihan: number,
   ) {
-    const nominal = parseFloat(cicilanNominal[hutangId] ?? "0");
+    const data = cicilanData[hutangId] || {};
+    const nominal = parseFloat(data.nominal ?? "0");
     if (!nominal || nominal <= 0)
       return toast.error("Masukkan nominal cicilan");
     if (nominal > sisaTagihan)
@@ -91,7 +114,12 @@ export default function HutangPageClient({ initialHutang }: Props) {
     const res = await createCicilan({
       hutang_id: hutangId,
       nominal,
+      rekening_id:
+        data.rekening_id && data.rekening_id !== "none"
+          ? data.rekening_id
+          : undefined,
       tanggal: todayISODate(),
+      waktu: currentTime(),
     });
     if (res.success) {
       setHutang((prev) =>
@@ -106,7 +134,10 @@ export default function HutangPageClient({ initialHutang }: Props) {
           };
         }),
       );
-      setCicilanNominal((prev) => ({ ...prev, [hutangId]: "" }));
+      setCicilanData((prev) => ({
+        ...prev,
+        [hutangId]: { nominal: "", rekening_id: "" },
+      }));
       toast.success("Cicilan dicatat");
     } else {
       toast.error(res.error ?? "Gagal mencatat cicilan");
@@ -206,7 +237,7 @@ export default function HutangPageClient({ initialHutang }: Props) {
                           size="sm"
                           variant="outline"
                           className="h-7 text-xs gap-1 text-emerald-600"
-                          onClick={() => handleLunas(h.id)}
+                          onClick={() => handleLunas(h)}
                         >
                           <CheckCircle2 className="h-3 w-3" />
                           Lunas
@@ -255,38 +286,71 @@ export default function HutangPageClient({ initialHutang }: Props) {
 
                 {/* Cicilan Input */}
                 {isExpanded && h.status !== "lunas" && (
-                  <div className="border-t bg-muted/30 px-4 py-3 flex gap-2 items-end">
-                    <div className="flex-1 space-y-1">
-                      <Label className="text-xs">Nominal Cicilan (Rp)</Label>
-                      <Input
-                        type="number"
-                        min={0}
-                        step={1000}
-                        placeholder="0"
-                        value={cicilanNominal[h.id] ?? ""}
-                        onChange={(e) =>
-                          setCicilanNominal((prev) => ({
-                            ...prev,
-                            [h.id]: e.target.value,
-                          }))
-                        }
-                        className="h-8 text-sm"
-                      />
+                  <div className="border-t bg-muted/30 px-4 py-3 space-y-2">
+                    <div className="flex gap-2">
+                      <div className="flex-1 space-y-1">
+                        <Label className="text-xs">Nominal Cicilan (Rp)</Label>
+                        <Input
+                          type="number"
+                          min={0}
+                          step="any"
+                          placeholder="0"
+                          value={cicilanData[h.id]?.nominal ?? ""}
+                          onChange={(e) =>
+                            setCicilanData((prev) => ({
+                              ...prev,
+                              [h.id]: {
+                                ...prev[h.id],
+                                nominal: e.target.value,
+                              },
+                            }))
+                          }
+                          className="h-8 text-sm"
+                        />
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        <Label className="text-xs">Dari / Ke Rekening</Label>
+                        <Select
+                          value={cicilanData[h.id]?.rekening_id ?? ""}
+                          onValueChange={(val) =>
+                            setCicilanData((prev) => ({
+                              ...prev,
+                              [h.id]: { ...prev[h.id], rekening_id: val },
+                            }))
+                          }
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="(Tanpa Rekening)" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">
+                              (Tanpa Rekening)
+                            </SelectItem>
+                            {rekening.map((r) => (
+                              <SelectItem key={r.id} value={r.id}>
+                                {r.nama}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                    <Button
-                      size="sm"
-                      onClick={() =>
-                        handleCicilan(
-                          h.id,
-                          Number(h.total_pinjaman),
-                          Number(h.sisa_tagihan),
-                        )
-                      }
-                      disabled={loadingCicilan === h.id}
-                      className="h-8 bg-indigo-600 hover:bg-indigo-500 text-white"
-                    >
-                      Catat
-                    </Button>
+                    <div className="flex justify-end mt-2">
+                      <Button
+                        size="sm"
+                        onClick={() =>
+                          handleCicilan(
+                            h.id,
+                            Number(h.total_pinjaman),
+                            Number(h.sisa_tagihan),
+                          )
+                        }
+                        disabled={loadingCicilan === h.id}
+                        className="h-8 bg-indigo-600 hover:bg-indigo-500 text-white"
+                      >
+                        Catat
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -339,6 +403,7 @@ export default function HutangPageClient({ initialHutang }: Props) {
           setDialogOpen(open);
           if (!open) setEditData(null);
         }}
+        rekening={rekening}
         editData={editData}
         onCreated={(h) => {
           setHutang((prev) => [h, ...prev]);
