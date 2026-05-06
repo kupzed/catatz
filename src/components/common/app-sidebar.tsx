@@ -23,6 +23,8 @@ import {
 } from 'lucide-react';
 import { signOut } from '@/actions/auth-action';
 
+import { ConfirmDialog } from '@/components/common/confirm-dialog';
+
 const NAV_ITEMS = [
   {
     group: 'Menu Utama',
@@ -88,14 +90,19 @@ export default function AppSidebar() {
       <SidebarFooter className="border-t border-sidebar-border p-2">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              tooltip="Keluar"
-              onClick={() => signOut()}
-              className="text-rose-500 hover:text-rose-500 hover:bg-rose-500/10"
+            <ConfirmDialog
+              title="Keluar Akun?"
+              description="Anda harus login kembali untuk mengakses data Anda."
+              onConfirm={() => signOut()}
             >
-              <LogOut className="h-4 w-4" />
-              <span>Keluar</span>
-            </SidebarMenuButton>
+              <SidebarMenuButton
+                tooltip="Keluar"
+                className="text-rose-500 hover:text-rose-500 hover:bg-rose-500/10"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Keluar</span>
+              </SidebarMenuButton>
+            </ConfirmDialog>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

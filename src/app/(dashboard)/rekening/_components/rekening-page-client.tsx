@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import RekeningDialog from "./rekening-dialog";
 import { cn } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/common/confirm-dialog";
 
 type Props = { initialRekening: Rekening[] };
 
@@ -165,15 +166,20 @@ export default function RekeningPageClient({ initialRekening }: Props) {
                           >
                             <Pencil className="h-3.5 w-3.5" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-rose-500 hover:text-rose-500 hover:bg-rose-500/10"
-                            onClick={() => handleDelete(r.id)}
-                            disabled={deleting === r.id}
+                          <ConfirmDialog
+                            title="Hapus Rekening?"
+                            description="Transaksi yang terkait dengan rekening ini mungkin akan kehilangan referensinya."
+                            onConfirm={() => handleDelete(r.id)}
                           >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-rose-500 hover:text-rose-500 hover:bg-rose-500/10"
+                              disabled={deleting === r.id}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </ConfirmDialog>
                         </div>
                       </div>
                       <p className="text-lg font-bold mt-2">

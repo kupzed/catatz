@@ -36,6 +36,7 @@ import HutangDialog from "./hutang-dialog";
 import { cn } from "@/lib/utils";
 import { todayISODate, currentTime } from "@/lib/utils";
 import { NominalInput } from "@/components/common/nominal-input";
+import { ConfirmDialog } from "@/components/common/confirm-dialog";
 
 type Props = { initialHutang: Hutang[]; rekening: Rekening[] };
 
@@ -233,15 +234,20 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                             <ChevronDown className="h-3 w-3" />
                           )}
                         </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 text-xs gap-1 text-emerald-600"
-                          onClick={() => handleLunas(h)}
+                        <ConfirmDialog
+                          title="Lunaskan Hutang?"
+                          description={`Aksi ini akan mencatat cicilan sebesar sisa tagihan (${formatRupiah(Number(h.sisa_tagihan))}) dan mengubah status menjadi lunas.`}
+                          onConfirm={() => handleLunas(h)}
                         >
-                          <CheckCircle2 className="h-3 w-3" />
-                          Lunas
-                        </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs gap-1 text-emerald-600"
+                          >
+                            <CheckCircle2 className="h-3 w-3" />
+                            Lunas
+                          </Button>
+                        </ConfirmDialog>
                         <Button
                           size="sm"
                           variant="outline"
@@ -273,14 +279,19 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                     >
                       <Pencil className="h-3 w-3" />
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 text-xs text-rose-500 hover:text-rose-500 hover:bg-rose-500/10"
-                      onClick={() => handleDelete(h.id)}
+                    <ConfirmDialog
+                      title="Hapus Catatan?"
+                      description="Menghapus hutang/piutang ini juga akan menghapus semua riwayat cicilannya."
+                      onConfirm={() => handleDelete(h.id)}
                     >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 text-xs text-rose-500 hover:text-rose-500 hover:bg-rose-500/10"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </ConfirmDialog>
                   </div>
                 </div>
 

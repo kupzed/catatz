@@ -51,6 +51,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import TransaksiDialog from "./transaksi-dialog";
 import { cn } from "@/lib/utils";
 
@@ -245,33 +246,19 @@ export default function TransaksiPageClient({
             Catat semua arus kas Anda
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setEditData(null);
-              setDialogOpen(true);
-            }}
-            className="gap-2"
-            id="btn-tambah-transaksi"
-          >
-            <Plus className="h-4 w-4" />
-            Tambah
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => {
-              setEditData(null);
-              setDialogOpen(true);
-            }}
-            className="gap-2 bg-indigo-600 hover:bg-indigo-500 text-white"
-            id="btn-ai-input"
-          >
-            <Sparkles className="h-4 w-4" />
-            AI Input
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setEditData(null);
+            setDialogOpen(true);
+          }}
+          className="gap-2"
+          id="btn-tambah-transaksi"
+        >
+          <Plus className="h-4 w-4" />
+          Tambah
+        </Button>
       </div>
 
       {/* Date Navigator & Summary Card */}
@@ -539,15 +526,20 @@ export default function TransaksiPageClient({
                   >
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-rose-500 hover:text-rose-500 hover:bg-rose-500/10"
-                    onClick={() => handleDelete(t.id)}
-                    disabled={deleting === t.id}
+                  <ConfirmDialog
+                    title="Hapus Transaksi?"
+                    description="Transaksi ini akan dihapus secara permanen beserta pengaruhnya pada saldo rekening."
+                    onConfirm={() => handleDelete(t.id)}
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-rose-500 hover:text-rose-500 hover:bg-rose-500/10"
+                      disabled={deleting === t.id}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </ConfirmDialog>
                 </div>
               </div>
             );
