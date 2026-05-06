@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
@@ -12,7 +13,7 @@ import {
   SidebarMenuItem,
   SidebarGroup,
   SidebarGroupLabel,
-} from '@/components/ui/sidebar';
+} from "@/components/ui/sidebar";
 import {
   ArrowLeftRight,
   Landmark,
@@ -20,26 +21,24 @@ import {
   HandCoins,
   Settings,
   LogOut,
-} from 'lucide-react';
-import { signOut } from '@/actions/auth-action';
+} from "lucide-react";
+import { signOut } from "@/actions/auth-action";
 
-import { ConfirmDialog } from '@/components/common/confirm-dialog';
+import { ConfirmDialog } from "@/components/common/confirm-dialog";
 
 const NAV_ITEMS = [
   {
-    group: 'Menu Utama',
+    group: "Menu Utama",
     items: [
-      { href: '/transaksi', label: 'Transaksi',   icon: ArrowLeftRight },
-      { href: '/rekening',  label: 'Rekening',    icon: Landmark },
-      { href: '/rekap',     label: 'Rekap',       icon: BarChart3 },
-      { href: '/hutang',    label: 'Hutang',      icon: HandCoins },
+      { href: "/transaksi", label: "Transaksi", icon: ArrowLeftRight },
+      { href: "/rekening", label: "Rekening", icon: Landmark },
+      { href: "/rekap", label: "Rekap", icon: BarChart3 },
+      { href: "/hutang", label: "Hutang", icon: HandCoins },
     ],
   },
   {
-    group: 'Lainnya',
-    items: [
-      { href: '/settings',  label: 'Pengaturan',  icon: Settings },
-    ],
+    group: "Lainnya",
+    items: [{ href: "/settings", label: "Pengaturan", icon: Settings }],
   },
 ];
 
@@ -50,9 +49,7 @@ export default function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <Link href="/transaksi" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
-            💰
-          </div>
+          <Image src="/catatz.svg" alt="CatatZ Logo" width={32} height={32} />
           <span className="font-bold text-lg tracking-tight text-sidebar-foreground group-data-[collapsible=icon]:hidden">
             CatatZ
           </span>
@@ -66,7 +63,8 @@ export default function AppSidebar() {
             <SidebarMenu>
               {group.items.map((item) => {
                 const isActive =
-                  pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  pathname === item.href ||
+                  pathname.startsWith(`${item.href}/`);
                 return (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton

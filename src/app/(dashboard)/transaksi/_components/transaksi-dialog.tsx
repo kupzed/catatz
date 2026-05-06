@@ -282,30 +282,6 @@ export default function TransaksiDialog({
             </TabsList>
           </Tabs>
 
-          {/* Nominal */}
-          <div className="space-y-1.5">
-            <Label htmlFor="nominal">Nominal (Rp)</Label>
-            <Controller
-              control={control}
-              name="nominal"
-              render={({ field }) => (
-                <NominalInput
-                  id="nominal"
-                  placeholder="0"
-                  value={field.value || ""}
-                  onValueChange={field.onChange}
-                  className={cn(
-                    "text-lg font-semibold",
-                    errors.nominal && "border-rose-500",
-                  )}
-                />
-              )}
-            />
-            {errors.nominal && (
-              <p className="text-xs text-rose-500">{errors.nominal.message}</p>
-            )}
-          </div>
-
           {/* Tanggal & Waktu */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
@@ -390,6 +366,30 @@ export default function TransaksiDialog({
               )}
             </div>
           )}
+
+          {/* Nominal */}
+          <div className="space-y-1.5">
+            <Label htmlFor="nominal">Nominal (Rp)</Label>
+            <Controller
+              control={control}
+              name="nominal"
+              render={({ field }) => (
+                <NominalInput
+                  id="nominal"
+                  placeholder="0"
+                  value={field.value || ""}
+                  onValueChange={field.onChange}
+                  className={cn(
+                    "text-lg font-semibold",
+                    errors.nominal && "border-rose-500",
+                  )}
+                />
+              )}
+            />
+            {errors.nominal && (
+              <p className="text-xs text-rose-500">{errors.nominal.message}</p>
+            )}
+          </div>
 
           {/* Kategori */}
           {tipe !== "transfer" && (

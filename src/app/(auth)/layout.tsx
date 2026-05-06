@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { ReactNode } from "react";
 
 export const metadata: Metadata = {
@@ -17,7 +18,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-2">
-            <span className="text-4xl">💰</span>
+            <Image src="/catatz.svg" alt="CatatZ Logo" width={40} height={40} />
             <h1 className="text-3xl font-bold text-white tracking-tight">
               CatatZ
             </h1>
