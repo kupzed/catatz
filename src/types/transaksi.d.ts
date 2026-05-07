@@ -9,12 +9,13 @@ export type Kategori = {
   created_at: string;
 };
 
-export type TipeTransaksi = 'income' | 'expense' | 'transfer';
+export type TipeTransaksi = 'income' | 'expense' | 'transfer' | 'correction';
 
 export type Transaksi = {
   id: string;
   user_id: string;
   tipe: TipeTransaksi;
+  judul: string | null;
   nominal: number;
   tanggal: string;
   waktu: string;
@@ -35,6 +36,7 @@ export type Transaksi = {
 
 export type TransaksiFormValues = {
   tipe: TipeTransaksi;
+  judul?: string | null;
   nominal: number;
   tanggal: string;
   waktu?: string;
@@ -73,4 +75,10 @@ export type RecurringTransaksi = {
   next_run: string;
   is_active: boolean;
   created_at: string;
+};
+
+/** Suggestion untuk field judul */
+export type JudulSuggestion = {
+  judul: string;
+  kategori_id: string | null;
 };

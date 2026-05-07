@@ -40,39 +40,61 @@ export async function createRekening(values: RekeningFormValues): Promise<Action
 
 export async function updateRekening(
   id: string,
-  values: Partial<RekeningFormValues>
+  values: Partial<RekeningFormValues & { saldo_saat_ini?: number }>
 ): Promise<ActionResult<Rekening>> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Tidak terautentikasi' };
 
-  if (values.saldo_awal !== undefined && user) {
-    const { data: oldData } = await supabase
+  // Jika user mengubah saldo_saat_ini → buat transaksi koreksi dengan tipe 'correction'
+  if (values.saldo_saat_ini !== undefined) {
+    const { data: oldData, error: fetchError } = await supabase
       .from('rekening')
-      .select('saldo_awal')
+      .select('saldo_saat_ini')
       .eq('id', id)
       .single();
 
-    if (oldData && oldData.saldo_awal !== values.saldo_awal) {
-      const selisih = values.saldo_awal - oldData.saldo_awal;
-      
-      // Buat transaksi koreksi saldo
-      // Trigger di DB otomatis akan mengupdate saldo_saat_ini dari rekening
-      await supabase.from('transaksi').insert({
+    if (fetchError) return { success: false, error: fetchError.message };
+
+    const oldSaldo = Number(oldData?.saldo_saat_ini ?? 0);
+    const newSaldo = Number(values.saldo_saat_ini);
+
+    if (oldSaldo !== newSaldo) {
+      const selisih = newSaldo - oldSaldo;
+
+      // Buat transaksi koreksi dengan tipe 'correction'
+      // Trigger TIDAK akan memproses tipe ini — saldo diupdate manual di bawah
+      // Catatan: field judul dan kategori_id sengaja tidak dikirim (default NULL di DB)
+      const { error: insertError } = await supabase.from('transaksi').insert({
         user_id: user.id,
-        tipe: selisih > 0 ? 'income' : 'expense',
+        tipe: 'correction',
         nominal: Math.abs(selisih),
         tanggal: new Date().toISOString().split('T')[0],
         waktu: currentTime(),
         rekening_id: id,
-        catatan: 'Koreksi Saldo',
-        kategori_id: null,
+        tags: selisih > 0 ? ["correction_add"] : ["correction_sub"],
       });
+
+      if (insertError) return { success: false, error: `Gagal membuat koreksi: ${insertError.message}` };
+
+      // Langsung update saldo_saat_ini di rekening (trigger tidak memproses correction)
+      const { error: saldoError } = await supabase
+        .from('rekening')
+        .update({ saldo_saat_ini: newSaldo, updated_at: new Date().toISOString() })
+        .eq('id', id);
+
+      if (saldoError) return { success: false, error: saldoError.message };
     }
   }
 
+  // Update field rekening lainnya (nama, jenis, warna, logo, exclude_total)
+  // Saldo awal TIDAK diubah dari sini — hanya bisa diset saat create
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { saldo_saat_ini: _saldo_saat_ini, saldo_awal: _saldo_awal, ...otherValues } = values;
+
   const { data, error } = await supabase
     .from('rekening')
-    .update({ ...values, updated_at: new Date().toISOString() })
+    .update({ ...otherValues, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select()
     .single();

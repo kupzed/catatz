@@ -3,7 +3,7 @@
 import { createClient } from '@/configs/supabase/server';
 import { revalidatePath } from 'next/cache';
 import type { ActionResult } from '@/types/general';
-import type { Transaksi, TransaksiFormValues, TransaksiFilter, Kategori } from '@/types/transaksi';
+import type { Transaksi, TransaksiFormValues, TransaksiFilter, Kategori, JudulSuggestion } from '@/types/transaksi';
 
 export async function getKategori(): Promise<Kategori[]> {
   const supabase = await createClient();
@@ -48,7 +48,7 @@ export async function getTransaksi(filter: TransaksiFilter = {}): Promise<Transa
     query = query.lte('tanggal', filter.sampai);
   }
   if (filter.q) {
-    query = query.ilike('catatan', `%${filter.q}%`);
+    query = query.or(`catatan.ilike.%${filter.q}%,judul.ilike.%${filter.q}%`);
   }
 
   const { data, error } = await query;
@@ -80,6 +80,42 @@ export async function updateTransaksi(
 ): Promise<ActionResult<Transaksi>> {
   const supabase = await createClient();
 
+  // Ambil data transaksi lama untuk pengecekan tipe 'correction'
+  const { data: oldTrx } = await supabase
+    .from('transaksi')
+    .select('tipe, nominal, rekening_id, tags')
+    .eq('id', id)
+    .single();
+
+  if (oldTrx?.tipe === 'correction' && values.nominal !== undefined && oldTrx.rekening_id) {
+    const isAdd = oldTrx.tags?.includes('correction_add');
+    const isSub = oldTrx.tags?.includes('correction_sub');
+    
+    if (isAdd || isSub) {
+      const { data: rek } = await supabase
+        .from('rekening')
+        .select('saldo_saat_ini')
+        .eq('id', oldTrx.rekening_id)
+        .single();
+        
+      if (rek) {
+        const currentSaldo = Number(rek.saldo_saat_ini);
+        const oldNominal = Number(oldTrx.nominal);
+        const newNominal = Number(values.nominal);
+        
+        // Kembalikan saldo ke sebelum koreksi
+        const baseSaldo = isAdd ? currentSaldo - oldNominal : currentSaldo + oldNominal;
+        // Terapkan koreksi nominal yang baru
+        const finalSaldo = isAdd ? baseSaldo + newNominal : baseSaldo - newNominal;
+        
+        await supabase
+          .from('rekening')
+          .update({ saldo_saat_ini: finalSaldo, updated_at: new Date().toISOString() })
+          .eq('id', oldTrx.rekening_id);
+      }
+    }
+  }
+
   const { data, error } = await supabase
     .from('transaksi')
     .update({ ...values, updated_at: new Date().toISOString() })
@@ -96,6 +132,40 @@ export async function updateTransaksi(
 
 export async function deleteTransaksi(id: string): Promise<ActionResult> {
   const supabase = await createClient();
+
+  // Cek apakah ini transaksi correction — jika ya, balik saldo secara manual (Opsi B)
+  const { data: trx } = await supabase
+    .from('transaksi')
+    .select('tipe, nominal, rekening_id, tags')
+    .eq('id', id)
+    .single();
+
+  if (trx?.tipe === 'correction' && trx.rekening_id) {
+    const isAdd = trx.tags?.includes('correction_add');
+    const isSub = trx.tags?.includes('correction_sub');
+    
+    if (isAdd || isSub) {
+      const { data: rek } = await supabase
+        .from('rekening')
+        .select('saldo_saat_ini')
+        .eq('id', trx.rekening_id)
+        .single();
+        
+      if (rek) {
+        const currentSaldo = Number(rek.saldo_saat_ini);
+        const trxNominal = Number(trx.nominal);
+        
+        // Reverse correction: jika sebelumnya ditambah, maka sekarang dikurangi
+        const revertedSaldo = isAdd ? currentSaldo - trxNominal : currentSaldo + trxNominal;
+        
+        await supabase
+          .from('rekening')
+          .update({ saldo_saat_ini: revertedSaldo, updated_at: new Date().toISOString() })
+          .eq('id', trx.rekening_id);
+      }
+    }
+  }
+
   const { error } = await supabase.from('transaksi').delete().eq('id', id);
   if (error) return { success: false, error: error.message };
   revalidatePath('/transaksi');
@@ -105,15 +175,89 @@ export async function deleteTransaksi(id: string): Promise<ActionResult> {
 }
 
 /**
- * Smart auto-categorization: given a catatan text, find the most frequently used
- * category for similar transactions from the user's history.
+ * Mengembalikan suggestion judul berdasarkan query (debounced dari UI).
+ * Menggantikan getNamaSuggestions yang berbasis catatan.
+ */
+export async function getJudulSuggestions(query: string): Promise<JudulSuggestion[]> {
+  if (!query || query.length < 1) return [];
+
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from('transaksi')
+    .select('judul, kategori_id')
+    .not('judul', 'is', null)
+    .ilike('judul', `%${query}%`)
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  if (!data) return [];
+
+  // Group by judul, ambil kategori_id yang paling sering dipakai
+  const grouped: Record<string, Record<string, number>> = {};
+  data.forEach((t) => {
+    if (!t.judul) return;
+    const j = t.judul.trim();
+    if (!grouped[j]) grouped[j] = {};
+    if (t.kategori_id) {
+      grouped[j][t.kategori_id] = (grouped[j][t.kategori_id] || 0) + 1;
+    }
+  });
+
+  const suggestions: JudulSuggestion[] = Object.keys(grouped).map((judul) => {
+    const cats = grouped[judul];
+    const topCatId = Object.keys(cats).length > 0
+      ? Object.entries(cats).sort((a, b) => b[1] - a[1])[0][0]
+      : null;
+    return { judul, kategori_id: topCatId };
+  });
+
+  return suggestions
+    .sort((a, b) => a.judul.localeCompare(b.judul))
+    .slice(0, 6);
+}
+
+/**
+ * Mengembalikan judul-judul transaksi terbaru (tanpa query) untuk initial suggestion.
+ */
+export async function getRecentJudul(): Promise<JudulSuggestion[]> {
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from('transaksi')
+    .select('judul, kategori_id')
+    .not('judul', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  if (!data) return [];
+
+  // Deduplicate: ambil judul unik + kategori terakhir
+  const seen = new Map<string, string | null>();
+  for (const t of data) {
+    if (!t.judul) continue;
+    const j = t.judul.trim();
+    if (!seen.has(j)) {
+      seen.set(j, t.kategori_id ?? null);
+    }
+  }
+
+  const result: JudulSuggestion[] = [];
+  seen.forEach((kategori_id, judul) => {
+    result.push({ judul, kategori_id });
+  });
+
+  return result.slice(0, 8);
+}
+
+/**
+ * Smart auto-kategorisasi berdasarkan catatan (legacy — tetap dipertahankan).
  */
 export async function suggestKategori(catatan: string): Promise<string | null> {
   const supabase = await createClient();
   const words = catatan.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
   if (words.length === 0) return null;
 
-  // Try to find a frequently used category for similar notes
   const { data } = await supabase
     .from('transaksi')
     .select('kategori_id, catatan')
@@ -124,7 +268,6 @@ export async function suggestKategori(catatan: string): Promise<string | null> {
 
   if (!data || data.length === 0) return null;
 
-  // Count frequency of each category_id
   const freq: Record<string, number> = {};
   data.forEach((t) => {
     if (t.kategori_id) {
@@ -137,25 +280,23 @@ export async function suggestKategori(catatan: string): Promise<string | null> {
 }
 
 /**
- * Returns unique transaction names (catatan) based on a query,
- * along with the most frequently used category for that name.
+ * @deprecated Gunakan getJudulSuggestions sebagai gantinya.
+ * Dipertahankan untuk backward compatibility.
  */
 export async function getNamaSuggestions(query: string): Promise<Array<{ catatan: string, kategori_id: string | null }>> {
   if (!query || query.length < 2) return [];
-  
+
   const supabase = await createClient();
-  
-  // Get latest 50 matches
+
   const { data } = await supabase
     .from('transaksi')
     .select('catatan, kategori_id')
     .ilike('catatan', `%${query}%`)
     .order('created_at', { ascending: false })
     .limit(50);
-    
+
   if (!data) return [];
-  
-  // Group by exact catatan to find unique ones and their most common category
+
   const grouped: Record<string, Record<string, number>> = {};
   data.forEach((t) => {
     if (!t.catatan) return;
@@ -165,8 +306,7 @@ export async function getNamaSuggestions(query: string): Promise<Array<{ catatan
       grouped[cat][t.kategori_id] = (grouped[cat][t.kategori_id] || 0) + 1;
     }
   });
-  
-  // Map back to array
+
   const suggestions = Object.keys(grouped).map(catatan => {
     const categories = grouped[catatan];
     let topCatId = null;
@@ -175,7 +315,6 @@ export async function getNamaSuggestions(query: string): Promise<Array<{ catatan
     }
     return { catatan, kategori_id: topCatId };
   });
-  
-  // Sort by shortest first and return top 5
+
   return suggestions.sort((a, b) => a.catatan.length - b.catatan.length).slice(0, 5);
 }

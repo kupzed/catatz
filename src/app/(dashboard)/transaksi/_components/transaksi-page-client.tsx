@@ -47,9 +47,10 @@ import {
   Search,
   Trash2,
   Pencil,
-  Sparkles,
   ChevronLeft,
   ChevronRight,
+  SlidersHorizontal,
+  CalendarIcon,
 } from "lucide-react";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import TransaksiDialog from "./transaksi-dialog";
@@ -83,7 +84,14 @@ const TIPE_CONFIG = {
     bg: "bg-blue-500/10",
     badge: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
   },
-};
+  correction: {
+    label: "Koreksi Saldo",
+    icon: SlidersHorizontal,
+    color: "text-amber-500",
+    bg: "bg-amber-500/10",
+    badge: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  },
+} as const;
 
 export default function TransaksiPageClient({
   initialTransaksi,
@@ -93,6 +101,7 @@ export default function TransaksiPageClient({
   const [transaksi, setTransaksi] = useState(initialTransaksi);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editData, setEditData] = useState<Transaksi | null>(null);
+  const [copyFrom, setCopyFrom] = useState<Transaksi | null>(null);
   const [filter, setFilter] = useState<TransaksiFilter>({
     tipe: "all",
     sortBy: "tanggal",
@@ -102,6 +111,8 @@ export default function TransaksiPageClient({
   const [baseDate, setBaseDate] = useState<Date>(new Date());
   const [search, setSearch] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
+  // Untuk custom range: track apakah sedang pilih 'dari' atau 'sampai'
+  const [customStep, setCustomStep] = useState<"dari" | "sampai">("dari");
 
   const filtered = useMemo(() => {
     let result = transaksi.filter((t) => {
@@ -111,7 +122,11 @@ export default function TransaksiPageClient({
         return false;
       if (filter.kategori_id && t.kategori_id !== filter.kategori_id)
         return false;
-      if (search && !t.catatan?.toLowerCase().includes(search.toLowerCase()))
+      if (
+        search &&
+        !t.catatan?.toLowerCase().includes(search.toLowerCase()) &&
+        !t.judul?.toLowerCase().includes(search.toLowerCase())
+      )
         return false;
 
       const tDate = parseISO(t.tanggal);
@@ -150,7 +165,6 @@ export default function TransaksiPageClient({
         valA = new Date(a.created_at).getTime();
         valB = new Date(b.created_at).getTime();
       } else {
-        // default tanggal + waktu
         valA = new Date(`${a.tanggal}T${a.waktu || "00:00:00"}`).getTime();
         valB = new Date(`${b.tanggal}T${b.waktu || "00:00:00"}`).getTime();
       }
@@ -178,6 +192,32 @@ export default function TransaksiPageClient({
     else if (preset === "tahun") setBaseDate(addYears(baseDate, 1));
   }
 
+  /** Handler saat user memilih tanggal dari DatePicker di dateLabel */
+  function handleDateLabelPick(dateStr: string) {
+    const picked = parseISO(dateStr);
+    if (preset === "custom") {
+      // Langkah 1: pilih 'dari', langkah 2: pilih 'sampai'
+      if (customStep === "dari") {
+        setFilter((f) => ({ ...f, dari: dateStr, sampai: undefined }));
+        setCustomStep("sampai");
+        // Jangan tutup popover, tunggu pilih sampai
+        return;
+      } else {
+        // Pastikan sampai >= dari
+        const dari = filter.dari ? parseISO(filter.dari) : null;
+        if (dari && picked < dari) {
+          // Jika pilih tanggal lebih awal dari 'dari', swap
+          setFilter((f) => ({ ...f, sampai: f.dari, dari: dateStr }));
+        } else {
+          setFilter((f) => ({ ...f, sampai: dateStr }));
+        }
+        setCustomStep("dari"); // reset untuk pilihan berikutnya
+      }
+    } else {
+      setBaseDate(picked);
+    }
+  }
+
   const dateLabel = useMemo(() => {
     if (preset === "all") return "Semua Waktu";
     if (preset === "hari")
@@ -195,16 +235,16 @@ export default function TransaksiPageClient({
       if (filter.dari && filter.sampai) {
         return `${format(parseISO(filter.dari), "dd MMM yy", { locale: idLocale })} - ${format(parseISO(filter.sampai), "dd MMM yyyy", { locale: idLocale })}`;
       } else if (filter.dari) {
+        if (customStep === "sampai")
+          return `${format(parseISO(filter.dari), "dd MMM", { locale: idLocale })} → Pilih akhir`;
         return `Mulai ${format(parseISO(filter.dari), "dd MMM yyyy", { locale: idLocale })}`;
-      } else if (filter.sampai) {
-        return `Hingga ${format(parseISO(filter.sampai), "dd MMM yyyy", { locale: idLocale })}`;
       }
-      return "Pilih Tanggal";
+      return "Klik untuk pilih rentang";
     }
     return "Rentang Waktu";
-  }, [baseDate, preset, filter.dari, filter.sampai]);
+  }, [baseDate, preset, filter.dari, filter.sampai, customStep]);
 
-  // Summary totals
+  // Summary totals (correction tidak masuk hitungan income/expense)
   const totalIncome = filtered
     .filter((t) => t.tipe === "income")
     .reduce((s, t) => s + Number(t.nominal), 0);
@@ -228,13 +268,29 @@ export default function TransaksiPageClient({
     setTransaksi((prev) => [t, ...prev]);
     setDialogOpen(false);
     setEditData(null);
+    setCopyFrom(null);
   }
 
-  function handleUpdated(t: Transaksi) {
+  function handleUpdated(t: Transaksi & { _isCopySignal?: boolean }) {
+    // Copy Transaksi (Opsi B): signal dari dialog untuk buka mode create dengan copyFrom
+    if (t._isCopySignal) {
+      const original = editData;
+      setEditData(null);
+      setDialogOpen(false);
+      // Delay sedikit agar dialog tutup dulu sebelum buka lagi
+      setTimeout(() => {
+        setCopyFrom(original);
+        setDialogOpen(true);
+      }, 150);
+      return;
+    }
     setTransaksi((prev) => prev.map((x) => (x.id === t.id ? t : x)));
     setDialogOpen(false);
     setEditData(null);
+    setCopyFrom(null);
   }
+
+  const canNavigateDate = preset !== "all" && preset !== "custom";
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
@@ -251,6 +307,7 @@ export default function TransaksiPageClient({
           size="sm"
           onClick={() => {
             setEditData(null);
+            setCopyFrom(null);
             setDialogOpen(true);
           }}
           className="gap-2"
@@ -264,31 +321,63 @@ export default function TransaksiPageClient({
       {/* Date Navigator & Summary Card */}
       <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
         {/* Navigator Header */}
-        <div className="bg-linear-to-br from-indigo-600 to-violet-600  text-white flex items-center justify-between p-3 md:px-6">
+        <div className="bg-linear-to-br from-indigo-600 to-violet-600 text-white flex items-center justify-between p-3 md:px-6">
           <Button
             variant="ghost"
             size="icon"
             className="text-white hover:bg-white/20 h-8 w-8"
             onClick={handlePrevDate}
-            disabled={preset === "all" || preset === "custom"}
+            disabled={!canNavigateDate}
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <span className="font-semibold text-sm md:text-base">
-            {dateLabel}
-          </span>
+
+          {/* dateLabel yang bisa diklik */}
+          <div className="relative inline-flex items-center">
+            <button
+              className={cn(
+                "font-semibold text-sm md:text-base flex items-center gap-1.5",
+                "hover:text-white/80 transition-colors rounded px-2 py-1",
+                preset !== "all" && "hover:underline underline-offset-2",
+              )}
+              disabled={preset === "all"}
+              title={
+                preset !== "all" ? "Klik untuk pilih tanggal" : undefined
+              }
+            >
+              <CalendarIcon className="h-3.5 w-3.5 opacity-70" />
+              {dateLabel}
+            </button>
+            {preset !== "all" && (
+              <input
+                type="date"
+                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                value={
+                  preset === "custom"
+                    ? (customStep === "dari" ? filter.dari || "" : filter.sampai || "")
+                    : format(baseDate, "yyyy-MM-dd")
+                }
+                onChange={(e) => {
+                  if (e.target.value) {
+                    handleDateLabelPick(e.target.value);
+                  }
+                }}
+              />
+            )}
+          </div>
+
           <Button
             variant="ghost"
             size="icon"
             className="text-white hover:bg-white/20 h-8 w-8"
             onClick={handleNextDate}
-            disabled={preset === "all" || preset === "custom"}
+            disabled={!canNavigateDate}
           >
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
 
-        {/* Summary */}
+        {/* Summary — correction tidak dihitung */}
         <div className="grid grid-cols-3 divide-x p-4 text-center">
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Pemasukan</p>
@@ -320,14 +409,22 @@ export default function TransaksiPageClient({
       </div>
 
       {/* Filters & Sorting */}
-      <div className="space-y-4">
-        {/* Preset & Custom Range Tabs */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-3 items-center">
+          {/* Preset Periode */}
           <Select
             value={preset}
             onValueChange={(val) => {
               setPreset(val);
               setBaseDate(new Date());
+              setCustomStep("dari");
+              if (val !== "custom") {
+                setFilter((f) => ({
+                  ...f,
+                  dari: undefined,
+                  sampai: undefined,
+                }));
+              }
             }}
           >
             <SelectTrigger className="w-40 h-8 text-sm" id="filter-periode">
@@ -342,35 +439,13 @@ export default function TransaksiPageClient({
               <SelectItem value="custom">Custom</SelectItem>
             </SelectContent>
           </Select>
-
-          {preset === "custom" && (
-            <div className="flex items-center gap-2">
-              <Input
-                type="date"
-                value={filter.dari ?? ""}
-                onChange={(e) =>
-                  setFilter((f) => ({ ...f, dari: e.target.value }))
-                }
-                className="h-8 text-xs w-32.5"
-              />
-              <span className="text-xs text-muted-foreground">-</span>
-              <Input
-                type="date"
-                value={filter.sampai ?? ""}
-                onChange={(e) =>
-                  setFilter((f) => ({ ...f, sampai: e.target.value }))
-                }
-                className="h-8 text-xs w-32.5"
-              />
-            </div>
-          )}
         </div>
 
         <div className="flex flex-wrap gap-3 items-center">
           <div className="relative flex-1 min-w-50">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
-              placeholder="Cari catatan..."
+              placeholder="Cari judul / catatan..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-8 h-8 text-sm"
@@ -410,6 +485,7 @@ export default function TransaksiPageClient({
               <SelectItem value="income">Pemasukan</SelectItem>
               <SelectItem value="expense">Pengeluaran</SelectItem>
               <SelectItem value="transfer">Transfer</SelectItem>
+              <SelectItem value="correction">Koreksi Saldo</SelectItem>
             </SelectContent>
           </Select>
           <Select
@@ -448,8 +524,9 @@ export default function TransaksiPageClient({
           </div>
         ) : (
           filtered.map((t) => {
-            const cfg = TIPE_CONFIG[t.tipe];
+            const cfg = TIPE_CONFIG[t.tipe] ?? TIPE_CONFIG.expense;
             const TipeIcon = cfg.icon;
+            const displayName = t.judul || t.catatan || cfg.label;
             return (
               <div
                 key={t.id}
@@ -471,7 +548,7 @@ export default function TransaksiPageClient({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-medium text-sm truncate">
-                      {t.catatan || cfg.label}
+                      {displayName}
                     </span>
                     <Badge
                       className={cn("text-xs px-1.5 py-0 border-0", cfg.badge)}
@@ -498,6 +575,12 @@ export default function TransaksiPageClient({
                         → {t.rekening_tujuan_data.nama}
                       </span>
                     )}
+                    {/* Catatan sebagai subtitle jika ada judul */}
+                    {t.judul && t.catatan && (
+                      <span className="text-xs text-muted-foreground truncate max-w-32">
+                        · {t.catatan}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -521,14 +604,23 @@ export default function TransaksiPageClient({
                     className="h-7 w-7"
                     onClick={() => {
                       setEditData(t);
+                      setCopyFrom(null);
                       setDialogOpen(true);
                     }}
                   >
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
                   <ConfirmDialog
-                    title="Hapus Transaksi?"
-                    description="Transaksi ini akan dihapus secara permanen beserta pengaruhnya pada saldo rekening."
+                    title={
+                      t.tipe === "correction"
+                        ? "Hapus Koreksi Saldo?"
+                        : "Hapus Transaksi?"
+                    }
+                    description={
+                      t.tipe === "correction"
+                        ? "Koreksi saldo ini akan dihapus. Saldo rekening TIDAK akan otomatis dibalik. Lakukan koreksi saldo baru jika perlu menyesuaikan saldo."
+                        : "Transaksi ini akan dihapus secara permanen beserta pengaruhnya pada saldo rekening."
+                    }
                     onConfirm={() => handleDelete(t.id)}
                   >
                     <Button
@@ -552,11 +644,15 @@ export default function TransaksiPageClient({
         open={dialogOpen}
         onOpenChange={(open) => {
           setDialogOpen(open);
-          if (!open) setEditData(null);
+          if (!open) {
+            setEditData(null);
+            setCopyFrom(null);
+          }
         }}
         rekening={rekening}
         kategori={kategori}
         editData={editData}
+        copyFrom={copyFrom}
         onCreated={handleCreated}
         onUpdated={handleUpdated}
       />

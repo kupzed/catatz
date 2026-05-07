@@ -2,7 +2,8 @@ import { z } from "zod";
 
 export const transaksiSchema = z
   .object({
-    tipe: z.enum(["income", "expense", "transfer"]),
+    tipe: z.enum(["income", "expense", "transfer", "correction"]),
+    judul: z.string().max(200, "Judul maksimal 200 karakter").optional().nullable(),
     nominal: z
       .number({ error: "Nominal harus berupa angka" })
       .positive("Nominal harus lebih dari 0"),
@@ -34,6 +35,17 @@ export const transaksiSchema = z
     {
       message: "Rekening asal dan tujuan tidak boleh sama",
       path: ["rekening_tujuan"],
+    },
+  )
+  .refine(
+    (data) => {
+      // Transaksi correction tidak boleh memiliki judul
+      if (data.tipe === "correction") return !data.judul;
+      return true;
+    },
+    {
+      message: "Transaksi koreksi tidak boleh memiliki judul",
+      path: ["judul"],
     },
   );
 

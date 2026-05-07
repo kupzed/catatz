@@ -1,0 +1,11 @@
+-- =============================================
+-- Migration 011: DEPRECATED
+-- =============================================
+-- File ini sudah dipecah menjadi dua file terpisah:
+--   - 011a-add-judul-enum.sql   (jalankan PERTAMA)
+--   - 011b-correction-constraints.sql  (jalankan KEDUA setelah 011a commit)
+--
+-- Alasan pemecahan:
+-- PostgreSQL tidak mengizinkan penggunaan enum value baru dalam constraint
+-- pada transaksi yang sama (ERROR 55P04). Value harus di-commit dulu.
+-- =============================================
