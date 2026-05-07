@@ -2,7 +2,7 @@
 -- Migration 004: Transaksi (Transactions)
 -- =============================================
 
-CREATE TYPE tipe_transaksi AS ENUM ('income', 'expense', 'transfer');
+CREATE TYPE tipe_transaksi AS ENUM ('income', 'expense', 'transfer', 'correction');
 
 CREATE TABLE IF NOT EXISTS public.transaksi (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS public.transaksi (
   tipe              tipe_transaksi NOT NULL,
   nominal           NUMERIC(15, 2) NOT NULL CHECK (nominal > 0),
   tanggal           DATE NOT NULL DEFAULT CURRENT_DATE,
+  waktu             TIME DEFAULT CURRENT_TIME,
+  judul             TEXT,
   kategori_id       UUID REFERENCES public.kategori(id) ON DELETE SET NULL,
   rekening_id       UUID REFERENCES public.rekening(id) ON DELETE SET NULL,
   rekening_tujuan   UUID REFERENCES public.rekening(id) ON DELETE SET NULL,  -- only for transfer
@@ -19,10 +21,15 @@ CREATE TABLE IF NOT EXISTS public.transaksi (
   recurring_id      UUID,
   created_at        TIMESTAMPTZ DEFAULT NOW(),
   updated_at        TIMESTAMPTZ DEFAULT NOW(),
+
   -- Constraint: transfer must have rekening_tujuan, non-transfer must not
   CONSTRAINT chk_transfer CHECK (
     (tipe = 'transfer' AND rekening_tujuan IS NOT NULL)
     OR (tipe != 'transfer' AND rekening_tujuan IS NULL)
+  ),
+  -- Constraint: correction must not have judul (handled in action layer)
+  CONSTRAINT chk_correction_judul CHECK (
+    tipe != 'correction' OR judul IS NULL
   )
 );
 
@@ -30,6 +37,7 @@ CREATE TABLE IF NOT EXISTS public.transaksi (
 CREATE INDEX idx_transaksi_user_tanggal ON public.transaksi(user_id, tanggal DESC);
 CREATE INDEX idx_transaksi_rekening    ON public.transaksi(rekening_id);
 CREATE INDEX idx_transaksi_kategori    ON public.transaksi(kategori_id);
+CREATE INDEX idx_transaksi_judul       ON public.transaksi(user_id, judul) WHERE judul IS NOT NULL;
 
 ALTER TABLE public.transaksi ENABLE ROW LEVEL SECURITY;
 
@@ -65,6 +73,7 @@ BEGIN
       UPDATE public.rekening SET saldo_saat_ini = saldo_saat_ini + NEW.nominal, updated_at = NOW()
       WHERE id = NEW.rekening_tujuan;
     END IF;
+    -- 'correction': bypass auto-update (handled manually in action layer)
 
   -- === ON DELETE ===
   ELSIF (TG_OP = 'DELETE') THEN
@@ -80,10 +89,11 @@ BEGIN
       UPDATE public.rekening SET saldo_saat_ini = saldo_saat_ini - OLD.nominal, updated_at = NOW()
       WHERE id = OLD.rekening_tujuan;
     END IF;
+    -- 'correction': bypass auto-update
 
   -- === ON UPDATE ===
   ELSIF (TG_OP = 'UPDATE') THEN
-    -- First, reverse the OLD transaction
+    -- First, reverse the OLD transaction (if not correction)
     IF OLD.tipe = 'income' THEN
       UPDATE public.rekening SET saldo_saat_ini = saldo_saat_ini - OLD.nominal, updated_at = NOW()
       WHERE id = OLD.rekening_id;
@@ -96,7 +106,8 @@ BEGIN
       UPDATE public.rekening SET saldo_saat_ini = saldo_saat_ini - OLD.nominal, updated_at = NOW()
       WHERE id = OLD.rekening_tujuan;
     END IF;
-    -- Then apply the NEW transaction
+
+    -- Then apply the NEW transaction (if not correction)
     IF NEW.tipe = 'income' THEN
       UPDATE public.rekening SET saldo_saat_ini = saldo_saat_ini + NEW.nominal, updated_at = NOW()
       WHERE id = NEW.rekening_id;
