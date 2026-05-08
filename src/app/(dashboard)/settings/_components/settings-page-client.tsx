@@ -50,7 +50,7 @@ export default function SettingsPageClient({ profile }: Props) {
   }
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-4">
+    <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Page title */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Pengaturan</h1>

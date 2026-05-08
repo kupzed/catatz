@@ -180,7 +180,7 @@ export default function KategoriPageClient({ kategori }: Props) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Page header */}
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>

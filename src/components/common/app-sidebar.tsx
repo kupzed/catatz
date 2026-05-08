@@ -85,7 +85,7 @@ function SidebarHeaderContent() {
       {!isCollapsed && (
         <Link
           href="/transaksi"
-          className="flex items-center gap-2.5 flex-1 min-w-0"
+          className="flex items-center gap-2.5 px-2 flex-1 min-w-0"
         >
           <Image
             src="/catatz.svg"
@@ -94,7 +94,7 @@ function SidebarHeaderContent() {
             height={26}
             className="shrink-0 pointer-events-none"
           />
-          <span className="font-semibold text-sm tracking-tight text-sidebar-foreground truncate">
+          <span className="font-bold text-lg tracking-tight text-sidebar-foreground truncate">
             CatatZ
           </span>
         </Link>
@@ -120,6 +120,7 @@ function SidebarHeaderContent() {
 // ─── UserCard component ───────────────────────────────────────────────────────
 
 function UserCard({ user }: { user: AppSidebarUser }) {
+  const { isMobile, setOpenMobile } = useSidebar();
   const initials = user?.name
     ? user.name
         .split(" ")
@@ -180,7 +181,13 @@ function UserCard({ user }: { user: AppSidebarUser }) {
             <DropdownMenuSeparator />
 
             <DropdownMenuItem asChild>
-              <Link href="/settings" className="flex items-center gap-2">
+              <Link 
+                href="/settings" 
+                className="flex items-center gap-2"
+                onClick={() => {
+                  if (isMobile) setOpenMobile(false);
+                }}
+              >
                 <Settings className="h-4 w-4" />
                 Pengaturan
               </Link>
@@ -227,7 +234,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
         <SidebarHeaderContent />
       </SidebarHeader>
 
-      <SidebarContent className="select-none">
+      <SidebarContent className="py-1.5 select-none">
         {/* ── CTA: Transaksi baru ── */}
         <SidebarGroup className="py-1.5">
           <SidebarMenu>
