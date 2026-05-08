@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { getKategori } from '@/actions/transaksi-action';
 import { createClient } from '@/configs/supabase/server';
 import SettingsPageClient from './_components/settings-page-client';
 
@@ -9,11 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default async function SettingsPage() {
-  const [kategori, supabase] = await Promise.all([
-    getKategori(),
-    createClient(),
-  ]);
-
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const { data: profile } = await supabase
     .from('profiles')
@@ -21,5 +16,5 @@ export default async function SettingsPage() {
     .eq('id', user?.id)
     .single();
 
-  return <SettingsPageClient kategori={kategori} profile={profile} />;
+  return <SettingsPageClient kategori={[]} profile={profile} />;
 }

@@ -1,35 +1,50 @@
-import { ReactNode } from 'react';
-import AppSidebar from '@/components/common/app-sidebar';
-import { DarkmodeToggle } from '@/components/common/darkmode-toggle';
-import { Separator } from '@/components/ui/separator';
+import { ReactNode } from "react";
+import AppSidebar from "@/components/common/app-sidebar";
+import { DarkmodeToggle } from "@/components/common/darkmode-toggle";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from '@/components/ui/sidebar';
-import DashboardBreadcrumb from './_components/dashboard-breadcrumb';
-import { createClient } from '@/configs/supabase/server';
-import { redirect } from 'next/navigation';
+} from "@/components/ui/sidebar";
+import DashboardBreadcrumb from "./_components/dashboard-breadcrumb";
+import { createClient } from "@/configs/supabase/server";
+import { redirect } from "next/navigation";
 
-export default async function DashboardLayout({ children }: { children: ReactNode }) {
+export default async function DashboardLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect("/login");
   }
+
+  // Fetch display name & avatar from profiles table
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("name, avatar_url")
+    .eq("id", user.id)
+    .single();
+
+  const sidebarUser = {
+    name: profile?.name ?? null,
+    email: user.email ?? "",
+    avatar_url: profile?.avatar_url ?? null,
+  };
 
   return (
     <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset className="overflow-x-hidden">
-        <header className="flex justify-between h-14 shrink-0 items-center gap-2 border-b px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+      <AppSidebar user={sidebarUser} />
+      <SidebarInset className="overflow-x-clip">
+        <header className="sticky top-0 z-40 flex h-12 shrink-0 select-none items-center justify-between gap-2 bg-background/90 backdrop-blur-sm px-4">
           <div className="flex items-center gap-2">
-            <SidebarTrigger className="cursor-pointer -ml-1" />
-            <Separator
-              orientation="vertical"
-              className="mr-2 data-[orientation=vertical]:h-4"
-            />
+            {/* Tombol buka sidebar — hanya tampil di mobile */}
+            <SidebarTrigger className="cursor-pointer md:hidden" />
             <DashboardBreadcrumb />
           </div>
           <div className="flex items-center gap-2">

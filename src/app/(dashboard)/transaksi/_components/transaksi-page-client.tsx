@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Transaksi, Kategori, TransaksiFilter } from "@/types/transaksi";
 import { Rekening } from "@/types/rekening";
 import { formatRupiah, formatTanggal } from "@/lib/utils";
@@ -113,6 +114,19 @@ export default function TransaksiPageClient({
   const [deleting, setDeleting] = useState<string | null>(null);
   // Untuk custom range: track apakah sedang pilih 'dari' atau 'sampai'
   const [customStep, setCustomStep] = useState<"dari" | "sampai">("dari");
+
+  // ── Auto-open dialog via ?new=true (dari sidebar CTA) ──
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  useEffect(() => {
+    if (searchParams.get("new") === "true") {
+      setEditData(null);
+      setCopyFrom(null);
+      setDialogOpen(true);
+      // Hapus query param tanpa reload
+      router.replace("/transaksi", { scroll: false });
+    }
+  }, [searchParams, router]);
 
   const filtered = useMemo(() => {
     let result = transaksi.filter((t) => {
