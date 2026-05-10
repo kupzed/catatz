@@ -64,7 +64,12 @@ export async function createTransaksi(values: TransaksiFormValues): Promise<Acti
   const { data, error } = await supabase
     .from('transaksi')
     .insert({ user_id: user.id, ...values })
-    .select()
+    .select(`
+      *,
+      kategori:kategori_id(*),
+      rekening:rekening_id(id, nama, jenis, logo, warna),
+      rekening_tujuan_data:rekening_tujuan(id, nama, jenis, logo, warna)
+    `)
     .single();
 
   if (error) return { success: false, error: error.message };
@@ -120,7 +125,12 @@ export async function updateTransaksi(
     .from('transaksi')
     .update({ ...values, updated_at: new Date().toISOString() })
     .eq('id', id)
-    .select()
+    .select(`
+      *,
+      kategori:kategori_id(*),
+      rekening:rekening_id(id, nama, jenis, logo, warna),
+      rekening_tujuan_data:rekening_tujuan(id, nama, jenis, logo, warna)
+    `)
     .single();
 
   if (error) return { success: false, error: error.message };

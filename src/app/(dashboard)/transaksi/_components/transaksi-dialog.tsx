@@ -38,7 +38,13 @@ import {
 } from "@/components/ui/select";
 import { NominalInput } from "@/components/common/nominal-input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Sparkles, Wand2, Copy, SlidersHorizontal } from "lucide-react";
+import {
+  Loader2,
+  Sparkles,
+  Wand2,
+  Copy,
+  SlidersHorizontal,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -154,7 +160,9 @@ export default function TransaksiDialog({
   // Load recent judul saat dialog pertama dibuka (mode create)
   useEffect(() => {
     if (open && !isEdit) {
-      getRecentJudul().then(setSuggestions).catch(() => {});
+      getRecentJudul()
+        .then(setSuggestions)
+        .catch(() => {});
     }
   }, [open, isEdit]);
 
@@ -162,7 +170,9 @@ export default function TransaksiDialog({
   useEffect(() => {
     if (!judul || judul.length < 1) {
       if (!isEdit) {
-        getRecentJudul().then(setSuggestions).catch(() => {});
+        getRecentJudul()
+          .then(setSuggestions)
+          .catch(() => {});
       }
       return;
     }
@@ -174,6 +184,13 @@ export default function TransaksiDialog({
 
     return () => clearTimeout(timeout);
   }, [judul, isEdit]);
+
+  // Reset judul saat tipe berubah jadi transfer atau correction
+  useEffect(() => {
+    if (tipe === "transfer" || tipe === "correction") {
+      setValue("judul", null);
+    }
+  }, [tipe, setValue]);
 
   function handleSelectSuggestion(s: JudulSuggestion) {
     setValue("judul", s.judul);
@@ -229,7 +246,9 @@ export default function TransaksiDialog({
       } else {
         const res = await createTransaksi(values);
         if (res.success && res.data) {
-          toast.success(copyFrom ? "Transaksi berhasil di-copy!" : "Transaksi disimpan");
+          toast.success(
+            copyFrom ? "Transaksi berhasil di-copy!" : "Transaksi disimpan",
+          );
           onCreated(res.data);
         } else {
           toast.error(res.error ?? "Gagal menyimpan");
@@ -248,7 +267,9 @@ export default function TransaksiDialog({
     setTimeout(() => {
       setCopying(false);
       // Kirim signal ke parent via callback khusus
-      onUpdated({ ...editData, _isCopySignal: true } as Transaksi & { _isCopySignal: boolean });
+      onUpdated({ ...editData, _isCopySignal: true } as Transaksi & {
+        _isCopySignal: boolean;
+      });
     }, 200);
   }
 
@@ -358,22 +379,16 @@ export default function TransaksiDialog({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="tanggal">Tanggal</Label>
-              <Input
-                id="tanggal"
-                type="date"
-                {...register("tanggal")}
-              />
+              <Input id="tanggal" type="date" {...register("tanggal")} />
               {errors.tanggal && (
-                <p className="text-xs text-rose-500">{errors.tanggal.message}</p>
+                <p className="text-xs text-rose-500">
+                  {errors.tanggal.message}
+                </p>
               )}
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="waktu">Waktu</Label>
-              <Input
-                id="waktu"
-                type="time"
-                {...register("waktu")}
-              />
+              <Input id="waktu" type="time" {...register("waktu")} />
             </div>
           </div>
 
@@ -404,7 +419,10 @@ export default function TransaksiDialog({
                 control={control}
                 name="rekening_id"
                 render={({ field }) => (
-                  <Select value={field.value || ""} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value || ""}
+                    onValueChange={field.onChange}
+                  >
                     <SelectTrigger
                       id="rekening-select"
                       className={errors.rekening_id ? "border-rose-500" : ""}
@@ -446,10 +464,15 @@ export default function TransaksiDialog({
                 control={control}
                 name="rekening_tujuan"
                 render={({ field }) => (
-                  <Select value={field.value || ""} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value || ""}
+                    onValueChange={field.onChange}
+                  >
                     <SelectTrigger
                       id="rekening-tujuan-select"
-                      className={errors.rekening_tujuan ? "border-rose-500" : ""}
+                      className={
+                        errors.rekening_tujuan ? "border-rose-500" : ""
+                      }
                     >
                       <SelectValue placeholder="Pilih rekening tujuan" />
                     </SelectTrigger>
@@ -501,8 +524,8 @@ export default function TransaksiDialog({
             )}
           </div>
 
-          {/* Judul — tampil untuk semua tipe KECUALI correction */}
-          {!isCorrection && (
+          {/* Judul — tampil untuk semua tipe KECUALI correction dan transfer */}
+          {!isCorrection && tipe !== "transfer" && (
             <div className="space-y-1.5">
               <Label htmlFor="judul">Judul</Label>
               <Input
@@ -551,7 +574,10 @@ export default function TransaksiDialog({
                 control={control}
                 name="kategori_id"
                 render={({ field }) => (
-                  <Select value={field.value || ""} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value || ""}
+                    onValueChange={field.onChange}
+                  >
                     <SelectTrigger id="kategori-select">
                       <SelectValue placeholder="Pilih kategori" />
                     </SelectTrigger>

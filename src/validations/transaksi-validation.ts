@@ -39,12 +39,12 @@ export const transaksiSchema = z
   )
   .refine(
     (data) => {
-      // Transaksi correction tidak boleh memiliki judul
-      if (data.tipe === "correction") return !data.judul;
+      // Transaksi correction & transfer tidak boleh memiliki judul
+      if (data.tipe === "correction" || data.tipe === "transfer") return !data.judul;
       return true;
     },
     {
-      message: "Transaksi koreksi tidak boleh memiliki judul",
+      message: "Transaksi koreksi & transfer tidak boleh memiliki judul",
       path: ["judul"],
     },
   );
