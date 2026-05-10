@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+import { updateProfile } from "@/actions/profile-action";
 
 type Profile = {
   id: string;
@@ -40,6 +41,25 @@ function SettingRow({
 
 export function ProfilTab({ profile }: Props) {
   const [name, setName] = useState(profile?.name ?? "");
+  const [isPending, setIsPending] = useState(false);
+
+  const handleSave = async () => {
+    const trimmedName = name.trim();
+    if (trimmedName.length < 1 || trimmedName.length > 100) {
+      toast.error("Nama harus antara 1 sampai 100 karakter");
+      return;
+    }
+
+    setIsPending(true);
+    const res = await updateProfile({ name: trimmedName });
+    setIsPending(false);
+
+    if (res.success) {
+      toast.success("Profil berhasil diperbarui");
+    } else {
+      toast.error(res.error || "Gagal memperbarui profil");
+    }
+  };
 
   const initials = profile?.name
     ? profile.name
@@ -100,9 +120,10 @@ export function ProfilTab({ profile }: Props) {
       <div className="pt-4">
         <Button
           className="bg-indigo-600 hover:bg-indigo-500 text-white"
-          onClick={() => toast.info("Fitur update profil segera hadir")}
+          onClick={handleSave}
+          disabled={isPending}
         >
-          Simpan Perubahan
+          {isPending ? "Menyimpan..." : "Simpan Perubahan"}
         </Button>
       </div>
     </div>

@@ -16,5 +16,11 @@ export default async function SettingsPage() {
     .eq('id', user?.id)
     .single();
 
-  return <SettingsPageClient kategori={[]} profile={profile} />;
+  const profileData = profile
+    ? { ...profile, email: user?.email || "" }
+    : user
+      ? { id: user.id, email: user.email || "", name: null, avatar_url: null }
+      : null;
+
+  return <SettingsPageClient kategori={[]} profile={profileData} />;
 }
