@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import type { Kategori } from "@/types/transaksi";
 import { cn } from "@/lib/utils";
-import { User, Palette, Download } from "lucide-react";
+import { User, Palette, Download, ShieldCheck } from "lucide-react";
 import { ProfilTab } from "./profil-tab";
 import { TampilanTab } from "./tampilan-tab";
+import { KeamananTab } from "./keamanan-tab";
 import { ExportTab } from "./export-tab";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -18,8 +18,6 @@ type Profile = {
 };
 
 type Props = {
-  /** kategori masih diterima untuk backward compat, tidak dipakai di sini */
-  kategori: Kategori[];
   profile: Profile | null;
 };
 
@@ -27,6 +25,7 @@ type Props = {
 
 const TABS = [
   { id: "profil", label: "Profil", icon: User },
+  { id: "keamanan", label: "Keamanan", icon: ShieldCheck },
   { id: "tampilan", label: "Tampilan", icon: Palette },
   { id: "export", label: "Export Data", icon: Download },
 ] as const;
@@ -42,6 +41,8 @@ export default function SettingsPageClient({ profile }: Props) {
     switch (activeTab) {
       case "profil":
         return <ProfilTab profile={profile} />;
+      case "keamanan":
+        return <KeamananTab />;
       case "tampilan":
         return <TampilanTab />;
       case "export":
