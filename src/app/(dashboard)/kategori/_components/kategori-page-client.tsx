@@ -5,16 +5,8 @@ import type { Kategori } from "@/types/transaksi";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import {
   Tags,
   Plus,
@@ -26,6 +18,9 @@ import {
   ArrowLeftRight,
 } from "lucide-react";
 import { toast } from "sonner";
+import KategoriDialog from "./kategori-dialog";
+import { deleteKategori } from "@/actions/kategori-action";
+import { ConfirmDialog } from "@/components/common/confirm-dialog";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -111,26 +106,31 @@ function KategoriCard({
             <ShieldCheck className="h-3 w-3" /> Sistem
           </span>
         ) : (
-          <>
+          <div className="flex items-center gap-1">
             <Button
               size="icon"
               variant="ghost"
-              className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="h-7 w-7 text-foreground"
               onClick={() => onEdit(kategori)}
               aria-label={`Edit ${kategori.nama}`}
             >
               <Pencil className="h-3.5 w-3.5" />
             </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-rose-500 hover:text-rose-500 hover:bg-rose-500/10"
-              onClick={() => onDelete(kategori)}
-              aria-label={`Hapus ${kategori.nama}`}
+            <ConfirmDialog
+              title={`Hapus kategori "${kategori.nama}"?`}
+              description="Tindakan ini tidak dapat dibatalkan. Kategori ini akan dihapus dari sistem."
+              onConfirm={() => onDelete(kategori)}
             >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
-          </>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-7 w-7 text-rose-500"
+                aria-label={`Hapus ${kategori.nama}`}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </ConfirmDialog>
+          </div>
         )}
       </div>
     </div>
@@ -144,10 +144,11 @@ export default function KategoriPageClient({ kategori }: Props) {
   const [filterTipe, setFilterTipe] = useState<string>("all");
   const [showDialog, setShowDialog] = useState(false);
   const [editTarget, setEditTarget] = useState<Kategori | null>(null);
+  const [items, setItems] = useState<Kategori[]>(kategori);
   const [, startTransition] = useTransition();
 
-  const systemKat = kategori.filter((k) => k.is_system);
-  const customKat = kategori.filter((k) => !k.is_system);
+  const systemKat = items.filter((k) => k.is_system);
+  const customKat = items.filter((k) => !k.is_system);
 
   function applyFilter(list: Kategori[]) {
     return list.filter((k) => {
@@ -169,8 +170,14 @@ export default function KategoriPageClient({ kategori }: Props) {
   }
 
   function handleDelete(k: Kategori) {
-    startTransition(() => {
-      toast.info(`Hapus kategori "${k.nama}" — segera hadir`);
+    startTransition(async () => {
+      const res = await deleteKategori(k.id);
+      if (res.success) {
+        setItems((prev) => prev.filter((x) => x.id !== k.id));
+        toast.success(`Kategori "${k.nama}" berhasil dihapus`);
+      } else {
+        toast.error(res.error ?? "Gagal menghapus kategori");
+      }
     });
   }
 
@@ -299,52 +306,19 @@ export default function KategoriPageClient({ kategori }: Props) {
         </div>
       </section>
 
-      {/* Add/Edit Dialog (placeholder) */}
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>
-              {editTarget ? `Edit: ${editTarget.nama}` : "Tambah Kategori"}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="kat-nama">Nama</Label>
-              <Input
-                id="kat-nama"
-                defaultValue={editTarget?.nama ?? ""}
-                placeholder="cth. Belanja Mingguan"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="kat-ikon">Ikon (emoji)</Label>
-              <Input
-                id="kat-ikon"
-                defaultValue={editTarget?.ikon ?? ""}
-                placeholder="🛒"
-                className="text-lg"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Form lengkap dengan pilihan tipe & warna segera hadir.
-            </p>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDialog(false)}>
-              Batal
-            </Button>
-            <Button
-              className="bg-indigo-600 hover:bg-indigo-500 text-white"
-              onClick={() => {
-                toast.info("Simpan kategori — segera hadir");
-                setShowDialog(false);
-              }}
-            >
-              Simpan
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <KategoriDialog
+        open={showDialog}
+        onOpenChange={setShowDialog}
+        editData={editTarget}
+        onCreated={(k) => {
+          setItems((prev) => [k, ...prev]);
+          setShowDialog(false);
+        }}
+        onUpdated={(k) => {
+          setItems((prev) => prev.map((x) => (x.id === k.id ? k : x)));
+          setShowDialog(false);
+        }}
+      />
     </div>
   );
 }
