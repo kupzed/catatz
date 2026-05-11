@@ -2,77 +2,122 @@
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Download, FileSpreadsheet, FileText } from "lucide-react";
+import { FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useState, useEffect } from "react";
+import { getExportData, getExportCount } from "@/actions/export-action";
+import { getUser } from "@/actions/auth-action";
 
 export function ExportTab() {
-  function handleExport(format: "csv" | "excel") {
-    toast.info(`Export ${format.toUpperCase()} — segera hadir`);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [exportCount, setExportCount] = useState<number | null>(null);
+  const [filter, setFilter] = useState<{ dari: string; sampai: string }>({ dari: '', sampai: '' });
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const fetchCount = async () => {
+      const res = await getExportCount();
+      if (res.success && res.data) {
+        setExportCount(res.data.count);
+      }
+    };
+    fetchCount();
+  }, []);
+
+  async function handleExportPDF() {
+    setLoading(true);
+    try {
+      const exportFilter = filter.dari || filter.sampai 
+        ? { dari: filter.dari || undefined, sampai: filter.sampai || undefined }
+        : undefined;
+
+      const res = await getExportData(exportFilter);
+      if (!res.success || !res.data) {
+        toast.error(res.error ?? 'Gagal mengambil data');
+        return;
+      }
+      if (res.data.transaksi.length === 0) {
+        toast.info('Tidak ada transaksi untuk diexport');
+        return;
+      }
+      
+      const userName = res.data.userName;
+      
+      const { generatePDF } = await import('@/lib/pdf-generator');
+      await generatePDF(res.data.transaksi, res.data.summary, userName);
+      toast.success(`PDF berhasil dibuat — ${res.data.transaksi.length} transaksi`);
+    } catch (err) {
+      toast.error('Gagal membuat PDF');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }
 
+  if (!mounted) return null;
+
   return (
-    <div className="space-y-0">
-      <h2 className="text-sm font-semibold text-indigo-500 mb-2">
-        Export Data
-      </h2>
-
-      {/* CSV row */}
-      <div className="flex items-center justify-between gap-6 py-4">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-            <FileText className="h-4 w-4 text-emerald-600" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-medium leading-tight">CSV</p>
-            <p className="text-xs text-muted-foreground">
-              Google Sheets, Numbers
-            </p>
-          </div>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5 shrink-0"
-          onClick={() => handleExport("csv")}
-          id="btn-export-csv"
-        >
-          <Download className="h-3.5 w-3.5" />
-          Export
-        </Button>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-sm font-semibold text-indigo-500 mb-2">
+          Export Data
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Download laporan transaksi keuangan Anda dalam format PDF.
+        </p>
       </div>
 
       <Separator />
 
-      {/* Excel row */}
-      <div className="flex items-center justify-between gap-6 py-4">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-            <FileSpreadsheet className="h-4 w-4 text-blue-600" />
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium">Dari Tanggal</label>
+            <input 
+              type="date" 
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              value={filter.dari}
+              onChange={(e) => setFilter({ ...filter, dari: e.target.value })}
+            />
           </div>
-          <div className="min-w-0">
-            <p className="text-sm font-medium leading-tight">Excel</p>
-            <p className="text-xs text-muted-foreground">
-              Microsoft Excel (.xlsx)
-            </p>
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium">Sampai Tanggal</label>
+            <input 
+              type="date" 
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              value={filter.sampai}
+              onChange={(e) => setFilter({ ...filter, sampai: e.target.value })}
+            />
           </div>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5 shrink-0"
-          onClick={() => handleExport("excel")}
-          id="btn-export-excel"
+        <p className="text-xs text-muted-foreground">
+          Kosongkan untuk export semua transaksi
+        </p>
+      </div>
+
+      <div className="bg-muted/50 rounded-lg p-4 flex flex-col gap-1 text-sm">
+        <p className="font-medium">
+          {exportCount ?? '...'} transaksi siap diexport
+        </p>
+        <p className="text-muted-foreground">
+          Periode: {(filter.dari || filter.sampai) ? `${filter.dari || 'Awal'} – ${filter.sampai || 'Sekarang'}` : 'Semua waktu'}
+        </p>
+      </div>
+
+      <div>
+        <Button 
+          onClick={handleExportPDF} 
+          disabled={loading}
+          className="w-full sm:w-auto bg-rose-600 hover:bg-rose-500 text-white gap-2"
         >
-          <Download className="h-3.5 w-3.5" />
-          Export
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
+          {loading ? 'Membuat PDF...' : 'Export PDF'}
         </Button>
       </div>
 
-      <Separator />
-
-      <p className="text-xs text-muted-foreground py-3">
-        Hanya data transaksi milik akun Anda yang akan dieksport. Data
-        rekening & hutang akan menyusul di update berikutnya.
+      <p className="text-xs text-muted-foreground">
+        PDF berisi ringkasan keuangan dan rincian seluruh transaksi.
       </p>
     </div>
   );
