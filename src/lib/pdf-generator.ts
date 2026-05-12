@@ -199,7 +199,7 @@ export async function generatePDF(
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
     doc.setTextColor(...COLORS.black);
-    doc.text("Pengeluaran per Kategori", margin, y);
+    doc.text("Top 5 Pengeluaran per Kategori", margin, y);
     y += 5;
 
     summary.kategori_breakdown.forEach((item) => {
@@ -313,7 +313,12 @@ export async function generatePDF(
         if (!row) return;
 
         if (data.column.index === 0) {
-          data.cell.styles.cellPadding = { top: 3.5, right: 1, bottom: 3.5, left: 1 };
+          data.cell.styles.cellPadding = {
+            top: 3.5,
+            right: 1,
+            bottom: 3.5,
+            left: 1,
+          };
         }
 
         if (data.column.index === 6) {
