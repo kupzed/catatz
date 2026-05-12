@@ -309,19 +309,19 @@ export default function TransaksiPageClient({
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-row items-start justify-between gap-3">
-        <div className="space-y-1 min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground truncate">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground truncate">
             Transaksi
           </h1>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] sm:text-sm">
-              <ArrowLeftRight className="h-3 w-3 sm:h-4 sm:w-4 text-indigo-500 shrink-0" />
+            <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+              <ArrowLeftRight className="h-4 w-4 text-indigo-500 shrink-0" />
               <span className="truncate">Riwayat arus kas Anda</span>
             </div>
             <Badge
               variant="secondary"
-              className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0 h-4 sm:h-5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-none shrink-0"
+              className="text-sm px-2 py-0 h-4 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-none shrink-0"
             >
               {filtered.length} Data
             </Badge>
