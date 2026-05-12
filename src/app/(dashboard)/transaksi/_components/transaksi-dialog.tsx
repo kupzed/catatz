@@ -288,7 +288,7 @@ export default function TransaksiDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-sm sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {isCorrection
@@ -375,20 +375,30 @@ export default function TransaksiDialog({
             </Tabs>
           )}
 
-          {/* Tanggal & Waktu — native inputs */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
+          {/* Tanggal & Waktu */}
+          <div className="flex items-start gap-4">
+            <div className="flex-1 space-y-1.5 min-w-0">
               <Label htmlFor="tanggal">Tanggal</Label>
-              <Input id="tanggal" type="date" {...register("tanggal")} />
+              <Input
+                id="tanggal"
+                type="date"
+                {...register("tanggal")}
+                className="w-full appearance-none bg-background dark:bg-input/20 border-input"
+              />
               {errors.tanggal && (
-                <p className="text-xs text-rose-500">
+                <p className="text-xs text-rose-500 mt-1">
                   {errors.tanggal.message}
                 </p>
               )}
             </div>
-            <div className="space-y-1.5">
+            <div className="w-32 space-y-1.5 shrink-0">
               <Label htmlFor="waktu">Waktu</Label>
-              <Input id="waktu" type="time" {...register("waktu")} />
+              <Input
+                id="waktu"
+                type="time"
+                {...register("waktu")}
+                className="w-full appearance-none bg-background dark:bg-input/20 border-input"
+              />
             </div>
           </div>
 

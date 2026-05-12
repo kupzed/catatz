@@ -309,33 +309,62 @@ export default function TransaksiPageClient({
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Transaksi</h1>
-          <p className="text-muted-foreground text-sm">
-            Catat semua arus kas Anda
-          </p>
+      <div className="flex flex-row items-start justify-between gap-3">
+        <div className="space-y-1 min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground truncate">
+            Transaksi
+          </h1>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] sm:text-sm">
+              <ArrowLeftRight className="h-3 w-3 sm:h-4 sm:w-4 text-indigo-500 shrink-0" />
+              <span className="truncate">Riwayat arus kas Anda</span>
+            </div>
+            <Badge
+              variant="secondary"
+              className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0 h-4 sm:h-5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-none shrink-0"
+            >
+              {filtered.length} Data
+            </Badge>
+          </div>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            setEditData(null);
-            setCopyFrom(null);
-            setDialogOpen(true);
-          }}
-          className="gap-2"
-          id="btn-tambah-transaksi"
-        >
-          <Plus className="h-4 w-4" />
-          Tambah
-        </Button>
+        <div className="shrink-0">
+          <Select
+            value={preset}
+            onValueChange={(val) => {
+              setPreset(val);
+              setBaseDate(new Date());
+              setCustomStep("dari");
+              if (val !== "custom") {
+                setFilter((f) => ({
+                  ...f,
+                  dari: undefined,
+                  sampai: undefined,
+                }));
+              }
+            }}
+          >
+            <SelectTrigger
+              className="h-9 sm:h-10 text-sm w-32 sm:w-48 bg-background dark:bg-card border dark:border-none shadow-sm dark:shadow-xs shrink-0 px-2 sm:px-3"
+              id="filter-periode"
+            >
+              <SelectValue placeholder="Periode" />
+            </SelectTrigger>
+            <SelectContent align="end" className="min-w-48">
+              <SelectItem value="hari">Hari Ini</SelectItem>
+              <SelectItem value="minggu">Minggu Ini</SelectItem>
+              <SelectItem value="bulan">Bulan Ini</SelectItem>
+              <SelectItem value="tahun">Tahun Ini</SelectItem>
+              <SelectItem value="all">Semua Waktu</SelectItem>
+              <SelectItem value="custom">Custom</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Date Navigator & Summary Card */}
-      <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+      <div className="rounded-xl border bg-card shadow-md dark:shadow-sm overflow-hidden">
         {/* Navigator Header */}
-        <div className="bg-linear-to-br from-indigo-600 to-violet-600 text-white flex items-center justify-between p-3 md:px-6">
+        <div className="bg-linear-to-br from-indigo-500 via-indigo-600 to-violet-600 text-white flex items-center justify-between p-3 md:px-6">
           <Button
             variant="ghost"
             size="icon"
@@ -355,9 +384,7 @@ export default function TransaksiPageClient({
                 preset !== "all" && "hover:underline underline-offset-2",
               )}
               disabled={preset === "all"}
-              title={
-                preset !== "all" ? "Klik untuk pilih tanggal" : undefined
-              }
+              title={preset !== "all" ? "Klik untuk pilih tanggal" : undefined}
             >
               <CalendarIcon className="h-3.5 w-3.5 opacity-70" />
               {dateLabel}
@@ -368,7 +395,9 @@ export default function TransaksiPageClient({
                 className="absolute inset-0 opacity-0 cursor-pointer w-full h-full [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                 value={
                   preset === "custom"
-                    ? (customStep === "dari" ? filter.dari || "" : filter.sampai || "")
+                    ? customStep === "dari"
+                      ? filter.dari || ""
+                      : filter.sampai || ""
                     : format(baseDate, "yyyy-MM-dd")
                 }
                 onChange={(e) => {
@@ -392,28 +421,34 @@ export default function TransaksiPageClient({
         </div>
 
         {/* Summary — correction tidak dihitung */}
-        <div className="grid grid-cols-3 divide-x p-4 text-center">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Pemasukan</p>
-            <p className="text-sm md:text-base font-bold text-emerald-500">
+        <div className="grid grid-cols-3 divide-x divide-border/10 dark:divide-white/5 p-4 text-center bg-card">
+          <div className="px-1">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-medium">
+              Pemasukan
+            </p>
+            <p className="text-sm sm:text-base font-bold text-emerald-600 dark:text-emerald-500 truncate mt-0.5">
               {totalIncome > 0 ? "+" : ""}
               {formatRupiah(totalIncome)}
             </p>
           </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Pengeluaran</p>
-            <p className="text-sm md:text-base font-bold text-rose-500">
+          <div className="px-1">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-medium">
+              Pengeluaran
+            </p>
+            <p className="text-sm sm:text-base font-bold text-rose-600 dark:text-rose-500 truncate mt-0.5">
               {formatRupiah(totalExpense)}
             </p>
           </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Selisih</p>
+          <div className="px-1">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-medium">
+              Selisih
+            </p>
             <p
               className={cn(
-                "text-sm md:text-base font-bold",
+                "text-sm sm:text-base font-bold truncate mt-0.5",
                 totalIncome - totalExpense >= 0
-                  ? "text-emerald-500"
-                  : "text-rose-500",
+                  ? "text-emerald-600 dark:text-emerald-500"
+                  : "text-rose-600 dark:text-rose-500",
               )}
             >
               {formatRupiah(totalIncome - totalExpense)}
@@ -423,48 +458,32 @@ export default function TransaksiPageClient({
       </div>
 
       {/* Filters & Sorting */}
-      <div className="space-y-3">
-        <div className="flex flex-wrap gap-3 items-center">
-          {/* Preset Periode */}
-          <Select
-            value={preset}
-            onValueChange={(val) => {
-              setPreset(val);
-              setBaseDate(new Date());
-              setCustomStep("dari");
-              if (val !== "custom") {
-                setFilter((f) => ({
-                  ...f,
-                  dari: undefined,
-                  sampai: undefined,
-                }));
-              }
-            }}
-          >
-            <SelectTrigger className="w-40 h-8 text-sm" id="filter-periode">
-              <SelectValue placeholder="Pilih Periode" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="hari">Hari Ini</SelectItem>
-              <SelectItem value="minggu">Minggu Ini</SelectItem>
-              <SelectItem value="bulan">Bulan Ini</SelectItem>
-              <SelectItem value="tahun">Tahun Ini</SelectItem>
-              <SelectItem value="all">Semua Waktu</SelectItem>
-              <SelectItem value="custom">Custom</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex flex-wrap gap-3 items-center">
-          <div className="relative flex-1 min-w-50">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Cari judul / catatan..."
+              placeholder="Cari judul atau catatan..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-8 h-8 text-sm"
+              className="pl-9 h-10 text-sm bg-background dark:bg-card border dark:border-none shadow-sm dark:shadow-xs focus-visible:ring-1 focus-visible:ring-indigo-500"
             />
           </div>
+          <Button
+            onClick={() => {
+              setEditData(null);
+              setCopyFrom(null);
+              setDialogOpen(true);
+            }}
+            className="h-10 px-6 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md dark:shadow-sm font-medium gap-2 shrink-0 transition-all active:scale-95"
+            id="btn-tambah-transaksi"
+          >
+            <Plus className="h-4 w-4" />
+            Transaksi Baru
+          </Button>
+        </div>
+
+        <div className="flex w-full sm:w-auto space-x-2">
           <Select
             value={`${filter.sortBy}-${filter.sortOrder}`}
             onValueChange={(v) => {
@@ -475,7 +494,7 @@ export default function TransaksiPageClient({
               setFilter((f) => ({ ...f, sortBy: by, sortOrder: order }));
             }}
           >
-            <SelectTrigger className="w-40 h-8 text-sm">
+            <SelectTrigger className="w-full text-xs bg-background dark:bg-card border dark:border-none shadow-sm dark:shadow-xs">
               <SelectValue placeholder="Urutkan" />
             </SelectTrigger>
             <SelectContent>
@@ -485,13 +504,17 @@ export default function TransaksiPageClient({
               <SelectItem value="nominal-asc">💰 Terkecil</SelectItem>
             </SelectContent>
           </Select>
+
           <Select
             value={filter.tipe ?? "all"}
             onValueChange={(v) =>
               setFilter((f) => ({ ...f, tipe: v as TransaksiFilter["tipe"] }))
             }
           >
-            <SelectTrigger className="w-36 h-8 text-sm" id="filter-tipe">
+            <SelectTrigger
+              className="w-full text-xs bg-background dark:bg-card border dark:border-none shadow-sm dark:shadow-xs"
+              id="filter-tipe"
+            >
               <SelectValue placeholder="Semua tipe" />
             </SelectTrigger>
             <SelectContent>
@@ -502,6 +525,7 @@ export default function TransaksiPageClient({
               <SelectItem value="correction">Koreksi Saldo</SelectItem>
             </SelectContent>
           </Select>
+
           <Select
             value={filter.rekening_id ?? "all"}
             onValueChange={(v) =>
@@ -511,7 +535,10 @@ export default function TransaksiPageClient({
               }))
             }
           >
-            <SelectTrigger className="w-40 h-8 text-sm" id="filter-rekening">
+            <SelectTrigger
+              className="w-full text-xs bg-background dark:bg-card border dark:border-none shadow-sm dark:shadow-xs"
+              id="filter-rekening"
+            >
               <SelectValue placeholder="Semua rekening" />
             </SelectTrigger>
             <SelectContent>
@@ -544,63 +571,88 @@ export default function TransaksiPageClient({
             return (
               <div
                 key={t.id}
-                className="flex items-center gap-4 p-4 rounded-xl border bg-card hover:shadow-sm transition-shadow group"
+                className="group relative flex flex-col sm:flex-row sm:items-center gap-3 p-3 sm:p-4 rounded-xl border bg-card hover:bg-accent/50 dark:hover:bg-accent/5 transition-all duration-200 shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-none"
               >
-                {/* Icon */}
-                <div
-                  className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg",
-                    cfg.bg,
-                  )}
-                >
-                  {t.kategori?.ikon ?? (
-                    <TipeIcon className={cn("h-5 w-5", cfg.color)} />
-                  )}
+                {/* Mobile: Top Row (Icon, Title, Amount) */}
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <div
+                    className={cn(
+                      "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-xs",
+                      cfg.bg,
+                    )}
+                  >
+                    {t.kategori?.ikon ?? (
+                      <TipeIcon className={cn("h-5 w-5", cfg.color)} />
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0 sm:hidden">
+                    <p className="font-semibold text-sm truncate">
+                      {displayName}
+                    </p>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <Badge
+                        className={cn(
+                          "text-[10px] px-1 py-0 border-0 leading-tight",
+                          cfg.badge,
+                        )}
+                      >
+                        {t.kategori
+                          ? `${t.kategori.ikon} ${t.kategori.nama}`
+                          : cfg.label}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="text-right sm:hidden">
+                    <p className={cn("font-bold text-sm", cfg.color)}>
+                      {t.tipe === "income"
+                        ? "+"
+                        : t.tipe === "expense"
+                          ? "-"
+                          : ""}
+                      {formatRupiah(Number(t.nominal))}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
+                {/* Desktop/Tablet Info */}
+                <div className="hidden sm:flex flex-1 flex-col min-w-0">
+                  <div className="flex items-center gap-2">
                     <span className="font-medium text-sm truncate">
                       {displayName}
                     </span>
                     <Badge
-                      className={cn("text-xs px-1.5 py-0 border-0", cfg.badge)}
+                      className={cn(
+                        "text-[10px] px-1.5 py-0 border-0",
+                        cfg.badge,
+                      )}
                     >
-                      {cfg.label}
+                      {t.kategori
+                        ? `${t.kategori.ikon} ${t.kategori.nama}`
+                        : cfg.label}
                     </Badge>
-                    {t.kategori && (
-                      <Badge variant="outline" className="text-xs px-1.5 py-0">
-                        {t.kategori.ikon} {t.kategori.nama}
-                      </Badge>
-                    )}
                   </div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-xs text-muted-foreground">
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs text-muted-foreground shrink-0">
                       {formatTanggal(t.tanggal)}
                     </span>
                     {t.rekening && (
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-muted-foreground truncate max-w-[120px]">
                         · {t.rekening.nama}
                       </span>
                     )}
                     {t.tipe === "transfer" && t.rekening_tujuan_data && (
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-muted-foreground truncate max-w-[120px]">
                         → {t.rekening_tujuan_data.nama}
-                      </span>
-                    )}
-                    {/* Catatan sebagai subtitle jika ada judul */}
-                    {t.judul && t.catatan && (
-                      <span className="text-xs text-muted-foreground truncate max-w-32">
-                        · {t.catatan}
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* Amount */}
-                <div className="text-right shrink-0">
-                  <p className={cn("font-semibold text-sm", cfg.color)}>
+                {/* Desktop Amount */}
+                <div className="hidden sm:block text-right px-2">
+                  <p className={cn("font-bold text-sm", cfg.color)}>
                     {t.tipe === "income"
                       ? "+"
                       : t.tipe === "expense"
@@ -610,42 +662,56 @@ export default function TransaksiPageClient({
                   </p>
                 </div>
 
-                {/* Actions */}
-                <div className="flex gap-1 flex-wrap">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={() => {
-                      setEditData(t);
-                      setCopyFrom(null);
-                      setDialogOpen(true);
-                    }}
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                  <ConfirmDialog
-                    title={
-                      t.tipe === "correction"
-                        ? "Hapus Koreksi Saldo?"
-                        : "Hapus Transaksi?"
-                    }
-                    description={
-                      t.tipe === "correction"
-                        ? "Koreksi saldo ini akan dihapus. Saldo rekening TIDAK akan otomatis dibalik. Lakukan koreksi saldo baru jika perlu menyesuaikan saldo."
-                        : "Transaksi ini akan dihapus secara permanen beserta pengaruhnya pada saldo rekening."
-                    }
-                    onConfirm={() => handleDelete(t.id)}
-                  >
+                {/* Mobile Bottom Row (Meta & Actions) */}
+                <div className="flex items-center justify-between mt-1 pt-2 border-t border-dashed sm:border-0 sm:mt-0 sm:pt-0 w-full sm:w-auto">
+                  <div className="flex flex-col sm:hidden">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <span>{formatTanggal(t.tanggal)}</span>
+                      {t.rekening && <span>· {t.rekening.nama}</span>}
+                      {t.tipe === "transfer" && t.rekening_tujuan_data && (
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          → {t.rekening_tujuan_data.nama}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 ml-auto">
                     <Button
-                      variant="ghost"
+                      variant="secondary"
                       size="icon"
-                      className="h-7 w-7 text-rose-500 hover:text-rose-500 hover:bg-rose-500/10"
-                      disabled={deleting === t.id}
+                      className="h-8 w-8 rounded-lg"
+                      onClick={() => {
+                        setEditData(t);
+                        setCopyFrom(null);
+                        setDialogOpen(true);
+                      }}
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Pencil className="h-3.5 w-3.5" />
                     </Button>
-                  </ConfirmDialog>
+                    <ConfirmDialog
+                      title={
+                        t.tipe === "correction"
+                          ? "Hapus Koreksi Saldo?"
+                          : "Hapus Transaksi?"
+                      }
+                      description={
+                        t.tipe === "correction"
+                          ? "Koreksi saldo ini akan dihapus. Saldo rekening TIDAK akan otomatis dibalik."
+                          : "Transaksi ini akan dihapus secara permanen."
+                      }
+                      onConfirm={() => handleDelete(t.id)}
+                    >
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="h-8 w-8 rounded-lg text-rose-500 hover:text-rose-600"
+                        disabled={deleting === t.id}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </ConfirmDialog>
+                  </div>
                 </div>
               </div>
             );
