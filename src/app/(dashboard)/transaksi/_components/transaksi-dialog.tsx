@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -13,7 +13,13 @@ import {
   getJudulSuggestions,
   getRecentJudul,
 } from "@/actions/transaksi-action";
-import { parseTransaksiFromText } from "@/lib/ai-parser";
+import dynamic from "next/dynamic";
+import type { VoiceParseResult } from "@/types/voice-parser";
+
+const VoiceInputButton = dynamic(() => import("./voice-input-button"), {
+  ssr: false,
+  loading: () => null,
+});
 import { toast } from "sonner";
 import type { Transaksi, Kategori, JudulSuggestion } from "@/types/transaksi";
 import type { Rekening } from "@/types/rekening";
@@ -38,13 +44,7 @@ import {
 } from "@/components/ui/select";
 import { NominalInput } from "@/components/common/nominal-input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Loader2,
-  Sparkles,
-  Wand2,
-  Copy,
-  SlidersHorizontal,
-} from "lucide-react";
+import { Loader2, Sparkles, Copy, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -94,8 +94,6 @@ export default function TransaksiDialog({
   const isCorrection = editData?.tipe === "correction";
   const [submitting, setSubmitting] = useState(false);
   const [copying, setCopying] = useState(false);
-  const [aiText, setAiText] = useState("");
-  const [aiLoading, setAiLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<JudulSuggestion[]>([]);
 
   const {
@@ -206,31 +204,85 @@ export default function TransaksiDialog({
     }
   }
 
-  const handleAiParse = useCallback(async () => {
-    if (!aiText.trim()) return;
-    setAiLoading(true);
-    try {
-      const parsed = await parseTransaksiFromText(aiText);
-      setValue("tipe", parsed.tipe);
-      setValue("nominal", parsed.nominal);
-      setValue("catatan", parsed.catatan);
-      const matchedKat = kategori.find((k) =>
-        k.nama.toLowerCase().includes(parsed.kategori_hint.toLowerCase()),
+  function handleVoiceParsed(result: VoiceParseResult) {
+    const transactions = result.transactions;
+    if (transactions.length === 0) {
+      toast.info(result.parse_summary || "Tidak ada transaksi terdeteksi");
+      return;
+    }
+
+    const first = transactions[0];
+
+    // Set field form dari hasil parsing transaksi pertama
+    if (
+      first.tipe === "expense" ||
+      first.tipe === "income" ||
+      first.tipe === "transfer"
+    ) {
+      setValue("tipe", first.tipe);
+    } else {
+      // Untuk hutang/piutang: default ke expense dengan toast info
+      setValue("tipe", "expense");
+      toast.info(`Terdeteksi: ${first.tipe}. Silakan sesuaikan manual.`);
+    }
+
+    if (first.nominal > 0) setValue("nominal", first.nominal);
+    if (first.tanggal) setValue("tanggal", first.tanggal);
+    if (first.waktu) setValue("waktu", first.waktu);
+    if (first.judul) setValue("judul", first.judul);
+    if (first.catatan) setValue("catatan", first.catatan);
+
+    // Fuzzy match kategori
+    if (first.kategori_hint) {
+      const matchedKat = kategori.find(
+        (k) =>
+          k.nama.toLowerCase().includes(first.kategori_hint.toLowerCase()) ||
+          first.kategori_hint.toLowerCase().includes(k.nama.toLowerCase()),
       );
-      if (matchedKat) setValue("kategori_id", matchedKat.id);
+      if (matchedKat) {
+        setTimeout(() => setValue("kategori_id", matchedKat.id), 50);
+      }
+    }
+
+    // Fuzzy match rekening asal
+    if (first.rekening_hint) {
       const matchedRek = rekening.find(
         (r) =>
-          r.nama.toLowerCase().includes(parsed.rekening_hint.toLowerCase()) ||
-          r.logo?.toLowerCase().includes(parsed.rekening_hint.toLowerCase()),
+          r.nama.toLowerCase().includes(first.rekening_hint.toLowerCase()) ||
+          r.logo?.toLowerCase().includes(first.rekening_hint.toLowerCase()),
       );
       if (matchedRek) setValue("rekening_id", matchedRek.id);
-      toast.success("AI berhasil mem-parse transaksi!");
-    } catch {
-      toast.error("Gagal mem-parse dengan AI");
-    } finally {
-      setAiLoading(false);
     }
-  }, [aiText, kategori, rekening, setValue]);
+
+    // Fuzzy match rekening tujuan (untuk tipe transfer)
+    if (first.rekening_tujuan_hint) {
+      const matchedRekTujuan = rekening.find(
+        (r) =>
+          r.nama.toLowerCase().includes(first.rekening_tujuan_hint.toLowerCase()) ||
+          r.logo?.toLowerCase().includes(first.rekening_tujuan_hint.toLowerCase()),
+      );
+      if (matchedRekTujuan) setValue("rekening_tujuan", matchedRekTujuan.id);
+    }
+
+    // Handle multiple transactions: toast info
+    if (transactions.length > 1) {
+      toast.info(
+        `${transactions.length} transaksi terdeteksi. Sisa ${
+          transactions.length - 1
+        } bisa diinput manual.`,
+        { duration: 5000 },
+      );
+    }
+
+    // Handle needs_clarification
+    if (first.needs_clarification) {
+      const fieldsText = first.clarification_fields.join(", ");
+      toast.warning(`Mohon periksa: ${fieldsText}`, { duration: 6000 });
+    }
+
+    // Toast sukses
+    toast.success(`Terisi dari suara: ${first.judul || result.parse_summary}`);
+  }
 
   async function onSubmit(values: TransaksiSchema) {
     setSubmitting(true);
@@ -310,34 +362,16 @@ export default function TransaksiDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {/* AI Input — hanya tampil saat create (bukan edit & bukan correction) */}
+        {/* AI Voice Input — hanya tampil saat create (bukan edit & bukan correction) */}
         {!isEdit && !copyFrom && (
           <div className="space-y-2 p-3 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800">
             <Label className="text-xs text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
               <Sparkles className="h-3 w-3" /> Input Natural (AI)
             </Label>
-            <div className="flex gap-2">
-              <Input
-                placeholder='Contoh: "Beli nasi padang 25rb pakai GoPay"'
-                value={aiText}
-                onChange={(e) => setAiText(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleAiParse()}
-                className="text-sm h-8"
-              />
-              <Button
-                type="button"
-                size="sm"
-                onClick={handleAiParse}
-                disabled={aiLoading || !aiText.trim()}
-                className="h-8 bg-indigo-600 hover:bg-indigo-500 text-white shrink-0"
-              >
-                {aiLoading ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Wand2 className="h-3.5 w-3.5" />
-                )}
-              </Button>
-            </div>
+            <VoiceInputButton
+              onParsed={handleVoiceParsed}
+              onError={(msg) => toast.error(msg)}
+            />
           </div>
         )}
 
