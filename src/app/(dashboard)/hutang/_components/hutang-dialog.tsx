@@ -80,8 +80,7 @@ export default function HutangDialog({
         total_pinjaman: Number(editData.total_pinjaman),
         tanggal_mulai: editData.tanggal_mulai,
         tanggal_jatuh_tempo: editData.tanggal_jatuh_tempo ?? undefined,
-        waktu:
-          editData.waktu?.substring(0, 5) ?? currentTime(),
+        waktu: editData.waktu?.substring(0, 5) ?? currentTime(),
         rekening_id: editData.rekening_id ?? undefined,
         catatan: editData.catatan ?? "",
       });
@@ -121,7 +120,7 @@ export default function HutangDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-sm sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {isEdit ? "Edit Hutang" : "Catat Hutang/Piutang"}
@@ -187,39 +186,46 @@ export default function HutangDialog({
           </div>
 
           {/* Dates & Waktu */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="tgl-mulai" className="text-xs">
-                Tanggal Mulai
-              </Label>
-              <Input
-                id="tgl-mulai"
-                type="date"
-                className="text-xs h-9"
-                {...register("tanggal_mulai")}
-              />
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-row items-start gap-3">
+              <div className="flex-1 space-y-1.5 min-w-0">
+                <Label htmlFor="tgl-mulai">Tanggal Mulai</Label>
+                <Input
+                  id="tgl-mulai"
+                  type="date"
+                  {...register("tanggal_mulai")}
+                  className="w-full appearance-none bg-background dark:bg-input/20 border-input"
+                />
+                {errors.tanggal_mulai && (
+                  <p className="text-xs text-rose-500 mt-1">
+                    {errors.tanggal_mulai.message}
+                  </p>
+                )}
+              </div>
+              <div className="w-28 space-y-1.5 shrink-0">
+                <Label htmlFor="waktu">Waktu</Label>
+                <Input
+                  id="waktu"
+                  type="time"
+                  {...register("waktu")}
+                  className="w-full appearance-none bg-background dark:bg-input/20 border-input"
+                />
+              </div>
             </div>
+
             <div className="space-y-1.5">
-              <Label htmlFor="waktu" className="text-xs">
-                Waktu
-              </Label>
-              <Input
-                id="waktu"
-                type="time"
-                className="text-xs h-9"
-                {...register("waktu")}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="tgl-jatuh" className="text-xs">
-                Jatuh Tempo
-              </Label>
+              <Label htmlFor="tgl-jatuh">Jatuh Tempo (Opsional)</Label>
               <Input
                 id="tgl-jatuh"
                 type="date"
-                className="text-xs h-9"
                 {...register("tanggal_jatuh_tempo")}
+                className="w-full appearance-none bg-background dark:bg-input/20 border-input"
               />
+              {errors.tanggal_jatuh_tempo && (
+                <p className="text-xs text-rose-500 mt-1">
+                  {errors.tanggal_jatuh_tempo.message}
+                </p>
+              )}
             </div>
           </div>
 

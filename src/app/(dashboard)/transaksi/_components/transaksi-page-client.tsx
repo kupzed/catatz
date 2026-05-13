@@ -638,12 +638,12 @@ export default function TransaksiPageClient({
                       {formatTanggal(t.tanggal)}
                     </span>
                     {t.rekening && (
-                      <span className="text-xs text-muted-foreground truncate max-w-[120px]">
+                      <span className="text-xs text-muted-foreground truncate max-w-30">
                         · {t.rekening.nama}
                       </span>
                     )}
                     {t.tipe === "transfer" && t.rekening_tujuan_data && (
-                      <span className="text-xs text-muted-foreground truncate max-w-[120px]">
+                      <span className="text-xs text-muted-foreground truncate max-w-30">
                         → {t.rekening_tujuan_data.nama}
                       </span>
                     )}

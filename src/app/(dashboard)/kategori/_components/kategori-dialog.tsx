@@ -26,14 +26,49 @@ import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const WARNA_PRESETS = [
-  "#6366f1", "#8b5cf6", "#ec4899", "#ef4444", "#f97316",
-  "#eab308", "#22c55e", "#10b981", "#06b6d4", "#3b82f6",
+  "#6366f1",
+  "#8b5cf6",
+  "#ec4899",
+  "#ef4444",
+  "#f97316",
+  "#eab308",
+  "#22c55e",
+  "#10b981",
+  "#06b6d4",
+  "#3b82f6",
 ];
 
 const EMOJI_PRESETS = [
-  "💰","🍔","🚗","🛍️","📄","🏥","🎮","📚","🏠","👕","🏋️","👥",
-  "✈️","🎵","💊","🐾","🎁","💼","📱","☕","🍺","🎂","🛒","⚡",
-  "🔧","📷","🎯","💡","🌿","🏖️"
+  "💰",
+  "🍔",
+  "🚗",
+  "🛍️",
+  "📄",
+  "🏥",
+  "🎮",
+  "📚",
+  "🏠",
+  "👕",
+  "🏋️",
+  "👥",
+  "✈️",
+  "🎵",
+  "💊",
+  "🐾",
+  "🎁",
+  "💼",
+  "📱",
+  "☕",
+  "🍺",
+  "🎂",
+  "🛒",
+  "⚡",
+  "🔧",
+  "📷",
+  "🎯",
+  "💡",
+  "🌿",
+  "🏖️",
 ];
 
 type Props = {
@@ -44,20 +79,32 @@ type Props = {
   onUpdated: (k: Kategori) => void;
 };
 
-export default function KategoriDialog({ open, onOpenChange, editData, onCreated, onUpdated }: Props) {
+export default function KategoriDialog({
+  open,
+  onOpenChange,
+  editData,
+  onCreated,
+  onUpdated,
+}: Props) {
   const isEdit = !!editData;
   const [submitting, setSubmitting] = useState(false);
 
-  const { register, handleSubmit, setValue, control, reset, formState: { errors } } =
-    useForm<KategoriSchema>({
-      resolver: zodResolver(kategoriSchema),
-      defaultValues: {
-        nama: "",
-        ikon: "💰",
-        warna: "#6366f1",
-        tipe: "expense",
-      },
-    });
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    control,
+    reset,
+    formState: { errors },
+  } = useForm<KategoriSchema>({
+    resolver: zodResolver(kategoriSchema),
+    defaultValues: {
+      nama: "",
+      ikon: "💰",
+      warna: "#6366f1",
+      tipe: "expense",
+    },
+  });
 
   const ikon = useWatch({ control, name: "ikon" });
   const warna = useWatch({ control, name: "warna" });
@@ -108,11 +155,15 @@ export default function KategoriDialog({ open, onOpenChange, editData, onCreated
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-sm sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Kategori" : "Tambah Kategori"}</DialogTitle>
+          <DialogTitle>
+            {isEdit ? "Edit Kategori" : "Tambah Kategori"}
+          </DialogTitle>
           <DialogDescription>
-            {isEdit ? "Perbarui informasi kategori kustom Anda." : "Tambahkan kategori baru untuk mencatat transaksi."}
+            {isEdit
+              ? "Perbarui informasi kategori kustom Anda."
+              : "Tambahkan kategori baru untuk mencatat transaksi."}
           </DialogDescription>
         </DialogHeader>
 
@@ -120,50 +171,76 @@ export default function KategoriDialog({ open, onOpenChange, editData, onCreated
           {/* Preview Kategori */}
           <div className="flex justify-center mb-4">
             <div className="flex flex-col items-center gap-2">
-              <div 
+              <div
                 className="w-16 h-16 rounded-xl flex items-center justify-center text-3xl shadow-sm border"
-                style={{ backgroundColor: `${warna}20`, borderColor: `${warna}40` }}
+                style={{
+                  backgroundColor: `${warna}20`,
+                  borderColor: `${warna}40`,
+                }}
               >
                 {ikon || "📁"}
               </div>
-              <span className="text-xs text-muted-foreground font-medium">Preview</span>
+              <span className="text-xs text-muted-foreground font-medium">
+                Preview
+              </span>
             </div>
           </div>
 
           {/* Nama */}
           <div className="space-y-1.5">
             <Label htmlFor="kat-nama">Nama Kategori</Label>
-            <Input id="kat-nama" placeholder="Contoh: Makan Siang" {...register("nama")} className={errors.nama ? "border-rose-500" : ""} />
-            {errors.nama && <p className="text-xs text-rose-500">{errors.nama.message}</p>}
+            <Input
+              id="kat-nama"
+              placeholder="Contoh: Makan Siang"
+              {...register("nama")}
+              className={errors.nama ? "border-rose-500" : ""}
+            />
+            {errors.nama && (
+              <p className="text-xs text-rose-500">{errors.nama.message}</p>
+            )}
           </div>
 
           {/* Tipe */}
           <div className="space-y-1.5">
             <Label>Tipe Kategori</Label>
-            <Tabs value={tipe} onValueChange={(v) => setValue("tipe", v as KategoriSchema["tipe"])}>
+            <Tabs
+              value={tipe}
+              onValueChange={(v) =>
+                setValue("tipe", v as KategoriSchema["tipe"])
+              }
+            >
               <TabsList className="w-full grid grid-cols-3">
                 <TabsTrigger value="expense">Pengeluaran</TabsTrigger>
                 <TabsTrigger value="income">Pemasukan</TabsTrigger>
                 <TabsTrigger value="all">Semua</TabsTrigger>
               </TabsList>
             </Tabs>
-            {errors.tipe && <p className="text-xs text-rose-500">{errors.tipe.message}</p>}
+            {errors.tipe && (
+              <p className="text-xs text-rose-500">{errors.tipe.message}</p>
+            )}
           </div>
 
           {/* Ikon */}
           <div className="space-y-2">
             <Label>Ikon</Label>
             <div className="flex gap-2 items-center">
-              <Input 
-                {...register("ikon")} 
-                className={cn("w-16 text-center text-lg", errors.ikon ? "border-rose-500" : "")} 
-                placeholder="🍔" 
+              <Input
+                {...register("ikon")}
+                className={cn(
+                  "w-16 text-center text-lg",
+                  errors.ikon ? "border-rose-500" : "",
+                )}
+                placeholder="🍔"
                 maxLength={5}
               />
-              <span className="text-xs text-muted-foreground">Ketik emoji manual atau pilih di bawah</span>
+              <span className="text-xs text-muted-foreground">
+                Ketik emoji manual atau pilih di bawah
+              </span>
             </div>
-            {errors.ikon && <p className="text-xs text-rose-500">{errors.ikon.message}</p>}
-            
+            {errors.ikon && (
+              <p className="text-xs text-rose-500">{errors.ikon.message}</p>
+            )}
+
             <div className="grid grid-cols-8 gap-1 p-2 bg-muted/30 rounded-lg border">
               {EMOJI_PRESETS.map((e) => (
                 <button
@@ -172,7 +249,7 @@ export default function KategoriDialog({ open, onOpenChange, editData, onCreated
                   onClick={() => setValue("ikon", e)}
                   className={cn(
                     "text-xl p-1.5 rounded hover:bg-accent transition-colors flex items-center justify-center",
-                    ikon === e && "bg-accent border border-border"
+                    ikon === e && "bg-accent border border-border",
                   )}
                 >
                   {e}
@@ -186,19 +263,45 @@ export default function KategoriDialog({ open, onOpenChange, editData, onCreated
             <Label>Warna</Label>
             <div className="flex flex-wrap gap-2 items-center">
               {WARNA_PRESETS.map((c) => (
-                <button key={c} type="button" onClick={() => setValue("warna", c)}
-                  className={cn("w-7 h-7 rounded-full border-2 transition-transform hover:scale-110", warna === c ? "border-foreground scale-110" : "border-transparent")}
-                  style={{ background: c }} />
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setValue("warna", c)}
+                  className={cn(
+                    "w-7 h-7 rounded-full border-2 transition-transform hover:scale-110",
+                    warna === c
+                      ? "border-foreground scale-110"
+                      : "border-transparent",
+                  )}
+                  style={{ background: c }}
+                />
               ))}
-              <input type="color" value={warna} onChange={(e) => setValue("warna", e.target.value)}
-                className="w-7 h-7 rounded-full border border-border cursor-pointer" title="Pilih warna kustom" />
+              <input
+                type="color"
+                value={warna}
+                onChange={(e) => setValue("warna", e.target.value)}
+                className="w-7 h-7 rounded-full border border-border cursor-pointer"
+                title="Pilih warna kustom"
+              />
             </div>
-            {errors.warna && <p className="text-xs text-rose-500">{errors.warna.message}</p>}
+            {errors.warna && (
+              <p className="text-xs text-rose-500">{errors.warna.message}</p>
+            )}
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Batal</Button>
-            <Button type="submit" disabled={submitting} className="bg-indigo-600 hover:bg-indigo-500 text-white">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
+              Batal
+            </Button>
+            <Button
+              type="submit"
+              disabled={submitting}
+              className="bg-indigo-600 hover:bg-indigo-500 text-white"
+            >
               {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               {isEdit ? "Perbarui" : "Tambah"}
             </Button>
