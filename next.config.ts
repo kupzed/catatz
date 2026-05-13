@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
   allowedDevOrigins: environment.allowedDevOrigins,
+  experimental: {
+    serverActions: {
+      allowedOrigins: environment.allowedDevOrigins,
+    },
+  },
 };
 
 export default nextConfig;
