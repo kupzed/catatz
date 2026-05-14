@@ -173,3 +173,7 @@ CREATE TRIGGER trg_update_sisa_hutang
 CREATE TRIGGER trg_rekening_cicilan
   AFTER INSERT OR UPDATE OF nominal, rekening_id OR DELETE ON public.hutang_cicilan
   FOR EACH ROW EXECUTE FUNCTION public.update_saldo_rekening_cicilan();
+
+-- Grant API access (Supabase v1.26.05+)
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.hutang TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.hutang_cicilan TO authenticated;

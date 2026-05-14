@@ -36,3 +36,7 @@ INSERT INTO public.kategori (nama, ikon, warna, tipe, is_system) VALUES
   ('Transportasi', '🚗', '#06b6d4', 'expense', TRUE),
   ('Kesehatan',    '🏥', '#ef4444', 'expense', TRUE),
   ('Lainnya',      '📌', '#6b7280', 'all',     TRUE);
+
+-- Grant API access (Supabase v1.26.05+)
+GRANT SELECT ON public.kategori TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.kategori TO authenticated;
