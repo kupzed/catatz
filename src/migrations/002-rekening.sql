@@ -29,3 +29,6 @@ CREATE POLICY "rekening: update own" ON public.rekening
   FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "rekening: delete own" ON public.rekening
   FOR DELETE USING (auth.uid() = user_id);
+
+-- Grant API access (Supabase v1.26.05+)
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.rekening TO authenticated;

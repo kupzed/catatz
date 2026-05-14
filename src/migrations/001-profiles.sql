@@ -43,3 +43,6 @@ $$;
 CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- Grant API access (Supabase v1.26.05+)
+GRANT SELECT, UPDATE ON public.profiles TO authenticated;

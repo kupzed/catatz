@@ -26,3 +26,6 @@ CREATE POLICY "budget: update own" ON public.budget
   FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "budget: delete own" ON public.budget
   FOR DELETE USING (auth.uid() = user_id);
+
+-- Grant API access (Supabase v1.26.05+)
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.budget TO authenticated;

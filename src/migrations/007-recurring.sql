@@ -33,3 +33,6 @@ CREATE POLICY "recurring: update own" ON public.recurring_transaksi
   FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "recurring: delete own" ON public.recurring_transaksi
   FOR DELETE USING (auth.uid() = user_id);
+
+-- Grant API access (Supabase v1.26.05+)
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.recurring_transaksi TO authenticated;

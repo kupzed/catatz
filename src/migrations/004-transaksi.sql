@@ -129,3 +129,6 @@ $$;
 CREATE TRIGGER trg_transaksi_saldo
   AFTER INSERT OR UPDATE OR DELETE ON public.transaksi
   FOR EACH ROW EXECUTE FUNCTION public.update_saldo_rekening();
+
+-- Grant API access (Supabase v1.26.05+)
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.transaksi TO authenticated;
