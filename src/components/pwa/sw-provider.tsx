@@ -70,21 +70,5 @@ export function SwProvider({ children }: { children: ReactNode }) {
     [isOnline, isInstalled, isUpdateAvailable, triggerUpdate],
   );
 
-  return (
-    <PWAContext.Provider value={value}>
-      {children}
-      {isUpdateAvailable && (
-        <div className="fixed inset-x-3 bottom-20 z-50 mx-auto flex max-w-md items-center justify-between gap-3 rounded-md border border-indigo-300/60 bg-white px-4 py-3 text-sm text-slate-900 shadow-lg shadow-black/10 dark:border-indigo-400/30 dark:bg-slate-900 dark:text-slate-50">
-          <span className="font-medium">Update CatatZ tersedia.</span>
-          <button
-            type="button"
-            onClick={triggerUpdate}
-            className="shrink-0 rounded-md bg-indigo-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-indigo-500"
-          >
-            Perbarui
-          </button>
-        </div>
-      )}
-    </PWAContext.Provider>
-  );
+  return <PWAContext.Provider value={value}>{children}</PWAContext.Provider>;
 }

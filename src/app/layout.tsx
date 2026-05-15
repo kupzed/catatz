@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AppleSplashScreens } from '@/components/pwa/apple-splash-screens';
 import { OfflineIndicator } from '@/components/pwa/offline-indicator';
+import { PWAComponents } from '@/components/pwa/pwa-components';
 import { SwProvider } from '@/components/pwa/sw-provider';
 
 const geistSans = Geist({
@@ -77,6 +78,7 @@ export default function RootLayout({
               <TooltipProvider>
                 {children}
                 <OfflineIndicator />
+                <PWAComponents />
                 <Toaster richColors position="top-right" />
               </TooltipProvider>
             </SwProvider>

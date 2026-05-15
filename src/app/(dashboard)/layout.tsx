@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import AppSidebar from "@/components/common/app-sidebar";
 import { DarkmodeToggle } from "@/components/common/darkmode-toggle";
+import { IOSInstallHeaderButton } from "@/components/pwa/ios-install-header-button";
 import {
   SidebarInset,
   SidebarProvider,
@@ -48,6 +49,7 @@ export default async function DashboardLayout({
             <DashboardBreadcrumb />
           </div>
           <div className="flex items-center gap-2">
+            <IOSInstallHeaderButton />
             <DarkmodeToggle />
           </div>
         </header>
