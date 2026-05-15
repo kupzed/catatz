@@ -1,10 +1,18 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { WifiOff } from "lucide-react";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 
 export function OfflineIndicator() {
   const isOnline = useOnlineStatus();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
     <div
