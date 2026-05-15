@@ -167,7 +167,7 @@ export function ProfilTab({ profile }: Props) {
               <img
                 src={avatarPreview}
                 className={`w-full h-full object-cover ${isAvatarPending ? 'opacity-50' : ''}`}
-                alt={profile.name ?? profile.email}
+                alt={profile?.name ?? profile?.email ?? 'Avatar CatatZ'}
               />
             ) : (
               <span className={isAvatarPending ? 'opacity-50' : ''}>{initials}</span>

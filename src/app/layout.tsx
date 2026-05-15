@@ -6,6 +6,8 @@ import ReactQueryProvider from '@/providers/react-query-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AppleSplashScreens } from '@/components/pwa/apple-splash-screens';
+import { OfflineIndicator } from '@/components/pwa/offline-indicator';
+import { SwProvider } from '@/components/pwa/sw-provider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -71,10 +73,13 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <TooltipProvider>
-              {children}
-              <Toaster richColors position="top-right" />
-            </TooltipProvider>
+            <SwProvider>
+              <TooltipProvider>
+                {children}
+                <OfflineIndicator />
+                <Toaster richColors position="top-right" />
+              </TooltipProvider>
+            </SwProvider>
           </ThemeProvider>
         </ReactQueryProvider>
       </body>
