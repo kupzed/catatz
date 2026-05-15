@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Eye, EyeOff } from "lucide-react";
@@ -50,9 +50,9 @@ export function KeamananTab() {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const {
+    control,
     register,
     handleSubmit,
-    watch,
     reset,
     formState: { errors, isSubmitting }
   } = useForm<FormValues>({
@@ -64,7 +64,7 @@ export function KeamananTab() {
     }
   });
 
-  const newPasswordValue = watch("newPassword");
+  const newPasswordValue = useWatch({ control, name: "newPassword" });
 
   const onSubmit = async (values: FormValues) => {
     const res = await changePassword({ 

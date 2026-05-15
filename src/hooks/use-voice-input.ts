@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 // ─────────────────────────────────────────────────────────────
 // Web Speech API type definitions (not in lib.dom.d.ts by default)
@@ -69,29 +69,40 @@ export type UseVoiceInputReturn = {
   resetTranscript: () => void;
 };
 
+function getSpeechRecognitionAPI() {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+}
+
+function getSpeechRecognitionSupportSnapshot() {
+  return Boolean(getSpeechRecognitionAPI());
+}
+
+function subscribeToSpeechRecognitionSupport() {
+  return () => {};
+}
+
 export function useVoiceInput(): UseVoiceInputReturn {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [finalTranscript, setFinalTranscript] = useState('');
-  const [isSupported, setIsSupported] = useState(false);
+  const isSupported = useSyncExternalStore(
+    subscribeToSpeechRecognitionSupport,
+    getSpeechRecognitionSupportSnapshot,
+    () => false,
+  );
   const [error, setError] = useState<string | null>(null);
 
   const recognitionRef = useRef<ISpeechRecognition | null>(null);
-
-  // Check browser support (client-side only)
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const SpeechRecognitionAPI =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-    setIsSupported(!!SpeechRecognitionAPI);
-  }, []);
 
   // Setup and teardown recognition instance
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const SpeechRecognitionAPI =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognitionAPI = getSpeechRecognitionAPI();
     if (!SpeechRecognitionAPI) return;
 
     const recognition = new SpeechRecognitionAPI();
@@ -144,7 +155,7 @@ export function useVoiceInput(): UseVoiceInputReturn {
     };
   }, []);
 
-  function startListening() {
+  const startListening = useCallback(() => {
     if (!recognitionRef.current) return;
     setError(null);
     setTranscript('');
@@ -154,17 +165,17 @@ export function useVoiceInput(): UseVoiceInputReturn {
     } catch {
       // Already started — ignore DOMException
     }
-  }
+  }, []);
 
-  function stopListening() {
+  const stopListening = useCallback(() => {
     if (!recognitionRef.current) return;
     recognitionRef.current.stop();
-  }
+  }, []);
 
-  function resetTranscript() {
+  const resetTranscript = useCallback(() => {
     setTranscript('');
     setFinalTranscript('');
-  }
+  }, []);
 
   return {
     isListening,

@@ -31,13 +31,13 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: Do not add logic between createServerClient and supabase.auth.getUser()
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  const user = session?.user;
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // Protected routes
   const pathname = request.nextUrl.pathname;
-  const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register');
+  const isAuthPage =
+    pathname.startsWith('/login') || pathname.startsWith('/register');
   const isProtected = !isAuthPage && pathname !== '/';
 
   if (isProtected && !user) {

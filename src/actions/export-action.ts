@@ -33,6 +33,40 @@ export type ExportSummary = {
   }[];
 };
 
+type RelationOne<T> = T | T[] | null;
+
+type ExportTransaksiRow = {
+  tanggal: string;
+  waktu: string | null;
+  tipe: string;
+  judul: string | null;
+  nominal: number | string;
+  catatan: string | null;
+  kategori: RelationOne<{ nama: string | null }>;
+  rekening: RelationOne<{ nama: string | null }>;
+  rekening_tujuan_data: RelationOne<{ nama: string | null }>;
+};
+
+type ExportKategoriRow = {
+  nominal: number | string;
+  kategori_id: string | null;
+  kategori: RelationOne<{ nama: string | null; warna: string | null }>;
+};
+
+type CategoryBreakdownItem = {
+  nama: string;
+  warna: string;
+  total: number;
+};
+
+function firstRelation<T>(relation: RelationOne<T> | undefined) {
+  if (Array.isArray(relation)) {
+    return relation[0] ?? null;
+  }
+
+  return relation ?? null;
+}
+
 export async function getExportData(filter?: {
   dari?: string;
   sampai?: string;
@@ -104,18 +138,26 @@ export async function getExportData(filter?: {
     }
   };
 
-  const transaksi: ExportTransaksi[] = (tData || []).map((t: any) => ({
-    tanggal: formatDate(t.tanggal),
-    waktu: t.waktu ? t.waktu.substring(0, 5) : "-",
-    tipe: formatTipe(t.tipe),
-    judul: t.judul ?? "-",
-    nominal: Number(t.nominal),
-    kategori: t.kategori?.nama ?? "-",
-    rekening: t.rekening?.nama ?? "-",
-    rekening_tujuan:
-      t.tipe === "transfer" ? (t.rekening_tujuan_data?.nama ?? "-") : "-",
-    catatan: t.catatan ?? "-",
-  }));
+  const rows = (tData ?? []) as ExportTransaksiRow[];
+
+  const transaksi: ExportTransaksi[] = rows.map((t) => {
+    const kategori = firstRelation(t.kategori);
+    const rekening = firstRelation(t.rekening);
+    const rekeningTujuan = firstRelation(t.rekening_tujuan_data);
+
+    return {
+      tanggal: formatDate(t.tanggal),
+      waktu: t.waktu ? t.waktu.substring(0, 5) : "-",
+      tipe: formatTipe(t.tipe),
+      judul: t.judul ?? "-",
+      nominal: Number(t.nominal),
+      kategori: kategori?.nama ?? "-",
+      rekening: rekening?.nama ?? "-",
+      rekening_tujuan:
+        t.tipe === "transfer" ? (rekeningTujuan?.nama ?? "-") : "-",
+      catatan: t.catatan ?? "-",
+    };
+  });
 
   let total_income = 0;
   let total_expense = 0;
@@ -123,7 +165,7 @@ export async function getExportData(filter?: {
   let count_expense = 0;
   let count_transfer = 0;
 
-  (tData || []).forEach((t: any) => {
+  rows.forEach((t) => {
     const nominal = Number(t.nominal);
     if (t.tipe === "income") {
       total_income += nominal;
@@ -168,15 +210,18 @@ export async function getExportData(filter?: {
 
   const { data: katData, error: katError } = await katQuery;
 
-  let kategori_breakdown: any[] = [];
+  let kategori_breakdown: ExportSummary["kategori_breakdown"] = [];
   if (!katError && katData) {
-    const grouped = katData.reduce((acc: any, curr: any) => {
+    const kategoriRows = katData as ExportKategoriRow[];
+    const grouped = kategoriRows.reduce<Record<string, CategoryBreakdownItem>>((acc, curr) => {
       const katId = curr.kategori_id;
-      if (!katId || !curr.kategori) return acc;
+      const kategori = firstRelation(curr.kategori);
+      if (!katId || !kategori) return acc;
+
       if (!acc[katId]) {
         acc[katId] = {
-          nama: curr.kategori.nama,
-          warna: curr.kategori.warna,
+          nama: kategori.nama ?? "Tanpa Kategori",
+          warna: kategori.warna ?? "#9ca3af",
           total: 0,
         };
       }
@@ -184,15 +229,13 @@ export async function getExportData(filter?: {
       return acc;
     }, {});
 
-    const sortedCategories = Object.values(grouped).sort(
-      (a: any, b: any) => b.total - a.total,
-    );
-    let topCategories = sortedCategories.slice(0, 5);
+    const sortedCategories = Object.values(grouped).sort((a, b) => b.total - a.total);
+    const topCategories = sortedCategories.slice(0, 5);
     const otherCategories = sortedCategories.slice(5);
 
     if (otherCategories.length > 0) {
       const otherTotal = otherCategories.reduce(
-        (sum, k: any) => sum + k.total,
+        (sum, k) => sum + k.total,
         0,
       );
       topCategories.push({
@@ -202,7 +245,7 @@ export async function getExportData(filter?: {
       });
     }
 
-    kategori_breakdown = topCategories.map((k: any) => ({
+    kategori_breakdown = topCategories.map((k) => ({
       ...k,
       persentase: total_expense > 0 ? (k.total / total_expense) * 100 : 0,
     }));

@@ -6,23 +6,27 @@ import { FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { getExportData, getExportCount } from "@/actions/export-action";
-import { getUser } from "@/actions/auth-action";
 
 export function ExportTab() {
   const [loading, setLoading] = useState<boolean>(false);
   const [exportCount, setExportCount] = useState<number | null>(null);
   const [filter, setFilter] = useState<{ dari: string; sampai: string }>({ dari: '', sampai: '' });
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    let ignore = false;
+
     const fetchCount = async () => {
       const res = await getExportCount();
-      if (res.success && res.data) {
+      if (!ignore && res.success && res.data) {
         setExportCount(res.data.count);
       }
     };
+
     fetchCount();
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   async function handleExportPDF() {
@@ -54,8 +58,6 @@ export function ExportTab() {
       setLoading(false);
     }
   }
-
-  if (!mounted) return null;
 
   return (
     <div className="space-y-6">

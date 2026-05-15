@@ -12,8 +12,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization)
      * - favicon.ico
-     * - public folder assets
+     * - public folder assets and PWA files
      */
-    "/((?!_next|api|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next|api|favicon.ico|manifest\\.json|offline\\.html|sw\\.js|swe-worker.*\\.js|icons/|catatz\\.(?:svg|png)|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|json|txt|html|js|webmanifest)$).*)",
   ],
 };

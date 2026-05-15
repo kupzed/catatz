@@ -1,8 +1,7 @@
 'use server';
 
-import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
-import type { Schema } from '@google/generative-ai';
-import { environment } from '@/configs/environment';
+import { GoogleGenAI, Type } from '@google/genai';
+import { serverEnvironment } from '@/configs/server-environment';
 import { format } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 import type { VoiceParseResult, VoiceTransaction } from '@/types/voice-parser';
@@ -733,48 +732,72 @@ function buildDateContext(): string {
 // ═══════════════════════════════════════
 
 const VOICE_TRANSACTION_SCHEMA = {
-  type: SchemaType.OBJECT,
+  type: Type.OBJECT,
   properties: {
-    tipe:                 { type: SchemaType.STRING },
-    nominal:              { type: SchemaType.NUMBER },
-    tanggal:              { type: SchemaType.STRING },
-    waktu:                { type: SchemaType.STRING },
-    kategori_hint:        { type: SchemaType.STRING },
-    rekening_hint:        { type: SchemaType.STRING },
-    rekening_tujuan_hint: { type: SchemaType.STRING },
-    judul:                { type: SchemaType.STRING },
-    catatan:              { type: SchemaType.STRING },
-    entitas:              { type: SchemaType.STRING },
-    confidence:           { type: SchemaType.NUMBER },
-    needs_clarification:  { type: SchemaType.BOOLEAN },
-    clarification_fields: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-    flags:                { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+    tipe:                 { type: Type.STRING },
+    nominal:              { type: Type.NUMBER },
+    tanggal:              { type: Type.STRING },
+    waktu:                { type: Type.STRING },
+    kategori_hint:        { type: Type.STRING },
+    rekening_hint:        { type: Type.STRING },
+    rekening_tujuan_hint: { type: Type.STRING },
+    judul:                { type: Type.STRING },
+    catatan:              { type: Type.STRING },
+    entitas:              { type: Type.STRING },
+    confidence:           { type: Type.NUMBER },
+    needs_clarification:  { type: Type.BOOLEAN },
+    clarification_fields: { type: Type.ARRAY, items: { type: Type.STRING } },
+    flags:                { type: Type.ARRAY, items: { type: Type.STRING } },
   },
   required: [
     'tipe', 'nominal', 'tanggal', 'waktu', 'kategori_hint', 'rekening_hint',
     'rekening_tujuan_hint', 'judul', 'catatan', 'entitas',
     'confidence', 'needs_clarification', 'clarification_fields', 'flags',
   ],
-} as Schema;
+};
 
 const RESPONSE_SCHEMA = {
-  type: SchemaType.OBJECT,
+  type: Type.OBJECT,
   properties: {
     transactions: {
-      type: SchemaType.ARRAY,
+      type: Type.ARRAY,
       items: VOICE_TRANSACTION_SCHEMA,
     },
-    raw_input:     { type: SchemaType.STRING },
-    parse_summary: { type: SchemaType.STRING },
+    raw_input:     { type: Type.STRING },
+    parse_summary: { type: Type.STRING },
   },
   required: ['transactions', 'raw_input', 'parse_summary'],
-} as Schema;
+};
 
 // ═══════════════════════════════════════
 // BAGIAN 5: VALIDASI & SANITASI RESULT
 // ═══════════════════════════════════════
 
 const VALID_TIPE = ['expense', 'income', 'transfer', 'hutang_baru', 'piutang_baru', 'bayar_hutang'];
+const MAX_TRANSCRIPT_LENGTH = 1200;
+const GEMINI_TIMEOUT_MS = 20_000;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function getErrorStatus(error: unknown) {
+  if (!isRecord(error)) return undefined;
+
+  const status = error.status;
+  return typeof status === 'number' ? status : undefined;
+}
+
+function logGeminiError(error: unknown) {
+  if (process.env.NODE_ENV === 'production') return;
+
+  const message = error instanceof Error ? error.message : String(error);
+  console.error('[voice-parser] Gemini request failed', {
+    name: error instanceof Error ? error.name : undefined,
+    status: getErrorStatus(error),
+    message,
+  });
+}
 
 function sanitizeTransaction(t: VoiceTransaction): VoiceTransaction {
   // 1. Validasi tipe
@@ -845,56 +868,90 @@ export async function parseVoiceTranscript(rawTranscript: string): Promise<Voice
     };
   }
 
+  if (rawTranscript.length > MAX_TRANSCRIPT_LENGTH) {
+    return {
+      transactions: [],
+      raw_input: rawTranscript,
+      parse_summary: 'Input terlalu panjang. Ringkas transaksi lalu coba lagi.',
+    };
+  }
+
   // 2. Preprocessing
   const processedText = preprocessTranscript(rawTranscript);
   const dateContext = buildDateContext();
   const userMessage = `${dateContext}\n\nInput transkrip: "${processedText}"`;
 
   try {
-    // 3. Init Gemini
-    const genAI = new GoogleGenerativeAI(environment.aiApiKey);
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash',  // SELALU gunakan ini
-      systemInstruction: VOICE_SYSTEM_PROMPT,
-      generationConfig: {
-        responseMimeType: 'application/json',
-        responseSchema: RESPONSE_SCHEMA,
-        temperature: 0.1,          // rendah untuk konsistensi parsing
-        topP: 0.8,
-        maxOutputTokens: 2048,
-      },
-    });
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), GEMINI_TIMEOUT_MS);
 
-    // 4. Panggil API
-    const result = await model.generateContent(userMessage);
-    const rawText = result.response.text();
-
-    // 5. Parse JSON
-    let parsed: VoiceParseResult;
     try {
-      const cleaned = rawText
-        .trim()
-        .replace(/^```(?:json)?\s*/i, '')
-        .replace(/\s*```$/, '')
-        .trim();
-      parsed = JSON.parse(cleaned) as VoiceParseResult;
-    } catch {
+      // 3. Init Gemini
+      const ai = new GoogleGenAI({ apiKey: serverEnvironment.aiApiKey });
+
+      // 4. Panggil API
+      const result = await ai.models.generateContent({
+        model: serverEnvironment.aiModel,
+        contents: userMessage,
+        config: {
+          systemInstruction: VOICE_SYSTEM_PROMPT,
+          abortSignal: abortController.signal,
+          responseMimeType: 'application/json',
+          responseSchema: RESPONSE_SCHEMA,
+          temperature: 0.1,          // rendah untuk konsistensi parsing
+          topP: 0.8,
+          maxOutputTokens: 2048,
+        },
+      });
+      const rawText = result.text ?? '';
+
+      clearTimeout(timeoutId);
+
+      // 5. Parse JSON
+      let parsed: VoiceParseResult;
+      try {
+        const cleaned = rawText
+          .trim()
+          .replace(/^```(?:json)?\s*/i, '')
+          .replace(/\s*```$/, '')
+          .trim();
+        parsed = JSON.parse(cleaned) as VoiceParseResult;
+      } catch {
+        return {
+          transactions: [],
+          raw_input: rawTranscript,
+          parse_summary: 'Gagal memparse respons AI. Coba input ulang.',
+        };
+      }
+
+      // 6. Sanitasi setiap transaksi
+      parsed.transactions = (parsed.transactions ?? []).map(sanitizeTransaction);
+
+      // 7. Return
+      return parsed;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+  } catch (err: unknown) {
+    logGeminiError(err);
+
+    if (err instanceof Error && err.name === 'AbortError') {
       return {
         transactions: [],
         raw_input: rawTranscript,
-        parse_summary: 'Gagal memparse respons AI. Coba input ulang.',
+        parse_summary: 'Layanan AI terlalu lama merespons. Coba lagi sebentar.',
       };
     }
 
-    // 6. Sanitasi setiap transaksi
-    parsed.transactions = (parsed.transactions ?? []).map(sanitizeTransaction);
-
-    // 7. Return
-    return parsed;
-
-  } catch (err: unknown) {
+    const status = getErrorStatus(err);
     const message = err instanceof Error ? err.message : String(err);
-    if (message.includes('quota') || message.includes('429')) {
+    if (
+      status === 429 ||
+      message.includes('quota') ||
+      message.includes('429') ||
+      message.includes('RESOURCE_EXHAUSTED')
+    ) {
       return {
         transactions: [],
         raw_input: rawTranscript,

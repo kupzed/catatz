@@ -289,7 +289,6 @@ function EditForm({
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<RekeningEditSchema>({
     resolver: zodResolver(rekeningEditSchema),
@@ -306,7 +305,7 @@ function EditForm({
   const warna = useWatch({ control, name: "warna" });
   const jenis = useWatch({ control, name: "jenis" });
   const exclude_total = useWatch({ control, name: "exclude_total" });
-  const currentSaldo = watch("saldo_saat_ini");
+  const currentSaldo = useWatch({ control, name: "saldo_saat_ini" });
 
   // Sync saat editData berubah
   useEffect(() => {

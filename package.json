@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=22"
+    "node": "22.x"
   },
   "scripts": {
     "dev": "next dev",
@@ -12,8 +12,11 @@
     "generate-icons": "node src/scripts/generate-icons.mjs",
     "lint": "eslint"
   },
+  "overrides": {
+    "postcss": "8.5.12"
+  },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
+    "@google/genai": "^2.3.0",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -37,7 +40,7 @@
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",
     "lucide-react": "^1.14.0",
-    "next": "16.2.4",
+    "next": "^16.2.6",
     "next-themes": "^0.4.6",
     "radix-ui": "^1.4.3",
     "react": "19.2.4",
@@ -45,6 +48,7 @@
     "react-dom": "19.2.4",
     "react-hook-form": "^7.74.0",
     "recharts": "^3.8.1",
+    "server-only": "^0.0.1",
     "serwist": "^9.5.11",
     "shadcn": "^4.6.0",
     "sonner": "^2.0.7",
@@ -61,7 +65,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.4",
+    "eslint-config-next": "^16.2.6",
     "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "typescript": "^5"

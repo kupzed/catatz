@@ -2,10 +2,8 @@ import {
   CacheFirst,
   CacheableResponsePlugin,
   ExpirationPlugin,
-  NetworkFirst,
   NetworkOnly,
   Serwist,
-  StaleWhileRevalidate,
 } from "serwist";
 import type { PrecacheEntry, RuntimeCaching, SerwistGlobalConfig } from "serwist";
 
@@ -21,33 +19,31 @@ interface ServiceWorkerMessageEvent extends Event {
   };
 }
 
+interface ServiceWorkerExtendableEvent extends Event {
+  waitUntil(promise: Promise<unknown>): void;
+}
+
 interface CatatZServiceWorkerGlobalScope extends WorkerGlobalScope, SerwistGlobalConfig {
   __SW_MANIFEST: (PrecacheEntry | string)[] | undefined;
-  addEventListener: (
-    type: "message",
-    listener: (event: ServiceWorkerMessageEvent) => void,
-  ) => void;
+  addEventListener: {
+    (
+      type: "message",
+      listener: (event: ServiceWorkerMessageEvent) => void,
+    ): void;
+    (
+      type: "activate",
+      listener: (event: ServiceWorkerExtendableEvent) => void,
+    ): void;
+  };
+  caches: CacheStorage;
   location: Location;
   skipWaiting: () => Promise<void>;
 }
 
 declare const self: CatatZServiceWorkerGlobalScope;
 
-const appShellCache = "catatz-app-shell-v1";
-const pageCache = "catatz-pages-v1";
-const dataCache = "catatz-next-data-v1";
-
-const cachedPages = new Set([
-  "/",
-  "/transaksi",
-  "/rekening",
-  "/rekap",
-  "/hutang",
-  "/kategori",
-  "/settings",
-  "/login",
-  "/register",
-]);
+const appShellCache = "catatz-app-shell-v2";
+const currentRuntimeCaches = new Set([appShellCache]);
 
 const appShellStrategy = new CacheFirst({
   cacheName: appShellCache,
@@ -56,29 +52,6 @@ const appShellStrategy = new CacheFirst({
     new ExpirationPlugin({
       maxEntries: 80,
       maxAgeSeconds: 30 * 24 * 60 * 60,
-    }),
-  ],
-});
-
-const pageStrategy = new NetworkFirst({
-  cacheName: pageCache,
-  networkTimeoutSeconds: 5,
-  plugins: [
-    new CacheableResponsePlugin({ statuses: [0, 200] }),
-    new ExpirationPlugin({
-      maxEntries: 24,
-      maxAgeSeconds: 24 * 60 * 60,
-    }),
-  ],
-});
-
-const nextDataStrategy = new StaleWhileRevalidate({
-  cacheName: dataCache,
-  plugins: [
-    new CacheableResponsePlugin({ statuses: [0, 200] }),
-    new ExpirationPlugin({
-      maxEntries: 64,
-      maxAgeSeconds: 5 * 60,
     }),
   ],
 });
@@ -105,14 +78,6 @@ function isAppShellAsset(url: URL) {
   );
 }
 
-function isCachedPageRequest({ request, url }: { request: Request; url: URL }) {
-  if (!isSameOrigin(url) || request.method !== "GET" || hasAuthSensitiveHeaders(request)) {
-    return false;
-  }
-
-  return request.mode === "navigate" && cachedPages.has(url.pathname);
-}
-
 const runtimeCaching: RuntimeCaching[] = [
   {
     method: "POST",
@@ -132,24 +97,28 @@ const runtimeCaching: RuntimeCaching[] = [
       isAppShellAsset(url),
     handler: appShellStrategy,
   },
-  {
-    matcher: ({ request, url }) =>
-      isSameOrigin(url) &&
-      request.method === "GET" &&
-      !hasAuthSensitiveHeaders(request) &&
-      url.pathname.startsWith("/_next/data/"),
-    handler: nextDataStrategy,
-  },
-  {
-    matcher: isCachedPageRequest,
-    handler: pageStrategy,
-  },
 ];
 
 self.addEventListener("message", (event) => {
   if (event.data?.type === "SKIP_WAITING") {
     void self.skipWaiting();
   }
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    self.caches.keys().then((cacheNames) =>
+      Promise.all(
+        cacheNames
+          .filter(
+            (cacheName) =>
+              cacheName.startsWith("catatz-") &&
+              !currentRuntimeCaches.has(cacheName),
+          )
+          .map((cacheName) => self.caches.delete(cacheName)),
+      ),
+    ),
+  );
 });
 
 const serwist = new Serwist({

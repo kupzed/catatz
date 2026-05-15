@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useVoiceInput } from '@/hooks/use-voice-input';
 import { processVoiceInput } from '@/actions/voice-action';
 import { Button } from '@/components/ui/button';
@@ -41,21 +41,9 @@ export default function VoiceInputButton({ onParsed, onError, disabled }: Props)
   } = useVoiceInput();
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const processedTranscriptRef = useRef('');
 
-  // Show hook-level errors as toasts
-  useEffect(() => {
-    if (error) toast.error(error);
-  }, [error]);
-
-  // When user stops speaking and final transcript is available → send to Gemini
-  useEffect(() => {
-    if (!isListening && finalTranscript) {
-      handleProcess(finalTranscript);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isListening, finalTranscript]);
-
-  async function handleProcess(text: string) {
+  const handleProcess = useCallback(async (text: string) => {
     if (!text.trim()) {
       toast.error('Tidak ada suara yang terdeteksi.');
       return;
@@ -71,11 +59,41 @@ export default function VoiceInputButton({ onParsed, onError, disabled }: Props)
         onError(msg);
         toast.error(msg);
       }
+    } catch {
+      const msg = 'Gagal memproses suara.';
+      onError(msg);
+      toast.error(msg);
     } finally {
       setIsProcessing(false);
       resetTranscript();
     }
-  }
+  }, [onError, onParsed, resetTranscript]);
+
+  // Show hook-level errors as toasts
+  useEffect(() => {
+    if (error) toast.error(error);
+  }, [error]);
+
+  // When user stops speaking and final transcript is available → send to Gemini
+  useEffect(() => {
+    if (!finalTranscript) {
+      processedTranscriptRef.current = '';
+      return;
+    }
+
+    if (isListening || processedTranscriptRef.current === finalTranscript) {
+      return;
+    }
+
+    processedTranscriptRef.current = finalTranscript;
+    const timeoutId = window.setTimeout(() => {
+      void handleProcess(finalTranscript);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [isListening, finalTranscript, handleProcess]);
 
   function handleToggle() {
     if (isListening) {
