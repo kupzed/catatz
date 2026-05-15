@@ -6,6 +6,14 @@ import { Transaksi, Kategori, TransaksiFilter } from "@/types/transaksi";
 import { Rekening } from "@/types/rekening";
 import { formatRupiah, formatTanggal } from "@/lib/utils";
 import { deleteTransaksi } from "@/actions/transaksi-action";
+import {
+  addToQueue,
+  getQueue,
+  offlineQueueChangedEvent,
+  processQueue,
+  removeFromQueue,
+  type QueuedAction,
+} from "@/lib/offline-queue";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -63,6 +71,11 @@ type Props = {
   kategori: Kategori[];
 };
 
+type DisplayTransaksi = Transaksi & {
+  _queuedId?: string;
+  _pendingSync?: boolean;
+};
+
 const TIPE_CONFIG = {
   income: {
     label: "Pemasukan",
@@ -112,6 +125,7 @@ export default function TransaksiPageClient({
   const [baseDate, setBaseDate] = useState<Date>(new Date());
   const [search, setSearch] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [queuedActions, setQueuedActions] = useState<QueuedAction[]>([]);
   // Untuk custom range: track apakah sedang pilih 'dari' atau 'sampai'
   const [customStep, setCustomStep] = useState<"dari" | "sampai">("dari");
 
@@ -119,17 +133,114 @@ export default function TransaksiPageClient({
   const searchParams = useSearchParams();
   const router = useRouter();
   useEffect(() => {
-    if (searchParams.get("new") === "true") {
+    if (searchParams.get("new") !== "true") {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
       setEditData(null);
       setCopyFrom(null);
       setDialogOpen(true);
       // Hapus query param tanpa reload
       router.replace("/transaksi", { scroll: false });
-    }
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [searchParams, router]);
 
+  useEffect(() => {
+    const refreshQueue = async () => {
+      setQueuedActions(await getQueue());
+    };
+
+    const syncQueue = async () => {
+      const result = await processQueue();
+      await refreshQueue();
+
+      if (result.success > 0) {
+        toast.success(`${result.success} transaksi offline berhasil disinkronkan.`);
+        router.refresh();
+      }
+
+      if (result.failed > 0) {
+        toast.warning(`${result.failed} transaksi masih menunggu sinkronisasi.`);
+      }
+    };
+
+    void refreshQueue();
+    window.addEventListener(offlineQueueChangedEvent, refreshQueue);
+    window.addEventListener("online", syncQueue);
+
+    if (navigator.onLine) {
+      void syncQueue();
+    }
+
+    return () => {
+      window.removeEventListener(offlineQueueChangedEvent, refreshQueue);
+      window.removeEventListener("online", syncQueue);
+    };
+  }, [router]);
+
+  const pendingCreateTransaksi = useMemo<DisplayTransaksi[]>(() => {
+    return queuedActions
+      .filter((action) => action.type === "CREATE_TRANSAKSI")
+      .map((action) => {
+        const payload = action.payload as Partial<Transaksi>;
+        const rekeningData = rekening.find((item) => item.id === payload.rekening_id);
+        const kategoriData = kategori.find((item) => item.id === payload.kategori_id);
+        const rekeningTujuanData = rekening.find((item) => item.id === payload.rekening_tujuan);
+
+        return {
+          id: action.id,
+          user_id: "",
+          tipe: payload.tipe ?? "expense",
+          judul: payload.judul ?? null,
+          nominal: Number(payload.nominal ?? 0),
+          tanggal: payload.tanggal ?? format(new Date(), "yyyy-MM-dd"),
+          waktu: payload.waktu ?? "00:00",
+          kategori_id: payload.kategori_id ?? null,
+          rekening_id: payload.rekening_id ?? null,
+          rekening_tujuan: payload.rekening_tujuan ?? null,
+          catatan: payload.catatan ?? null,
+          tags: payload.tags ?? [],
+          is_recurring: false,
+          recurring_id: null,
+          created_at: new Date(action.timestamp).toISOString(),
+          updated_at: new Date(action.timestamp).toISOString(),
+          kategori: kategoriData,
+          rekening: rekeningData
+            ? {
+                id: rekeningData.id,
+                nama: rekeningData.nama,
+                jenis: rekeningData.jenis,
+                logo: rekeningData.logo,
+                warna: rekeningData.warna,
+              }
+            : undefined,
+          rekening_tujuan_data: rekeningTujuanData
+            ? {
+                id: rekeningTujuanData.id,
+                nama: rekeningTujuanData.nama,
+                jenis: rekeningTujuanData.jenis,
+                logo: rekeningTujuanData.logo,
+                warna: rekeningTujuanData.warna,
+              }
+            : undefined,
+          _queuedId: action.id,
+          _pendingSync: true,
+        };
+      });
+  }, [queuedActions, rekening, kategori]);
+
+  const displayTransaksi = useMemo<DisplayTransaksi[]>(
+    () => [...pendingCreateTransaksi, ...transaksi],
+    [pendingCreateTransaksi, transaksi],
+  );
+
   const filtered = useMemo(() => {
-    let result = transaksi.filter((t) => {
+    const result = displayTransaksi.filter((t) => {
       if (filter.tipe && filter.tipe !== "all" && t.tipe !== filter.tipe)
         return false;
       if (filter.rekening_id && t.rekening_id !== filter.rekening_id)
@@ -189,7 +300,7 @@ export default function TransaksiPageClient({
     });
 
     return result;
-  }, [transaksi, filter, search, preset, baseDate]);
+  }, [displayTransaksi, filter, search, preset, baseDate]);
 
   // Date Navigation Logic
   function handlePrevDate() {
@@ -267,6 +378,30 @@ export default function TransaksiPageClient({
     .reduce((s, t) => s + Number(t.nominal), 0);
 
   async function handleDelete(id: string) {
+    const target = filtered.find((item) => item.id === id);
+
+    if (target?._queuedId) {
+      await removeFromQueue(target._queuedId);
+      toast.success("Transaksi sementara dihapus");
+      return;
+    }
+
+    if (!navigator.onLine) {
+      const queuedAction = await addToQueue({
+        type: "DELETE_TRANSAKSI",
+        payload: { id },
+      });
+
+      if (queuedAction) {
+        setTransaksi((prev) => prev.filter((t) => t.id !== id));
+        toast.success("Hapus transaksi akan disinkronkan saat online.");
+      } else {
+        toast.error("Perangkat tidak mendukung penyimpanan offline.");
+      }
+
+      return;
+    }
+
     setDeleting(id);
     const res = await deleteTransaksi(id);
     if (res.success) {
@@ -299,6 +434,13 @@ export default function TransaksiPageClient({
       return;
     }
     setTransaksi((prev) => prev.map((x) => (x.id === t.id ? t : x)));
+    setDialogOpen(false);
+    setEditData(null);
+    setCopyFrom(null);
+  }
+
+  function handleQueued(action: QueuedAction) {
+    setQueuedActions((prev) => [action, ...prev.filter((item) => item.id !== action.id)]);
     setDialogOpen(false);
     setEditData(null);
     setCopyFrom(null);
@@ -591,18 +733,23 @@ export default function TransaksiPageClient({
                       {displayName}
                     </p>
                     <div className="flex items-center gap-1 mt-0.5">
-                      <Badge
-                        className={cn(
-                          "text-[10px] px-1 py-0 border-0 leading-tight",
-                          cfg.badge,
-                        )}
-                      >
-                        {t.kategori
-                          ? `${t.kategori.ikon} ${t.kategori.nama}`
-                          : cfg.label}
+                    <Badge
+                      className={cn(
+                        "text-[10px] px-1 py-0 border-0 leading-tight",
+                        cfg.badge,
+                      )}
+                    >
+                      {t.kategori
+                        ? `${t.kategori.ikon} ${t.kategori.nama}`
+                        : cfg.label}
+                    </Badge>
+                    {t._pendingSync && (
+                      <Badge className="border-0 bg-amber-500/10 px-1 py-0 text-[10px] text-amber-700 dark:text-amber-400">
+                        Menunggu sinkronisasi
                       </Badge>
-                    </div>
+                    )}
                   </div>
+                </div>
 
                   <div className="text-right sm:hidden">
                     <p className={cn("font-bold text-sm", cfg.color)}>
@@ -632,6 +779,11 @@ export default function TransaksiPageClient({
                         ? `${t.kategori.ikon} ${t.kategori.nama}`
                         : cfg.label}
                     </Badge>
+                    {t._pendingSync && (
+                      <Badge className="border-0 bg-amber-500/10 px-1.5 py-0 text-[10px] text-amber-700 dark:text-amber-400">
+                        Menunggu sinkronisasi
+                      </Badge>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-xs text-muted-foreground shrink-0">
@@ -681,6 +833,7 @@ export default function TransaksiPageClient({
                       variant="secondary"
                       size="icon"
                       className="h-8 w-8 rounded-lg"
+                      disabled={t._pendingSync}
                       onClick={() => {
                         setEditData(t);
                         setCopyFrom(null);
@@ -735,6 +888,7 @@ export default function TransaksiPageClient({
         copyFrom={copyFrom}
         onCreated={handleCreated}
         onUpdated={handleUpdated}
+        onQueued={handleQueued}
       />
     </div>
   );

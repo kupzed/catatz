@@ -42,7 +42,7 @@ export default async function DashboardLayout({
     <SidebarProvider>
       <AppSidebar user={sidebarUser} />
       <SidebarInset className="overflow-x-clip">
-        <header className="sticky top-0 z-40 flex h-12 shrink-0 select-none items-center justify-between gap-2 bg-background/90 backdrop-blur-sm px-4">
+        <header className="sticky top-0 z-40 flex min-h-12 shrink-0 select-none items-center justify-between gap-2 bg-background/90 px-4 pt-[env(safe-area-inset-top)] backdrop-blur-sm">
           <div className="flex items-center gap-2">
             {/* Tombol buka sidebar — hanya tampil di mobile */}
             <SidebarTrigger className="cursor-pointer md:hidden" />
@@ -53,7 +53,7 @@ export default async function DashboardLayout({
             <DarkmodeToggle />
           </div>
         </header>
-        <main className="flex flex-1 flex-col gap-4 p-4 md:p-6">
+        <main className="flex flex-1 flex-col gap-4 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:p-6 md:pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
           {children}
         </main>
       </SidebarInset>

@@ -1,7 +1,5 @@
 "use client";
 
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import type { ExportTransaksi, ExportSummary } from "@/actions/export-action";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
@@ -40,6 +38,11 @@ export async function generatePDF(
   summary: ExportSummary,
   userName: string = "Pengguna",
 ): Promise<void> {
+  const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+    import("jspdf"),
+    import("jspdf-autotable"),
+  ]);
+
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
@@ -388,7 +391,7 @@ export async function generatePDF(
     },
   });
 
-  let yLast = (doc as any).lastAutoTable.finalY + 10;
+  let yLast = doc.lastAutoTable.finalY + 10;
   if (yLast + 30 > pageH - 20) {
     doc.addPage();
     yLast = 20;

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/providers/theme-provider';
@@ -9,16 +9,23 @@ import { AppleSplashScreens } from '@/components/pwa/apple-splash-screens';
 import { OfflineIndicator } from '@/components/pwa/offline-indicator';
 import { PWAComponents } from '@/components/pwa/pwa-components';
 import { SwProvider } from '@/components/pwa/sw-provider';
+import { ErrorBoundary } from '@/components/error-boundary';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
+  display: 'swap',
 });
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+  display: 'swap',
 });
+
+const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
+  : null;
 
 export const metadata: Metadata = {
   title: {
@@ -55,6 +62,16 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  // App-like zoom locking can improve mobile feel, but it reduces accessibility.
+  // Enable only after product review:
+  // maximumScale: 1,
+  // userScalable: false,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -63,6 +80,8 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning>
       <head>
+        {supabaseOrigin ? <link rel="preconnect" href={supabaseOrigin} /> : null}
+        <link rel="dns-prefetch" href="https://generativelanguage.googleapis.com" />
         {/* Apple startup images require explicit link tags. */}
         <AppleSplashScreens />
       </head>
@@ -76,7 +95,7 @@ export default function RootLayout({
           >
             <SwProvider>
               <TooltipProvider>
-                {children}
+                <ErrorBoundary>{children}</ErrorBoundary>
                 <OfflineIndicator />
                 <PWAComponents />
                 <Toaster richColors position="top-right" />

@@ -15,6 +15,10 @@ import {
 } from "@/actions/transaksi-action";
 import dynamic from "next/dynamic";
 import type { VoiceParseResult } from "@/types/voice-parser";
+import {
+  addToQueue,
+  type QueuedAction,
+} from "@/lib/offline-queue";
 
 const VoiceInputButton = dynamic(() => import("./voice-input-button"), {
   ssr: false,
@@ -55,6 +59,7 @@ type Props = {
   editData?: Transaksi | null;
   onCreated: (t: Transaksi) => void;
   onUpdated: (t: Transaksi) => void;
+  onQueued?: (action: QueuedAction) => void;
   /** Data yang di-prefill dari Copy Transaksi (mode create dengan data awal) */
   copyFrom?: Transaksi | null;
 };
@@ -88,6 +93,7 @@ export default function TransaksiDialog({
   editData,
   onCreated,
   onUpdated,
+  onQueued,
   copyFrom,
 }: Props) {
   const isEdit = !!editData;
@@ -287,6 +293,25 @@ export default function TransaksiDialog({
   async function onSubmit(values: TransaksiSchema) {
     setSubmitting(true);
     try {
+      if (!navigator.onLine) {
+        const queuedAction = await addToQueue({
+          type: isEdit ? "UPDATE_TRANSAKSI" : "CREATE_TRANSAKSI",
+          payload: isEdit ? { id: editData!.id, values } : values,
+        });
+
+        if (queuedAction) {
+          toast.success(
+            "Transaksi tersimpan sementara. Akan disinkronkan saat online.",
+          );
+          onQueued?.(queuedAction);
+          onOpenChange(false);
+        } else {
+          toast.error("Perangkat tidak mendukung penyimpanan offline.");
+        }
+
+        return;
+      }
+
       if (isEdit) {
         const res = await updateTransaksi(editData!.id, values);
         if (res.success && res.data) {

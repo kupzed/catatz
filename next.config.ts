@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
+import bundleAnalyzer from "@next/bundle-analyzer";
 import withSerwistInit from "@serwist/next";
 import { environment } from "./src/configs/environment";
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
 
 const withSerwist = withSerwistInit({
   swSrc: "src/app/sw.ts",
@@ -27,6 +32,22 @@ const nextConfig: NextConfig = {
       allowedOrigins: environment.allowedDevOrigins,
     },
   },
+  images: {
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [360, 390, 414, 640, 768, 1024, 1280],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256],
+  },
+  webpack: (config, { dev }) => {
+    if (!dev) {
+      config.optimization = {
+        ...config.optimization,
+        sideEffects: true,
+        usedExports: true,
+      };
+    }
+
+    return config;
+  },
 };
 
-export default withSerwist(nextConfig);
+export default withSerwist(withBundleAnalyzer(nextConfig));
