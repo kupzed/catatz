@@ -16,6 +16,14 @@ function publicEnv(name: string, fallback: string): string {
   return process.env[name]?.trim() || fallback;
 }
 
+function appUrlEnv(): string {
+  if (isProduction) {
+    return requiredPublicEnv("NEXT_PUBLIC_APP_URL");
+  }
+
+  return publicEnv("NEXT_PUBLIC_APP_URL", "http://localhost:3000");
+}
+
 function normalizeUrl(name: string, value: string): string {
   try {
     return new URL(value).origin;
@@ -26,7 +34,7 @@ function normalizeUrl(name: string, value: string): string {
 
 const appUrl = normalizeUrl(
   "NEXT_PUBLIC_APP_URL",
-  publicEnv("NEXT_PUBLIC_APP_URL", "http://localhost:3000"),
+  appUrlEnv(),
 );
 
 function createAllowedDevOrigins() {

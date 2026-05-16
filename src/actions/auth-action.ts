@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/configs/supabase/server';
+import { environment } from '@/configs/environment';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import type { ActionResult } from '@/types/general';
@@ -17,6 +18,7 @@ export async function signUp(formData: FormData): Promise<ActionResult> {
     password,
     options: {
       data: { name },
+      emailRedirectTo: `${environment.appUrl}/auth/callback?next=/transaksi`,
     },
   });
 
