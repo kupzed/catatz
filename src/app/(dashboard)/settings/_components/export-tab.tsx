@@ -1,6 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -74,20 +76,22 @@ export function ExportTab() {
 
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium">Dari Tanggal</label>
-            <input 
+          <div className="flex-1 space-y-1.5 min-w-0">
+            <Label htmlFor="dari" className="text-sm font-medium">Dari Tanggal</Label>
+            <Input 
+              id="dari"
               type="date" 
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full appearance-none bg-background dark:bg-input/20 border-input"
               value={filter.dari}
               onChange={(e) => setFilter({ ...filter, dari: e.target.value })}
             />
           </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium">Sampai Tanggal</label>
-            <input 
+          <div className="flex-1 space-y-1.5 min-w-0">
+            <Label htmlFor="sampai" className="text-sm font-medium">Sampai Tanggal</Label>
+            <Input 
+              id="sampai"
               type="date" 
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full appearance-none bg-background dark:bg-input/20 border-input"
               value={filter.sampai}
               onChange={(e) => setFilter({ ...filter, sampai: e.target.value })}
             />

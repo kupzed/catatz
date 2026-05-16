@@ -7,11 +7,23 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Loader2, Mail, Lock, User } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordValue, setPasswordValue] = useState('');
+
+  const getStrength = (pwd: string) => {
+    if (!pwd || pwd.length < 8) return { label: 'Lemah', width: 'w-1/3', color: 'bg-red-500' };
+    if (pwd.length >= 12 && /[0-9]/.test(pwd) && /[^A-Za-z0-9]/.test(pwd)) {
+      return { label: 'Kuat', width: 'w-full', color: 'bg-green-500' };
+    }
+    return { label: 'Sedang', width: 'w-2/3', color: 'bg-yellow-500' };
+  };
+
+  const strength = getStrength(passwordValue);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -87,13 +99,33 @@ export default function RegisterPage() {
             <Input
               id="password"
               name="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Minimal 6 karakter"
               minLength={6}
               required
-              className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus:border-indigo-500"
+              value={passwordValue}
+              onChange={(e) => setPasswordValue(e.target.value)}
+              className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus:border-indigo-500"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
           </div>
+          {passwordValue.length > 0 && (
+            <div className="space-y-1 mt-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400">Kekuatan:</span>
+                <span className={`font-medium ${strength.color.replace('bg-', 'text-')}`}>{strength.label}</span>
+              </div>
+              <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden flex">
+                <div className={`h-full transition-all duration-300 ${strength.width} ${strength.color}`} />
+              </div>
+            </div>
+          )}
         </div>
 
         <Button
