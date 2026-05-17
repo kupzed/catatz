@@ -16,6 +16,7 @@ type Profile = {
   name: string | null;
   avatar_url?: string | null;
   created_at?: string | null;
+  providers?: string[];
 };
 
 type Props = {
@@ -42,7 +43,7 @@ export default function SettingsPageClient({ profile, preferences }: Props) {
       case "umum":
         return <UmumTab profile={profile} preferences={preferences} />;
       case "keamanan":
-        return <KeamananTab />;
+        return <KeamananTab profile={profile} />;
     }
   }
 

@@ -19,9 +19,9 @@ export default async function SettingsPage() {
     .single();
 
   const profileData = profile
-    ? { ...profile, email: user?.email || "", created_at: profile.created_at || user?.created_at }
+    ? { ...profile, email: user?.email || "", created_at: profile.created_at || user?.created_at, providers: user?.app_metadata?.providers || [] }
     : user
-      ? { id: user.id, email: user.email || "", name: null, avatar_url: null, created_at: user.created_at }
+      ? { id: user.id, email: user.email || "", name: null, avatar_url: null, created_at: user.created_at, providers: user?.app_metadata?.providers || [] }
       : null;
 
   const { data: preferences } = await supabase

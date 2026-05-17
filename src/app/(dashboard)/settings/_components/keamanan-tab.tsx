@@ -5,10 +5,23 @@ import { ActiveSessionsSection } from "./active-sessions-section";
 import { LogoutSection } from "./logout-section";
 import { DeleteAccountSection } from "./delete-account-section";
 
-export function KeamananTab() {
+type Profile = {
+  id: string;
+  email: string;
+  name: string | null;
+  avatar_url?: string | null;
+  created_at?: string | null;
+  providers?: string[];
+};
+
+type Props = {
+  profile: Profile | null;
+};
+
+export function KeamananTab({ profile }: Props) {
   return (
     <div className="space-y-6 max-w-3xl">
-      <PasswordSection />
+      <PasswordSection profile={profile} />
       <ActiveSessionsSection />
       <LogoutSection />
       <DeleteAccountSection />
