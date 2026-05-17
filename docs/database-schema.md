@@ -214,6 +214,33 @@ Deskripsi: template transaksi berulang.
 
 Catatan: table sudah ada di migration, tetapi belum terlihat ada UI/Server Action khusus recurring transaction.
 
+## Tabel `user_sessions`
+
+Deskripsi: mencatat perangkat dan sesi pengguna yang aktif untuk fitur Keamanan (Active Sessions).
+
+| Column | Type | Nullable | Default | Description |
+|---|---|---:|---|---|
+| `id` | `uuid` | No | `gen_random_uuid()` | Primary key. |
+| `user_id` | `uuid` | No | - | FK ke `profiles(id)`. |
+| `auth_session_id` | `text` | Yes | - | ID session auth Supabase. |
+| `device_id` | `text` | Yes | - | ID device dari cookie. |
+| `device_name` | `text` | Yes | - | Nama perangkat. |
+| `browser` | `text` | Yes | - | Browser yang digunakan. |
+| `os` | `text` | Yes | - | OS yang digunakan. |
+| `ip_address` | `text` | Yes | - | Alamat IP pengguna. |
+| `location` | `text` | Yes | - | Lokasi geografis (default null). |
+| `user_agent` | `text` | Yes | - | Header user-agent. |
+| `last_active_at` | `timestamptz` | Yes | `now()` | Waktu terakhir aktif. |
+| `created_at` | `timestamptz` | Yes | `now()` | Waktu login/dibuat. |
+| `revoked_at` | `timestamptz` | Yes | - | Waktu sesi diakhiri. |
+
+Indexes:
+
+- `idx_user_sessions_user_id` pada `user_id`.
+- `idx_user_sessions_device_id` pada `device_id`.
+- `idx_user_sessions_revoked_at` pada `revoked_at`.
+- `idx_user_sessions_last_active_at` pada `last_active_at DESC`.
+
 ## Storage Bucket `avatars`
 
 Migration `008-avatars-storage.sql` membuat bucket:
@@ -246,6 +273,7 @@ Policy storage:
 - `recurring_transaksi.kategori_id` -> `kategori.id`.
 - `recurring_transaksi.rekening_id` -> `rekening.id`.
 - `recurring_transaksi.rekening_tujuan` -> `rekening.id`.
+- `user_sessions.user_id` -> `profiles.id`.
 
 ## Business Rule Database
 

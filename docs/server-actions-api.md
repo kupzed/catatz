@@ -162,8 +162,8 @@ Deskripsi: mengubah transaksi. Untuk tipe `correction`, action menghitung ulang 
 Input:
 
 ```ts
-id: string
-values: Partial<TransaksiFormValues>
+id: string;
+values: Partial<TransaksiFormValues>;
 ```
 
 Output: `ActionResult<Transaksi>`.
@@ -190,12 +190,12 @@ Tabel: `transaksi`, `rekening`.
 
 Lokasi: `src/actions/transaksi-action.ts`
 
-| Action | Tujuan | Tabel |
-|---|---|---|
+| Action                       | Tujuan                                                                        | Tabel       |
+| ---------------------------- | ----------------------------------------------------------------------------- | ----------- |
 | `getJudulSuggestions(query)` | Suggest judul berdasarkan riwayat transaksi dan kategori yang sering dipakai. | `transaksi` |
-| `getRecentJudul()` | Mengambil judul transaksi terbaru untuk initial suggestion. | `transaksi` |
-| `suggestKategori(catatan)` | Legacy auto-kategorisasi berbasis catatan. | `transaksi` |
-| `getNamaSuggestions(query)` | Deprecated, backward compatibility untuk suggestion catatan. | `transaksi` |
+| `getRecentJudul()`           | Mengambil judul transaksi terbaru untuk initial suggestion.                   | `transaksi` |
+| `suggestKategori(catatan)`   | Legacy auto-kategorisasi berbasis catatan.                                    | `transaksi` |
+| `getNamaSuggestions(query)`  | Deprecated, backward compatibility untuk suggestion catatan.                  | `transaksi` |
 
 ## Rekening Actions
 
@@ -226,8 +226,8 @@ Deskripsi: mengubah rekening. Jika `saldo_saat_ini` berubah, action membuat tran
 Input:
 
 ```ts
-id: string
-values: Partial<RekeningFormValues & { saldo_saat_ini?: number }>
+id: string;
+values: Partial<RekeningFormValues & { saldo_saat_ini?: number }>;
 ```
 
 Validasi UI: `rekeningEditSchema`.
@@ -254,10 +254,10 @@ Tabel: `rekening`.
 
 Lokasi: `src/actions/kategori-action.ts`
 
-| Action | Tujuan | Validasi | Tabel |
-|---|---|---|---|
-| `createKategori` | Membuat kategori custom user. | `kategoriSchema` | `kategori` |
-| `updateKategori` | Mengubah kategori custom user. | `kategoriSchema` | `kategori` |
+| Action           | Tujuan                          | Validasi                        | Tabel      |
+| ---------------- | ------------------------------- | ------------------------------- | ---------- |
+| `createKategori` | Membuat kategori custom user.   | `kategoriSchema`                | `kategori` |
+| `updateKategori` | Mengubah kategori custom user.  | `kategoriSchema`                | `kategori` |
 | `deleteKategori` | Menghapus kategori custom user. | Auth user + `is_system = false` | `kategori` |
 
 Action update/delete menambahkan filter `user_id = user.id` dan `is_system = false`, selain proteksi RLS.
@@ -266,15 +266,15 @@ Action update/delete menambahkan filter `user_id = user.id` dan `is_system = fal
 
 Lokasi: `src/actions/hutang-action.ts`
 
-| Action | Tujuan | Tabel |
-|---|---|---|
-| `getHutang` | Mengambil hutang/piutang dengan relasi cicilan. | `hutang`, `hutang_cicilan` |
-| `createHutang` | Membuat hutang/piutang dan mengisi `sisa_tagihan = total_pinjaman`. | `hutang` |
-| `updateHutang` | Mengubah hutang/piutang dan menghitung ulang sisa jika total berubah. | `hutang`, `hutang_cicilan` |
-| `deleteHutang` | Menghapus hutang/piutang. | `hutang` |
-| `createCicilan` | Membuat cicilan. | `hutang_cicilan` |
-| `deleteCicilan` | Menghapus cicilan. | `hutang_cicilan` |
-| `markHutangLunas` | Set status lunas dan sisa tagihan 0. | `hutang` |
+| Action            | Tujuan                                                                | Tabel                      |
+| ----------------- | --------------------------------------------------------------------- | -------------------------- |
+| `getHutang`       | Mengambil hutang/piutang dengan relasi cicilan.                       | `hutang`, `hutang_cicilan` |
+| `createHutang`    | Membuat hutang/piutang dan mengisi `sisa_tagihan = total_pinjaman`.   | `hutang`                   |
+| `updateHutang`    | Mengubah hutang/piutang dan menghitung ulang sisa jika total berubah. | `hutang`, `hutang_cicilan` |
+| `deleteHutang`    | Menghapus hutang/piutang.                                             | `hutang`                   |
+| `createCicilan`   | Membuat cicilan.                                                      | `hutang_cicilan`           |
+| `deleteCicilan`   | Menghapus cicilan.                                                    | `hutang_cicilan`           |
+| `markHutangLunas` | Set status lunas dan sisa tagihan 0.                                  | `hutang`                   |
 
 Validasi UI:
 
@@ -287,12 +287,12 @@ Catatan: UI saat ini melunaskan hutang dengan membuat cicilan sebesar sisa tagih
 
 Lokasi: `src/actions/rekap-action.ts`
 
-| Action | Tujuan | Tabel |
-|---|---|---|
-| `getRekapBulanan(tahun)` | Menghitung income, expense, dan net per bulan. Transfer dikecualikan. | `transaksi` |
-| `getRekapKategori(bulan, tahun)` | Breakdown expense per kategori untuk bulan tertentu. | `transaksi`, `kategori` |
-| `getBudgetWithUsage(bulan, tahun)` | Mengambil budget dan menghitung pemakaian expense. | `budget`, `transaksi`, `kategori` |
-| `upsertBudget(...)` | Membuat/mengubah budget berdasarkan unique `(user_id,kategori_id,bulan,tahun)`. | `budget` |
+| Action                             | Tujuan                                                                          | Tabel                             |
+| ---------------------------------- | ------------------------------------------------------------------------------- | --------------------------------- |
+| `getRekapBulanan(tahun)`           | Menghitung income, expense, dan net per bulan. Transfer dikecualikan.           | `transaksi`                       |
+| `getRekapKategori(bulan, tahun)`   | Breakdown expense per kategori untuk bulan tertentu.                            | `transaksi`, `kategori`           |
+| `getBudgetWithUsage(bulan, tahun)` | Mengambil budget dan menghitung pemakaian expense.                              | `budget`, `transaksi`, `kategori` |
+| `upsertBudget(...)`                | Membuat/mengubah budget berdasarkan unique `(user_id,kategori_id,bulan,tahun)`. | `budget`                          |
 
 Catatan: `upsertBudget` belum terlihat dipakai oleh UI route yang ada.
 
@@ -320,7 +320,7 @@ ActionResult<{
   transaksi: ExportTransaksi[];
   summary: ExportSummary;
   userName: string;
-}>
+}>;
 ```
 
 Tabel: `profiles`, `transaksi`, `kategori`, `rekening`.
@@ -335,12 +335,12 @@ Tabel: `transaksi`.
 
 Lokasi: `src/actions/profile-action.ts`
 
-| Action | Tujuan | Supabase Access |
-|---|---|---|
-| `updateProfile` | Mengubah nama profil user. | `profiles` |
-| `uploadAvatar` | Upload avatar image max 2 MB, update `profiles.avatar_url`. | Storage `avatars`, `profiles` |
-| `removeAvatar` | Hapus semua file avatar di folder user dan set `avatar_url = null`. | Storage `avatars`, `profiles` |
-| `changePassword` | Verifikasi password lama lalu update password baru. | Supabase Auth |
+| Action           | Tujuan                                                              | Supabase Access               |
+| ---------------- | ------------------------------------------------------------------- | ----------------------------- |
+| `updateProfile`  | Mengubah nama profil user.                                          | `profiles`                    |
+| `uploadAvatar`   | Upload avatar image max 2 MB, update `profiles.avatar_url`.         | Storage `avatars`, `profiles` |
+| `removeAvatar`   | Hapus semua file avatar di folder user dan set `avatar_url = null`. | Storage `avatars`, `profiles` |
+| `changePassword` | Verifikasi password lama lalu update password baru.                 | Supabase Auth                 |
 
 ## Voice Actions
 
@@ -357,13 +357,13 @@ Deskripsi: menerima transcript suara, memanggil parser AI server-side, lalu meng
 Input:
 
 ```ts
-rawTranscript: string
+rawTranscript: string;
 ```
 
 Output:
 
 ```ts
-ActionResult<VoiceParseResult>
+ActionResult<VoiceParseResult>;
 ```
 
 Dependency:
