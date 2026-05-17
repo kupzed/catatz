@@ -8,15 +8,19 @@ import { KeamananTab } from "./keamanan-tab";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
+import type { UserPreferences } from "@/actions/preference-action";
+
 type Profile = {
   id: string;
   email: string;
   name: string | null;
   avatar_url?: string | null;
+  created_at?: string | null;
 };
 
 type Props = {
   profile: Profile | null;
+  preferences: UserPreferences;
 };
 
 // ─── Nav config ───────────────────────────────────────────────────────────────
@@ -30,13 +34,13 @@ type TabId = (typeof TABS)[number]["id"];
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function SettingsPageClient({ profile }: Props) {
+export default function SettingsPageClient({ profile, preferences }: Props) {
   const [activeTab, setActiveTab] = useState<TabId>("umum");
 
   function renderContent() {
     switch (activeTab) {
       case "umum":
-        return <UmumTab profile={profile} />;
+        return <UmumTab profile={profile} preferences={preferences} />;
       case "keamanan":
         return <KeamananTab />;
     }

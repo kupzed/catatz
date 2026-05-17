@@ -48,7 +48,7 @@ export async function updateSession(request: NextRequest) {
 
   if (isAuthPage && user) {
     const url = request.nextUrl.clone();
-    url.pathname = '/transaksi';
+    url.pathname = '/';
     return NextResponse.redirect(url);
   }
 

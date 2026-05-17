@@ -7,12 +7,14 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { updateProfile, uploadAvatar, removeAvatar } from "@/actions/profile-action";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
 type Profile = {
   id: string;
   email: string;
   name: string | null;
   avatar_url?: string | null;
+  created_at?: string | null;
 };
 
 type Props = { profile: Profile | null };
@@ -50,8 +52,9 @@ export function ProfileSection({ profile }: Props) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      toast.error("File harus berupa gambar");
+    const validTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Format file tidak valid (hanya JPG, PNG, WEBP)");
       return;
     }
 
@@ -121,6 +124,14 @@ export function ProfileSection({ profile }: Props) {
         .slice(0, 2)
     : (profile?.email?.[0]?.toUpperCase() ?? "U");
 
+  const formattedJoinDate = profile?.created_at
+    ? new Intl.DateTimeFormat("id-ID", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }).format(new Date(profile.created_at))
+    : null;
+
   return (
     <Card>
       <CardHeader>
@@ -143,8 +154,9 @@ export function ProfileSection({ profile }: Props) {
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isAvatarPending}
-                  className="h-8 text-xs"
+                  className="h-8 text-xs gap-2"
                 >
+                  {isAvatarPending ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
                   Ganti Foto
                 </Button>
                 {avatarPreview && (
@@ -153,7 +165,7 @@ export function ProfileSection({ profile }: Props) {
                     size="sm"
                     onClick={handleRemoveAvatar}
                     disabled={isAvatarPending}
-                    className="h-8 text-xs text-red-500 hover:text-red-600 hover:bg-red-50"
+                    className="h-8 text-xs text-red-500 hover:text-red-600 hover:bg-red-50 gap-2"
                   >
                     Hapus
                   </Button>
@@ -205,14 +217,29 @@ export function ProfileSection({ profile }: Props) {
           />
         </SettingRow>
 
+        {formattedJoinDate && (
+          <>
+            <Separator />
+            <SettingRow label="Tanggal Bergabung" description="Sejak akun Anda didaftarkan">
+              <Input
+                id="profil-created-at"
+                value={formattedJoinDate}
+                disabled
+                className="bg-muted text-sm h-9"
+              />
+            </SettingRow>
+          </>
+        )}
+
         <Separator />
 
         <div className="pt-4 flex justify-end">
           <Button
-            className="bg-indigo-600 hover:bg-indigo-500 text-white"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white gap-2"
             onClick={handleSave}
             disabled={isPending}
           >
+            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             {isPending ? "Menyimpan..." : "Simpan Perubahan"}
           </Button>
         </div>
