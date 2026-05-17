@@ -12,7 +12,7 @@ export function LogoutSection() {
       <CardHeader>
         <CardTitle className="text-lg">Logout Account</CardTitle>
         <CardDescription>
-          Keluar dari sesi akun Anda di perangkat ini.
+          Keluar dari akun ini di perangkat saat ini.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -21,13 +21,13 @@ export function LogoutSection() {
             Anda akan diminta untuk login kembali untuk mengakses data.
           </p>
           <ConfirmDialog
-            title="Keluar Akun?"
-            description="Anda harus login kembali untuk mengakses data."
+            title="Logout dari akun?"
+            description="Anda akan keluar dari akun CatatZ di perangkat ini."
             onConfirm={() => signOut()}
           >
             <Button variant="outline" className="w-full sm:w-auto gap-2 border-border/50">
               <LogOut className="w-4 h-4" />
-              Keluar Akun
+              Logout
             </Button>
           </ConfirmDialog>
         </div>

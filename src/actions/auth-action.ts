@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { ActionResult } from "@/types/general";
 import { createSessionRecord } from "./session-action";
+import { cookies } from "next/headers";
 
 export async function signUp(formData: FormData): Promise<ActionResult> {
   const supabase = await createClient();
@@ -59,7 +60,27 @@ export async function signIn(
 
 export async function signOut() {
   const supabase = await createClient();
+  
+  // Revoke current session
+  const cookieStore = await cookies();
+  const deviceId = cookieStore.get("device_id")?.value;
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (user && deviceId) {
+    await supabase
+      .from("user_sessions")
+      .update({ revoked_at: new Date().toISOString() })
+      .eq("user_id", user.id)
+      .eq("device_id", deviceId)
+      .is("revoked_at", null);
+  }
+
   await supabase.auth.signOut();
+  
+  // Clean up device_id cookie
+  cookieStore.delete("device_id");
+  cookieStore.delete("last_ping");
+  
   revalidatePath("/", "layout");
   redirect("/login");
 }
