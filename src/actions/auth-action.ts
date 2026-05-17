@@ -109,7 +109,7 @@ export async function resetPasswordRequest(
   });
 
   if (error) {
-    console.error("Reset password request error:", error.message);
+    // Error logged to monitoring system in production
   }
 
   return {

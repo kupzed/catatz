@@ -169,7 +169,6 @@ export async function deleteAccount(): Promise<ActionResult> {
     const { error: deleteError } = await adminAuth.auth.admin.deleteUser(user.id);
 
     if (deleteError) {
-      console.error('Error deleting user:', deleteError);
       return { success: false, error: 'Gagal menghapus akun, silakan coba lagi.' };
     }
 
@@ -181,7 +180,6 @@ export async function deleteAccount(): Promise<ActionResult> {
     cookieStore.delete("last_ping");
 
   } catch (err) {
-    console.error('Unexpected error during delete account:', err);
     return { success: false, error: 'Terjadi kesalahan sistem.' };
   }
 
