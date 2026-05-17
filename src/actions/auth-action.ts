@@ -49,7 +49,9 @@ export async function signIn(
   }
 
   // Record the session
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (user) {
     await createSessionRecord(user.id);
   }
@@ -60,12 +62,14 @@ export async function signIn(
 
 export async function signOut() {
   const supabase = await createClient();
-  
+
   // Revoke current session
   const cookieStore = await cookies();
   const deviceId = cookieStore.get("device_id")?.value;
-  const { data: { user } } = await supabase.auth.getUser();
-  
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   if (user && deviceId) {
     await supabase
       .from("user_sessions")
@@ -76,11 +80,11 @@ export async function signOut() {
   }
 
   await supabase.auth.signOut();
-  
+
   // Clean up device_id cookie
   cookieStore.delete("device_id");
   cookieStore.delete("last_ping");
-  
+
   revalidatePath("/", "layout");
   redirect("/login");
 }
@@ -151,23 +155,36 @@ export async function updatePassword(
   redirect("/login?message=reset-success");
 }
 
-export async function signInWithGoogle(): Promise<ActionResult<{ url: string }>> {
+export async function unlinkGoogleIdentity(): Promise<ActionResult> {
   const supabase = await createClient();
-  
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: `${environment.appUrl}/auth/callback?next=/transaksi`,
-    },
-  });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  if (!user.identities || user.identities.length <= 1) {
+    return {
+      success: false,
+      error:
+        "Metode login satu-satunya tidak dapat diputuskan. Tambahkan password terlebih dahulu.",
+    };
+  }
+
+  const googleIdentity = user.identities.find((i) => i.provider === "google");
+
+  if (!googleIdentity) {
+    return { success: false, error: "Akun Google tidak ditemukan." };
+  }
+
+  const { error } = await supabase.auth.unlinkIdentity(googleIdentity);
 
   if (error) {
     return { success: false, error: error.message };
   }
 
-  if (data?.url) {
-    return { success: true, data: { url: data.url } };
-  }
-
-  return { success: false, error: 'Gagal menginisialisasi login Google' };
+  revalidatePath("/settings", "layout");
+  return { success: true, message: "Tautan akun Google berhasil diputuskan." };
 }

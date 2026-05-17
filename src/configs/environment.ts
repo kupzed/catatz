@@ -18,10 +18,10 @@ function publicEnv(name: string, fallback: string): string {
 
 function appUrlEnv(): string {
   if (isProduction) {
-    return requiredPublicEnv("NEXT_PUBLIC_APP_URL");
+    return process.env.NEXT_PUBLIC_APP_URL || requiredPublicEnv("NEXT_PUBLIC_APP_URL");
   }
 
-  return publicEnv("NEXT_PUBLIC_APP_URL", "http://localhost:3000");
+  return process.env.NEXT_PUBLIC_APP_URL || publicEnv("NEXT_PUBLIC_APP_URL", "http://localhost:3000");
 }
 
 function normalizeUrl(name: string, value: string): string {
@@ -55,13 +55,13 @@ export const environment = {
   // Supabase public browser-safe configuration
   supabaseUrl: normalizeUrl(
     "NEXT_PUBLIC_SUPABASE_URL",
-    requiredPublicEnv("NEXT_PUBLIC_SUPABASE_URL"),
+    process.env.NEXT_PUBLIC_SUPABASE_URL || requiredPublicEnv("NEXT_PUBLIC_SUPABASE_URL"),
   ),
-  supabaseAnonKey: requiredPublicEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+  supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || requiredPublicEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
 
   // App public browser-safe configuration
-  appName: publicEnv("NEXT_PUBLIC_APP_NAME", "CatatZ"),
+  appName: process.env.NEXT_PUBLIC_APP_NAME || publicEnv("NEXT_PUBLIC_APP_NAME", "CatatZ"),
   appUrl,
   allowedDevOrigins: createAllowedDevOrigins(),
 
