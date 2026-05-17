@@ -1,11 +1,11 @@
 -- =============================================
--- Migration 010: User Preferences
+-- Migration 009: User Preferences
 -- Dedicated table for user settings like theme, currency, landing page.
 -- =============================================
 
 CREATE TABLE IF NOT EXISTS public.user_preferences (
   id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id               UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
+  user_id               UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE UNIQUE,
   theme                 TEXT DEFAULT 'system',
   currency              TEXT DEFAULT 'IDR',
   date_format           TEXT DEFAULT 'id-ID',

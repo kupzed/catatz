@@ -45,3 +45,6 @@ FOR UPDATE
 USING (auth.uid() = user_id);
 
 -- Note: User tidak diizinkan DELETE (hard delete), cukup update revoked_at
+
+-- Grant API access (Supabase v1.26.05+)
+GRANT SELECT, INSERT, UPDATE ON public.user_sessions TO authenticated;
