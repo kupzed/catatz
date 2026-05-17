@@ -3,6 +3,9 @@
 import { createClient } from '@/configs/supabase/server';
 import { revalidatePath } from 'next/cache';
 import type { ActionResult } from '@/types/general';
+import { createAdminClient } from '@/configs/supabase/admin';
+import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 
 export async function updateProfile(values: { name: string }): Promise<ActionResult> {
   const supabase = await createClient();
@@ -142,4 +145,46 @@ export async function changePassword(values: { currentPassword?: string, newPass
   }
 
   return { success: true, message: "Password berhasil diperbarui" };
+}
+
+export async function deleteAccount(): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: 'Tidak terautentikasi' };
+  }
+
+  try {
+    // 1. Hapus avatar storage jika ada
+    const { data: files } = await supabase.storage.from('avatars').list(user.id);
+    if (files && files.length > 0) {
+      const pathsToDelete = files.map(f => `${user.id}/${f.name}`);
+      await supabase.storage.from('avatars').remove(pathsToDelete);
+    }
+
+    // 2. Hapus dari Auth menggunakan Admin API
+    // Hal ini akan memicu penghapusan CASCADE otomatis di semua tabel (profiles, transaksi, dll)
+    const adminAuth = createAdminClient();
+    const { error: deleteError } = await adminAuth.auth.admin.deleteUser(user.id);
+
+    if (deleteError) {
+      console.error('Error deleting user:', deleteError);
+      return { success: false, error: 'Gagal menghapus akun, silakan coba lagi.' };
+    }
+
+    // 3. Clear auth session/cookies secara manual
+    // Karena kita tidak bisa memanggil supabase.auth.signOut() pada user yang sudah dihapus dengan baik,
+    // kita hapus cookie device_id dan biarkan request dihentikan oleh redirect
+    const cookieStore = await cookies();
+    cookieStore.delete("device_id");
+    cookieStore.delete("last_ping");
+
+  } catch (err) {
+    console.error('Unexpected error during delete account:', err);
+    return { success: false, error: 'Terjadi kesalahan sistem.' };
+  }
+
+  // 4. Redirect out
+  redirect('/login?message=account-deleted');
 }
