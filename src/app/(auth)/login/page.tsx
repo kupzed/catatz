@@ -43,6 +43,10 @@ function LoginForm() {
       toast.error("Gagal", {
         description: "Link tidak valid atau kadaluarsa.",
       });
+    } else if (message === "session-revoked") {
+      toast.error("Sesi Berakhir", {
+        description: "Sesi Anda telah diakhiri dari perangkat lain. Silakan login kembali.",
+      });
     }
   }, [message]);
 

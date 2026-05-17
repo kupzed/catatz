@@ -49,6 +49,37 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Cek apakah session saat ini telah di-revoke
+  if (isProtected && user) {
+    const deviceId = request.cookies.get("device_id")?.value;
+    if (deviceId) {
+      const { data: sessionData } = await supabase
+        .from("user_sessions")
+        .select("revoked_at")
+        .eq("device_id", deviceId)
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+        
+      if (sessionData && sessionData.revoked_at !== null) {
+        // Hapus cookie sesi karena telah di-revoke
+        supabaseResponse = NextResponse.redirect(
+          new URL("/login?message=session-revoked", request.url)
+        );
+        // Supabase SSR uses name/value pairs
+        // We delete the auth token by clearing auth cookies
+        const allCookies = request.cookies.getAll();
+        allCookies.forEach(({ name }) => {
+          if (name.startsWith('sb-') || name === 'device_id') {
+            supabaseResponse.cookies.delete(name);
+          }
+        });
+        return supabaseResponse;
+      }
+    }
+  }
+
   if (isAuthPage && user) {
     const url = request.nextUrl.clone();
     url.pathname = '/';

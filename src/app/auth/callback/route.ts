@@ -1,5 +1,6 @@
 import { createClient } from "@/configs/supabase/server";
 import { NextResponse, type NextRequest } from "next/server";
+import { createSessionRecord } from "@/actions/session-action";
 
 function safeNextPath(value: string | null): string {
   if (!value || !value.startsWith("/") || value.startsWith("//")) {
@@ -49,6 +50,9 @@ export async function GET(request: NextRequest) {
           }
         }
       }
+      
+      // Record session tracking
+      await createSessionRecord(user.id);
       
       return NextResponse.redirect(new URL(next, requestUrl.origin));
     }

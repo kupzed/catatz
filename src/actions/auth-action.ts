@@ -5,6 +5,7 @@ import { environment } from "@/configs/environment";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { ActionResult } from "@/types/general";
+import { createSessionRecord } from "./session-action";
 
 export async function signUp(formData: FormData): Promise<ActionResult> {
   const supabase = await createClient();
@@ -44,6 +45,12 @@ export async function signIn(
 
   if (error) {
     return { success: false, error: error.message };
+  }
+
+  // Record the session
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    await createSessionRecord(user.id);
   }
 
   revalidatePath("/", "layout");
