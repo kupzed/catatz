@@ -13,7 +13,8 @@
 - Setelah mengubah deployment/env, update `docs/environment-variables.md` dan `docs/deployment-vercel.md`.
 - Jangan expose secret, token, service role key, atau credential.
 - Gunakan Bahasa Indonesia untuk UI user-facing kecuali istilah teknis.
-- Buat commit message dalam Bahasa Inggris setelah selesai.
+- Buat suggested Conventional Commit message dalam Bahasa Inggris setelah selesai.
+- Jangan membuat commit Git otomatis kecuali user meminta eksplisit.
 
 ## Project-Specific Rules
 
@@ -48,9 +49,41 @@ Setiap selesai mengerjakan task, AI wajib memberikan:
 1. Ringkasan perubahan
 2. Daftar file yang diubah
 3. Hasil validasi/test
-4. Dokumentasi yang ikut di-update
-5. Commit message Bahasa Inggris
+4. Dokumentasi yang ikut di-update atau alasan dokumentasi tidak perlu diubah
+5. Suggested Conventional Commit message lengkap dalam Bahasa Inggris
+
+## Conventional Commit Rules
+
+- Commit message harus siap dipakai di GitHub dan berisi subject plus body teknis.
+- Format commit message:
+
+```text
+type(scope): imperative summary
+
+Explain the technical change in concrete terms.
+
+Mention important documentation, validation, migration, API, UI, or behavior impact when relevant.
+```
+
+- Gunakan Bahasa Inggris.
+- Gunakan summary berbentuk imperative, singkat, dan jelas.
+- Type utama yang digunakan: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `build`, `perf`.
+- Scope mengikuti area utama yang berubah, misalnya `docs`, `settings`, `transactions`, `pwa`, `auth`, `database`, atau `workflow`.
+- Body commit harus menjelaskan perubahan teknis secara konkret, termasuk dampak pada dokumentasi, validasi, migration, API, UI, atau behavior jika relevan.
+- Jangan mencantumkan secret, credential, token, atau detail sensitif di commit message.
+
+Contoh:
+
+```text
+docs(workflow): document Codex output requirements
+
+Add repository-level instructions that require each task to check whether CatatZ documentation needs updates before returning a final response.
+
+Clarify the final response contract and require a technical Conventional Commit suggestion with subject and body.
+```
 
 ## Permanent Instruction
 
-Mulai sekarang, setiap kali mengerjakan satu task pada project ini, selalu cek apakah dokumentasi di folder `docs/` perlu diperbarui. Jika ada perubahan pada fitur, database, auth, environment variable, deployment, security, atau struktur folder, update dokumentasi terkait dalam task yang sama. Di akhir pekerjaan, selalu sertakan commit message GitHub dalam Bahasa Inggris.
+Mulai sekarang, setiap kali mengerjakan satu task pada project ini, selalu cek apakah dokumentasi di folder `docs/` perlu diperbarui. Jika ada perubahan pada fitur, database, auth, environment variable, deployment, security, atau struktur folder, update dokumentasi terkait dalam task yang sama. Di akhir pekerjaan, selalu sertakan suggested Conventional Commit message lengkap dalam Bahasa Inggris, termasuk body teknis.
+
+Root `AGENTS.md` mengikat aturan ini sebagai instruksi repository-level untuk Codex. Jika ada perbedaan, ikuti aturan yang paling spesifik untuk task yang sedang dikerjakan dan tetap jaga dokumentasi `docs/` tetap sesuai perubahan aktual.

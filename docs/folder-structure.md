@@ -54,6 +54,7 @@ catatz/
 - `src/validations`: schema validasi Zod untuk form.
 - `public`: asset static, PWA manifest, icons, offline page, dan generated service worker.
 - `docs`: dokumentasi teknis project.
+- `AGENTS.md`: instruksi repository-level untuk workflow Codex, documentation gate, final response, dan suggested Conventional Commit message.
 
 ## Routing
 
@@ -99,4 +100,5 @@ Tidak ada folder `src/app/api` pada kondisi repo saat ini.
 
 - Project memakai `src/proxy.ts`, bukan `middleware.ts`.
 - Migration SQL berada di `src/migrations`, bukan folder `supabase/migrations`.
+- Root `AGENTS.md` menjadi operating instructions untuk Codex dan merujuk ke `docs/ai-development-rules.md`.
 - File `env-example` masih ada sebagai contoh lama. `.env.example` menjadi contoh env yang lebih konvensional untuk dokumentasi baru.

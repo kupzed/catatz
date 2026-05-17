@@ -25,4 +25,8 @@ Format mengikuti Keep a Changelog sederhana.
 - Security checklist.
 - Troubleshooting guide.
 - AI development rules.
+- Repository-level Codex workflow instructions in `AGENTS.md`.
+- Conventional Commit guidance for Codex task summaries.
+- Technical commit message body requirements for Codex final responses.
+- Documentation references for the Codex operating instructions.
 - Root `.env.example`.
