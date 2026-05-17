@@ -122,3 +122,24 @@ export async function updatePassword(
   revalidatePath("/", "layout");
   redirect("/login?message=reset-success");
 }
+
+export async function signInWithGoogle(): Promise<ActionResult<{ url: string }>> {
+  const supabase = await createClient();
+  
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${environment.appUrl}/auth/callback?next=/transaksi`,
+    },
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  if (data?.url) {
+    return { success: true, data: { url: data.url } };
+  }
+
+  return { success: false, error: 'Gagal menginisialisasi login Google' };
+}

@@ -16,9 +16,40 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { error, data } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (!error) {
+    if (!error && data?.user) {
+      // Smart profile sync for Google OAuth
+      const user = data.user;
+      const metadata = user.user_metadata;
+      
+      if (metadata) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('name, avatar_url')
+          .eq('id', user.id)
+          .single();
+          
+        if (profile) {
+          const updatePayload: Record<string, string> = {};
+          
+          // Only update if field is empty (to respect manual user changes)
+          if (!profile.name && (metadata.full_name || metadata.name)) {
+            updatePayload.name = metadata.full_name || metadata.name;
+          }
+          if (!profile.avatar_url && (metadata.avatar_url || metadata.picture)) {
+            updatePayload.avatar_url = metadata.avatar_url || metadata.picture;
+          }
+          
+          if (Object.keys(updatePayload).length > 0) {
+            await supabase
+              .from('profiles')
+              .update(updatePayload)
+              .eq('id', user.id);
+          }
+        }
+      }
+      
       return NextResponse.redirect(new URL(next, requestUrl.origin));
     }
   }
