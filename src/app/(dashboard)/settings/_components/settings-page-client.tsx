@@ -2,11 +2,9 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { User, Palette, Download, ShieldCheck } from "lucide-react";
-import { ProfilTab } from "./profil-tab";
-import { TampilanTab } from "./tampilan-tab";
+import { Settings, ShieldCheck } from "lucide-react";
+import { UmumTab } from "./umum-tab";
 import { KeamananTab } from "./keamanan-tab";
-import { ExportTab } from "./export-tab";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -24,10 +22,8 @@ type Props = {
 // ─── Nav config ───────────────────────────────────────────────────────────────
 
 const TABS = [
-  { id: "profil", label: "Profil", icon: User },
-  { id: "keamanan", label: "Keamanan", icon: ShieldCheck },
-  { id: "tampilan", label: "Tampilan", icon: Palette },
-  { id: "export", label: "Export Data", icon: Download },
+  { id: "umum", label: "General", icon: Settings },
+  { id: "keamanan", label: "Security", icon: ShieldCheck },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -35,18 +31,14 @@ type TabId = (typeof TABS)[number]["id"];
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function SettingsPageClient({ profile }: Props) {
-  const [activeTab, setActiveTab] = useState<TabId>("profil");
+  const [activeTab, setActiveTab] = useState<TabId>("umum");
 
   function renderContent() {
     switch (activeTab) {
-      case "profil":
-        return <ProfilTab profile={profile} />;
+      case "umum":
+        return <UmumTab profile={profile} />;
       case "keamanan":
         return <KeamananTab />;
-      case "tampilan":
-        return <TampilanTab />;
-      case "export":
-        return <ExportTab />;
     }
   }
 
@@ -54,9 +46,9 @@ export default function SettingsPageClient({ profile }: Props) {
     <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Page title */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Pengaturan</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
         <p className="text-muted-foreground text-sm">
-          Kelola preferensi dan konfigurasi akun Anda.
+          Kelola akun, preferensi, dan keamanan aplikasi CatatZ.
         </p>
       </div>
 
