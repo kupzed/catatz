@@ -74,6 +74,78 @@ Auth requirement: optional, return bisa null.
 
 Supabase access: `supabase.auth.getUser`.
 
+### `resetPasswordRequest`
+
+Lokasi: `src/actions/auth-action.ts`
+
+Deskripsi: mengirim email reset password.
+
+Input: `FormData` dengan `email`.
+
+Output: `ActionResult` dengan message netral agar tidak membocorkan apakah email terdaftar.
+
+Auth requirement: public.
+
+Supabase access: `supabase.auth.resetPasswordForEmail`.
+
+Catatan: redirect reset diarahkan ke `/auth/callback?next=/reset-password`.
+
+### `updatePassword`
+
+Lokasi: `src/actions/auth-action.ts`
+
+Deskripsi: menyimpan password baru setelah user masuk melalui callback reset password.
+
+Input: `FormData` dengan `password` dan `confirmPassword`.
+
+Output: redirect ke `/login?message=reset-success` jika sukses.
+
+Auth requirement: authenticated session dari reset-password callback.
+
+Supabase access: `supabase.auth.updateUser`, lalu `supabase.auth.signOut`.
+
+### `signInWithGoogle`
+
+Lokasi: `src/actions/auth-action.ts`
+
+Deskripsi: memulai OAuth login/register Google.
+
+Output: `ActionResult<{ url: string }>` berisi URL OAuth Supabase.
+
+Auth requirement: public.
+
+Supabase access: `supabase.auth.signInWithOAuth`.
+
+Catatan: redirect OAuth diarahkan ke `/auth/callback?next=/transaksi`.
+
+### `linkGoogleIdentity`
+
+Lokasi: `src/actions/auth-action.ts`
+
+Deskripsi: memulai manual Link Identity Google untuk user yang sedang login.
+
+Output: `ActionResult<{ url: string }>` berisi URL OAuth Supabase.
+
+Auth requirement: authenticated.
+
+Supabase access: `supabase.auth.getUser`, `supabase.auth.getUserIdentities`, `supabase.auth.linkIdentity`.
+
+Catatan: redirect OAuth diarahkan ke `/auth/callback?next=/settings&flow=link_google`. Action mengirim `login_hint` berisi email utama user.
+
+### `unlinkGoogleIdentity`
+
+Lokasi: `src/actions/auth-action.ts`
+
+Deskripsi: memutus identity Google jika user masih memiliki minimal satu identity login lain.
+
+Output: `ActionResult`.
+
+Auth requirement: authenticated.
+
+Supabase access: `supabase.auth.getUser`, `supabase.auth.getUserIdentities`, `supabase.auth.unlinkIdentity`.
+
+Revalidate: `/settings`.
+
 ## Route Handler
 
 ### `GET /auth/callback`
@@ -86,10 +158,12 @@ Input query:
 
 - `code`: auth code dari Supabase.
 - `next`: path redirect internal. Divalidasi agar hanya path lokal yang diawali `/` dan bukan `//`.
+- `flow`: optional. Nilai `link_google` menandai callback Link Identity Google dari Settings.
 
 Output:
 
 - Redirect ke `next` jika sukses.
+- Untuk `flow=link_google`, callback memvalidasi email identity Google sama dengan email utama user. Jika cocok, redirect ke `/settings?message=google-linked`; jika berbeda, callback mencoba `unlinkIdentity` dan redirect dengan message error.
 - Redirect ke `/login?message=auth-callback-failed` jika gagal.
 
 Auth requirement: public callback.

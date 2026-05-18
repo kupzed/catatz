@@ -46,6 +46,7 @@ Masuk ke **Authentication > Providers > Google**:
 - **Client ID:** Masukkan *Client ID* yang didapat dari Google Cloud Console.
 - **Client Secret:** Masukkan *Client Secret* yang didapat dari Google Cloud Console.
 - **Authorized Redirect URI:** Salin URL yang diberikan oleh Supabase (format: `https://<project-ref>.supabase.co/auth/v1/callback`) dan tempel di *Authorized redirect URIs* pada layar OAuth Google Cloud Console Anda.
+- **Manual Linking:** Aktifkan manual identity linking di konfigurasi provider/auth Supabase agar tombol **Hubungkan** pada Akun Terhubung dapat memanggil `linkIdentity`.
 - *(Tidak ada environment variable tambahan di proyek ini untuk Google Client ID, sebab semuanya dikelola langsung di Supabase Dashboard).*
 
 ---

@@ -2,7 +2,10 @@
 
 import { ProfileSection } from "./profile-section";
 import { SystemPreferenceSection } from "./system-preference-section";
-import { ConnectedAccountSection } from "./connected-account-section";
+import {
+  ConnectedAccountSection,
+  type ConnectedAccount,
+} from "./connected-account-section";
 import { ExportSection } from "./export-section";
 
 import type { UserPreferences } from "@/actions/preference-action";
@@ -13,19 +16,25 @@ type Profile = {
   name: string | null;
   avatar_url?: string | null;
   created_at?: string | null;
+  providers?: string[];
 };
 
 type Props = {
   profile: Profile | null;
   preferences: UserPreferences;
+  connectedAccounts: ConnectedAccount[];
 };
 
-export function UmumTab({ profile, preferences }: Props) {
+export function UmumTab({ profile, preferences, connectedAccounts }: Props) {
   return (
     <div className="space-y-6 max-w-3xl">
       <ProfileSection profile={profile} />
       <SystemPreferenceSection preferences={preferences} />
-      <ConnectedAccountSection />
+      <ConnectedAccountSection
+        accounts={connectedAccounts}
+        primaryEmail={profile?.email || ""}
+        providers={profile?.providers}
+      />
       <ExportSection />
     </div>
   );

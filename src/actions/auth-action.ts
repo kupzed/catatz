@@ -153,9 +153,9 @@ export async function updatePassword(
 
 export async function signInWithGoogle(): Promise<ActionResult<{ url: string }>> {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
+    provider: "google",
     options: {
       redirectTo: `${environment.appUrl}/auth/callback?next=/transaksi`,
     },
@@ -169,5 +169,105 @@ export async function signInWithGoogle(): Promise<ActionResult<{ url: string }>>
     return { success: true, data: { url: data.url } };
   }
 
-  return { success: false, error: 'Gagal menginisialisasi login Google' };
+  return { success: false, error: "Gagal menginisialisasi login Google" };
+}
+
+export async function linkGoogleIdentity(): Promise<ActionResult<{ url: string }>> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return { success: false, error: "Sesi tidak valid. Silakan login ulang." };
+  }
+
+  const { data: identitiesData, error: identitiesError } =
+    await supabase.auth.getUserIdentities();
+
+  if (identitiesError) {
+    return { success: false, error: identitiesError.message };
+  }
+
+  const hasGoogleIdentity = identitiesData.identities.some(
+    (identity) => identity.provider === "google",
+  );
+
+  if (hasGoogleIdentity) {
+    return { success: true, message: "Akun Google sudah terhubung." };
+  }
+
+  const queryParams: Record<string, string> = {
+    prompt: "select_account",
+  };
+
+  if (user.email) {
+    queryParams.login_hint = user.email;
+  }
+
+  const { data, error } = await supabase.auth.linkIdentity({
+    provider: "google",
+    options: {
+      redirectTo: `${environment.appUrl}/auth/callback?next=/settings&flow=link_google`,
+      queryParams,
+    },
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  if (data?.url) {
+    return { success: true, data: { url: data.url } };
+  }
+
+  return { success: false, error: "Gagal menginisialisasi koneksi Google" };
+}
+
+export async function unlinkGoogleIdentity(): Promise<ActionResult> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return { success: false, error: "Sesi tidak valid. Silakan login ulang." };
+  }
+
+  const { data: identitiesData, error: identitiesError } =
+    await supabase.auth.getUserIdentities();
+
+  if (identitiesError) {
+    return { success: false, error: identitiesError.message };
+  }
+
+  const identities = identitiesData.identities;
+  const googleIdentity = identities.find(
+    (identity) => identity.provider === "google",
+  );
+
+  if (!googleIdentity) {
+    return { success: false, error: "Akun Google belum terhubung." };
+  }
+
+  if (identities.length < 2) {
+    return {
+      success: false,
+      error: "Tambahkan metode login lain sebelum memutuskan akun Google.",
+    };
+  }
+
+  const { error } = await supabase.auth.unlinkIdentity(googleIdentity);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath("/settings");
+
+  return { success: true, message: "Akun Google berhasil diputuskan." };
 }

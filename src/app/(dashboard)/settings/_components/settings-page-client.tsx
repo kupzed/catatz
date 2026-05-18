@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Settings, ShieldCheck } from "lucide-react";
 import { UmumTab } from "./umum-tab";
 import { KeamananTab } from "./keamanan-tab";
+import type { ConnectedAccount } from "./connected-account-section";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -22,6 +23,7 @@ type Profile = {
 type Props = {
   profile: Profile | null;
   preferences: UserPreferences;
+  connectedAccounts: ConnectedAccount[];
 };
 
 // ─── Nav config ───────────────────────────────────────────────────────────────
@@ -35,13 +37,23 @@ type TabId = (typeof TABS)[number]["id"];
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function SettingsPageClient({ profile, preferences }: Props) {
+export default function SettingsPageClient({
+  profile,
+  preferences,
+  connectedAccounts,
+}: Props) {
   const [activeTab, setActiveTab] = useState<TabId>("umum");
 
   function renderContent() {
     switch (activeTab) {
       case "umum":
-        return <UmumTab profile={profile} preferences={preferences} />;
+        return (
+          <UmumTab
+            profile={profile}
+            preferences={preferences}
+            connectedAccounts={connectedAccounts}
+          />
+        );
       case "keamanan":
         return <KeamananTab profile={profile} />;
     }

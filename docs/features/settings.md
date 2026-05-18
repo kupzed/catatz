@@ -6,7 +6,7 @@ Status: Aktif.
 
 ## Deskripsi
 
-Settings mengelola profil, avatar, password, tema, dan export data.
+Settings mengelola profil, avatar, preferensi sistem, akun Google terhubung, password, sesi aktif, logout, hapus akun, dan export data.
 
 ## Route
 
@@ -16,27 +16,31 @@ Settings mengelola profil, avatar, password, tema, dan export data.
 
 - Page: `src/app/(dashboard)/settings/page.tsx`
 - Client shell: `src/app/(dashboard)/settings/_components/settings-page-client.tsx`
-- Profil tab: `src/app/(dashboard)/settings/_components/profil-tab.tsx`
+- Umum tab: `src/app/(dashboard)/settings/_components/umum-tab.tsx`
 - Keamanan tab: `src/app/(dashboard)/settings/_components/keamanan-tab.tsx`
-- Tampilan tab: `src/app/(dashboard)/settings/_components/tampilan-tab.tsx`
-- Export tab: `src/app/(dashboard)/settings/_components/export-tab.tsx`
+- Profile section: `src/app/(dashboard)/settings/_components/profile-section.tsx`
+- System preference section: `src/app/(dashboard)/settings/_components/system-preference-section.tsx`
+- Connected account section: `src/app/(dashboard)/settings/_components/connected-account-section.tsx`
+- Password section: `src/app/(dashboard)/settings/_components/password-section.tsx`
+- Active sessions section: `src/app/(dashboard)/settings/_components/active-sessions-section.tsx`
+- Export section: `src/app/(dashboard)/settings/_components/export-section.tsx`
 - Profile actions: `src/actions/profile-action.ts`
+- Auth actions: `src/actions/auth-action.ts`
 - Export actions: `src/actions/export-action.ts`
 
 ## Tabs
 
 | Tab | Fungsi |
 |---|---|
-| `Profil` | Update nama, upload avatar, hapus avatar, lihat email readonly. |
-| `Keamanan` | Ganti password setelah memasukkan password lama. |
-| `Tampilan` | Pilih tema terang/gelap/system dan quick toggle dark mode. |
-| `Export Data` | Export laporan transaksi ke PDF dengan optional filter tanggal. |
+| `Umum` | Update profil/avatar, preferensi sistem, akun Google terhubung, dan export data. |
+| `Keamanan` | Ganti password, lihat sesi aktif, logout, dan hapus akun. |
 
 ## Data Source
 
 Settings page mengambil user dan profile dari Supabase server client:
 
 - `supabase.auth.getUser()`
+- `supabase.auth.getUserIdentities()`
 - `profiles.select("*").eq("id", user.id).single()`
 
 ## Tabel/Bucket Terkait
@@ -51,6 +55,8 @@ Settings page mengambil user dan profile dari Supabase server client:
 - `uploadAvatar`
 - `removeAvatar`
 - `changePassword`
+- `linkGoogleIdentity`
+- `unlinkGoogleIdentity`
 - `getExportData`
 - `getExportCount`
 
@@ -61,6 +67,9 @@ Settings page mengambil user dan profile dari Supabase server client:
 - Avatar disimpan di bucket `avatars` dengan path `{user.id}/avatar.{ext}`.
 - Password baru minimal 8 karakter dan harus sama dengan konfirmasi.
 - Password lama diverifikasi sebelum `updateUser`.
+- Connected Account memakai Supabase Auth identities aktual, bukan hanya `app_metadata.providers`.
+- Tombol Hubungkan Google memakai `linkIdentity` dan callback hanya menerima link jika email Google sama dengan email utama user.
+- Tombol Putuskan Google hanya tersedia jika user masih punya metode login lain.
 - Export PDF tidak berjalan jika tidak ada transaksi.
 
 ## UI Behavior
@@ -68,10 +77,11 @@ Settings page mengambil user dan profile dari Supabase server client:
 - Desktop memakai sidebar tab settings.
 - Mobile memakai tab strip horizontal.
 - Upload avatar menampilkan preview lokal sebelum hasil upload.
+- Akun Terhubung menampilkan status Google dan toast hasil callback `google-linked` / error.
 - Export PDF menampilkan jumlah transaksi siap export.
 - Theme memakai `next-themes`.
 
 ## TODO / Improvement
 
-- Belum ada flow reset password via email dari halaman auth.
 - Pertimbangkan validasi MIME/extension avatar server-side yang lebih ketat jika security requirement naik.
+- Pastikan konfigurasi Supabase Manual Linking aktif sebelum QA Connected Account.

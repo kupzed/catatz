@@ -44,8 +44,10 @@ Security headers saat ini:
 - [ ] Login/register flow sudah dites.
 - [ ] Logout membersihkan session dan redirect ke `/login`.
 - [ ] Password update hanya untuk user login.
-- [ ] Reset password email belum ada; jangan klaim tersedia sebelum diimplementasikan.
-- [ ] Google OAuth belum ada; jangan klaim tersedia sebelum diimplementasikan.
+- [ ] Reset password email memakai callback Supabase dan Redirect URLs yang valid.
+- [ ] Google OAuth provider aktif di Supabase Dashboard sebelum flow Google dipakai.
+- [ ] Manual Linking aktif di Supabase Dashboard sebelum fitur Link Identity Google dipakai.
+- [ ] Link Identity Google hanya dianggap sukses jika email Google sama dengan email utama user.
 
 ## Storage
 

@@ -43,7 +43,7 @@ Aplikasi saat ini berfokus pada pencatatan transaksi harian, pengelolaan rekenin
 - Kategori: `src/app/(dashboard)/kategori`, `src/actions/kategori-action.ts`.
 - Hutang/Piutang: `src/app/(dashboard)/hutang`, `src/actions/hutang-action.ts`.
 - Rekap/Laporan: `src/app/(dashboard)/rekap`, `src/actions/rekap-action.ts`, `src/actions/export-action.ts`, `src/lib/pdf-generator.ts`.
-- Settings: `src/app/(dashboard)/settings`, `src/actions/profile-action.ts`.
+- Settings: `src/app/(dashboard)/settings`, `src/actions/profile-action.ts`, `src/actions/auth-action.ts`.
 - Supabase config: `src/configs/supabase`.
 - Database migrations: `src/migrations`.
 - PWA: `src/app/sw.ts`, `src/lib/sw-register.ts`, `src/components/pwa`, `public/manifest.json`.
@@ -56,6 +56,6 @@ Catatan status aktual:
 
 - Fitur recurring transaction sudah memiliki table `recurring_transaksi`, type `IntervalRecurring`, dan field transaksi terkait, tetapi belum terlihat ada UI/flow aktif untuk mengelola recurring transaction.
 - Fitur budget memiliki table `budget`, action `upsertBudget`, dan tampilan usage di halaman rekap jika data budget tersedia. UI pembuatan/edit budget belum terlihat di route yang ada.
-- Reset password melalui email belum terlihat sebagai flow khusus. Yang tersedia adalah perubahan password dari tab Keamanan saat user sudah login.
-- Google OAuth tidak terlihat digunakan di codebase saat ini.
+- Reset password email tersedia melalui `/forgot-password` dan `/reset-password`.
+- Google OAuth tersedia untuk login/register, dan Google Link Identity tersedia dari Settings Akun Terhubung.
 - Tidak ada folder `supabase/` CLI. Migration SQL project berada di `src/migrations`.

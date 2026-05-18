@@ -5,15 +5,18 @@
 Provider yang terlihat di codebase:
 
 - Email/password.
-
-Tidak terlihat implementasi Google OAuth atau provider OAuth lain di repository saat ini.
+- Google OAuth.
+- Google Link Identity untuk user login dari `/settings`.
 
 ## File Terkait
 
 - `src/actions/auth-action.ts`
 - `src/app/(auth)/login/page.tsx`
 - `src/app/(auth)/register/page.tsx`
+- `src/app/(auth)/forgot-password/page.tsx`
+- `src/app/(auth)/reset-password/page.tsx`
 - `src/app/auth/callback/route.ts`
+- `src/app/(dashboard)/settings/_components/connected-account-section.tsx`
 - `src/configs/supabase/client.ts`
 - `src/configs/supabase/server.ts`
 - `src/configs/supabase/middleware.ts`
@@ -29,6 +32,17 @@ Tidak terlihat implementasi Google OAuth atau provider OAuth lain di repository 
 4. Jika berhasil, action menjalankan `revalidatePath("/", "layout")`.
 5. User diarahkan ke `/transaksi`.
 6. Session disimpan melalui mekanisme cookie Supabase SSR.
+
+## Google OAuth Login/Register Flow
+
+1. User memilih tombol Google di `/login` atau `/register`.
+2. Client memanggil Server Action `signInWithGoogle`.
+3. Action memanggil `supabase.auth.signInWithOAuth({ provider: "google" })`.
+4. `redirectTo` diarahkan ke `{NEXT_PUBLIC_APP_URL}/auth/callback?next=/transaksi`.
+5. Setelah Google dan Supabase selesai, `/auth/callback` menukar `code` dengan session.
+6. Jika sukses, callback melakukan smart profile sync untuk nama/avatar kosong, mencatat session, lalu redirect ke `/transaksi`.
+
+Jika user email/password sudah ada dan user masuk via Google dengan email terverifikasi yang sama, automatic identity linking ditangani oleh Supabase Auth.
 
 ## Register Flow
 
@@ -53,10 +67,12 @@ Ada juga `useAuthStore` di `src/stores/auth-store.ts` yang memiliki method `sign
 
 ## Reset Password
 
-Status: Belum ada flow reset password via email di route auth.
+Status: Aktif.
 
 Yang tersedia saat ini:
 
+- Route `/forgot-password` mengirim email reset password melalui `resetPasswordForEmail`.
+- Route `/reset-password` menyimpan password baru melalui `updateUser({ password })` setelah callback Supabase membuat session reset.
 - Tab `Keamanan` di `/settings`.
 - Server Action `changePassword`.
 - User harus sudah login.
@@ -65,9 +81,27 @@ Yang tersedia saat ini:
 
 ## Google OAuth
 
-Status: Tidak terlihat digunakan di codebase.
+Status: Aktif untuk login/register dan Link Identity.
 
-Tidak ada pemanggilan `signInWithOAuth` atau konfigurasi Google OAuth di route/action saat dokumentasi ini dibuat.
+Implementasi terkait:
+
+- `signInWithGoogle` untuk OAuth login/register.
+- `linkGoogleIdentity` untuk menghubungkan Google dari Settings.
+- `unlinkGoogleIdentity` untuk memutus Google jika user masih punya identity login lain.
+- `/auth/callback` mendukung query `flow=link_google`.
+
+Flow Link Identity:
+
+1. User login email/password membuka `/settings`.
+2. `SettingsPage` mengambil identity aktual via `supabase.auth.getUserIdentities()`.
+3. Bagian Akun Terhubung menampilkan status Google.
+4. Tombol Hubungkan memanggil `linkGoogleIdentity`.
+5. Action memanggil `supabase.auth.linkIdentity({ provider: "google" })` dengan redirect ke `/auth/callback?next=/settings&flow=link_google`.
+6. Callback memvalidasi identity Google yang baru terhubung.
+7. Jika email Google sama dengan email utama user, user kembali ke `/settings?message=google-linked`.
+8. Jika email Google berbeda, callback mencoba `unlinkIdentity` dan user kembali ke `/settings` dengan message error.
+
+Catatan konfigurasi: Manual Linking harus aktif di Supabase Dashboard Authentication > Providers agar `linkIdentity` dapat digunakan.
 
 ## Session Handling
 
@@ -85,14 +119,14 @@ Project memakai `src/proxy.ts`.
 
 Protected route rule:
 
-- Auth page: `/login`, `/register`.
+- Auth page: `/login`, `/register`, `/forgot-password`, `/reset-password`.
 - Public route: `/`.
 - Selain itu dianggap protected.
 
 Behavior:
 
 - Protected route tanpa user -> redirect `/login`.
-- Auth page dengan user -> redirect `/transaksi`.
+- Auth page dengan user -> redirect `/`.
 - Dashboard layout juga melakukan check `supabase.auth.getUser()`.
 
 Matcher proxy mengecualikan:
@@ -113,12 +147,14 @@ Development default:
 
 ```txt
 http://localhost:3000/auth/callback?next=/transaksi
+http://localhost:3000/auth/callback?next=/settings&flow=link_google
 ```
 
 Production:
 
 ```txt
 {NEXT_PUBLIC_APP_URL}/auth/callback?next=/transaksi
+{NEXT_PUBLIC_APP_URL}/auth/callback?next=/settings&flow=link_google
 ```
 
 Supabase Auth Site URL dan Redirect URLs harus memasukkan domain production dan URL local yang dipakai untuk development/mobile testing.
