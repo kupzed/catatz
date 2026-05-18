@@ -2,9 +2,31 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+const isProduction = process.env.NODE_ENV === "production";
+const developmentCachePrefixes = ["serwist", "catatz"];
+
 export interface ServiceWorkerState {
   isUpdateAvailable: boolean;
   triggerUpdate: () => void;
+}
+
+async function cleanupDevelopmentServiceWorkers() {
+  const registrations = await navigator.serviceWorker.getRegistrations();
+
+  await Promise.all(registrations.map((registration) => registration.unregister()));
+
+  if (!("caches" in window)) {
+    return;
+  }
+
+  const cacheNames = await window.caches.keys();
+  const staleCacheNames = cacheNames.filter((cacheName) =>
+    developmentCachePrefixes.some((prefix) => cacheName.startsWith(prefix)),
+  );
+
+  await Promise.all(
+    staleCacheNames.map((cacheName) => window.caches.delete(cacheName)),
+  );
 }
 
 export function useServiceWorkerRegistration(): ServiceWorkerState {
@@ -23,6 +45,13 @@ export function useServiceWorkerRegistration(): ServiceWorkerState {
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) {
+      return;
+    }
+
+    if (!isProduction) {
+      cleanupDevelopmentServiceWorkers().catch((error: unknown) => {
+        console.warn("[pwa] Development service worker cleanup failed", error);
+      });
       return;
     }
 

@@ -78,7 +78,13 @@ disable: process.env.NODE_ENV === "development"
 register: false
 ```
 
-Registration manual dilakukan oleh `src/lib/sw-register.ts` melalui `navigator.serviceWorker.register("/sw.js", { scope: "/" })`.
+Registration manual dilakukan oleh `src/lib/sw-register.ts`.
+
+Behavior:
+
+- Production mendaftarkan `/sw.js` melalui `navigator.serviceWorker.register("/sw.js", { scope: "/" })`.
+- Development tidak mendaftarkan service worker.
+- Development mencoba unregister service worker lama untuk origin saat ini dan menghapus cache `serwist-*`/`catatz-*` agar build production lama tidak memicu `bad-precaching-response` saat ngrok/local testing.
 
 ## Caching Strategy
 
@@ -142,4 +148,4 @@ Dependency:
 
 PWA install dan service worker production membutuhkan HTTPS. Vercel production sudah menyediakan HTTPS secara default.
 
-Untuk local development, service worker dinonaktifkan di development mode. Gunakan build production untuk validasi PWA lengkap.
+Untuk local development, service worker dinonaktifkan di development mode dan hook registration membersihkan service worker lama. Gunakan build production untuk validasi PWA lengkap.

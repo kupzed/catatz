@@ -38,7 +38,7 @@ Provider yang terlihat di codebase:
 1. User memilih tombol Google di `/login` atau `/register`.
 2. Client memanggil Server Action `signInWithGoogle`.
 3. Action memanggil `supabase.auth.signInWithOAuth({ provider: "google" })`.
-4. `redirectTo` diarahkan ke `{NEXT_PUBLIC_APP_URL}/auth/callback?next=/transaksi`.
+4. `redirectTo` diarahkan ke `{allowed-origin}/auth/callback?next=/transaksi`.
 5. Setelah Google dan Supabase selesai, `/auth/callback` menukar `code` dengan session.
 6. Jika sukses, callback melakukan smart profile sync untuk nama/avatar kosong, mencatat session, lalu redirect ke `/transaksi`.
 
@@ -50,7 +50,7 @@ Jika user email/password sudah ada dan user masuk via Google dengan email terver
 2. Form memanggil Server Action `signUp`.
 3. `signUp` memanggil `supabase.auth.signUp`.
 4. Metadata yang dikirim: `name`.
-5. `emailRedirectTo` diarahkan ke `{NEXT_PUBLIC_APP_URL}/auth/callback?next=/transaksi`.
+5. `emailRedirectTo` diarahkan ke `{allowed-origin}/auth/callback?next=/transaksi`.
 6. User diminta mengecek email verifikasi.
 7. Setelah link diklik, Supabase mengarahkan ke `/auth/callback`.
 8. Route Handler callback menukar `code` menjadi session.
@@ -96,7 +96,7 @@ Flow Link Identity:
 2. `SettingsPage` mengambil identity aktual via `supabase.auth.getUserIdentities()`.
 3. Bagian Akun Terhubung menampilkan status Google.
 4. Tombol Hubungkan memanggil `linkGoogleIdentity`.
-5. Action memanggil `supabase.auth.linkIdentity({ provider: "google" })` dengan redirect ke `/auth/callback?next=/settings&flow=link_google`.
+5. Action memanggil `supabase.auth.linkIdentity({ provider: "google" })` dengan redirect ke `{allowed-origin}/auth/callback?next=/settings&flow=link_google`.
 6. Callback memvalidasi identity Google yang baru terhubung.
 7. Jika email Google sama dengan email utama user, user kembali ke `/settings?message=google-linked`.
 8. Jika email Google berbeda, callback mencoba `unlinkIdentity` dan user kembali ke `/settings` dengan message error.
@@ -120,6 +120,7 @@ Project memakai `src/proxy.ts`.
 Protected route rule:
 
 - Auth page: `/login`, `/register`, `/forgot-password`, `/reset-password`.
+- Auth callback: `/auth/callback`.
 - Public route: `/`.
 - Selain itu dianggap protected.
 
@@ -127,6 +128,8 @@ Behavior:
 
 - Protected route tanpa user -> redirect `/login`.
 - Auth page dengan user -> redirect `/`.
+- `/auth/callback` tetap public agar auth code Supabase bisa ditukar menjadi session.
+- Jika `/login` atau `/register` menerima query `code`, middleware mengalihkan request ke `/auth/callback` dengan query yang sama. Ini safety net untuk konfigurasi Supabase yang masih mengirim auth code ke halaman auth.
 - Dashboard layout juga melakukan check `supabase.auth.getUser()`.
 
 Matcher proxy mengecualikan:
@@ -143,11 +146,24 @@ Matcher proxy mengecualikan:
 
 ## Redirect URL
 
+Auth actions membuat callback URL dengan helper server-side:
+
+- Production selalu memakai `NEXT_PUBLIC_APP_URL`.
+- Development memilih origin request jika host tersebut ada di `ALLOWED_DEV_ORIGINS`.
+- Jika origin request development tidak diizinkan, action mengembalikan error jelas dan tidak memulai redirect OAuth ke URL yang salah.
+
 Development default:
 
 ```txt
 http://localhost:3000/auth/callback?next=/transaksi
 http://localhost:3000/auth/callback?next=/settings&flow=link_google
+```
+
+Development dengan ngrok:
+
+```txt
+https://morphing-easeful-starry.ngrok-free.dev/auth/callback?next=/transaksi
+https://morphing-easeful-starry.ngrok-free.dev/auth/callback?next=/settings&flow=link_google
 ```
 
 Production:
@@ -158,6 +174,14 @@ Production:
 ```
 
 Supabase Auth Site URL dan Redirect URLs harus memasukkan domain production dan URL local yang dipakai untuk development/mobile testing.
+
+Untuk Google Cloud OAuth, Authorized redirect URI tetap callback Supabase:
+
+```txt
+https://<project-ref>.supabase.co/auth/v1/callback
+```
+
+Authorized JavaScript origin harus berisi origin app yang sedang dipakai, misalnya `https://morphing-easeful-starry.ngrok-free.dev`.
 
 ## Profile Creation Flow
 

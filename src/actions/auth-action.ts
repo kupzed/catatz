@@ -6,20 +6,135 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { ActionResult } from "@/types/general";
 import { createSessionRecord } from "./session-action";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+
+type AuthCallbackUrlResult =
+  | { success: true; url: string }
+  | { success: false; error: string };
+
+function getFirstHeaderValue(value: string | null): string | null {
+  return value?.split(",")[0]?.trim() || null;
+}
+
+function normalizeOrigin(value: string | null): string | null {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    return new URL(value).origin;
+  } catch {
+    return null;
+  }
+}
+
+function getHostFromOrigin(origin: string): string {
+  return new URL(origin).host;
+}
+
+function normalizeAllowedHost(value: string): string | null {
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) {
+    return null;
+  }
+
+  try {
+    return new URL(trimmedValue).host;
+  } catch {
+    return trimmedValue;
+  }
+}
+
+async function getRequestOrigin(): Promise<string | null> {
+  const headerStore = await headers();
+  const origin = normalizeOrigin(getFirstHeaderValue(headerStore.get("origin")));
+
+  if (origin) {
+    return origin;
+  }
+
+  const refererOrigin = normalizeOrigin(
+    getFirstHeaderValue(headerStore.get("referer")),
+  );
+
+  if (refererOrigin) {
+    return refererOrigin;
+  }
+
+  const forwardedHost = getFirstHeaderValue(headerStore.get("x-forwarded-host"));
+  const host = forwardedHost || getFirstHeaderValue(headerStore.get("host"));
+
+  if (!host) {
+    return null;
+  }
+
+  const protocol =
+    getFirstHeaderValue(headerStore.get("x-forwarded-proto")) ||
+    (environment.isProduction ? "https" : "http");
+
+  return normalizeOrigin(`${protocol}://${host}`);
+}
+
+async function createAuthCallbackUrl(
+  next: string,
+  flow?: string,
+): Promise<AuthCallbackUrlResult> {
+  const origin = environment.isProduction
+    ? environment.appUrl
+    : (await getRequestOrigin()) || environment.appUrl;
+
+  if (!origin) {
+    return {
+      success: false,
+      error:
+        "Origin request tidak terbaca. Restart dev server dan cek konfigurasi URL auth.",
+    };
+  }
+
+  if (environment.isDevelopment) {
+    const allowedHosts = new Set(
+      [getHostFromOrigin(environment.appUrl), ...environment.allowedDevOrigins]
+        .map(normalizeAllowedHost)
+        .filter((host): host is string => Boolean(host)),
+    );
+    const requestHost = getHostFromOrigin(origin);
+
+    if (!allowedHosts.has(requestHost)) {
+      return {
+        success: false,
+        error: `Origin ${origin} belum diizinkan untuk auth redirect. Tambahkan ${requestHost} ke ALLOWED_DEV_ORIGINS, restart dev server, dan pastikan Supabase Redirect URLs berisi /auth/callback untuk origin tersebut.`,
+      };
+    }
+  }
+
+  const callbackUrl = new URL("/auth/callback", origin);
+  callbackUrl.searchParams.set("next", next);
+
+  if (flow) {
+    callbackUrl.searchParams.set("flow", flow);
+  }
+
+  return { success: true, url: callbackUrl.toString() };
+}
 
 export async function signUp(formData: FormData): Promise<ActionResult> {
   const supabase = await createClient();
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const name = formData.get("name") as string;
+  const callbackUrl = await createAuthCallbackUrl("/transaksi");
+
+  if (!callbackUrl.success) {
+    return { success: false, error: callbackUrl.error };
+  }
 
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: { name },
-      emailRedirectTo: `${environment.appUrl}/auth/callback?next=/transaksi`,
+      emailRedirectTo: callbackUrl.url,
     },
   });
 
@@ -104,8 +219,14 @@ export async function resetPasswordRequest(
     return { success: false, error: "Email wajib diisi" };
   }
 
+  const callbackUrl = await createAuthCallbackUrl("/reset-password");
+
+  if (!callbackUrl.success) {
+    return { success: false, error: callbackUrl.error };
+  }
+
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${environment.appUrl}/auth/callback?next=/reset-password`,
+    redirectTo: callbackUrl.url,
   });
 
   if (error) {
@@ -153,11 +274,16 @@ export async function updatePassword(
 
 export async function signInWithGoogle(): Promise<ActionResult<{ url: string }>> {
   const supabase = await createClient();
+  const callbackUrl = await createAuthCallbackUrl("/transaksi");
+
+  if (!callbackUrl.success) {
+    return { success: false, error: callbackUrl.error };
+  }
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${environment.appUrl}/auth/callback?next=/transaksi`,
+      redirectTo: callbackUrl.url,
     },
   });
 
@@ -207,10 +333,16 @@ export async function linkGoogleIdentity(): Promise<ActionResult<{ url: string }
     queryParams.login_hint = user.email;
   }
 
+  const callbackUrl = await createAuthCallbackUrl("/settings", "link_google");
+
+  if (!callbackUrl.success) {
+    return { success: false, error: callbackUrl.error };
+  }
+
   const { data, error } = await supabase.auth.linkIdentity({
     provider: "google",
     options: {
-      redirectTo: `${environment.appUrl}/auth/callback?next=/settings&flow=link_google`,
+      redirectTo: callbackUrl.url,
       queryParams,
     },
   });

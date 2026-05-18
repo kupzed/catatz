@@ -41,6 +41,7 @@ Security headers saat ini:
 
 - [ ] Supabase Auth Site URL sesuai domain production.
 - [ ] Redirect URLs berisi domain production dan URL development yang diperlukan.
+- [ ] Origin development tambahan untuk OAuth hanya diizinkan lewat `ALLOWED_DEV_ORIGINS` dan tidak diset di production.
 - [ ] Login/register flow sudah dites.
 - [ ] Logout membersihkan session dan redirect ke `/login`.
 - [ ] Password update hanya untuk user login.

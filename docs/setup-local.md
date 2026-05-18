@@ -75,6 +75,7 @@ Jika ingin memakai Supabase CLI local di masa depan:
 ## PWA Local
 
 - Development mode menonaktifkan Serwist melalui `disable: process.env.NODE_ENV === "development"`.
+- Hook registration PWA juga tidak mendaftarkan `/sw.js` di development dan akan mencoba unregister service worker lama beserta cache `serwist-*`/`catatz-*`.
 - Service worker production dibuat saat `npm run build`.
 - Untuk test PWA lengkap, gunakan build production dan akses via HTTPS/domain yang valid.
 
@@ -90,6 +91,26 @@ ALLOWED_DEV_ORIGINS=192.168.1.10:3000,localhost:3000
 ```
 
 Pastikan Supabase Redirect URLs juga mengizinkan URL yang sama.
+
+## Ngrok OAuth Testing
+
+Untuk test Google OAuth melalui ngrok, `NEXT_PUBLIC_APP_URL` boleh tetap menunjuk localhost. Tambahkan host ngrok ke allowlist development agar Server Action auth memakai origin request ngrok sebagai callback.
+
+Contoh:
+
+```env
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+ALLOWED_DEV_ORIGINS=morphing-easeful-starry.ngrok-free.dev,localhost:3000
+```
+
+Setelah mengubah env, restart `npm run dev`.
+
+Konfigurasi eksternal yang wajib selaras:
+
+- Supabase Auth Site URL saat test ngrok: `https://morphing-easeful-starry.ngrok-free.dev`.
+- Supabase Redirect URLs minimal: `https://morphing-easeful-starry.ngrok-free.dev/auth/callback` dan `http://localhost:3000/auth/callback`.
+- Google Cloud Authorized JavaScript origin: `https://morphing-easeful-starry.ngrok-free.dev`.
+- Google Cloud Authorized redirect URI tetap callback Supabase: `https://<project-ref>.supabase.co/auth/v1/callback`.
 
 ## Masalah Umum
 

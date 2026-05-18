@@ -44,14 +44,15 @@ Status: Aktif untuk email/password login/register, reset password email, Google 
 ## Business Rules
 
 - Register mengirim metadata `name`.
-- Register mengirim email verification redirect ke `/auth/callback?next=/transaksi`.
+- Register mengirim email verification redirect ke `/auth/callback?next=/transaksi` memakai origin production atau origin development yang sudah diizinkan.
 - Login sukses redirect ke `/transaksi`.
-- Google login/daftar memakai `signInWithOAuth` dan redirect ke `/auth/callback?next=/transaksi`.
-- Link Identity Google dari Settings memakai `linkIdentity` dan redirect ke `/auth/callback?next=/settings&flow=link_google`.
+- Google login/daftar memakai `signInWithOAuth` dan redirect ke `/auth/callback?next=/transaksi` memakai origin production atau origin development yang sudah diizinkan.
+- Link Identity Google dari Settings memakai `linkIdentity` dan redirect ke `/auth/callback?next=/settings&flow=link_google` memakai origin production atau origin development yang sudah diizinkan.
 - Callback flow `link_google` hanya mempertahankan identity Google jika email Google sama dengan email utama user. Jika berbeda, callback mencoba `unlinkIdentity` dan mengembalikan message error ke `/settings`.
 - Supabase automatic linking tetap ditangani oleh Supabase Auth saat OAuth sign-in menemukan user existing dengan email terverifikasi yang sama.
 - Auth page akan redirect ke `/transaksi` jika user sudah login.
-- Route selain `/`, `/login`, `/register`, `/forgot-password`, dan `/reset-password` diperlakukan protected oleh proxy.
+- Route selain `/`, `/login`, `/register`, `/forgot-password`, `/reset-password`, dan `/auth/callback` diperlakukan protected oleh proxy.
+- Jika auth code salah mendarat di `/login` atau `/register`, middleware mengalihkan request ke `/auth/callback` dengan query yang sama.
 
 ## UI Behavior
 
@@ -65,3 +66,4 @@ Status: Aktif untuk email/password login/register, reset password email, Google 
 ## TODO / Improvement
 
 - Pastikan Google provider, Redirect URLs, dan Manual Linking aktif di Supabase Dashboard sebelum menguji flow Link Identity.
+- Untuk ngrok development, pastikan host ngrok ada di `ALLOWED_DEV_ORIGINS`, Supabase Redirect URLs, dan Google Cloud Authorized JavaScript origins.

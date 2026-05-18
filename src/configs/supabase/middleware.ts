@@ -4,6 +4,17 @@ import { environment } from '../environment';
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
+  const pathname = request.nextUrl.pathname;
+  const hasAuthCode = request.nextUrl.searchParams.has('code');
+
+  if (
+    hasAuthCode &&
+    (pathname.startsWith('/login') || pathname.startsWith('/register'))
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/auth/callback';
+    return NextResponse.redirect(url);
+  }
 
   const supabase = createServerClient(
     environment.supabaseUrl,
@@ -35,13 +46,13 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // Protected routes
-  const pathname = request.nextUrl.pathname;
   const isAuthPage =
     pathname.startsWith('/login') || 
     pathname.startsWith('/register') ||
     pathname.startsWith('/forgot-password') ||
     pathname.startsWith('/reset-password');
-  const isProtected = !isAuthPage && pathname !== '/';
+  const isAuthCallback = pathname.startsWith('/auth/callback');
+  const isProtected = !isAuthPage && !isAuthCallback && pathname !== '/';
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone();

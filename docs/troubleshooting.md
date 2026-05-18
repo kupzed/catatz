@@ -54,17 +54,50 @@ Kemungkinan penyebab:
 - `NEXT_PUBLIC_APP_URL` salah.
 - Supabase Site URL salah.
 - Redirect URLs belum berisi `/auth/callback`.
+- Development/ngrok memakai origin request yang belum ada di `ALLOWED_DEV_ORIGINS`.
+- `/auth/callback` belum masuk allowlist Redirect URLs Supabase untuk origin yang sedang dipakai.
 
 Solusi:
 
 - Update `NEXT_PUBLIC_APP_URL`.
 - Update Supabase Auth Site URL.
+- Untuk ngrok development, set `ALLOWED_DEV_ORIGINS=morphing-easeful-starry.ngrok-free.dev,localhost:3000`, lalu restart dev server.
 - Tambahkan Redirect URL:
 
 ```txt
 http://localhost:3000/auth/callback
+https://morphing-easeful-starry.ngrok-free.dev/auth/callback
 https://domain-production/auth/callback
 ```
+
+## OAuth code mendarat di `/login?code=...`
+
+Kemungkinan penyebab:
+
+- Supabase Auth Site URL atau redirect target masih mengarah ke halaman auth, bukan `/auth/callback`.
+- Origin ngrok/local belum diizinkan di `ALLOWED_DEV_ORIGINS`.
+- `/auth/callback` belum ada di Supabase Redirect URLs untuk origin tersebut.
+
+Solusi:
+
+- Pastikan Server Action Google OAuth memakai callback `/auth/callback?next=/transaksi`.
+- Pastikan Supabase Redirect URLs berisi origin yang dipakai, misalnya `https://morphing-easeful-starry.ngrok-free.dev/auth/callback`.
+- Restart dev server setelah mengubah `.env.local`.
+- Middleware memiliki safety net yang memindahkan `/login?code=...` dan `/register?code=...` ke `/auth/callback` dengan query yang sama, tetapi konfigurasi Supabase tetap harus dibetulkan.
+
+## `bad-precaching-response` dari `/sw.js` saat development
+
+Kemungkinan penyebab:
+
+- Service worker production lama masih terdaftar di origin development/ngrok.
+- Browser mencoba precache asset `_next/static/media/*` dari build lama yang sudah tidak tersedia.
+
+Solusi:
+
+- Jalankan app dalam development seperti biasa; hook PWA akan mencoba unregister service worker lama dan menghapus cache `serwist-*`/`catatz-*`.
+- Reload halaman setelah cleanup berjalan.
+- Jika browser masih memakai service worker lama, hapus site data untuk origin ngrok/local dari DevTools.
+- Service worker penuh hanya divalidasi di production build melalui `npm run build`.
 
 ## Build error
 

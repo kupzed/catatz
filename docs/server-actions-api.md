@@ -38,7 +38,7 @@ Auth requirement: public.
 
 Supabase access: `supabase.auth.signUp`.
 
-Catatan: mengirim `emailRedirectTo` ke `/auth/callback?next=/transaksi`.
+Catatan: mengirim `emailRedirectTo` ke `/auth/callback?next=/transaksi` memakai origin production dari `NEXT_PUBLIC_APP_URL` atau origin request development yang ada di `ALLOWED_DEV_ORIGINS`.
 
 ### `signIn`
 
@@ -88,7 +88,7 @@ Auth requirement: public.
 
 Supabase access: `supabase.auth.resetPasswordForEmail`.
 
-Catatan: redirect reset diarahkan ke `/auth/callback?next=/reset-password`.
+Catatan: redirect reset diarahkan ke `/auth/callback?next=/reset-password` memakai origin production dari `NEXT_PUBLIC_APP_URL` atau origin request development yang ada di `ALLOWED_DEV_ORIGINS`.
 
 ### `updatePassword`
 
@@ -116,7 +116,7 @@ Auth requirement: public.
 
 Supabase access: `supabase.auth.signInWithOAuth`.
 
-Catatan: redirect OAuth diarahkan ke `/auth/callback?next=/transaksi`.
+Catatan: redirect OAuth diarahkan ke `/auth/callback?next=/transaksi` memakai origin production dari `NEXT_PUBLIC_APP_URL` atau origin request development yang ada di `ALLOWED_DEV_ORIGINS`. Jika origin development belum diizinkan, action mengembalikan error dan tidak membuat URL OAuth.
 
 ### `linkGoogleIdentity`
 
@@ -130,7 +130,7 @@ Auth requirement: authenticated.
 
 Supabase access: `supabase.auth.getUser`, `supabase.auth.getUserIdentities`, `supabase.auth.linkIdentity`.
 
-Catatan: redirect OAuth diarahkan ke `/auth/callback?next=/settings&flow=link_google`. Action mengirim `login_hint` berisi email utama user.
+Catatan: redirect OAuth diarahkan ke `/auth/callback?next=/settings&flow=link_google` memakai origin production dari `NEXT_PUBLIC_APP_URL` atau origin request development yang ada di `ALLOWED_DEV_ORIGINS`. Action mengirim `login_hint` berisi email utama user.
 
 ### `unlinkGoogleIdentity`
 
@@ -165,6 +165,7 @@ Output:
 - Redirect ke `next` jika sukses.
 - Untuk `flow=link_google`, callback memvalidasi email identity Google sama dengan email utama user. Jika cocok, redirect ke `/settings?message=google-linked`; jika berbeda, callback mencoba `unlinkIdentity` dan redirect dengan message error.
 - Redirect ke `/login?message=auth-callback-failed` jika gagal.
+- Middleware memperlakukan route ini sebagai public dan memindahkan `/login?code=...` atau `/register?code=...` ke route ini sebagai recovery fallback.
 
 Auth requirement: public callback.
 
