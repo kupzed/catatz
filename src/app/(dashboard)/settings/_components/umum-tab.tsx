@@ -13,7 +13,6 @@ type Profile = {
   name: string | null;
   avatar_url?: string | null;
   created_at?: string | null;
-  providers?: string[];
 };
 
 type Props = {
@@ -26,7 +25,7 @@ export function UmumTab({ profile, preferences }: Props) {
     <div className="space-y-6 max-w-3xl">
       <ProfileSection profile={profile} />
       <SystemPreferenceSection preferences={preferences} />
-      <ConnectedAccountSection providers={profile?.providers || []} />
+      <ConnectedAccountSection />
       <ExportSection />
     </div>
   );

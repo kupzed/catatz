@@ -2,8 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { signUp } from "@/actions/auth-action";
-import { createClient } from "@/configs/supabase/client";
+import { signUp, signInWithGoogle } from "@/actions/auth-action";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,16 +18,11 @@ export default function RegisterPage() {
 
   const handleGoogleLogin = () => {
     startGoogleTransition(async () => {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/transaksi`,
-        },
-      });
-      
-      if (error) {
-        toast.error("Daftar via Google gagal", { description: error.message });
+      const res = await signInWithGoogle();
+      if (res?.error) {
+        toast.error("Daftar via Google gagal", { description: res.error });
+      } else if (res?.data?.url) {
+        window.location.href = res.data.url;
       }
     });
   };
