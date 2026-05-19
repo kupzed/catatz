@@ -14,23 +14,17 @@ import { Mic, MicOff, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { VoiceParseResult } from '@/types/voice-parser';
 
-// ─────────────────────────────────────────────────────────────
-// Props
-// ─────────────────────────────────────────────────────────────
-
 type Props = {
   onParsed: (result: VoiceParseResult) => void;
   onError: (message: string) => void;
   disabled?: boolean;
 };
 
-// ─────────────────────────────────────────────────────────────
-// Component
-// ─────────────────────────────────────────────────────────────
-
 export default function VoiceInputButton({ onParsed, onError, disabled }: Props) {
   const {
     isListening,
+    isStarting,
+    recordingState,
     transcript,
     finalTranscript,
     isSupported,
@@ -69,12 +63,10 @@ export default function VoiceInputButton({ onParsed, onError, disabled }: Props)
     }
   }, [onError, onParsed, resetTranscript]);
 
-  // Show hook-level errors as toasts
   useEffect(() => {
     if (error) toast.error(error);
   }, [error]);
 
-  // When user stops speaking and final transcript is available → send to Gemini
   useEffect(() => {
     if (!finalTranscript) {
       processedTranscriptRef.current = '';
@@ -103,7 +95,6 @@ export default function VoiceInputButton({ onParsed, onError, disabled }: Props)
     }
   }
 
-  // ── Render: NOT_SUPPORTED ──────────────────────────────────
   if (!isSupported) {
     return (
       <TooltipProvider>
@@ -128,8 +119,14 @@ export default function VoiceInputButton({ onParsed, onError, disabled }: Props)
     );
   }
 
-  // ── Render: PROCESSING ────────────────────────────────────
-  if (isProcessing) {
+  if (isProcessing || isStarting) {
+    const label =
+      recordingState === 'requesting-permission'
+        ? 'Meminta izin...'
+        : isProcessing
+          ? 'Memproses...'
+          : 'Menyiapkan...';
+
     return (
       <Button
         type="button"
@@ -139,12 +136,11 @@ export default function VoiceInputButton({ onParsed, onError, disabled }: Props)
         className="h-8 gap-1.5"
       >
         <Loader2 className="h-3.5 w-3.5 animate-spin" />
-        Memproses...
+        {label}
       </Button>
     );
   }
 
-  // ── Render: LISTENING / IDLE ──────────────────────────────
   return (
     <div className="flex flex-col items-start gap-1 w-full">
       <Button
@@ -152,7 +148,7 @@ export default function VoiceInputButton({ onParsed, onError, disabled }: Props)
         variant={isListening ? 'destructive' : 'outline'}
         size="sm"
         onClick={handleToggle}
-        disabled={disabled}
+        disabled={disabled || recordingState === 'stopping'}
         className={`h-8 gap-1.5 transition-all duration-200 ${
           isListening ? 'animate-pulse' : ''
         }`}
@@ -170,10 +166,9 @@ export default function VoiceInputButton({ onParsed, onError, disabled }: Props)
         )}
       </Button>
 
-      {/* Interim transcript preview */}
       {isListening && transcript.length > 0 && (
         <p className="text-[11px] text-muted-foreground italic leading-tight px-1 max-w-full truncate">
-          🎙 {transcript}
+          Mendengar: {transcript}
         </p>
       )}
     </div>

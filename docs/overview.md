@@ -29,7 +29,7 @@ Aplikasi saat ini berfokus pada pencatatan transaksi harian, pengelolaan rekenin
 - Input suara transaksi menggunakan browser Speech Recognition dan Gemini API melalui server action.
 - CRUD rekening dan koreksi saldo berbasis transaksi correction.
 - CRUD kategori custom dan kategori system read-only.
-- Hutang/piutang, cicilan, pelunasan, reminder WhatsApp link, dan progress pembayaran.
+- Hutang/piutang, cicilan, detail/edit/hapus cicilan, pelunasan dengan pilihan rekening, dan progress pembayaran.
 - Rekap pemasukan/pengeluaran bulanan, breakdown kategori, dan budget usage jika data budget tersedia.
 - Settings profil, avatar, password, tema, dan export PDF.
 - PWA manifest, icons, iOS metadata, service worker, offline fallback, install banner, dan update prompt.

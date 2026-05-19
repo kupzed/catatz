@@ -146,7 +146,7 @@ Solusi:
 - Cek session dengan `supabase.auth.getUser()`.
 - Cek nilai `user_id` row.
 - Cek policy di [RLS Policies](./rls-policies.md).
-- Jalankan/review migration `009-grant-api-access.sql`.
+- Review pernyataan `GRANT` pada migration table terkait di `src/migrations`.
 
 ## Migration gagal
 

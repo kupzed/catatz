@@ -73,12 +73,3 @@ export function percentage(value: number, total: number): number {
   if (total === 0) return 0;
   return Math.min(Math.round((value / total) * 100), 100);
 }
-
-/**
- * Generate WhatsApp reminder URL for hutang
- */
-export function waReminderUrl(phone: string, message: string): string {
-  const cleaned = phone.replace(/\D/g, '');
-  const intl = cleaned.startsWith('0') ? `62${cleaned.slice(1)}` : cleaned;
-  return `https://wa.me/${intl}?text=${encodeURIComponent(message)}`;
-}

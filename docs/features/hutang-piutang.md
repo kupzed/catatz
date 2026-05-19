@@ -21,7 +21,6 @@ Fitur hutang/piutang digunakan untuk mencatat pinjaman yang user berikan atau te
 - Actions: `src/actions/hutang-action.ts`
 - Validation: `src/validations/hutang-validation.ts`
 - Types: `src/types/hutang.d.ts`
-- Helper reminder: `waReminderUrl` di `src/lib/utils.ts`
 
 ## Data Source
 
@@ -43,6 +42,7 @@ Initial data diambil dengan:
 - `updateHutang`
 - `deleteHutang`
 - `createCicilan`
+- `updateCicilan`
 - `deleteCicilan`
 - `markHutangLunas`
 
@@ -52,9 +52,11 @@ Initial data diambil dengan:
 - `total_pinjaman` wajib lebih dari 0.
 - `sisa_tagihan` diisi dari `total_pinjaman` saat create.
 - Cicilan wajib memiliki nominal lebih dari 0.
-- Trigger database menghitung ulang `sisa_tagihan` dan status setelah insert/delete cicilan.
+- Trigger database menghitung ulang `sisa_tagihan` dan status setelah cicilan dibuat, diubah, atau dihapus.
 - Trigger database mengubah saldo rekening saat hutang/piutang atau cicilan mempengaruhi rekening.
-- UI melunaskan hutang dengan membuat cicilan sebesar sisa tagihan.
+- Cicilan menyimpan `tipe_hutang_snapshot` agar rollback saldo tetap benar ketika parent hutang/piutang dihapus setelah memiliki cicilan.
+- UI melunaskan hutang dengan meminta user memilih rekening terlebih dahulu, lalu membuat cicilan sebesar sisa tagihan.
+- Tipe hutang/piutang tidak bisa diubah setelah catatan memiliki cicilan.
 
 ## UI Behavior
 
@@ -62,10 +64,12 @@ Initial data diambil dengan:
 - Progress menunjukkan persentase pembayaran.
 - User bisa tambah/edit/hapus hutang/piutang.
 - User bisa tambah cicilan.
-- User bisa lunaskan catatan melalui confirm dialog.
-- User bisa membuka WhatsApp reminder link dengan helper `waReminderUrl`.
+- User bisa membuka Detail untuk melihat daftar cicilan.
+- User bisa mengedit dan menghapus cicilan dari Detail.
+- User bisa lunaskan catatan melalui dialog pilihan rekening.
+- Tombol WhatsApp reminder tidak tersedia.
 
 ## TODO / Improvement
 
 - Status `overdue` ada di enum database, tetapi belum terlihat logic otomatis yang mengubah status menjadi overdue berdasarkan tanggal jatuh tempo.
-- Pertimbangkan riwayat cicilan yang lebih rinci jika kebutuhan audit bertambah.
+- Pertimbangkan audit log khusus jika riwayat edit/hapus cicilan perlu disimpan permanen.

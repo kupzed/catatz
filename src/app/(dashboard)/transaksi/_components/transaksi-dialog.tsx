@@ -62,6 +62,8 @@ type Props = {
   onQueued?: (action: QueuedAction) => void;
   /** Data yang di-prefill dari Copy Transaksi (mode create dengan data awal) */
   copyFrom?: Transaksi | null;
+  /** Tanggal default untuk mode create normal, mengikuti periode yang dipilih. */
+  defaultTanggal?: string;
 };
 
 const TIPE_TABS = [
@@ -95,6 +97,7 @@ export default function TransaksiDialog({
   onUpdated,
   onQueued,
   copyFrom,
+  defaultTanggal,
 }: Props) {
   const isEdit = !!editData;
   const isCorrection = editData?.tipe === "correction";
@@ -154,12 +157,12 @@ export default function TransaksiDialog({
     } else {
       reset({
         tipe: "expense",
-        tanggal: todayISODate(),
+        tanggal: defaultTanggal ?? todayISODate(),
         waktu: currentTime(),
         tags: [],
       });
     }
-  }, [editData, copyFrom, reset, open]);
+  }, [editData, copyFrom, defaultTanggal, reset, open]);
 
   // Load recent judul saat dialog pertama dibuka (mode create)
   useEffect(() => {

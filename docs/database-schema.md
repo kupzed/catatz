@@ -138,7 +138,7 @@ Indexes:
 
 Trigger/function:
 
-- `public.update_saldo_rekening_hutang()` mengubah saldo rekening ketika hutang/piutang dibuat, diubah, atau dihapus.
+- `public.update_saldo_rekening_hutang()` mengubah saldo rekening ketika hutang/piutang dibuat, diubah, diubah tipe/rekening/nominalnya, atau dihapus.
 - Trigger `trg_rekening_hutang`.
 
 ## Tabel `hutang_cicilan`
@@ -153,6 +153,7 @@ Deskripsi: pembayaran cicilan untuk row `hutang`.
 | `tanggal` | `date` | No | `current_date` | Tanggal cicilan. |
 | `waktu` | `time` | Yes | `current_time` | Waktu cicilan. |
 | `rekening_id` | `uuid` | Yes | - | FK ke `rekening(id)`, `ON DELETE SET NULL`. |
+| `tipe_hutang_snapshot` | `tipe_hutang` | No | Diisi trigger | Snapshot `hutang.tipe` saat cicilan dibuat agar rollback saldo saat cascade delete tetap memakai arah saldo yang benar. |
 | `catatan` | `text` | Yes | - | Catatan cicilan. |
 | `created_at` | `timestamptz` | Yes | `now()` | Waktu dibuat. |
 
@@ -162,8 +163,10 @@ Indexes:
 
 Trigger/function:
 
-- `public.update_sisa_hutang()` menghitung ulang `sisa_tagihan` dan status `lunas`/`aktif`.
-- `public.update_saldo_rekening_cicilan()` mengubah saldo rekening ketika cicilan dibuat, diubah, atau dihapus.
+- `public.set_hutang_cicilan_tipe_snapshot()` mengisi snapshot tipe hutang pada cicilan.
+- `public.update_sisa_hutang()` menghitung ulang `sisa_tagihan` dan status `lunas`/`aktif` saat cicilan dibuat, diubah nominalnya, atau dihapus.
+- `public.update_saldo_rekening_cicilan()` mengubah saldo rekening ketika cicilan dibuat, diubah nominal/rekeningnya, atau dihapus.
+- Trigger `trg_set_cicilan_tipe_snapshot`.
 - Trigger `trg_update_sisa_hutang`.
 - Trigger `trg_rekening_cicilan`.
 
@@ -283,6 +286,7 @@ Policy storage:
 - Insert transaksi transfer mengurangi saldo rekening asal dan menambah rekening tujuan.
 - Delete/update transaksi membalik saldo lama lalu menerapkan saldo baru.
 - Transaksi correction sengaja dilewati trigger database dan diproses manual di Server Action.
-- Membuat hutang/piutang dapat mengubah saldo rekening berdasarkan `tipe`.
-- Membuat cicilan mengubah sisa tagihan dan saldo rekening.
+- Membuat, mengubah rekening/nominal/tipe, atau menghapus hutang/piutang dapat mengubah saldo rekening berdasarkan `tipe`.
+- Membuat, mengubah, atau menghapus cicilan mengubah sisa tagihan, status hutang/piutang, dan saldo rekening.
+- Menghapus parent hutang/piutang dengan cicilan memakai snapshot tipe cicilan agar saldo utama dan saldo cicilan tidak rollback dua kali atau tertinggal.
 - Kategori system tidak boleh diubah/dihapus user melalui RLS dan Server Action.

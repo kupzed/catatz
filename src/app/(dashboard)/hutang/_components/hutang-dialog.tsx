@@ -52,6 +52,7 @@ export default function HutangDialog({
   onUpdated,
 }: Props) {
   const isEdit = !!editData;
+  const hasCicilan = (editData?.cicilan?.length ?? 0) > 0;
   const [submitting, setSubmitting] = useState(false);
 
   const {
@@ -136,13 +137,24 @@ export default function HutangDialog({
           {/* Tipe */}
           <Tabs
             value={tipe}
-            onValueChange={(v) => setValue("tipe", v as HutangSchema["tipe"])}
+            onValueChange={(v) => {
+              if (!hasCicilan) setValue("tipe", v as HutangSchema["tipe"]);
+            }}
           >
             <TabsList className="w-full grid grid-cols-2">
-              <TabsTrigger value="menerima">📥 Saya Berhutang</TabsTrigger>
-              <TabsTrigger value="memberi">📤 Saya Meminjamkan</TabsTrigger>
+              <TabsTrigger value="menerima" disabled={hasCicilan}>
+                📥 Saya Berhutang
+              </TabsTrigger>
+              <TabsTrigger value="memberi" disabled={hasCicilan}>
+                📤 Saya Meminjamkan
+              </TabsTrigger>
             </TabsList>
           </Tabs>
+          {isEdit && hasCicilan && (
+            <p className="text-xs text-muted-foreground">
+              Tipe hutang/piutang tidak bisa diubah setelah memiliki cicilan.
+            </p>
+          )}
 
           {/* Nama Entitas */}
           <div className="space-y-1.5">

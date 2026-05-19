@@ -18,6 +18,7 @@ CatatZ memiliki manifest, app icons, iOS metadata, install UX, service worker Se
 - SW registration hook: `src/lib/sw-register.ts`
 - PWA components: `src/components/pwa`
 - Install hook: `src/hooks/use-pwa-install.ts`
+- Voice input hook: `src/hooks/use-voice-input.ts`
 - Offline queue: `src/lib/offline-queue.ts`
 - Icon generator: `src/scripts/generate-icons.mjs`
 
@@ -66,6 +67,8 @@ Behavior:
 - Dismiss install banner disimpan di localStorage key `catatz_pwa_dismissed` dengan cooldown 7 hari.
 - iOS Safari memakai guide manual, bukan prompt native.
 - Aplikasi mendeteksi mode standalone untuk mengetahui status installed.
+- Voice Input di mode Add to Home Screen meminta izin mikrofon melalui `getUserMedia`, memvalidasi audio track masih `live`, menunggu event start/audio start sebelum menandai state mendengar, dan membersihkan stream saat stop/error/end.
+- Error mikrofon seperti izin ditolak, audio capture gagal, koneksi speech gagal, atau pembatasan iOS standalone ditampilkan sebagai pesan fallback yang aman.
 
 ## Service Worker
 
@@ -143,6 +146,7 @@ Dependency:
 - [x] Update prompt tersedia.
 - [x] POST dan `/api/*` tidak di-cache.
 - [x] Offline queue transaksi tersedia.
+- [x] Voice Input memiliki permission/stream fallback untuk iOS Add to Home Screen.
 
 ## Deployment HTTPS
 

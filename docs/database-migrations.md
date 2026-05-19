@@ -14,15 +14,13 @@ Migration project berada di `src/migrations`.
 | `006-budget.sql` | Membuat table `budget`, unique constraint, index, RLS, dan grant API. | Active |
 | `007-recurring.sql` | Membuat type `interval_recurring`, table `recurring_transaksi`, RLS, dan grant API. | Active, belum terlihat UI aktif |
 | `008-avatars-storage.sql` | Membuat bucket storage `avatars` dan policy storage object. | Active |
-| `008-reorder-columns-production.sql` | Maintenance production untuk reorder kolom `transaksi`, `hutang`, dan `hutang_cicilan` dengan recreate table dalam transaction. | Active, perlu hati-hati |
-| `009-grant-api-access.sql` | Grant schema/table/sequence untuk `anon` dan `authenticated` agar kompatibel dengan kebutuhan Supabase PostgREST. | Active |
+| `009-user-preferences.sql` | Membuat table `user_preferences`, index, RLS, dan grant API untuk preferensi user. | Active |
+| `010-user-sessions.sql` | Membuat table `user_sessions`, index, RLS, dan grant API untuk tracking sesi aktif. | Active |
+| `011-hutang-cicilan-balance-safety.sql` | Menambah snapshot tipe cicilan, policy UPDATE cicilan, dan memperbaiki trigger saldo/sisa hutang saat cicilan diubah atau parent dihapus. | Active |
 
 ## Catatan Urutan
 
-Ada dua file dengan prefix `008`:
-
-- `008-avatars-storage.sql`
-- `008-reorder-columns-production.sql`
+File migration yang ada saat ini berurutan dari `001` sampai `011` di `src/migrations`.
 
 Jangan menjalankan migration otomatis hanya berdasarkan asumsi nomor file tanpa review. Pastikan urutan eksekusi sesuai riwayat production/staging yang sebenarnya.
 

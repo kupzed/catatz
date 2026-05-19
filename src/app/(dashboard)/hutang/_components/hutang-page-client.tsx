@@ -1,15 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import type { Hutang } from "@/types/hutang";
+import { useMemo, useState } from "react";
+import type { Hutang, HutangCicilan } from "@/types/hutang";
 import type { Rekening } from "@/types/rekening";
 import {
+  currentTime,
   formatRupiah,
   formatTanggal,
   percentage,
-  waReminderUrl,
+  todayISODate,
 } from "@/lib/utils";
-import { deleteHutang, createCicilan } from "@/actions/hutang-action";
+import {
+  createCicilan,
+  deleteCicilan,
+  deleteHutang,
+  updateCicilan,
+} from "@/actions/hutang-action";
 import { toast } from "sonner";
 import {
   Select,
@@ -18,27 +24,45 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Plus,
-  Trash2,
-  Pencil,
   CheckCircle2,
-  MessageCircle,
-  HandCoins,
   ChevronDown,
   ChevronUp,
+  HandCoins,
+  ListChecks,
+  Pencil,
+  Plus,
+  Save,
+  Trash2,
+  X,
 } from "lucide-react";
 import HutangDialog from "./hutang-dialog";
 import { cn } from "@/lib/utils";
-import { todayISODate, currentTime } from "@/lib/utils";
 import { NominalInput } from "@/components/common/nominal-input";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 
 type Props = { initialHutang: Hutang[]; rekening: Rekening[] };
+
+type CicilanDraft = {
+  nominal: string;
+  rekening_id: string;
+  tanggal: string;
+  waktu: string;
+  catatan: string;
+};
 
 const STATUS_BADGE: Record<string, string> = {
   aktif: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
@@ -46,74 +70,116 @@ const STATUS_BADGE: Record<string, string> = {
   overdue: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
 };
 
+const emptyEditDraft = (): CicilanDraft => ({
+  nominal: "",
+  rekening_id: "none",
+  tanggal: todayISODate(),
+  waktu: currentTime(),
+  catatan: "",
+});
+
+function sortCicilan(cicilan?: HutangCicilan[]) {
+  return [...(cicilan ?? [])].sort((a, b) => {
+    const timeA = new Date(`${a.tanggal}T${a.waktu ?? "00:00"}`).getTime();
+    const timeB = new Date(`${b.tanggal}T${b.waktu ?? "00:00"}`).getTime();
+    return timeB - timeA;
+  });
+}
+
 export default function HutangPageClient({ initialHutang, rekening }: Props) {
   const [hutang, setHutang] = useState(initialHutang);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editData, setEditData] = useState<Hutang | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [detailHutangId, setDetailHutangId] = useState<string | null>(null);
+  const [lunasTarget, setLunasTarget] = useState<Hutang | null>(null);
+  const [lunasRekeningId, setLunasRekeningId] = useState("none");
   const [cicilanData, setCicilanData] = useState<
     Record<string, { nominal: string; rekening_id: string }>
   >({});
   const [loadingCicilan, setLoadingCicilan] = useState<string | null>(null);
+  const [editingCicilanId, setEditingCicilanId] = useState<string | null>(null);
+  const [editCicilanDraft, setEditCicilanDraft] =
+    useState<CicilanDraft>(emptyEditDraft);
 
   const memberi = hutang.filter((h) => h.tipe === "memberi");
   const menerima = hutang.filter((h) => h.tipe === "menerima");
+  const detailHutang = useMemo(
+    () => hutang.find((item) => item.id === detailHutangId) ?? null,
+    [detailHutangId, hutang],
+  );
+
+  function getRekeningLabel(id?: string | null) {
+    if (!id) return "Tanpa rekening";
+    const item = rekening.find((r) => r.id === id);
+    return item ? `${item.nama} (${item.jenis})` : "Rekening tidak ditemukan";
+  }
+
+  function replaceHutang(updated: Hutang) {
+    setHutang((prev) =>
+      prev.map((item) => (item.id === updated.id ? updated : item)),
+    );
+  }
 
   async function handleDelete(id: string) {
     const res = await deleteHutang(id);
     if (res.success) {
       setHutang((prev) => prev.filter((h) => h.id !== id));
+      if (detailHutangId === id) setDetailHutangId(null);
       toast.success("Hutang dihapus");
     } else {
       toast.error(res.error ?? "Gagal menghapus");
     }
   }
 
-  async function handleLunas(h: Hutang) {
-    if (h.sisa_tagihan <= 0) return;
-    setLoadingCicilan(h.id);
+  function openLunasDialog(h: Hutang) {
+    setLunasTarget(h);
+    setLunasRekeningId(h.rekening_id ?? "none");
+  }
+
+  async function handleLunas() {
+    if (!lunasTarget || Number(lunasTarget.sisa_tagihan) <= 0) return;
+
+    setLoadingCicilan(lunasTarget.id);
     const res = await createCicilan({
-      hutang_id: h.id,
-      nominal: h.sisa_tagihan,
-      rekening_id: h.rekening_id ?? undefined,
+      hutang_id: lunasTarget.id,
+      nominal: Number(lunasTarget.sisa_tagihan),
+      rekening_id:
+        lunasRekeningId && lunasRekeningId !== "none"
+          ? lunasRekeningId
+          : undefined,
       tanggal: todayISODate(),
       waktu: currentTime(),
+      catatan: "Pelunasan",
     });
-    if (res.success) {
-      setHutang((prev) =>
-        prev.map((prevH) =>
-          prevH.id === h.id
-            ? {
-                ...prevH,
-                status: "lunas",
-                sisa_tagihan: 0,
-                cicilan: [...(prevH.cicilan ?? []), res.data!],
-              }
-            : prevH,
-        ),
-      );
-      toast.success("Hutang dilunaskan");
+
+    if (res.success && res.data) {
+      replaceHutang(res.data);
+      setLunasTarget(null);
+      toast.success("Catatan dilunaskan");
     } else {
       toast.error(res.error ?? "Gagal melunaskan hutang");
     }
+
     setLoadingCicilan(null);
   }
 
-  async function handleCicilan(
-    hutangId: string,
-    totalPinjaman: number,
-    sisaTagihan: number,
-  ) {
-    const data = cicilanData[hutangId] || {};
-    const nominal = parseFloat(data.nominal ?? "0");
-    if (!nominal || nominal <= 0)
-      return toast.error("Masukkan nominal cicilan");
-    if (nominal > sisaTagihan)
-      return toast.error("Nominal melebihi sisa tagihan");
+  async function handleCicilan(h: Hutang) {
+    const data = cicilanData[h.id] || {};
+    const nominal = Number(data.nominal ?? "0");
+    const sisaTagihan = Number(h.sisa_tagihan);
 
-    setLoadingCicilan(hutangId);
+    if (!nominal || nominal <= 0) {
+      return toast.error("Masukkan nominal cicilan");
+    }
+
+    if (nominal > sisaTagihan) {
+      return toast.error("Nominal melebihi sisa tagihan");
+    }
+
+    setLoadingCicilan(h.id);
     const res = await createCicilan({
-      hutang_id: hutangId,
+      hutang_id: h.id,
       nominal,
       rekening_id:
         data.rekening_id && data.rekening_id !== "none"
@@ -122,44 +188,274 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
       tanggal: todayISODate(),
       waktu: currentTime(),
     });
-    if (res.success) {
-      setHutang((prev) =>
-        prev.map((h) => {
-          if (h.id !== hutangId) return h;
-          const newSisa = Math.max(h.sisa_tagihan - nominal, 0);
-          return {
-            ...h,
-            sisa_tagihan: newSisa,
-            status: newSisa === 0 ? "lunas" : h.status,
-            cicilan: [...(h.cicilan ?? []), res.data!],
-          };
-        }),
-      );
+
+    if (res.success && res.data) {
+      replaceHutang(res.data);
       setCicilanData((prev) => ({
         ...prev,
-        [hutangId]: { nominal: "", rekening_id: "" },
+        [h.id]: { nominal: "", rekening_id: "" },
       }));
       toast.success("Cicilan dicatat");
     } else {
       toast.error(res.error ?? "Gagal mencatat cicilan");
     }
+
     setLoadingCicilan(null);
   }
 
-  function renderGroup(title: string, items: Hutang[], emoji: string) {
+  function startEditCicilan(cicilan: HutangCicilan) {
+    setEditingCicilanId(cicilan.id);
+    setEditCicilanDraft({
+      nominal: String(Number(cicilan.nominal)),
+      rekening_id: cicilan.rekening_id ?? "none",
+      tanggal: cicilan.tanggal,
+      waktu: cicilan.waktu?.substring(0, 5) ?? currentTime(),
+      catatan: cicilan.catatan ?? "",
+    });
+  }
+
+  async function handleUpdateCicilan(h: Hutang, cicilan: HutangCicilan) {
+    const nominal = Number(editCicilanDraft.nominal);
+    if (!nominal || nominal <= 0) {
+      return toast.error("Masukkan nominal cicilan");
+    }
+
+    const otherCicilanTotal = (h.cicilan ?? [])
+      .filter((item) => item.id !== cicilan.id)
+      .reduce((acc, item) => acc + Number(item.nominal), 0);
+    const maxNominal = Math.max(
+      Number(h.total_pinjaman) - otherCicilanTotal,
+      0,
+    );
+
+    if (nominal > maxNominal) {
+      return toast.error("Total cicilan melebihi total pinjaman");
+    }
+
+    setLoadingCicilan(h.id);
+    const res = await updateCicilan(cicilan.id, {
+      nominal,
+      rekening_id: editCicilanDraft.rekening_id,
+      tanggal: editCicilanDraft.tanggal,
+      waktu: editCicilanDraft.waktu,
+      catatan: editCicilanDraft.catatan,
+    });
+
+    if (res.success && res.data) {
+      replaceHutang(res.data);
+      setEditingCicilanId(null);
+      setEditCicilanDraft(emptyEditDraft());
+      toast.success("Cicilan diperbarui");
+    } else {
+      toast.error(res.error ?? "Gagal memperbarui cicilan");
+    }
+
+    setLoadingCicilan(null);
+  }
+
+  async function handleDeleteCicilan(id: string) {
+    const res = await deleteCicilan(id);
+    if (res.success && res.data) {
+      replaceHutang(res.data);
+      toast.success("Cicilan dihapus");
+    } else {
+      toast.error(res.error ?? "Gagal menghapus cicilan");
+    }
+  }
+
+  function renderCicilanDetail(h: Hutang) {
+    const cicilan = sortCicilan(h.cicilan);
+
+    if (cicilan.length === 0) {
+      return (
+        <div className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
+          Belum ada cicilan.
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-3">
+        {cicilan.map((item) => {
+          const isEditing = editingCicilanId === item.id;
+
+          return (
+            <div key={item.id} className="rounded-lg border p-3 space-y-3">
+              {isEditing ? (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Nominal</Label>
+                      <NominalInput
+                        value={editCicilanDraft.nominal}
+                        onValueChange={(value) =>
+                          setEditCicilanDraft((prev) => ({
+                            ...prev,
+                            nominal: value.toString(),
+                          }))
+                        }
+                        className="h-9 text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Rekening</Label>
+                      <Select
+                        value={editCicilanDraft.rekening_id}
+                        onValueChange={(value) =>
+                          setEditCicilanDraft((prev) => ({
+                            ...prev,
+                            rekening_id: value,
+                          }))
+                        }
+                      >
+                        <SelectTrigger className="h-9 text-xs">
+                          <SelectValue placeholder="Tanpa rekening" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Tanpa rekening</SelectItem>
+                          {rekening.map((r) => (
+                            <SelectItem key={r.id} value={r.id}>
+                              {r.nama}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex-1 space-y-1.5 min-w-0">
+                      <Label className="text-xs">Tanggal</Label>
+                      <Input
+                        type="date"
+                        value={editCicilanDraft.tanggal}
+                        onChange={(event) =>
+                          setEditCicilanDraft((prev) => ({
+                            ...prev,
+                            tanggal: event.target.value,
+                          }))
+                        }
+                        className="w-full appearance-none bg-background dark:bg-input/20 border-input"
+                      />
+                    </div>
+                    <div className="w-28 space-y-1.5 shrink-0">
+                      <Label className="text-xs">Waktu</Label>
+                      <Input
+                        type="time"
+                        value={editCicilanDraft.waktu}
+                        onChange={(event) =>
+                          setEditCicilanDraft((prev) => ({
+                            ...prev,
+                            waktu: event.target.value,
+                          }))
+                        }
+                        className="w-full appearance-none bg-background dark:bg-input/20 border-input"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Catatan</Label>
+                    <Input
+                      value={editCicilanDraft.catatan}
+                      onChange={(event) =>
+                        setEditCicilanDraft((prev) => ({
+                          ...prev,
+                          catatan: event.target.value,
+                        }))
+                      }
+                      placeholder="Catatan opsional"
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 gap-1"
+                      onClick={() => {
+                        setEditingCicilanId(null);
+                        setEditCicilanDraft(emptyEditDraft());
+                      }}
+                    >
+                      <X className="h-3.5 w-3.5" />
+                      Batal
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="h-8 gap-1 bg-indigo-600 hover:bg-indigo-500 text-white"
+                      disabled={loadingCicilan === h.id}
+                      onClick={() => handleUpdateCicilan(h, item)}
+                    >
+                      <Save className="h-3.5 w-3.5" />
+                      Simpan
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm">
+                        {formatRupiah(Number(item.nominal))}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {formatTanggal(item.tanggal, "d MMM yyyy")}
+                        {item.waktu ? `, ${item.waktu.substring(0, 5)}` : ""}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                        {getRekeningLabel(item.rekening_id)}
+                      </p>
+                      {item.catatan && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {item.catatan}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex gap-1 shrink-0">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8"
+                        onClick={() => startEditCicilan(item)}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <ConfirmDialog
+                        title="Hapus Cicilan?"
+                        description="Cicilan ini akan dihapus dan saldo rekening terkait akan dikembalikan oleh trigger database."
+                        onConfirm={() => handleDeleteCicilan(item.id)}
+                      >
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-rose-500 hover:text-rose-500 hover:bg-rose-500/10"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </ConfirmDialog>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  function renderGroup(title: string, items: Hutang[]) {
     if (items.length === 0) return null;
+
     return (
       <div>
-        <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-          {emoji} {title}
+        <h3 className="text-sm font-semibold text-muted-foreground mb-3">
+          {title}
         </h3>
         <div className="space-y-3">
           {items.map((h) => {
-            const pct = percentage(
-              h.total_pinjaman - h.sisa_tagihan,
-              h.total_pinjaman,
-            );
+            const totalPinjaman = Number(h.total_pinjaman);
+            const sisaTagihan = Number(h.sisa_tagihan);
+            const pct = percentage(totalPinjaman - sisaTagihan, totalPinjaman);
             const isExpanded = expanded === h.id;
+
             return (
               <div
                 key={h.id}
@@ -179,19 +475,18 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                           )}
                         >
                           {h.status === "lunas"
-                            ? "✅ Lunas"
+                            ? "Lunas"
                             : h.status === "overdue"
-                              ? "⚠️ Overdue"
-                              : "⏳ Aktif"}
+                              ? "Overdue"
+                              : "Aktif"}
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                        <span>
-                          Total: {formatRupiah(Number(h.total_pinjaman))}
-                        </span>
+                      <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-muted-foreground">
+                        <span>Total: {formatRupiah(totalPinjaman)}</span>
+                        <span>Rekening: {getRekeningLabel(h.rekening_id)}</span>
                         {h.tanggal_jatuh_tempo && (
                           <span>
-                            · Jatuh tempo:{" "}
+                            Jatuh tempo:{" "}
                             {formatTanggal(h.tanggal_jatuh_tempo, "d MMM yyyy")}
                           </span>
                         )}
@@ -199,25 +494,32 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-sm font-bold text-rose-500">
-                        {formatRupiah(Number(h.sisa_tagihan))}
+                        {formatRupiah(sisaTagihan)}
                       </p>
                       <p className="text-xs text-muted-foreground">sisa</p>
                     </div>
                   </div>
 
-                  {/* Progress */}
                   <div className="mt-3">
                     <div className="flex justify-between text-xs text-muted-foreground mb-1">
                       <span>Terbayar {pct}%</span>
                       <span>
-                        {formatRupiah(h.total_pinjaman - h.sisa_tagihan, true)}
+                        {formatRupiah(totalPinjaman - sisaTagihan, true)}
                       </span>
                     </div>
                     <Progress value={pct} className="h-2" />
                   </div>
 
-                  {/* Actions */}
                   <div className="flex gap-2 mt-3 flex-wrap">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs gap-1"
+                      onClick={() => setDetailHutangId(h.id)}
+                    >
+                      <ListChecks className="h-3 w-3" />
+                      Detail
+                    </Button>
                     {h.status !== "lunas" && (
                       <>
                         <Button
@@ -234,37 +536,14 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                             <ChevronDown className="h-3 w-3" />
                           )}
                         </Button>
-                        <ConfirmDialog
-                          title="Lunaskan Hutang?"
-                          description={`Aksi ini akan mencatat cicilan sebesar sisa tagihan (${formatRupiah(Number(h.sisa_tagihan))}) dan mengubah status menjadi lunas.`}
-                          onConfirm={() => handleLunas(h)}
-                        >
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7 text-xs gap-1 text-emerald-600"
-                          >
-                            <CheckCircle2 className="h-3 w-3" />
-                            Lunas
-                          </Button>
-                        </ConfirmDialog>
                         <Button
                           size="sm"
                           variant="outline"
-                          className="h-7 text-xs gap-1"
-                          asChild
+                          className="h-7 text-xs gap-1 text-emerald-600"
+                          onClick={() => openLunasDialog(h)}
                         >
-                          <a
-                            href={waReminderUrl(
-                              "",
-                              `Halo! Mengingatkan tagihan sebesar ${formatRupiah(Number(h.sisa_tagihan))}. Terima kasih.`,
-                            )}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <MessageCircle className="h-3 w-3" />
-                            WA
-                          </a>
+                          <CheckCircle2 className="h-3 w-3" />
+                          Lunas
                         </Button>
                       </>
                     )}
@@ -281,7 +560,7 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                     </Button>
                     <ConfirmDialog
                       title="Hapus Catatan?"
-                      description="Menghapus hutang/piutang ini juga akan menghapus semua riwayat cicilannya."
+                      description="Menghapus hutang/piutang ini juga akan menghapus semua riwayat cicilannya dan mengembalikan saldo rekening terkait."
                       onConfirm={() => handleDelete(h.id)}
                     >
                       <Button
@@ -295,10 +574,9 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                   </div>
                 </div>
 
-                {/* Cicilan Input */}
                 {isExpanded && h.status !== "lunas" && (
                   <div className="border-t bg-muted/30 px-4 py-3 space-y-2">
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <div className="flex-1 space-y-1">
                         <Label className="text-xs">Nominal Cicilan (Rp)</Label>
                         <NominalInput
@@ -328,12 +606,10 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                           }
                         >
                           <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="(Tanpa Rekening)" />
+                            <SelectValue placeholder="Tanpa rekening" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="none">
-                              (Tanpa Rekening)
-                            </SelectItem>
+                            <SelectItem value="none">Tanpa rekening</SelectItem>
                             {rekening.map((r) => (
                               <SelectItem key={r.id} value={r.id}>
                                 {r.nama}
@@ -346,13 +622,7 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                     <div className="flex justify-end mt-2">
                       <Button
                         size="sm"
-                        onClick={() =>
-                          handleCicilan(
-                            h.id,
-                            Number(h.total_pinjaman),
-                            Number(h.sisa_tagihan),
-                          )
-                        }
+                        onClick={() => handleCicilan(h)}
                         disabled={loadingCicilan === h.id}
                         className="h-8 bg-indigo-600 hover:bg-indigo-500 text-white"
                       >
@@ -400,8 +670,8 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
         </div>
       ) : (
         <div className="space-y-6">
-          {renderGroup("Piutang (Memberi Pinjaman)", memberi, "📤")}
-          {renderGroup("Hutang (Menerima Pinjaman)", menerima, "📥")}
+          {renderGroup("Piutang (Memberi Pinjaman)", memberi)}
+          {renderGroup("Hutang (Menerima Pinjaman)", menerima)}
         </div>
       )}
 
@@ -418,10 +688,80 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
           setDialogOpen(false);
         }}
         onUpdated={(h) => {
-          setHutang((prev) => prev.map((x) => (x.id === h.id ? h : x)));
+          replaceHutang(h);
           setDialogOpen(false);
         }}
       />
+
+      <Dialog
+        open={!!lunasTarget}
+        onOpenChange={(open) => {
+          if (!open) setLunasTarget(null);
+        }}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Pilih Rekening Pelunasan</DialogTitle>
+            <DialogDescription>
+              Pilih rekening yang digunakan untuk mencatat pelunasan sebesar{" "}
+              {formatRupiah(Number(lunasTarget?.sisa_tagihan ?? 0))}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label>Rekening</Label>
+            <Select value={lunasRekeningId} onValueChange={setLunasRekeningId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Tanpa rekening" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Tanpa rekening</SelectItem>
+                {rekening.map((r) => (
+                  <SelectItem key={r.id} value={r.id}>
+                    {r.nama} ({r.jenis})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setLunasTarget(null)}>
+              Batal
+            </Button>
+            <Button
+              onClick={handleLunas}
+              disabled={!!lunasTarget && loadingCicilan === lunasTarget.id}
+              className="bg-indigo-600 hover:bg-indigo-500 text-white"
+            >
+              Lunaskan
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!detailHutang}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDetailHutangId(null);
+            setEditingCicilanId(null);
+            setEditCicilanDraft(emptyEditDraft());
+          }
+        }}
+      >
+        <DialogContent className="max-w-sm sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Detail Cicilan</DialogTitle>
+            <DialogDescription>
+              {detailHutang
+                ? `${detailHutang.nama_entitas} - sisa ${formatRupiah(
+                    Number(detailHutang.sisa_tagihan),
+                  )}`
+                : "Daftar cicilan hutang/piutang."}
+            </DialogDescription>
+          </DialogHeader>
+          {detailHutang && renderCicilanDetail(detailHutang)}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

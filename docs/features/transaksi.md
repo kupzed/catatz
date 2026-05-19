@@ -68,6 +68,7 @@ Initial data diambil di Server Component dengan:
 - User bisa filter periode, tipe, rekening, search judul/catatan, dan sorting.
 - Query `?new=true` membuka dialog transaksi baru otomatis.
 - Dialog mendukung mode create, edit, copy, dan correction readonly behavior.
+- Tanggal default dialog create normal mengikuti tanggal/periode yang sedang dipilih di halaman transaksi; waktu tetap memakai waktu saat dialog dibuka.
 - Field kategori hanya tampil untuk income/expense.
 - Field rekening tujuan hanya tampil untuk transfer.
 - Judul suggestion diambil dari histori transaksi.

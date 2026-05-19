@@ -141,6 +141,7 @@ Saldo rekening tidak hanya dihitung di UI. Database memiliki trigger:
 
 - `trg_transaksi_saldo` menjalankan `update_saldo_rekening`.
 - `trg_rekening_hutang` menjalankan `update_saldo_rekening_hutang`.
+- `trg_set_cicilan_tipe_snapshot` menjalankan `set_hutang_cicilan_tipe_snapshot`.
 - `trg_update_sisa_hutang` menjalankan `update_sisa_hutang`.
 - `trg_rekening_cicilan` menjalankan `update_saldo_rekening_cicilan`.
 
@@ -148,6 +149,7 @@ Action layer juga menangani kasus khusus:
 
 - Koreksi saldo rekening membuat transaksi `correction`.
 - Transaksi `correction` tidak diproses trigger transaksi, sehingga saldo diperbarui manual oleh action.
+- Cicilan hutang/piutang menyimpan snapshot tipe hutang agar rollback saldo tetap konsisten saat cicilan diubah, dihapus, atau terhapus lewat cascade parent.
 - Edit/delete transaksi `correction` membalik atau menerapkan perubahan saldo secara manual.
 
 ## Alur PWA

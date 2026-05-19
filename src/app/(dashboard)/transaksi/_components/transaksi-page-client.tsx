@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Transaksi, Kategori, TransaksiFilter } from "@/types/transaksi";
 import { Rekening } from "@/types/rekening";
-import { formatRupiah, formatTanggal } from "@/lib/utils";
+import { formatRupiah, formatTanggal, todayISODate } from "@/lib/utils";
 import { deleteTransaksi } from "@/actions/transaksi-action";
 import {
   addToQueue,
@@ -447,6 +447,12 @@ export default function TransaksiPageClient({
   }
 
   const canNavigateDate = preset !== "all" && preset !== "custom";
+  const defaultDialogTanggal = useMemo(() => {
+    if (preset === "all") return todayISODate();
+    if (preset === "custom") return filter.dari ?? todayISODate();
+
+    return format(baseDate, "yyyy-MM-dd");
+  }, [baseDate, filter.dari, preset]);
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
@@ -886,6 +892,7 @@ export default function TransaksiPageClient({
         kategori={kategori}
         editData={editData}
         copyFrom={copyFrom}
+        defaultTanggal={defaultDialogTanggal}
         onCreated={handleCreated}
         onUpdated={handleUpdated}
         onQueued={handleQueued}

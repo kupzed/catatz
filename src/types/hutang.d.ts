@@ -27,6 +27,7 @@ export type HutangCicilan = {
   nominal: number;
   tanggal: string;
   waktu: string;
+  tipe_hutang_snapshot: TipeHutang;
   catatan: string | null;
   created_at: string;
 };
@@ -50,3 +51,10 @@ export type CicilanFormValues = {
   waktu?: string;
   catatan?: string;
 };
+
+export type CicilanUpdateValues = Partial<
+  Pick<
+    CicilanFormValues,
+    'rekening_id' | 'nominal' | 'tanggal' | 'waktu' | 'catatan'
+  >
+>;

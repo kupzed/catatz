@@ -60,9 +60,10 @@ Catatan: Tidak ada policy INSERT untuk user biasa karena profile dibuat oleh tri
 |---|---|---|---|
 | SELECT | `cicilan: select own` | `EXISTS hutang where h.id = hutang_id AND h.user_id = auth.uid()` | User membaca cicilan dari hutang miliknya. |
 | INSERT | `cicilan: insert own` | `WITH CHECK EXISTS hutang where h.id = hutang_id AND h.user_id = auth.uid()` | User hanya membuat cicilan untuk hutang miliknya. |
+| UPDATE | `cicilan: update own` | `USING` dan `WITH CHECK` via parent `hutang.user_id = auth.uid()` | User hanya mengubah cicilan dari hutang miliknya. |
 | DELETE | `cicilan: delete own` | `EXISTS hutang where h.id = hutang_id AND h.user_id = auth.uid()` | User hanya menghapus cicilan dari hutang miliknya. |
 
-Catatan: Tidak ada policy UPDATE untuk `hutang_cicilan` pada migration saat ini. UI/action yang terlihat hanya create dan delete cicilan.
+Catatan: Policy UPDATE ditambahkan oleh `011-hutang-cicilan-balance-safety.sql` untuk mendukung edit cicilan dari UI Detail.
 
 ## Tabel `budget`
 
@@ -93,18 +94,17 @@ Catatan: Tidak ada policy UPDATE untuk `hutang_cicilan` pada migration saat ini.
 
 ## Grant API
 
-Migration `009-grant-api-access.sql` memberikan:
+Grant API didefinisikan di masing-masing migration table dalam `src/migrations`:
 
-- `GRANT USAGE ON SCHEMA public TO anon, authenticated`.
-- `GRANT ALL` untuk table user-owned kepada `authenticated`.
-- `GRANT SELECT` kategori kepada `anon` agar kategori system bisa dibaca.
-- `GRANT USAGE ON ALL SEQUENCES IN SCHEMA public`.
+- Table user-owned memberi akses sesuai kebutuhan ke role `authenticated`.
+- `kategori` memberi `SELECT` kepada `anon` agar kategori system bisa dibaca.
+- Storage `avatars` memakai policy storage khusus di migration `008-avatars-storage.sql`.
 
 Grant bukan pengganti RLS. Grant membuka akses API pada level table/schema, RLS tetap membatasi row.
 
 ## Security Notes
 
-- Function `handle_new_user`, `update_saldo_rekening`, `update_sisa_hutang`, `update_saldo_rekening_hutang`, dan `update_saldo_rekening_cicilan` dibuat sebagai `SECURITY DEFINER` di schema `public`. Ini berfungsi di schema saat ini, tetapi perlu review keamanan berkala karena schema `public` adalah exposed schema Supabase.
+- Function `handle_new_user` dan `update_saldo_rekening` dibuat sebagai `SECURITY DEFINER` di schema `public`. Function hutang/cicilan terbaru dari migration 011 memakai `SECURITY INVOKER` dan fully qualified object names agar tetap mengikuti RLS user yang sedang login.
 - `avatars` bersifat public read. Jangan simpan gambar yang bersifat rahasia di bucket ini.
 - Pastikan semua perubahan table baru selalu mengaktifkan RLS sebelum diberi grant API.
 

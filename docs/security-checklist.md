@@ -67,7 +67,8 @@ Security headers saat ini:
 
 ## Security Notes
 
-- Function `SECURITY DEFINER` saat ini berada di schema `public`: `handle_new_user`, `update_saldo_rekening`, `update_sisa_hutang`, `update_saldo_rekening_hutang`, dan `update_saldo_rekening_cicilan`. Ini perlu review keamanan berkala karena `public` adalah exposed schema di Supabase.
+- Function `SECURITY DEFINER` saat ini berada di schema `public`: `handle_new_user` dan `update_saldo_rekening`. Function hutang/cicilan dari migration 011 memakai `SECURITY INVOKER` dan fully qualified object names supaya operasi saldo/sisa hutang tetap mengikuti RLS user yang sedang login.
+- `hutang_cicilan` memiliki policy UPDATE via parent `hutang`; pastikan edit cicilan tetap hanya dilakukan untuk row milik user.
 - Bucket `avatars` public read. Ini cocok untuk avatar, tetapi tidak cocok untuk dokumen privat.
 - `kategori` memberi SELECT kepada `anon`; RLS hanya memperbolehkan kategori system untuk anon karena `auth.uid()` null tidak cocok dengan kategori user.
 - Tidak ada service role key di codebase saat ini. Pertahankan kondisi ini kecuali ada kebutuhan server-only yang kuat.

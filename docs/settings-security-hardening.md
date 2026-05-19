@@ -6,7 +6,7 @@ Dokumen ini merangkum hasil audit keamanan dan langkah-langkah *hardening* yang 
 
 Seluruh riwayat SQL di dalam `src/migrations/` telah diaudit secara menyeluruh untuk memastikan tidak ada celah keamanan.
 
-- **Urutan Migrasi**: Konflik penamaan yang ada akibat file `008-reorder-columns-production.sql` dan `009-grant-api-access.sql` ganda (unused) telah diselesaikan dengan menghapus kedua file tersebut karena fungsinya sudah tidak diperlukan (berdasarkan instruksi). Skema sekarang berjalan teratur dari `001` sampai `010`.
+- **Urutan Migrasi**: Konflik penamaan yang ada akibat file `008-reorder-columns-production.sql` dan `009-grant-api-access.sql` ganda (unused) telah diselesaikan dengan menghapus kedua file tersebut karena fungsinya sudah tidak diperlukan (berdasarkan instruksi). Skema sekarang berjalan teratur dari `001` sampai `011`.
 - **Konsistensi Foreign Key**: Seluruh tabel turunan pengguna (termasuk `user_preferences` di migrasi `009`) kini memiliki konstrain *Foreign Key* ke `public.profiles(id)` dengan `ON DELETE CASCADE`. Ini menjamin pembersihan data otomatis saat *User* dihapus tanpa membebani server dan tidak akan menyisakan *orphan data*.
 - **PostgREST API Grants**: Telah divalidasi bahwa untuk mematuhi breaking change Supabase v1.26.05+, seluruh tabel di _schema_ `public` memiliki pernyataan `GRANT SELECT, INSERT, UPDATE, DELETE ON public.<table_name> TO authenticated;`. Pengecualian pada tabel yang hanya dibaca atau tabel esensial yang tidak diizinkan dihapus sembarangan (misalnya `user_sessions`).
 

@@ -65,7 +65,7 @@ Pastikan Supabase production memiliki:
 
 - Schema dan migration sesuai `src/migrations`.
 - RLS aktif untuk table user-owned.
-- Grant API sesuai migration `009-grant-api-access.sql`.
+- Grant API sesuai pernyataan `GRANT` di masing-masing migration table.
 - Bucket `avatars` dan policy storage sesuai migration.
 
 ## Supabase Auth Site URL

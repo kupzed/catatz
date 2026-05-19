@@ -345,18 +345,19 @@ Lokasi: `src/actions/hutang-action.ts`
 | ----------------- | --------------------------------------------------------------------- | -------------------------- |
 | `getHutang`       | Mengambil hutang/piutang dengan relasi cicilan.                       | `hutang`, `hutang_cicilan` |
 | `createHutang`    | Membuat hutang/piutang dan mengisi `sisa_tagihan = total_pinjaman`.   | `hutang`                   |
-| `updateHutang`    | Mengubah hutang/piutang dan menghitung ulang sisa jika total berubah. | `hutang`, `hutang_cicilan` |
+| `updateHutang`    | Mengubah hutang/piutang, menghitung ulang sisa jika total berubah, dan menolak perubahan tipe jika sudah ada cicilan. | `hutang`, `hutang_cicilan` |
 | `deleteHutang`    | Menghapus hutang/piutang.                                             | `hutang`                   |
-| `createCicilan`   | Membuat cicilan.                                                      | `hutang_cicilan`           |
-| `deleteCicilan`   | Menghapus cicilan.                                                    | `hutang_cicilan`           |
-| `markHutangLunas` | Set status lunas dan sisa tagihan 0.                                  | `hutang`                   |
+| `createCicilan`   | Membuat cicilan lalu mengembalikan parent `Hutang` terbaru dengan relasi cicilan. | `hutang_cicilan`, `hutang` |
+| `updateCicilan`   | Mengubah nominal, tanggal, waktu, rekening, atau catatan cicilan lalu mengembalikan parent `Hutang` terbaru. | `hutang_cicilan`, `hutang` |
+| `deleteCicilan`   | Menghapus cicilan lalu mengembalikan parent `Hutang` terbaru.         | `hutang_cicilan`, `hutang` |
+| `markHutangLunas` | Membuat cicilan sebesar sisa tagihan dengan rekening opsional.        | `hutang_cicilan`, `hutang` |
 
 Validasi UI:
 
 - `hutangSchema`.
 - `cicilanSchema`.
 
-Catatan: UI saat ini melunaskan hutang dengan membuat cicilan sebesar sisa tagihan, bukan memanggil `markHutangLunas` langsung.
+Catatan: operasi cicilan mengandalkan trigger database untuk memperbarui `sisa_tagihan`, status, dan saldo rekening. UI pelunasan meminta user memilih rekening terlebih dahulu lalu mencatat cicilan sebesar sisa tagihan.
 
 ## Rekap Actions
 
@@ -444,6 +445,7 @@ ActionResult<VoiceParseResult>;
 Dependency:
 
 - Browser Speech Recognition di client.
+- Permission microphone dan audio stream client melalui `navigator.mediaDevices.getUserMedia`.
 - Gemini API melalui `@google/genai` di server.
 - `AI_API_KEY` dan optional `AI_MODEL`.
 
