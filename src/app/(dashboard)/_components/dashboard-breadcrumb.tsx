@@ -39,11 +39,11 @@ export default function DashboardBreadcrumb() {
               {index > 0 && <BreadcrumbSeparator />}
               <BreadcrumbItem>
                 {isLast ? (
-                  <BreadcrumbPage>{label}</BreadcrumbPage>
+                  <BreadcrumbPage className="text-sm font-semibold text-foreground">{label}</BreadcrumbPage>
                 ) : (
                   <Link
                     href={href}
-                    className="hover:text-foreground transition-colors"
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {label}
                   </Link>

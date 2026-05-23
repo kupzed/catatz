@@ -94,7 +94,7 @@ function SidebarHeaderContent() {
             height={26}
             className="shrink-0 pointer-events-none"
           />
-          <span className="font-bold text-lg tracking-tight text-sidebar-foreground truncate">
+          <span className="font-semibold text-lg text-foreground truncate">
             CatatZ
           </span>
         </Link>
@@ -105,8 +105,8 @@ function SidebarHeaderContent() {
         onClick={toggleSidebar}
         aria-label="Toggle sidebar"
         className={cn(
-          "flex items-center justify-center rounded-md p-1.5 text-sidebar-foreground/60",
-          "hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors",
+          "flex items-center justify-center rounded-[8px] p-1.5 text-muted-foreground",
+          "hover:bg-surface-strong hover:text-foreground transition-colors",
           "cursor-pointer shrink-0 ml-auto",
           isCollapsed && "w-full",
         )}
@@ -141,7 +141,7 @@ function UserCard({ user }: { user: AppSidebarUser }) {
               tooltip="Akun"
             >
               {/* Avatar */}
-              <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-semibold shrink-0 overflow-hidden">
+              <div className="w-7 h-7 rounded-full bg-surface-strong flex items-center justify-center text-foreground text-xs font-semibold shrink-0 overflow-hidden">
                 {user?.avatar_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -242,10 +242,9 @@ export default function AppSidebar({ user }: AppSidebarProps) {
               <SidebarMenuButton
                 asChild
                 className={cn(
-                  "gap-2 text-muted-foreground",
-                  "hover:text-foreground hover:bg-muted/60",
-                  "border border-transparent hover:border-border/50",
-                  "transition-all",
+                  "gap-2 rounded-full bg-primary text-primary-foreground font-semibold text-sm h-9 px-4",
+                  "hover:bg-[#003ecc] hover:text-white",
+                  "transition-colors",
                 )}
                 tooltip="Transaksi baru"
                 onClick={handleMobileClick}
@@ -278,9 +277,9 @@ export default function AppSidebar({ user }: AppSidebarProps) {
                       tooltip={item.label}
                       className={cn(
                         "text-muted-foreground transition-all",
-                        "hover:text-foreground hover:bg-muted/60",
+                        "hover:text-foreground hover:bg-surface-strong",
                         isActive &&
-                          "bg-background text-foreground font-medium border border-border/60 shadow-none hover:bg-background",
+                          "bg-surface-strong text-foreground font-semibold hover:bg-surface-strong",
                       )}
                       onClick={handleMobileClick}
                     >
@@ -298,7 +297,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
       </SidebarContent>
 
       {/* ── Footer: User card ── */}
-      <SidebarFooter className="border-t border-sidebar-border pt-2 pb-2">
+      <SidebarFooter className="border-t border-hairline pt-2 pb-2">
         <UserCard user={user ?? null} />
       </SidebarFooter>
     </Sidebar>

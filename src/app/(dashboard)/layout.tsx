@@ -42,7 +42,7 @@ export default async function DashboardLayout({
     <SidebarProvider>
       <AppSidebar user={sidebarUser} />
       <SidebarInset className="overflow-x-clip">
-        <header className="sticky top-0 z-40 flex min-h-12 shrink-0 select-none items-center justify-between gap-2 bg-background/90 px-4 pt-[env(safe-area-inset-top)] backdrop-blur-sm">
+        <header className="sticky top-0 z-40 flex min-h-[64px] shrink-0 select-none items-center justify-between gap-2 border-b border-hairline bg-background/95 px-4 pt-[env(safe-area-inset-top)] backdrop-blur-sm">
           <div className="flex items-center gap-2">
             {/* Tombol buka sidebar — hanya tampil di mobile */}
             <SidebarTrigger className="cursor-pointer md:hidden" />

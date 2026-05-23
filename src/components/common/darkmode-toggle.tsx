@@ -13,9 +13,8 @@ export function DarkmodeToggle() {
       <TooltipTrigger asChild>
         <Button
           variant="ghost"
-          size="icon"
+          size="icon-sm"
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="h-8 w-8"
           id="darkmode-toggle"
         >
           <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
