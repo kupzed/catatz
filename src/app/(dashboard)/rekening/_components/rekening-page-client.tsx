@@ -86,8 +86,10 @@ export default function RekeningPageClient({ initialRekening }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Rekening</h1>
-          <p className="text-muted-foreground text-sm">
+          <h1 className="text-[32px] font-normal tracking-[-0.4px] text-foreground leading-tight">
+            Rekening
+          </h1>
+          <p className="text-sm text-muted-foreground">
             Kelola sumber dana Anda
           </p>
         </div>
@@ -96,7 +98,7 @@ export default function RekeningPageClient({ initialRekening }: Props) {
             setEditData(null);
             setDialogOpen(true);
           }}
-          className="gap-2 bg-indigo-600 hover:bg-indigo-500 text-white"
+          className="gap-2 bg-primary hover:bg-[#003ecc] text-white rounded-full font-semibold"
           id="btn-tambah-rekening"
         >
           <Plus className="h-4 w-4" />
@@ -105,10 +107,14 @@ export default function RekeningPageClient({ initialRekening }: Props) {
       </div>
 
       {/* Total Balance Card */}
-      <div className="rounded-2xl border bg-linear-to-br from-indigo-600 to-violet-600 p-6 text-white shadow-lg">
-        <p className="text-sm text-indigo-200 mb-1">Total Saldo (aktif)</p>
-        <p className="text-3xl font-bold">{formatRupiah(totalSaldo)}</p>
-        <p className="text-xs text-indigo-300 mt-2">
+      <div className="rounded-card bg-surface-dark p-8 text-white">
+        <p className="text-sm text-white/60 uppercase tracking-wider mb-2">
+          Total Saldo (aktif)
+        </p>
+        <p className="font-mono text-[44px] font-normal tracking-[-1px] text-white leading-none">
+          {formatRupiah(totalSaldo)}
+        </p>
+        <p className="text-xs text-white/40 mt-3">
           {rekening.filter((r) => r.exclude_total).length} rekening dikecualikan
         </p>
       </div>
@@ -128,7 +134,7 @@ export default function RekeningPageClient({ initialRekening }: Props) {
           const JenisIcon = cfg.icon;
           return (
             <div key={jenis}>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-2">
                 <JenisIcon className="h-4 w-4" />
                 {jenis}
               </h3>
@@ -137,20 +143,21 @@ export default function RekeningPageClient({ initialRekening }: Props) {
                   <div
                     key={r.id}
                     className={cn(
-                      "relative rounded-xl border bg-card p-4 transition-all duration-200 hover:shadow-md group",
+                      "relative rounded-card border border-hairline bg-card p-6 transition-colors hover:bg-surface-soft group border-t-2",
                       r.exclude_total && "opacity-60",
                     )}
+                    style={{ borderTopColor: r.warna ?? undefined }}
                   >
-                    {/* Color accent */}
-                    <div
-                      className="absolute top-0 left-0 w-1 h-full rounded-l-xl"
-                      style={{ background: r.warna }}
-                    />
-                    <div className="pl-2">
+                    <div>
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="font-semibold text-sm">{r.nama}</p>
-                          <Badge variant="secondary" className="text-xs mt-0.5">
+                          <p className="font-semibold text-sm text-foreground">
+                            {r.nama}
+                          </p>
+                          <Badge
+                            variant="secondary"
+                            className="text-xs mt-0.5 rounded-full bg-surface-strong text-muted-foreground"
+                          >
                             {r.jenis}
                           </Badge>
                         </div>
@@ -158,7 +165,7 @@ export default function RekeningPageClient({ initialRekening }: Props) {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7"
+                            className="h-7 w-7 rounded-full bg-surface-strong hover:bg-surface-strong/80"
                             onClick={() => {
                               setEditData(r);
                               setDialogOpen(true);
@@ -174,7 +181,7 @@ export default function RekeningPageClient({ initialRekening }: Props) {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-7 w-7 text-rose-500 hover:text-rose-500 hover:bg-rose-500/10"
+                              className="h-7 w-7 rounded-full bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20"
                               disabled={deleting === r.id}
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -182,10 +189,10 @@ export default function RekeningPageClient({ initialRekening }: Props) {
                           </ConfirmDialog>
                         </div>
                       </div>
-                      <p className="text-lg font-bold mt-2">
+                      <p className="font-mono text-xl font-medium text-foreground mt-3">
                         {formatRupiah(Number(r.saldo_saat_ini))}
                       </p>
-                      <div className="flex items-center gap-2 mt-2">
+                      <div className="flex items-center gap-2 mt-3">
                         <Switch
                           checked={!r.exclude_total}
                           onCheckedChange={() =>

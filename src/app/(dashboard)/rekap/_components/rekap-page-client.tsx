@@ -46,9 +46,9 @@ type Props = {
 };
 
 const BUDGET_STATUS_COLORS: Record<string, string> = {
-  aman: "bg-emerald-500",
-  waspada: "bg-amber-500",
-  bahaya: "bg-rose-500",
+  aman: "bg-semantic-up/10 text-semantic-up",
+  waspada: "bg-[#f4b000]/10 text-[#f4b000]",
+  bahaya: "bg-semantic-down/10 text-semantic-down",
 };
 
 export default function RekapPageClient({
@@ -67,8 +67,10 @@ export default function RekapPageClient({
     <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Rekap Keuangan</h1>
-        <p className="text-muted-foreground text-sm">Analitik {currentTahun}</p>
+        <h1 className="text-[32px] font-normal tracking-[-0.4px] text-foreground leading-tight">
+          Rekap Keuangan
+        </h1>
+        <p className="text-sm text-muted-foreground">Analitik {currentTahun}</p>
       </div>
 
       {/* Summary Cards */}
@@ -97,12 +99,12 @@ export default function RekapPageClient({
         ].map((c) => (
           <div
             key={c.label}
-            className="rounded-xl border bg-card p-4 space-y-1"
+            className="rounded-card border border-hairline bg-card p-6 space-y-2"
           >
-            <p className="text-xs text-muted-foreground leading-snug">
+            <p className="text-xs uppercase tracking-wider text-muted-foreground leading-snug">
               {c.label}
             </p>
-            <p className={cn("font-bold text-base", c.color)}>
+            <p className={cn("font-mono text-lg font-medium", c.color)}>
               {formatRupiah(c.value, true)}
             </p>
           </div>
@@ -110,8 +112,8 @@ export default function RekapPageClient({
       </div>
 
       {/* Bar Chart */}
-      <div className="rounded-xl border bg-card p-6">
-        <h2 className="text-sm font-semibold mb-4">
+      <div className="rounded-card border border-hairline bg-card p-8">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
           Pemasukan vs Pengeluaran per Bulan
         </h2>
         <Suspense fallback={<Skeleton className="h-62.5 w-full" />}>
@@ -122,8 +124,8 @@ export default function RekapPageClient({
       {/* Pie Chart + Category List */}
       {initialKategori.length > 0 && (
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="rounded-xl border bg-card p-6">
-            <h2 className="text-sm font-semibold mb-4">
+          <div className="rounded-card border border-hairline bg-card p-8">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
               Pengeluaran per Kategori ({BULAN_NAMES[currentBulan - 1]})
             </h2>
             <Suspense fallback={<Skeleton className="h-50 w-full" />}>
@@ -131,23 +133,28 @@ export default function RekapPageClient({
             </Suspense>
           </div>
 
-          <div className="rounded-xl border bg-card p-6">
-            <h2 className="text-sm font-semibold mb-4">Rincian Kategori</h2>
+          <div className="rounded-card border border-hairline bg-card p-8">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+              Rincian Kategori
+            </h2>
             <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
               {initialKategori.map((k) => (
                 <div key={k.kategori_id} className="flex items-center gap-3">
                   <span className="text-xl">{k.kategori_ikon}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium truncate">
+                      <span className="text-sm font-medium text-foreground truncate">
                         {k.kategori_nama}
                       </span>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="font-mono text-sm text-muted-foreground">
                         {k.persentase}%
                       </span>
                     </div>
-                    <Progress value={k.persentase} className="h-1.5 mt-1" />
-                    <span className="text-xs text-muted-foreground">
+                    <Progress
+                      value={k.persentase}
+                      className="h-1.5 mt-1 [&>div]:bg-primary"
+                    />
+                    <span className="font-mono text-xs text-muted-foreground">
                       {formatRupiah(k.total)}
                     </span>
                   </div>
@@ -160,8 +167,8 @@ export default function RekapPageClient({
 
       {/* Budget */}
       {initialBudget.length > 0 && (
-        <div className="rounded-xl border bg-card p-6">
-          <h2 className="text-sm font-semibold mb-4">
+        <div className="rounded-card border border-hairline bg-card p-8">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
             Budget {BULAN_NAMES[currentBulan - 1]}
           </h2>
           <div className="space-y-4">
@@ -175,14 +182,14 @@ export default function RekapPageClient({
                     </span>
                     <Badge
                       className={cn(
-                        "text-xs px-1.5 py-0 border-0 text-white",
+                        "text-xs px-2.5 py-0.5 border-0 rounded-full font-medium",
                         BUDGET_STATUS_COLORS[b.status],
                       )}
                     >
                       {b.status}
                     </Badge>
                   </div>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="font-mono text-xs text-muted-foreground">
                     {formatRupiah(b.total_dipakai, true)} /{" "}
                     {formatRupiah(b.limit_nominal, true)}
                   </span>
@@ -192,10 +199,10 @@ export default function RekapPageClient({
                   className={cn(
                     "h-2",
                     b.status === "bahaya"
-                      ? "[&>div]:bg-rose-500"
+                      ? "[&>div]:bg-semantic-down"
                       : b.status === "waspada"
-                        ? "[&>div]:bg-amber-500"
-                        : "[&>div]:bg-emerald-500",
+                        ? "[&>div]:bg-[#f4b000]"
+                        : "[&>div]:bg-semantic-up",
                   )}
                 />
               </div>

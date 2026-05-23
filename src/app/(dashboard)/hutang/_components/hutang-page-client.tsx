@@ -65,9 +65,9 @@ type CicilanDraft = {
 };
 
 const STATUS_BADGE: Record<string, string> = {
-  aktif: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  lunas: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  overdue: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+  aktif: "bg-primary/10 text-primary",
+  lunas: "bg-semantic-up/10 text-semantic-up",
+  overdue: "bg-semantic-down/10 text-semantic-down",
 };
 
 const emptyEditDraft = (): CicilanDraft => ({
@@ -377,12 +377,12 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                       <X className="h-3.5 w-3.5" />
                       Batal
                     </Button>
-                    <Button
-                      size="sm"
-                      className="h-8 gap-1 bg-indigo-600 hover:bg-indigo-500 text-white"
-                      disabled={loadingCicilan === h.id}
-                      onClick={() => handleUpdateCicilan(h, item)}
-                    >
+                      <Button
+                        size="sm"
+                        className="h-8 gap-1 bg-primary hover:bg-[#003ecc] text-white rounded-full"
+                        disabled={loadingCicilan === h.id}
+                        onClick={() => handleUpdateCicilan(h, item)}
+                      >
                       <Save className="h-3.5 w-3.5" />
                       Simpan
                     </Button>
@@ -446,7 +446,7 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
 
     return (
       <div>
-        <h3 className="text-sm font-semibold text-muted-foreground mb-3">
+        <h3 className="text-sm font-semibold tracking-tight text-foreground mb-3">
           {title}
         </h3>
         <div className="space-y-3">
@@ -459,18 +459,18 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
             return (
               <div
                 key={h.id}
-                className="rounded-xl border bg-card overflow-hidden"
+                className="rounded-2xl border bg-card overflow-hidden"
               >
                 <div className="p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-sm">
+                        <span className="font-semibold text-sm text-foreground">
                           {h.nama_entitas}
                         </span>
                         <Badge
                           className={cn(
-                            "text-xs px-1.5 py-0 border-0",
+                            "text-xs px-2.5 py-0.5 border-0 rounded-full",
                             STATUS_BADGE[h.status],
                           )}
                         >
@@ -492,12 +492,12 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                         )}
                       </div>
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-sm font-bold text-rose-500">
-                        {formatRupiah(sisaTagihan)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">sisa</p>
-                    </div>
+                      <div className="text-right shrink-0">
+                        <p className="font-mono text-lg font-semibold text-semantic-down">
+                          {formatRupiah(sisaTagihan)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">sisa</p>
+                      </div>
                   </div>
 
                   <div className="mt-3">
@@ -507,14 +507,14 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                         {formatRupiah(totalPinjaman - sisaTagihan, true)}
                       </span>
                     </div>
-                    <Progress value={pct} className="h-2" />
+                    <Progress value={pct} className="h-2 [&>div]:bg-primary" />
                   </div>
 
                   <div className="flex gap-2 mt-3 flex-wrap">
                     <Button
                       size="sm"
-                      variant="outline"
-                      className="h-7 text-xs gap-1"
+                      variant="ghost"
+                      className="h-7 text-xs gap-1 rounded-full bg-surface-strong text-foreground px-3"
                       onClick={() => setDetailHutangId(h.id)}
                     >
                       <ListChecks className="h-3 w-3" />
@@ -522,12 +522,12 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                     </Button>
                     {h.status !== "lunas" && (
                       <>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 text-xs gap-1"
-                          onClick={() => setExpanded(isExpanded ? null : h.id)}
-                        >
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 text-xs gap-1 rounded-full bg-surface-strong text-foreground px-3"
+                            onClick={() => setExpanded(isExpanded ? null : h.id)}
+                          >
                           <Plus className="h-3 w-3" />
                           Cicilan
                           {isExpanded ? (
@@ -536,12 +536,12 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                             <ChevronDown className="h-3 w-3" />
                           )}
                         </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 text-xs gap-1 text-emerald-600"
-                          onClick={() => openLunasDialog(h)}
-                        >
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 text-xs gap-1 rounded-full bg-semantic-up/10 text-semantic-up px-3"
+                            onClick={() => openLunasDialog(h)}
+                          >
                           <CheckCircle2 className="h-3 w-3" />
                           Lunas
                         </Button>
@@ -550,7 +550,7 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-7 text-xs ml-auto"
+                      className="h-7 text-xs ml-auto rounded-full bg-surface-strong"
                       onClick={() => {
                         setEditData(h);
                         setDialogOpen(true);
@@ -566,7 +566,7 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-7 text-xs text-rose-500 hover:text-rose-500 hover:bg-rose-500/10"
+                        className="h-7 text-xs rounded-full bg-semantic-down/10 text-semantic-down px-3"
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>
@@ -624,7 +624,7 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                         size="sm"
                         onClick={() => handleCicilan(h)}
                         disabled={loadingCicilan === h.id}
-                        className="h-8 bg-indigo-600 hover:bg-indigo-500 text-white"
+                        className="h-8 bg-primary hover:bg-[#003ecc] text-white rounded-full px-4"
                       >
                         Catat
                       </Button>
@@ -643,10 +643,10 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
     <div className="w-full max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Hutang & Piutang
+          <h1 className="text-[32px] font-normal tracking-[-0.4px] text-foreground leading-tight">
+            Hutang &amp; Piutang
           </h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             Kelola pinjaman masuk dan keluar
           </p>
         </div>
@@ -655,7 +655,7 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
             setEditData(null);
             setDialogOpen(true);
           }}
-          className="gap-2 bg-indigo-600 hover:bg-indigo-500 text-white"
+          className="gap-2 bg-primary hover:bg-[#003ecc] text-white rounded-full font-semibold"
           id="btn-tambah-hutang"
         >
           <Plus className="h-4 w-4" />
@@ -730,8 +730,8 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
             <Button
               onClick={handleLunas}
               disabled={!!lunasTarget && loadingCicilan === lunasTarget.id}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white"
-            >
+            className="bg-primary hover:bg-[#003ecc] text-white rounded-full"
+          >
               Lunaskan
             </Button>
           </DialogFooter>

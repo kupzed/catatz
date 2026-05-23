@@ -34,17 +34,17 @@ const TIPE_CONFIG = {
   income: {
     label: "Pemasukan",
     icon: TrendingUp,
-    badgeClass: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+    badgeClass: "bg-semantic-up/10 text-semantic-up border-0",
   },
   expense: {
     label: "Pengeluaran",
     icon: TrendingDown,
-    badgeClass: "bg-rose-500/10 text-rose-600 border-rose-500/20",
+    badgeClass: "bg-semantic-down/10 text-semantic-down border-0",
   },
   all: {
     label: "Semua Tipe",
     icon: ArrowLeftRight,
-    badgeClass: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+    badgeClass: "bg-primary/10 text-primary border-0",
   },
 } as const;
 
@@ -78,11 +78,11 @@ function KategoriCard({
   onDelete: (k: Kategori) => void;
 }) {
   return (
-    <div className="group flex items-center justify-between rounded-lg border bg-card px-4 py-3 transition-all hover:border-border/80 hover:bg-accent/30">
+    <div className="group flex items-center justify-between rounded-input border border-hairline bg-card px-4 py-3 transition-colors hover:bg-surface-soft">
       <div className="flex items-center gap-3 min-w-0">
         {/* Ikon + warna indikator */}
         <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-base shrink-0"
+          className="w-8 h-8 rounded-[8px] flex items-center justify-center text-base shrink-0"
           style={{
             background: kategori.warna ? `${kategori.warna}20` : undefined,
           }}
@@ -91,7 +91,7 @@ function KategoriCard({
         </div>
         {/* Nama + tipe */}
         <div className="min-w-0">
-          <p className="text-sm font-medium truncate leading-tight">
+          <p className="text-sm font-semibold text-foreground truncate leading-tight">
             {kategori.nama}
           </p>
           <div className="mt-0.5">
@@ -110,7 +110,7 @@ function KategoriCard({
             <Button
               size="icon"
               variant="ghost"
-              className="h-7 w-7 text-foreground"
+              className="h-7 w-7 rounded-full bg-surface-strong text-foreground hover:bg-surface-strong/80"
               onClick={() => onEdit(kategori)}
               aria-label={`Edit ${kategori.nama}`}
             >
@@ -124,7 +124,7 @@ function KategoriCard({
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-7 w-7 text-rose-500"
+                className="h-7 w-7 rounded-full bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20"
                 aria-label={`Hapus ${kategori.nama}`}
               >
                 <Trash2 className="h-3.5 w-3.5" />
@@ -189,19 +189,18 @@ export default function KategoriPageClient({ kategori }: Props) {
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Page header */}
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            {/* <Tags className="h-6 w-6 text-indigo-500" /> */}
+          <h1 className="text-[32px] font-normal tracking-[-0.4px] text-foreground leading-tight">
             Kategori
           </h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
+          <p className="text-sm text-muted-foreground mt-0.5">
             Kelola kategori untuk transaksi Anda.
           </p>
         </div>
         <Button
           onClick={handleOpenAdd}
-          className="gap-2 bg-indigo-600 hover:bg-indigo-500 text-white shrink-0"
+          className="gap-2 bg-primary hover:bg-[#003ecc] text-white rounded-full font-semibold shrink-0"
           id="btn-tambah-kategori"
         >
           <Plus className="h-4 w-4" />
@@ -224,10 +223,10 @@ export default function KategoriPageClient({ kategori }: Props) {
               key={t}
               onClick={() => setFilterTipe(t)}
               className={cn(
-                "inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-all",
+                "inline-flex items-center rounded-full px-4 py-1 text-sm font-medium transition-colors",
                 filterTipe === t
-                  ? "bg-indigo-600 text-white border-indigo-600"
-                  : "text-muted-foreground hover:text-foreground hover:border-border/80",
+                  ? "bg-primary text-white"
+                  : "bg-surface-strong text-muted-foreground hover:text-foreground",
               )}
             >
               {t === "all"
@@ -258,7 +257,7 @@ export default function KategoriPageClient({ kategori }: Props) {
               variant="link"
               size="sm"
               onClick={handleOpenAdd}
-              className="mt-1 text-indigo-500 h-auto p-0"
+              className="mt-1 text-primary h-auto p-0 underline-offset-4 hover:underline"
             >
               + Tambah kategori pertama
             </Button>

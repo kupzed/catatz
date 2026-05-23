@@ -44,8 +44,8 @@ export function RekapBarChart({ data }: { data: RekapBulanan[] }) {
         <YAxis tick={{ fontSize: 10 }} tickFormatter={(value) => `${(Number(value) / 1_000_000).toFixed(0)}Jt`} />
         <Tooltip formatter={(value) => formatRupiah(Number(value))} />
         <Legend />
-        <Bar dataKey="Pemasukan" fill="#10b981" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="Pengeluaran" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="Pemasukan" fill="#05b169" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="Pengeluaran" fill="#cf202f" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );
