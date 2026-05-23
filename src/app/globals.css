@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-inter), var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-inter), var(--font-geist-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -39,6 +39,20 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
+  /* Coinbase custom surface tokens */
+  --color-surface-soft: var(--surface-soft);
+  --color-surface-strong: var(--surface-strong);
+  --color-surface-dark: var(--surface-dark);
+  --color-surface-dark-elevated: var(--surface-dark-elevated);
+  --color-semantic-up: var(--semantic-up);
+  --color-semantic-down: var(--semantic-down);
+  --color-body: var(--body-color);
+  --color-ink: var(--foreground);
+  --color-hairline: var(--border);
+  --color-hairline-soft: var(--border-soft);
+
+  /* Radius — Coinbase scale */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -46,75 +60,131 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-pill: 100px;
+  --radius-card: 24px;    /* rounded-xl per DESIGN.md */
+  --radius-input: 12px;   /* rounded-md */
+  --radius-badge: 100px;  /* pill */
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  /* Brand */
+  --primary: oklch(47.5% 0.23 264);           /* #0052ff Coinbase Blue */
+  --primary-active: oklch(38% 0.24 264);       /* #003ecc */
+  --primary-disabled: oklch(75% 0.06 220);     /* #a8b8cc */
+  --primary-foreground: oklch(1 0 0);          /* white */
+
+  /* Canvas & Surface */
+  --background: oklch(1 0 0);                  /* #ffffff canvas */
+  --foreground: oklch(7% 0.01 240);            /* #0a0b0d ink */
+  --card: oklch(1 0 0);                        /* white */
+  --card-foreground: oklch(7% 0.01 240);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --popover-foreground: oklch(7% 0.01 240);
+
+  /* Surface tiers */
+  --surface-soft: oklch(97.5% 0 0);            /* #f7f7f7 */
+  --surface-strong: oklch(94% 0.004 220);       /* #eef0f3 */
+  --surface-dark: oklch(7% 0.01 240);           /* #0a0b0d */
+  --surface-dark-elevated: oklch(11% 0.008 240); /* #16181c */
+
+  /* Text */
+  --muted-foreground: oklch(53% 0.015 240);    /* #7c828a muted */
+  --body-color: oklch(43% 0.015 240);          /* #5b616e body */
+
+  /* Borders */
+  --border: oklch(88% 0.008 220);              /* #dee1e6 hairline */
+  --border-soft: oklch(94% 0.004 220);         /* #eef0f3 hairline-soft */
+  --input: oklch(88% 0.008 220);
+
+  /* Semantic */
+  --semantic-up: oklch(62% 0.17 155);          /* #05b169 income green */
+  --semantic-down: oklch(48% 0.19 25);         /* #cf202f expense red */
+
+  /* Secondary & Ghost */
+  --secondary: oklch(94% 0.004 220);           /* surface-strong */
+  --secondary-foreground: oklch(7% 0.01 240);  /* ink */
+  --muted: oklch(97.5% 0 0);                   /* surface-soft */
+  --accent: oklch(94% 0.004 220);
+  --accent-foreground: oklch(7% 0.01 240);
+
+  /* Destructive */
+  --destructive: oklch(48% 0.19 25);           /* semantic-down */
+
+  /* Ring */
+  --ring: oklch(47.5% 0.23 264);              /* primary blue */
+
+  /* Radius — Coinbase scale, base = 12px */
+  --radius: 0.75rem;
+
+  /* Charts — preserved from original */
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+
+  /* Sidebar — preserved from original */
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(47.5% 0.23 264);    /* Coinbase Blue */
+  --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-border: oklch(88% 0.008 220);
+  --sidebar-ring: oklch(47.5% 0.23 264);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
+  --background: oklch(7% 0.01 240);            /* #0a0b0d surface-dark */
+  --foreground: oklch(1 0 0);                  /* white on-dark */
+  --card: oklch(11% 0.008 240);                /* #16181c surface-dark-elevated */
+  --card-foreground: oklch(1 0 0);
+  --popover: oklch(11% 0.008 240);
+  --popover-foreground: oklch(1 0 0);
+
+  /* Brand stays consistent in dark mode */
+  --primary: oklch(47.5% 0.23 264);
+  --primary-foreground: oklch(1 0 0);
+
+  /* Surface tiers — dark */
+  --surface-soft: oklch(14% 0.008 240);
+  --surface-strong: oklch(18% 0.008 240);
+
+  /* Borders — dark */
+  --border: oklch(1 0 0 / 12%);
+  --border-soft: oklch(1 0 0 / 8%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+
+  /* Muted / secondary / accent — dark */
+  --muted: oklch(14% 0.008 240);
+  --muted-foreground: oklch(67% 0.008 220);    /* #a8acb3 on-dark-soft */
+  --secondary: oklch(18% 0.008 240);
+  --secondary-foreground: oklch(1 0 0);
+  --accent: oklch(18% 0.008 240);
+  --accent-foreground: oklch(1 0 0);
+
+  /* Destructive — keep consistent */
+  --destructive: oklch(48% 0.19 25);
+
+  /* Ring */
+  --ring: oklch(47.5% 0.23 264);
+
+  /* Charts — preserved from original */
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
+
+  /* Sidebar — dark override */
+  --sidebar: oklch(11% 0.008 240);
+  --sidebar-foreground: oklch(1 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-accent: oklch(18% 0.008 240);
+  --sidebar-accent-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(47.5% 0.23 264);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-ring: oklch(47.5% 0.23 264);
 }
 
 @layer base {
@@ -124,11 +194,27 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-inter), var(--font-sans), system-ui, sans-serif;
+    color: var(--body-color);
     overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
   }
   html {
     @apply font-sans;
   }
+
+  /* Heading / display text */
+  h1, h2, h3, h4 {
+    color: var(--foreground);
+    letter-spacing: -0.02em;
+  }
+
+  /* Number/monospace — Geist Mono sebagai CoinbaseMono substitute */
+  .font-mono, [data-slot="number"] {
+    font-family: var(--font-geist-mono), var(--font-mono), monospace;
+    font-weight: 500;
+  }
+
   button,
   [role="button"],
   input,
