@@ -82,16 +82,16 @@ export function SystemPreferenceSection({ preferences }: Props) {
             <p className="text-sm font-medium">Tema Warna</p>
             <p className="text-xs text-muted-foreground mt-0.5">Pilih tema terang, gelap, atau ikuti sistem</p>
           </div>
-          <div className="flex items-center gap-1 rounded-lg border bg-muted/50 p-1">
+          <div className="flex items-center gap-1 rounded-[8px] border bg-surface-strong p-1">
             {THEME_OPTIONS.map(({ value, icon: Icon }) => (
               <button
                 key={value}
                 onClick={() => handlePreferenceChange("theme", value)}
                 aria-label={value}
                 className={cn(
-                  "flex items-center justify-center w-8 h-8 rounded-md transition-all",
+                  "flex items-center justify-center w-8 h-8 rounded-[8px] transition-all",
                   theme === value
-                    ? "bg-background shadow-sm text-foreground"
+                    ? "bg-card text-foreground"
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >

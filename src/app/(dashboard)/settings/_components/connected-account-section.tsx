@@ -2,11 +2,26 @@
 
 import { useEffect, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { linkGoogleIdentity, unlinkGoogleIdentity } from "@/actions/auth-action";
-import { AlertTriangle, CheckCircle2, Link2, Link2Off, Loader2 } from "lucide-react";
+import {
+  linkGoogleIdentity,
+  unlinkGoogleIdentity,
+} from "@/actions/auth-action";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Link2,
+  Link2Off,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export type ConnectedAccount = {
@@ -49,12 +64,15 @@ export function ConnectedAccountSection({
   const [isLinkPending, startLinkTransition] = useTransition();
   const [isUnlinkPending, startUnlinkTransition] = useTransition();
 
-  const googleAccount = accounts.find((account) => account.provider === "google");
+  const googleAccount = accounts.find(
+    (account) => account.provider === "google",
+  );
   const hasGoogleProvider =
     Boolean(googleAccount) || providers.includes("google");
   const canUnlinkGoogle =
     hasGoogleProvider &&
-    (accounts.length > 1 || providers.some((provider) => provider !== "google"));
+    (accounts.length > 1 ||
+      providers.some((provider) => provider !== "google"));
 
   useEffect(() => {
     const message = searchParams.get("message");
@@ -67,8 +85,7 @@ export function ConnectedAccountSection({
       toast.success("Akun Google berhasil terhubung.");
     } else if (message === "google-link-email-mismatch") {
       toast.error("Akun Google tidak dihubungkan", {
-        description:
-          "Email Google berbeda dari email utama akun CatatZ Anda.",
+        description: "Email Google berbeda dari email utama akun CatatZ Anda.",
       });
     } else if (message === "google-link-cleanup-failed") {
       toast.error("Koneksi Google perlu ditinjau", {
@@ -135,9 +152,9 @@ export function ConnectedAccountSection({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex flex-col gap-4 rounded-lg border bg-muted/20 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 rounded-input border border-hairline bg-surface-soft p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-background text-foreground shadow-sm">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-strong text-foreground">
               <GoogleIcon />
             </div>
             <div className="min-w-0 space-y-1">
@@ -146,7 +163,7 @@ export function ConnectedAccountSection({
                 {hasGoogleProvider ? (
                   <Badge
                     variant="outline"
-                    className="border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                    className="border-0 bg-semantic-up/10 text-semantic-up rounded-full"
                   >
                     Terhubung
                   </Badge>
@@ -175,6 +192,7 @@ export function ConnectedAccountSection({
                   ? "Putuskan akun Google"
                   : "Tambahkan metode login lain sebelum memutuskan Google"
               }
+              className="rounded-full border border-hairline text-foreground"
             >
               {isUnlinkPending ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -189,7 +207,7 @@ export function ConnectedAccountSection({
               size="sm"
               onClick={handleLinkGoogle}
               disabled={isLinkPending}
-              className="bg-indigo-600 text-white hover:bg-indigo-500"
+              className="bg-primary text-white hover:bg-[#003ecc] rounded-full"
             >
               {isLinkPending ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />

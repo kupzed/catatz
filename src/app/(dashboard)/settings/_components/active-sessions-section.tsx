@@ -1,10 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Laptop, Smartphone, Globe, LogOut } from "lucide-react";
-import { getActiveSessions, revokeSession, revokeAllOtherSessions } from "@/actions/session-action";
+import {
+  getActiveSessions,
+  revokeSession,
+  revokeAllOtherSessions,
+} from "@/actions/session-action";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -71,7 +81,9 @@ export function ActiveSessionsSection() {
     const res = await revokeAllOtherSessions();
     if (res.success) {
       toast.success(res.message);
-      setSessions((prev) => prev.filter((s) => s.device_id === currentDeviceId));
+      setSessions((prev) =>
+        prev.filter((s) => s.device_id === currentDeviceId),
+      );
     } else {
       toast.error(res.error || "Gagal mengakhiri sesi lain");
     }
@@ -80,7 +92,11 @@ export function ActiveSessionsSection() {
 
   const getDeviceIcon = (osName: string, deviceName: string) => {
     const lower = `${osName} ${deviceName}`.toLowerCase();
-    if (lower.includes("ios") || lower.includes("android") || lower.includes("mobile")) {
+    if (
+      lower.includes("ios") ||
+      lower.includes("android") ||
+      lower.includes("mobile")
+    ) {
       return <Smartphone className="w-5 h-5" />;
     }
     return <Laptop className="w-5 h-5" />;
@@ -111,15 +127,18 @@ export function ActiveSessionsSection() {
             {/* Current Device */}
             {currentSession && (
               <div className="space-y-3">
-                <h3 className="text-sm font-medium text-foreground">Current Device</h3>
-                <div className="flex items-center justify-between gap-4 py-3 px-4 bg-indigo-500/5 rounded-lg border border-indigo-500/20">
+                <h3 className="text-sm font-medium text-foreground">
+                  Current Device
+                </h3>
+                <div className="flex items-center justify-between gap-4 py-3 px-4 bg-surface-soft rounded-input border border-hairline border-l-2">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0">
-                      <Laptop className="w-5 h-5 text-indigo-500" />
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <Laptop className="w-5 h-5 text-primary" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium leading-tight truncate">
-                        {currentSession.os || "Unknown OS"} • {currentSession.browser || "Unknown Browser"}
+                      <p className="text-sm font-medium text-foreground leading-tight truncate">
+                        {currentSession.os || "Unknown OS"} •{" "}
+                        {currentSession.browser || "Unknown Browser"}
                       </p>
                       <p className="text-xs text-muted-foreground mt-0.5 truncate flex items-center gap-1">
                         <Globe className="w-3 h-3" />
@@ -127,7 +146,7 @@ export function ActiveSessionsSection() {
                       </p>
                     </div>
                   </div>
-                  <div className="shrink-0 text-xs font-medium text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-md">
+                  <div className="shrink-0 text-xs font-medium text-semantic-up bg-semantic-up/10 px-2.5 py-0.5 rounded-full">
                     Aktif sekarang
                   </div>
                 </div>
@@ -138,19 +157,29 @@ export function ActiveSessionsSection() {
             {otherSessions.length > 0 && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-foreground">Other Sessions</h3>
+                  <h3 className="text-sm font-medium text-foreground">
+                    Other Sessions
+                  </h3>
                   {otherSessions.length > 1 && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 rounded-full bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20 text-sm px-3"
+                        >
                           Logout All
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Akhiri semua sesi lain?</AlertDialogTitle>
+                          <AlertDialogTitle>
+                            Akhiri semua sesi lain?
+                          </AlertDialogTitle>
                           <AlertDialogDescription>
-                            Anda akan keluar dari semua perangkat lain yang terhubung dengan akun ini. Perangkat saat ini akan tetap aktif.
+                            Anda akan keluar dari semua perangkat lain yang
+                            terhubung dengan akun ini. Perangkat saat ini akan
+                            tetap aktif.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -159,7 +188,11 @@ export function ActiveSessionsSection() {
                             onClick={handleRevokeAll}
                             className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
                           >
-                            {isRevokingAll ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : "Ya, Akhiri Semua"}
+                            {isRevokingAll ? (
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                              "Ya, Akhiri Semua"
+                            )}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -168,31 +201,50 @@ export function ActiveSessionsSection() {
                 </div>
                 <div className="space-y-2">
                   {otherSessions.map((session) => (
-                    <div key={session.id} className="flex items-center justify-between gap-4 py-3 px-4 bg-muted/30 rounded-lg border border-border/50">
+                    <div
+                      key={session.id}
+                      className="flex items-center justify-between gap-4 py-3 px-4 bg-surface-soft rounded-input border border-hairline"
+                    >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 rounded-full bg-slate-500/10 flex items-center justify-center shrink-0">
-                          {getDeviceIcon(session.os || "", session.device_name || "")}
+                        <div className="w-10 h-10 rounded-full bg-surface-strong flex items-center justify-center shrink-0">
+                          {getDeviceIcon(
+                            session.os || "",
+                            session.device_name || "",
+                          )}
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm font-medium leading-tight truncate">
-                            {session.os || "Unknown OS"} • {session.browser || "Unknown Browser"}
+                            {session.os || "Unknown OS"} •{" "}
+                            {session.browser || "Unknown Browser"}
                           </p>
                           <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                            Terakhir aktif {formatDistanceToNow(new Date(session.last_active_at), { addSuffix: true, locale: id })}
+                            Terakhir aktif{" "}
+                            {formatDistanceToNow(
+                              new Date(session.last_active_at),
+                              { addSuffix: true, locale: id },
+                            )}
                           </p>
                         </div>
                       </div>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" title="Logout session">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="shrink-0 h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                            title="Logout session"
+                          >
                             <LogOut className="w-4 h-4" />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Akhiri sesi ini?</AlertDialogTitle>
+                            <AlertDialogTitle>
+                              Akhiri sesi ini?
+                            </AlertDialogTitle>
                             <AlertDialogDescription>
-                              Perangkat ini akan segera dikeluarkan dari akun Anda.
+                              Perangkat ini akan segera dikeluarkan dari akun
+                              Anda.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -201,7 +253,11 @@ export function ActiveSessionsSection() {
                               onClick={() => handleRevoke(session.id)}
                               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
                             >
-                              {revokingId === session.id ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : "Ya, Akhiri"}
+                              {revokingId === session.id ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              ) : (
+                                "Ya, Akhiri"
+                              )}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>

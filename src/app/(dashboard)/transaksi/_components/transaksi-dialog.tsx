@@ -15,10 +15,7 @@ import {
 } from "@/actions/transaksi-action";
 import dynamic from "next/dynamic";
 import type { VoiceParseResult } from "@/types/voice-parser";
-import {
-  addToQueue,
-  type QueuedAction,
-} from "@/lib/offline-queue";
+import { addToQueue, type QueuedAction } from "@/lib/offline-queue";
 
 const VoiceInputButton = dynamic(() => import("./voice-input-button"), {
   ssr: false,
@@ -71,19 +68,19 @@ const TIPE_TABS = [
     value: "expense",
     label: "🔴 Keluar",
     color:
-      "data-[state=active]:text-rose-500 data-[state=active]:border-rose-500",
+      "data-[state=active]:text-semantic-down data-[state=active]:border-semantic-down",
   },
   {
     value: "income",
     label: "🟢 Masuk",
     color:
-      "data-[state=active]:text-emerald-500 data-[state=active]:border-emerald-500",
+      "data-[state=active]:text-semantic-up data-[state=active]:border-semantic-up",
   },
   {
     value: "transfer",
     label: "🔵 Transfer",
     color:
-      "data-[state=active]:text-blue-500 data-[state=active]:border-blue-500",
+      "data-[state=active]:text-primary data-[state=active]:border-primary",
   },
 ];
 
@@ -267,8 +264,12 @@ export default function TransaksiDialog({
     if (first.rekening_tujuan_hint) {
       const matchedRekTujuan = rekening.find(
         (r) =>
-          r.nama.toLowerCase().includes(first.rekening_tujuan_hint.toLowerCase()) ||
-          r.logo?.toLowerCase().includes(first.rekening_tujuan_hint.toLowerCase()),
+          r.nama
+            .toLowerCase()
+            .includes(first.rekening_tujuan_hint.toLowerCase()) ||
+          r.logo
+            ?.toLowerCase()
+            .includes(first.rekening_tujuan_hint.toLowerCase()),
       );
       if (matchedRekTujuan) setValue("rekening_tujuan", matchedRekTujuan.id);
     }
@@ -392,8 +393,8 @@ export default function TransaksiDialog({
 
         {/* AI Voice Input — hanya tampil saat create (bukan edit & bukan correction) */}
         {!isEdit && !copyFrom && (
-          <div className="space-y-2 p-3 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800">
-            <Label className="text-xs text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+          <div className="space-y-2 p-3 rounded-input bg-primary/5 border border-primary/20">
+            <Label className="text-xs text-primary flex items-center gap-1">
               <Sparkles className="h-3 w-3" /> Input Natural (AI)
             </Label>
             <VoiceInputButton
@@ -619,10 +620,10 @@ export default function TransaksiDialog({
                       onClick={() => handleSelectSuggestion(s)}
                       className={cn(
                         "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium",
-                        "border border-border bg-muted/50 hover:bg-muted hover:border-indigo-400",
+                        "border border-border bg-muted/50 hover:bg-muted hover:border-primary",
                         "transition-all duration-150 cursor-pointer",
                         judul === s.judul &&
-                          "border-indigo-500 bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300",
+                          "border-primary bg-primary/5 dark:bg-primary/10 text-primary",
                       )}
                     >
                       {s.kategori_id && (
@@ -690,7 +691,7 @@ export default function TransaksiDialog({
                 size="sm"
                 onClick={handleCopyTransaksi}
                 disabled={copying}
-                className="gap-1.5 text-indigo-600 border-indigo-200 hover:bg-indigo-50 dark:hover:bg-indigo-950"
+                className="gap-1.5 text-primary border-primary/20 hover:bg-primary/5 rounded-full"
               >
                 {copying ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -711,7 +712,7 @@ export default function TransaksiDialog({
               <Button
                 type="submit"
                 disabled={submitting}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white"
+                className="bg-primary hover:bg-[#003ecc] text-white rounded-full h-11 px-5"
               >
                 {submitting ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />

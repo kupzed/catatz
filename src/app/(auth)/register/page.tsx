@@ -29,11 +29,26 @@ export default function RegisterPage() {
 
   const getStrength = (pwd: string) => {
     if (!pwd || pwd.length < 8)
-      return { label: "Lemah", width: "w-1/3", color: "bg-red-500" };
+      return {
+        label: "Lemah",
+        width: "w-1/3",
+        color: "bg-semantic-down",
+        textColor: "text-semantic-down",
+      };
     if (pwd.length >= 12 && /[0-9]/.test(pwd) && /[^A-Za-z0-9]/.test(pwd)) {
-      return { label: "Kuat", width: "w-full", color: "bg-green-500" };
+      return {
+        label: "Kuat",
+        width: "w-full",
+        color: "bg-semantic-up",
+        textColor: "text-semantic-up",
+      };
     }
-    return { label: "Sedang", width: "w-2/3", color: "bg-yellow-500" };
+    return {
+      label: "Sedang",
+      width: "w-2/3",
+      color: "bg-[#f4b000]",
+      textColor: "text-[#f4b000]",
+    };
   };
 
   const strength = getStrength(passwordValue);
@@ -54,17 +69,15 @@ export default function RegisterPage() {
 
   if (done) {
     return (
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl text-center">
+      <div className="bg-surface-dark-elevated border border-white/10 rounded-card p-8 text-center">
         <div className="text-5xl mb-4">📬</div>
-        <h2 className="text-xl font-semibold text-white mb-2">
-          Cek Email Anda
-        </h2>
-        <p className="text-slate-400 text-sm">
+        <h2 className="text-xl font-normal text-white mb-2">Cek Email Anda</h2>
+        <p className="text-white/50 text-sm">
           Kami telah mengirim link verifikasi ke email Anda. Silakan klik link
           tersebut untuk mengaktifkan akun.
         </p>
         <Link href="/login">
-          <Button className="mt-6 bg-indigo-600 hover:bg-indigo-500 text-white w-full">
+          <Button className="mt-6 bg-primary hover:bg-[#003ecc] text-white w-full rounded-full font-semibold h-11">
             Ke Halaman Login
           </Button>
         </Link>
@@ -73,9 +86,9 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
-      <h2 className="text-xl font-semibold text-white mb-1">Buat akun baru</h2>
-      <p className="text-slate-400 text-sm mb-6">
+    <div className="bg-surface-dark-elevated border border-white/10 rounded-card p-8">
+      <h2 className="text-xl font-normal text-white mb-1">Buat akun baru</h2>
+      <p className="text-white/50 text-sm mb-6">
         Mulai catat keuangan Anda hari ini
       </p>
 
@@ -84,7 +97,7 @@ export default function RegisterPage() {
         variant="outline"
         onClick={handleGoogleLogin}
         disabled={isGooglePending || loading}
-        className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white h-11 mb-6"
+        className="w-full bg-surface-dark-elevated border border-white/15 text-white hover:bg-white/5 hover:text-white h-11 mb-6 rounded-full"
       >
         {isGooglePending ? (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -113,51 +126,56 @@ export default function RegisterPage() {
           <div className="w-full border-t border-white/10"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-[#1a1f36] text-slate-400">Atau</span>
+          <span className="px-2 bg-surface-dark-elevated text-white/40">
+            Atau
+          </span>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-slate-300">
+          <Label htmlFor="name" className="text-white/70 text-sm font-medium">
             Nama Lengkap
           </Label>
           <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
             <Input
               id="name"
               name="name"
               type="text"
               placeholder="Nama Anda"
               required
-              className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus:border-indigo-500"
+              className="pl-10 bg-surface-dark border-white/15 text-white placeholder:text-white/30 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-slate-300">
+          <Label htmlFor="email" className="text-white/70 text-sm font-medium">
             Email
           </Label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
             <Input
               id="email"
               name="email"
               type="email"
               placeholder="nama@email.com"
               required
-              className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus:border-indigo-500"
+              className="pl-10 bg-surface-dark border-white/15 text-white placeholder:text-white/30 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-slate-300">
+          <Label
+            htmlFor="password"
+            className="text-white/70 text-sm font-medium"
+          >
             Password
           </Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
             <Input
               id="password"
               name="password"
@@ -167,12 +185,12 @@ export default function RegisterPage() {
               required
               value={passwordValue}
               onChange={(e) => setPasswordValue(e.target.value)}
-              className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus:border-indigo-500"
+              className="pl-10 pr-10 bg-surface-dark border-white/15 text-white placeholder:text-white/30 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors"
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4" />
@@ -184,16 +202,14 @@ export default function RegisterPage() {
           {passwordValue.length > 0 && (
             <div className="space-y-1 mt-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-400">Kekuatan:</span>
-                <span
-                  className={`font-medium ${strength.color.replace("bg-", "text-")}`}
-                >
+                <span className="text-white/40">Kekuatan:</span>
+                <span className={`font-medium ${strength.textColor}`}>
                   {strength.label}
                 </span>
               </div>
-              <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden flex">
+              <div className="h-1.5 w-full bg-surface-dark rounded-full overflow-hidden">
                 <div
-                  className={`h-full transition-all duration-300 ${strength.width} ${strength.color}`}
+                  className={`h-full transition-all duration-300 ${strength.width} ${strength.color} rounded-full`}
                 />
               </div>
             </div>
@@ -203,7 +219,7 @@ export default function RegisterPage() {
         <Button
           type="submit"
           disabled={loading}
-          className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium h-11 mt-2 transition-all duration-200"
+          className="w-full bg-primary hover:bg-[#003ecc] text-white font-semibold h-11 mt-2 rounded-full"
         >
           {loading ? (
             <>
@@ -216,11 +232,11 @@ export default function RegisterPage() {
         </Button>
       </form>
 
-      <p className="text-center text-sm text-slate-500 mt-6">
+      <p className="text-center text-sm text-white/40 mt-6">
         Sudah punya akun?{" "}
         <Link
           href="/login"
-          className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+          className="text-primary hover:text-primary/80 font-medium transition-colors"
         >
           Masuk
         </Link>

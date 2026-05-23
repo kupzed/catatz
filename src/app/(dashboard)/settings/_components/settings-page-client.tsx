@@ -63,8 +63,8 @@ export default function SettingsPageClient({
     <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Page title */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground text-sm">
+        <h1 className="text-[32px] font-normal tracking-[-0.4px] text-foreground leading-tight">Settings</h1>
+        <p className="text-sm text-muted-foreground">
           Kelola akun, preferensi, dan keamanan aplikasi CatatZ.
         </p>
       </div>
@@ -82,10 +82,10 @@ export default function SettingsPageClient({
               id={`settings-nav-${id}`}
               onClick={() => setActiveTab(id)}
               className={cn(
-                "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-left transition-all",
+                "flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-left transition-all",
                 activeTab === id
-                  ? "bg-accent text-accent-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent/60",
+                  ? "text-foreground font-semibold border-l-2 border-primary pl-[calc(0.75rem-2px)]"
+                  : "text-muted-foreground hover:text-foreground pl-3",
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
@@ -98,7 +98,7 @@ export default function SettingsPageClient({
         <div className="md:hidden">
           <div
             role="tablist"
-            className="flex items-center gap-1 rounded-xl bg-muted p-1 w-full"
+            className="flex items-center gap-1 rounded-[8px] bg-surface-strong p-1 w-full"
           >
             {TABS.map(({ id, label, icon: Icon }) => (
               <button
@@ -108,9 +108,9 @@ export default function SettingsPageClient({
                 aria-selected={activeTab === id}
                 onClick={() => setActiveTab(id)}
                 className={cn(
-                  "flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium transition-all",
+                  "flex flex-1 items-center justify-center gap-1.5 rounded-[6px] px-2 py-1.5 text-xs font-medium transition-all",
                   activeTab === id
-                    ? "bg-background text-foreground shadow-sm"
+                    ? "bg-card text-foreground font-semibold"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >

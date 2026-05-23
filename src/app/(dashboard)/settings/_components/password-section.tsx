@@ -103,11 +103,11 @@ export function PasswordSection({ profile }: Props) {
   };
 
   const getStrength = (pwd: string) => {
-    if (!pwd || pwd.length < 8) return { label: 'Lemah', width: 'w-1/3', color: 'bg-red-500' };
+    if (!pwd || pwd.length < 8) return { label: 'Lemah', width: 'w-1/3', color: 'bg-semantic-down', textColor: 'text-semantic-down' };
     if (pwd.length >= 12 && /[0-9]/.test(pwd) && /[^A-Za-z0-9]/.test(pwd)) {
-      return { label: 'Kuat', width: 'w-full', color: 'bg-green-500' };
+      return { label: 'Kuat', width: 'w-full', color: 'bg-semantic-up', textColor: 'text-semantic-up' };
     }
-    return { label: 'Sedang', width: 'w-2/3', color: 'bg-yellow-500' };
+    return { label: 'Sedang', width: 'w-2/3', color: 'bg-[#f4b000]', textColor: 'text-[#f4b000]' };
   };
 
   const strength = getStrength(newPasswordValue);
@@ -137,7 +137,7 @@ export function PasswordSection({ profile }: Props) {
               <Badge variant="outline" className="bg-muted/30">Email & Password</Badge>
             )}
             {isGoogleProvider && (
-              <Badge variant="outline" className="bg-indigo-500/10 text-indigo-500 border-indigo-500/20">Akun Google</Badge>
+              <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">Akun Google</Badge>
             )}
             {!isEmailProvider && !isGoogleProvider && (
               <span className="text-sm text-muted-foreground">Tidak diketahui</span>
@@ -211,10 +211,10 @@ export function PasswordSection({ profile }: Props) {
                   <div className="space-y-1 mt-2">
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground">Kekuatan:</span>
-                      <span className={`font-medium ${strength.color.replace('bg-', 'text-')}`}>{strength.label}</span>
+                      <span className={`font-medium ${strength.color.replace('bg-semantic-down', 'text-semantic-down').replace('bg-semantic-up', 'text-semantic-up').replace('bg-[#f4b000]', 'text-[#f4b000]').replace('bg-red-500', 'text-red-500').replace('bg-green-500', 'text-green-500').replace('bg-yellow-500', 'text-yellow-500')}`}>{strength.label}</span>
                     </div>
-                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden flex">
-                      <div className={`h-full transition-all duration-300 ${strength.width} ${strength.color}`} />
+                    <div className="h-1.5 w-full bg-surface-strong rounded-full overflow-hidden">
+                      <div className={`h-full transition-all duration-300 ${strength.width} ${strength.color} rounded-full`} />
                     </div>
                   </div>
                 )}
@@ -252,7 +252,7 @@ export function PasswordSection({ profile }: Props) {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white"
+                className="bg-primary hover:bg-[#003ecc] text-white rounded-full h-11 px-5"
               >
                 {isSubmitting ? "Memperbarui..." : "Perbarui Password"}
               </Button>

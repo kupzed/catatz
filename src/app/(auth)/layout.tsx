@@ -8,22 +8,17 @@ export const metadata: Metadata = {
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-950 via-slate-900 to-indigo-950">
-      {/* Decorative blobs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-indigo-600/20 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-violet-600/20 blur-3xl" />
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-surface-dark">
       <div className="relative z-10 w-full max-w-md px-4">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-2">
             <Image src="/catatz.svg" alt="CatatZ Logo" width={40} height={40} />
-            <h1 className="text-3xl font-bold text-white tracking-tight">
+            <span className="text-2xl font-semibold text-white">
               CatatZ
-            </h1>
+            </span>
           </div>
-          <p className="text-slate-400 text-sm">
+          <p className="text-white/50 text-sm">
             Pencatatan keuangan pribadi yang cerdas
           </p>
         </div>

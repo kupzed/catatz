@@ -42,9 +42,9 @@ export function DeleteAccountSection() {
   };
 
   return (
-    <Card className="border-red-500/20">
+    <Card className="border-semantic-down/20">
       <CardHeader>
-        <CardTitle className="text-lg text-red-500 flex items-center gap-2">
+        <CardTitle className="text-lg text-semantic-down flex items-center gap-2">
           Danger Zone
         </CardTitle>
         <CardDescription>
@@ -65,7 +65,7 @@ export function DeleteAccountSection() {
             }
           }}>
             <DialogTrigger asChild>
-              <Button variant="destructive" className="w-full sm:w-auto gap-2">
+              <Button variant="ghost" className="w-full sm:w-auto gap-2 bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20 rounded-full">
                 <Trash2 className="w-4 h-4" />
                 Delete Account
               </Button>

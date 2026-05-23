@@ -5,8 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { updateProfile, uploadAvatar, removeAvatar } from "@/actions/profile-action";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  updateProfile,
+  uploadAvatar,
+  removeAvatar,
+} from "@/actions/profile-action";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 
 type Profile = {
@@ -45,7 +55,9 @@ export function ProfileSection({ profile }: Props) {
   const [name, setName] = useState(profile?.name ?? "");
   const [isPending, setIsPending] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(profile?.avatar_url ?? null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(
+    profile?.avatar_url ?? null,
+  );
   const [isAvatarPending, setIsAvatarPending] = useState(false);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,7 +90,7 @@ export function ProfileSection({ profile }: Props) {
       setAvatarPreview(profile?.avatar_url ?? null);
       toast.error(res.error || "Gagal mengunggah avatar");
     }
-    
+
     setIsAvatarPending(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -144,7 +156,9 @@ export function ProfileSection({ profile }: Props) {
         <div className="flex items-center justify-between gap-6 py-4">
           <div>
             <p className="text-sm font-medium">Avatar</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Gambar profil Anda</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Gambar profil Anda
+            </p>
           </div>
           <div className="flex items-center gap-4 shrink-0">
             <div className="flex flex-col items-end gap-2">
@@ -156,7 +170,9 @@ export function ProfileSection({ profile }: Props) {
                   disabled={isAvatarPending}
                   className="h-8 text-xs gap-2"
                 >
-                  {isAvatarPending ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
+                  {isAvatarPending ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : null}
                   Ganti Foto
                 </Button>
                 {avatarPreview && (
@@ -179,16 +195,18 @@ export function ProfileSection({ profile }: Props) {
                 onChange={handleAvatarChange}
               />
             </div>
-            <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-semibold shrink-0 overflow-hidden relative">
+            <div className="w-10 h-10 rounded-full bg-surface-strong flex items-center justify-center text-foreground text-sm font-semibold shrink-0 overflow-hidden relative">
               {avatarPreview ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={avatarPreview}
-                  className={`w-full h-full object-cover ${isAvatarPending ? 'opacity-50' : ''}`}
-                  alt={profile?.name ?? profile?.email ?? 'Avatar CatatZ'}
+                  className={`w-full h-full object-cover ${isAvatarPending ? "opacity-50" : ""}`}
+                  alt={profile?.name ?? profile?.email ?? "Avatar CatatZ"}
                 />
               ) : (
-                <span className={isAvatarPending ? 'opacity-50' : ''}>{initials}</span>
+                <span className={isAvatarPending ? "opacity-50" : ""}>
+                  {initials}
+                </span>
               )}
             </div>
           </div>
@@ -201,7 +219,7 @@ export function ProfileSection({ profile }: Props) {
             id="profil-email"
             value={profile?.email ?? "–"}
             disabled
-            className="bg-muted text-sm h-9"
+            className="bg-surface-soft text-muted-foreground text-sm h-9 rounded-input"
           />
         </SettingRow>
 
@@ -220,12 +238,15 @@ export function ProfileSection({ profile }: Props) {
         {formattedJoinDate && (
           <>
             <Separator />
-            <SettingRow label="Tanggal Bergabung" description="Sejak akun Anda didaftarkan">
+            <SettingRow
+              label="Tanggal Bergabung"
+              description="Sejak akun Anda didaftarkan"
+            >
               <Input
                 id="profil-created-at"
                 value={formattedJoinDate}
                 disabled
-                className="bg-muted text-sm h-9"
+                className="bg-surface-soft text-muted-foreground text-sm h-9 rounded-input"
               />
             </SettingRow>
           </>
@@ -235,7 +256,7 @@ export function ProfileSection({ profile }: Props) {
 
         <div className="pt-4 flex justify-end">
           <Button
-            className="bg-indigo-600 hover:bg-indigo-500 text-white gap-2"
+            className="bg-primary hover:bg-[#003ecc] text-white gap-2 rounded-full h-11 px-5"
             onClick={handleSave}
             disabled={isPending}
           >

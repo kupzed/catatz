@@ -300,7 +300,7 @@ export default function KategoriDialog({
             <Button
               type="submit"
               disabled={submitting}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white"
+              className="bg-primary hover:bg-[#003ecc] text-white rounded-full h-11 px-5"
             >
               {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               {isEdit ? "Perbarui" : "Tambah"}

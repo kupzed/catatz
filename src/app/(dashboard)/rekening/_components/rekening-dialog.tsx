@@ -135,9 +135,9 @@ function CreateForm({
                     type="button"
                     onClick={() => handleBankSelect(bank.slug)}
                     className={cn(
-                      "rounded-lg border p-2 text-center text-xs font-medium hover:border-indigo-400 transition-all",
+                      "rounded-[8px] border p-2 text-center text-xs font-medium hover:border-primary transition-all",
                       logo === bank.slug
-                        ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950"
+                        ? "border-primary bg-primary/5 dark:bg-primary/10"
                         : "border-border",
                     )}
                   >
@@ -261,7 +261,7 @@ function CreateForm({
         <Button
           type="submit"
           disabled={submitting}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white"
+          className="bg-primary hover:bg-[#003ecc] text-white rounded-full h-11 px-5"
         >
           {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
           Tambah
@@ -460,7 +460,7 @@ function EditForm({
         <Button
           type="submit"
           disabled={submitting}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white"
+          className="bg-primary hover:bg-[#003ecc] text-white rounded-full h-11 px-5"
         >
           {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
           Perbarui
