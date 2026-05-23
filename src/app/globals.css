@@ -198,6 +198,10 @@
     color: var(--body-color);
     overscroll-behavior: none;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-variant-numeric: lining-nums tabular-nums;
+    text-rendering: optimizeLegibility;
   }
   html {
     @apply font-sans;
@@ -207,6 +211,8 @@
   h1, h2, h3, h4 {
     color: var(--foreground);
     letter-spacing: -0.02em;
+    font-family: var(--font-inter), var(--font-sans), system-ui, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
   /* Number/monospace — Geist Mono sebagai CoinbaseMono substitute */

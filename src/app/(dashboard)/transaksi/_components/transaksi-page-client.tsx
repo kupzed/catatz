@@ -504,7 +504,7 @@ export default function TransaksiPageClient({
             }}
           >
             <SelectTrigger
-              className="h-9 sm:h-10 text-sm w-32 sm:w-48 bg-background dark:bg-card border dark:border-none shadow-sm dark:shadow-xs shrink-0 px-2 sm:px-3"
+              className="h-9 sm:h-10 text-sm w-32 sm:w-48 bg-background dark:bg-card border border-hairline text-foreground shrink-0 px-2 sm:px-3"
               id="filter-periode"
             >
               <SelectValue placeholder="Periode" />
@@ -522,9 +522,9 @@ export default function TransaksiPageClient({
       </div>
 
       {/* Date Navigator & Summary Card */}
-      <div className="rounded-card bg-surface-dark text-white overflow-hidden">
+      <div className="rounded-card border border-hairline bg-surface-dark dark:bg-surface-dark-elevated text-white overflow-hidden ring-1 ring-white/5">
         {/* Navigator Header */}
-        <div className="bg-surface-dark flex items-center justify-between px-6 py-4 border-b border-white/10">
+        <div className="bg-primary flex items-center justify-between px-6 py-4 border-b border-white/10">
           <Button
             variant="ghost"
             size="icon"
@@ -539,7 +539,7 @@ export default function TransaksiPageClient({
           <div className="relative inline-flex items-center">
             <button
               className={cn(
-                "font-medium text-sm md:text-base flex items-center gap-1.5 text-white",
+                "font-semibold text-sm md:text-base flex items-center gap-1.5 text-white",
                 "hover:text-white/80 transition-colors rounded-[6px] px-2 py-1",
                 preset !== "all" && "hover:underline underline-offset-2",
               )}
@@ -581,31 +581,31 @@ export default function TransaksiPageClient({
         </div>
 
         {/* Summary — correction tidak dihitung */}
-        <div className="grid grid-cols-3 divide-x divide-white/10 px-6 py-4 text-center bg-surface-dark-elevated rounded-b-card">
-          <div className="px-1">
-            <p className="text-[11px] uppercase tracking-wider text-white/60 font-medium">
+        <div className="grid grid-cols-3 divide-x divide-hairline px-3 sm:px-6 py-4 text-center bg-background dark:bg-card text-foreground rounded-b-card">
+          <div className="px-0.5 sm:px-1 min-w-0">
+            <p className="text-[10px] uppercase tracking-wider font-medium text-muted-foreground">
               Pemasukan
             </p>
-            <p className="font-mono text-base font-medium text-semantic-up truncate mt-0.5">
+            <p className="font-mono text-sm sm:text-base font-semibold text-semantic-up mt-0.5 break-all leading-tight">
               {totalIncome > 0 ? "+" : ""}
               {formatRupiah(totalIncome)}
             </p>
           </div>
-          <div className="px-1">
-            <p className="text-[11px] uppercase tracking-wider text-white/60 font-medium">
+          <div className="px-0.5 sm:px-1 min-w-0">
+            <p className="text-[10px] uppercase tracking-wider font-medium text-muted-foreground">
               Pengeluaran
             </p>
-            <p className="font-mono text-base font-medium text-semantic-down truncate mt-0.5">
+            <p className="font-mono text-sm sm:text-base font-semibold text-semantic-down mt-0.5 break-all leading-tight">
               {formatRupiah(totalExpense)}
             </p>
           </div>
-          <div className="px-1">
-            <p className="text-[11px] uppercase tracking-wider text-white/60 font-medium">
+          <div className="px-0.5 sm:px-1 min-w-0">
+            <p className="text-[10px] uppercase tracking-wider font-medium text-muted-foreground">
               Selisih
             </p>
             <p
               className={cn(
-                "font-mono text-base font-medium truncate mt-0.5",
+                "font-mono text-sm sm:text-base font-semibold mt-0.5 break-all leading-tight",
                 totalIncome - totalExpense >= 0
                   ? "text-semantic-up"
                   : "text-semantic-down",
@@ -643,7 +643,7 @@ export default function TransaksiPageClient({
           </Button>
         </div>
 
-        <div className="flex w-full sm:w-auto space-x-2">
+        <div className="flex w-full gap-2">
           <Select
             value={`${filter.sortBy}-${filter.sortOrder}`}
             onValueChange={(v) => {
@@ -654,7 +654,10 @@ export default function TransaksiPageClient({
               setFilter((f) => ({ ...f, sortBy: by, sortOrder: order }));
             }}
           >
-            <SelectTrigger className="w-full text-xs">
+            <SelectTrigger
+              size="sm"
+              className="flex-1 text-xs text-foreground border-hairline"
+            >
               <SelectValue placeholder="Urutkan" />
             </SelectTrigger>
             <SelectContent>
@@ -671,7 +674,11 @@ export default function TransaksiPageClient({
               setFilter((f) => ({ ...f, tipe: v as TransaksiFilter["tipe"] }))
             }
           >
-            <SelectTrigger className="w-full text-xs" id="filter-tipe">
+            <SelectTrigger
+              size="sm"
+              className="flex-1 text-xs text-foreground border-hairline"
+              id="filter-tipe"
+            >
               <SelectValue placeholder="Semua tipe" />
             </SelectTrigger>
             <SelectContent>
@@ -692,7 +699,11 @@ export default function TransaksiPageClient({
               }))
             }
           >
-            <SelectTrigger className="w-full text-xs" id="filter-rekening">
+            <SelectTrigger
+              size="sm"
+              className="flex-1 text-xs text-foreground border-hairline"
+              id="filter-rekening"
+            >
               <SelectValue placeholder="Semua rekening" />
             </SelectTrigger>
             <SelectContent>

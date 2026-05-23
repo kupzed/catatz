@@ -107,14 +107,14 @@ export default function RekeningPageClient({ initialRekening }: Props) {
       </div>
 
       {/* Total Balance Card */}
-      <div className="rounded-card bg-surface-dark p-8 text-white">
-        <p className="text-sm text-white/60 uppercase tracking-wider mb-2">
+      <div className="rounded-card bg-primary p-8 text-white ring-1 ring-white/5">
+        <p className="text-sm text-white uppercase tracking-wider mb-2">
           Total Saldo (aktif)
         </p>
         <p className="font-mono text-[44px] font-normal tracking-[-1px] text-white leading-none">
           {formatRupiah(totalSaldo)}
         </p>
-        <p className="text-xs text-white/40 mt-3">
+        <p className="text-xs text-white/60 mt-3">
           {rekening.filter((r) => r.exclude_total).length} rekening dikecualikan
         </p>
       </div>

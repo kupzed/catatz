@@ -80,21 +80,21 @@ function SidebarHeaderContent() {
   const isCollapsed = state === "collapsed" && !isMobile;
 
   return (
-    <div className="flex w-full overflow-hidden items-center justify-between px-2 py-1.5 min-h-12 select-none">
+    <div className="flex w-full overflow-hidden items-center justify-between px-2 py-3 min-h-[52px] select-none">
       {/* Expanded: logo + name */}
       {!isCollapsed && (
         <Link
           href="/transaksi"
-          className="flex items-center gap-2.5 px-2 flex-1 min-w-0"
+          className="flex items-center gap-3 px-2 flex-1 min-w-0"
         >
           <Image
             src="/catatz.svg"
             alt="CatatZ"
-            width={26}
-            height={26}
+            width={30}
+            height={30}
             className="shrink-0 pointer-events-none"
           />
-          <span className="font-semibold text-lg text-foreground truncate">
+          <span className="font-semibold text-[17px] text-foreground truncate tracking-tight">
             CatatZ
           </span>
         </Link>
@@ -105,13 +105,13 @@ function SidebarHeaderContent() {
         onClick={toggleSidebar}
         aria-label="Toggle sidebar"
         className={cn(
-          "flex items-center justify-center rounded-[8px] p-1.5 text-muted-foreground",
+          "flex items-center justify-center rounded-[8px] p-2 text-muted-foreground",
           "hover:bg-surface-strong hover:text-foreground transition-colors",
           "cursor-pointer shrink-0 ml-auto",
-          isCollapsed && "w-full",
+          isCollapsed && "w-full justify-center",
         )}
       >
-        <PanelLeft className="h-4 w-4" />
+        <PanelLeft className="h-[18px] w-[18px]" />
       </button>
     </div>
   );
@@ -166,7 +166,7 @@ function UserCard({ user }: { user: AppSidebarUser }) {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent side="top" align="start" className="w-56 mb-1">
+          <DropdownMenuContent side="top" align="start" className="w-64 mb-1">
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-medium">
@@ -181,8 +181,8 @@ function UserCard({ user }: { user: AppSidebarUser }) {
             <DropdownMenuSeparator />
 
             <DropdownMenuItem asChild>
-              <Link 
-                href="/settings" 
+              <Link
+                href="/settings"
                 className="flex items-center gap-2"
                 onClick={() => {
                   if (isMobile) setOpenMobile(false);
