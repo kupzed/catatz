@@ -377,12 +377,12 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                       <X className="h-3.5 w-3.5" />
                       Batal
                     </Button>
-                      <Button
-                        size="sm"
-                        className="h-8 gap-1 bg-primary hover:bg-[#003ecc] text-white rounded-full"
-                        disabled={loadingCicilan === h.id}
-                        onClick={() => handleUpdateCicilan(h, item)}
-                      >
+                    <Button
+                      size="sm"
+                      className="h-8 gap-1 bg-primary hover:bg-[#003ecc] text-white rounded-full"
+                      disabled={loadingCicilan === h.id}
+                      onClick={() => handleUpdateCicilan(h, item)}
+                    >
                       <Save className="h-3.5 w-3.5" />
                       Simpan
                     </Button>
@@ -492,12 +492,12 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                         )}
                       </div>
                     </div>
-                      <div className="text-right shrink-0">
-                        <p className="font-mono text-lg font-semibold text-semantic-down">
-                          {formatRupiah(sisaTagihan)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">sisa</p>
-                      </div>
+                    <div className="text-right shrink-0">
+                      <p className="font-mono text-lg font-semibold text-semantic-down">
+                        {formatRupiah(sisaTagihan)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">sisa</p>
+                    </div>
                   </div>
 
                   <div className="mt-3">
@@ -522,12 +522,12 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                     </Button>
                     {h.status !== "lunas" && (
                       <>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-7 text-xs gap-1 rounded-full bg-surface-strong text-foreground px-3"
-                            onClick={() => setExpanded(isExpanded ? null : h.id)}
-                          >
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 text-xs gap-1 rounded-full bg-surface-strong text-foreground px-3"
+                          onClick={() => setExpanded(isExpanded ? null : h.id)}
+                        >
                           <Plus className="h-3 w-3" />
                           Cicilan
                           {isExpanded ? (
@@ -536,12 +536,12 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                             <ChevronDown className="h-3 w-3" />
                           )}
                         </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-7 text-xs gap-1 rounded-full bg-semantic-up/10 text-semantic-up px-3"
-                            onClick={() => openLunasDialog(h)}
-                          >
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 text-xs gap-1 rounded-full bg-semantic-up/10 text-semantic-up px-3"
+                          onClick={() => openLunasDialog(h)}
+                        >
                           <CheckCircle2 className="h-3 w-3" />
                           Lunas
                         </Button>
@@ -730,8 +730,8 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
             <Button
               onClick={handleLunas}
               disabled={!!lunasTarget && loadingCicilan === lunasTarget.id}
-            className="bg-primary hover:bg-[#003ecc] text-white rounded-full"
-          >
+              className="bg-primary hover:bg-[#003ecc] text-white rounded-full"
+            >
               Lunaskan
             </Button>
           </DialogFooter>
