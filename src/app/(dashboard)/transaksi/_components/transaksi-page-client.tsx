@@ -62,6 +62,7 @@ import {
   CalendarIcon,
 } from "lucide-react";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
+import { RekeningSelect } from "@/components/common/rekening-select";
 import TransaksiDialog from "./transaksi-dialog";
 import { cn } from "@/lib/utils";
 
@@ -690,31 +691,22 @@ export default function TransaksiPageClient({
             </SelectContent>
           </Select>
 
-          <Select
-            value={filter.rekening_id ?? "all"}
+          <RekeningSelect
+            rekening={rekening}
+            value={filter.rekening_id ?? "none"}
             onValueChange={(v) =>
               setFilter((f) => ({
                 ...f,
-                rekening_id: v === "all" ? undefined : v,
+                rekening_id: v === "none" ? undefined : v,
               }))
             }
-          >
-            <SelectTrigger
-              size="sm"
-              className="flex-1 text-xs text-foreground border-hairline"
-              id="filter-rekening"
-            >
-              <SelectValue placeholder="Semua rekening" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Semua Rekening</SelectItem>
-              {rekening.map((r) => (
-                <SelectItem key={r.id} value={r.id}>
-                  {r.nama}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            placeholder="Semua rekening"
+            includeNone={true}
+            noneLabel="Semua Rekening"
+            size="sm"
+            className="flex-1 text-xs text-foreground border-hairline"
+            id="filter-rekening"
+          />
         </div>
       </div>
 

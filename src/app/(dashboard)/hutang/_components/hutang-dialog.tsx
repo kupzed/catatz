@@ -12,13 +12,7 @@ import { toast } from "sonner";
 import type { Hutang } from "@/types/hutang";
 import type { Rekening } from "@/types/rekening";
 import { todayISODate, currentTime } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { RekeningSelect } from "@/components/common/rekening-select";
 import { NominalInput } from "@/components/common/nominal-input";
 import {
   Dialog,
@@ -206,7 +200,7 @@ export default function HutangDialog({
                   id="tgl-mulai"
                   type="date"
                   {...register("tanggal_mulai")}
-                  className="w-full appearance-none bg-background dark:bg-input/20 border-input"
+                  className="w-full appearance-none bg-background border-input"
                 />
                 {errors.tanggal_mulai && (
                   <p className="text-xs text-rose-500 mt-1">
@@ -220,7 +214,7 @@ export default function HutangDialog({
                   id="waktu"
                   type="time"
                   {...register("waktu")}
-                  className="w-full appearance-none bg-background dark:bg-input/20 border-input"
+                  className="w-full appearance-none bg-background border-input"
                 />
               </div>
             </div>
@@ -231,7 +225,7 @@ export default function HutangDialog({
                 id="tgl-jatuh"
                 type="date"
                 {...register("tanggal_jatuh_tempo")}
-                className="w-full appearance-none bg-background dark:bg-input/20 border-input"
+                className="w-full appearance-none bg-background border-input"
               />
               {errors.tanggal_jatuh_tempo && (
                 <p className="text-xs text-rose-500 mt-1">
@@ -248,33 +242,17 @@ export default function HutangDialog({
               control={control}
               name="rekening_id"
               render={({ field }) => (
-                <Select
-                  value={field.value || ""}
+                <RekeningSelect
+                  rekening={rekening}
+                  value={field.value || "none"}
                   onValueChange={(val) =>
                     field.onChange(val === "none" ? "" : val)
                   }
-                >
-                  <SelectTrigger className="h-10 text-sm">
-                    <SelectValue placeholder="(Tanpa Rekening)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">(Tanpa Rekening)</SelectItem>
-                    {rekening.map((r) => (
-                      <SelectItem key={r.id} value={r.id}>
-                        <span className="flex items-center gap-2">
-                          <span
-                            className="w-2 h-2 rounded-full"
-                            style={{ background: r.warna }}
-                          />
-                          {r.nama}{" "}
-                          <span className="text-muted-foreground text-xs ml-1">
-                            ({r.jenis})
-                          </span>
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="(Tanpa Rekening)"
+                  includeNone={true}
+                  noneLabel="(Tanpa Rekening)"
+                  className="h-10 text-sm"
+                />
               )}
             />
           </div>
@@ -300,7 +278,7 @@ export default function HutangDialog({
             <Button
               type="submit"
               disabled={submitting}
-              className="bg-primary hover:bg-[#003ecc] text-white rounded-full h-11 px-5"
+              className="bg-primary hover:bg-primary-active text-white rounded-full h-11 px-5"
             >
               {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               {isEdit ? "Perbarui" : "Simpan"}

@@ -18,13 +18,6 @@ import {
 } from "@/actions/hutang-action";
 import { toast } from "sonner";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -53,6 +46,7 @@ import HutangDialog from "./hutang-dialog";
 import { cn } from "@/lib/utils";
 import { NominalInput } from "@/components/common/nominal-input";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
+import { RekeningSelect } from "@/components/common/rekening-select";
 
 type Props = { initialHutang: Hutang[]; rekening: Rekening[] };
 
@@ -294,12 +288,12 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                             nominal: value.toString(),
                           }))
                         }
-                        className="h-9 text-sm"
                       />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-xs">Rekening</Label>
-                      <Select
+                      <RekeningSelect
+                        rekening={rekening}
                         value={editCicilanDraft.rekening_id}
                         onValueChange={(value) =>
                           setEditCicilanDraft((prev) => ({
@@ -307,21 +301,13 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                             rekening_id: value,
                           }))
                         }
-                      >
-                        <SelectTrigger className="h-9 text-xs">
-                          <SelectValue placeholder="Tanpa rekening" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">Tanpa rekening</SelectItem>
-                          {rekening.map((r) => (
-                            <SelectItem key={r.id} value={r.id}>
-                              {r.nama}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        placeholder="Tanpa rekening"
+                        includeNone={true}
+                        noneLabel="Tanpa rekening"
+                        className="h-9 text-xs"
+                      />
                     </div>
-                    <div className="flex-1 space-y-1.5 min-w-0">
+                    <div className="space-y-1">
                       <Label className="text-xs">Tanggal</Label>
                       <Input
                         type="date"
@@ -332,10 +318,10 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                             tanggal: event.target.value,
                           }))
                         }
-                        className="w-full appearance-none bg-background dark:bg-input/20 border-input"
+                        className="w-full appearance-none bg-background border-input"
                       />
                     </div>
-                    <div className="w-28 space-y-1.5 shrink-0">
+                    <div className="space-y-1">
                       <Label className="text-xs">Waktu</Label>
                       <Input
                         type="time"
@@ -346,7 +332,7 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                             waktu: event.target.value,
                           }))
                         }
-                        className="w-full appearance-none bg-background dark:bg-input/20 border-input"
+                        className="w-full appearance-none bg-background border-input"
                       />
                     </div>
                   </div>
@@ -361,7 +347,6 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                         }))
                       }
                       placeholder="Catatan opsional"
-                      className="h-9 text-sm"
                     />
                   </div>
                   <div className="flex justify-end gap-2">
@@ -379,7 +364,7 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                     </Button>
                     <Button
                       size="sm"
-                      className="h-8 gap-1 bg-primary hover:bg-[#003ecc] text-white rounded-full"
+                      className="h-8 gap-1 bg-primary hover:bg-primary-active text-white rounded-full"
                       disabled={loadingCicilan === h.id}
                       onClick={() => handleUpdateCicilan(h, item)}
                     >
@@ -591,32 +576,24 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                               },
                             }))
                           }
-                          className="h-8 text-sm"
                         />
                       </div>
                       <div className="flex-1 space-y-1">
                         <Label className="text-xs">Dari / Ke Rekening</Label>
-                        <Select
-                          value={cicilanData[h.id]?.rekening_id ?? ""}
+                        <RekeningSelect
+                          rekening={rekening}
+                          value={cicilanData[h.id]?.rekening_id ?? "none"}
                           onValueChange={(val) =>
                             setCicilanData((prev) => ({
                               ...prev,
                               [h.id]: { ...prev[h.id], rekening_id: val },
                             }))
                           }
-                        >
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Tanpa rekening" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">Tanpa rekening</SelectItem>
-                            {rekening.map((r) => (
-                              <SelectItem key={r.id} value={r.id}>
-                                {r.nama}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          placeholder="Tanpa rekening"
+                          includeNone={true}
+                          noneLabel="Tanpa rekening"
+                          className="h-8 text-xs"
+                        />
                       </div>
                     </div>
                     <div className="flex justify-end mt-2">
@@ -624,7 +601,7 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
                         size="sm"
                         onClick={() => handleCicilan(h)}
                         disabled={loadingCicilan === h.id}
-                        className="h-8 bg-primary hover:bg-[#003ecc] text-white rounded-full px-4"
+                        className="h-8 bg-primary hover:bg-primary-active text-white rounded-full px-4"
                       >
                         Catat
                       </Button>
@@ -655,7 +632,7 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
             setEditData(null);
             setDialogOpen(true);
           }}
-          className="gap-2 bg-primary hover:bg-[#003ecc] text-white rounded-full font-semibold"
+          className="gap-2 bg-primary hover:bg-primary-active text-white rounded-full font-semibold"
           id="btn-tambah-hutang"
         >
           <Plus className="h-4 w-4" />
@@ -709,19 +686,14 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
           </DialogHeader>
           <div className="space-y-2">
             <Label>Rekening</Label>
-            <Select value={lunasRekeningId} onValueChange={setLunasRekeningId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Tanpa rekening" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Tanpa rekening</SelectItem>
-                {rekening.map((r) => (
-                  <SelectItem key={r.id} value={r.id}>
-                    {r.nama} ({r.jenis})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <RekeningSelect
+              rekening={rekening}
+              value={lunasRekeningId}
+              onValueChange={setLunasRekeningId}
+              placeholder="Tanpa rekening"
+              includeNone={true}
+              noneLabel="Tanpa rekening"
+            />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setLunasTarget(null)}>
@@ -730,7 +702,7 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
             <Button
               onClick={handleLunas}
               disabled={!!lunasTarget && loadingCicilan === lunasTarget.id}
-              className="bg-primary hover:bg-[#003ecc] text-white rounded-full"
+              className="bg-primary hover:bg-primary-active text-white rounded-full"
             >
               Lunaskan
             </Button>

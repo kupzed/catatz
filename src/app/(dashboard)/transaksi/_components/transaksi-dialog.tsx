@@ -44,6 +44,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { NominalInput } from "@/components/common/nominal-input";
+import { RekeningSelect } from "@/components/common/rekening-select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Sparkles, Copy, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -446,7 +447,7 @@ export default function TransaksiDialog({
                 id="tanggal"
                 type="date"
                 {...register("tanggal")}
-                className="w-full appearance-none bg-background dark:bg-input/20 border-input"
+                className="w-full appearance-none bg-background border-input"
               />
               {errors.tanggal && (
                 <p className="text-xs text-rose-500 mt-1">
@@ -460,7 +461,7 @@ export default function TransaksiDialog({
                 id="waktu"
                 type="time"
                 {...register("waktu")}
-                className="w-full appearance-none bg-background dark:bg-input/20 border-input"
+                className="w-full appearance-none bg-background border-input"
               />
             </div>
           </div>
@@ -492,33 +493,14 @@ export default function TransaksiDialog({
                 control={control}
                 name="rekening_id"
                 render={({ field }) => (
-                  <Select
+                  <RekeningSelect
+                    rekening={rekening}
                     value={field.value || ""}
                     onValueChange={field.onChange}
-                  >
-                    <SelectTrigger
-                      id="rekening-select"
-                      className={errors.rekening_id ? "border-rose-500" : ""}
-                    >
-                      <SelectValue placeholder="Pilih rekening" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {rekening.map((r) => (
-                        <SelectItem key={r.id} value={r.id}>
-                          <span className="flex items-center gap-2">
-                            <span
-                              className="w-2 h-2 rounded-full"
-                              style={{ background: r.warna }}
-                            />
-                            {r.nama}{" "}
-                            <span className="text-muted-foreground text-xs ml-1">
-                              ({r.jenis})
-                            </span>
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Pilih rekening"
+                    id="rekening-select"
+                    className={errors.rekening_id ? "border-rose-500" : ""}
+                  />
                 )}
               />
             )}
@@ -537,32 +519,14 @@ export default function TransaksiDialog({
                 control={control}
                 name="rekening_tujuan"
                 render={({ field }) => (
-                  <Select
+                  <RekeningSelect
+                    rekening={rekening}
                     value={field.value || ""}
                     onValueChange={field.onChange}
-                  >
-                    <SelectTrigger
-                      id="rekening-tujuan-select"
-                      className={
-                        errors.rekening_tujuan ? "border-rose-500" : ""
-                      }
-                    >
-                      <SelectValue placeholder="Pilih rekening tujuan" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {rekening.map((r) => (
-                        <SelectItem key={r.id} value={r.id}>
-                          <span className="flex items-center gap-2">
-                            <span
-                              className="w-2 h-2 rounded-full"
-                              style={{ background: r.warna }}
-                            />
-                            {r.nama}
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Pilih rekening tujuan"
+                    id="rekening-tujuan-select"
+                    className={errors.rekening_tujuan ? "border-rose-500" : ""}
+                  />
                 )}
               />
               {errors.rekening_tujuan && (
