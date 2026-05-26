@@ -102,7 +102,7 @@ const TIPE_CONFIG = {
   correction: {
     label: "Koreksi Saldo",
     icon: SlidersHorizontal,
-    color: "text-[#f4b000]",
+    color: "text-accent-yellow",
     bg: "bg-surface-strong",
     badge: "bg-surface-strong text-muted-foreground",
   },
@@ -754,7 +754,7 @@ export default function TransaksiPageClient({
                           : cfg.label}
                       </Badge>
                       {t._pendingSync && (
-                        <Badge className="border-0 bg-[#f4b000]/10 px-1 py-0 text-[10px] text-[#f4b000]">
+                        <Badge className="border-0 bg-accent-yellow/10 px-1 py-0 text-[10px] text-accent-yellow">
                           Menunggu sinkronisasi
                         </Badge>
                       )}
@@ -770,7 +770,7 @@ export default function TransaksiPageClient({
                           : t.tipe === "expense"
                             ? "text-semantic-down"
                             : t.tipe === "correction"
-                              ? "text-[#f4b000]"
+                              ? "text-accent-yellow"
                               : "text-foreground",
                       )}
                     >
@@ -801,7 +801,7 @@ export default function TransaksiPageClient({
                         : cfg.label}
                     </Badge>
                     {t._pendingSync && (
-                      <Badge className="border-0 bg-[#f4b000]/10 px-1.5 py-0 text-[10px] text-[#f4b000]">
+                      <Badge className="border-0 bg-accent-yellow/10 px-1.5 py-0 text-[10px] text-accent-yellow">
                         Menunggu sinkronisasi
                       </Badge>
                     )}
@@ -833,7 +833,7 @@ export default function TransaksiPageClient({
                         : t.tipe === "expense"
                           ? "text-semantic-down"
                           : t.tipe === "correction"
-                            ? "text-[#f4b000]"
+                            ? "text-accent-yellow"
                             : "text-foreground",
                     )}
                   >

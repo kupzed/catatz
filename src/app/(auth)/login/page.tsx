@@ -164,7 +164,7 @@ function LoginForm() {
         <Button
           type="submit"
           disabled={isPending}
-          className="w-full bg-primary hover:bg-[#003ecc] text-white font-semibold h-11 mt-2 rounded-full"
+          className="w-full bg-primary hover:bg-primary-active text-white font-semibold h-11 mt-2 rounded-full"
         >
           {isPending ? (
             <>

@@ -98,7 +98,7 @@ export default function RekeningPageClient({ initialRekening }: Props) {
             setEditData(null);
             setDialogOpen(true);
           }}
-          className="gap-2 bg-primary hover:bg-[#003ecc] text-white rounded-full font-semibold"
+          className="gap-2 bg-primary hover:bg-primary-active text-white rounded-full font-semibold"
           id="btn-tambah-rekening"
         >
           <Plus className="h-4 w-4" />

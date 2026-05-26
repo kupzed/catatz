@@ -47,7 +47,7 @@ type Props = {
 
 const BUDGET_STATUS_COLORS: Record<string, string> = {
   aman: "bg-semantic-up/10 text-semantic-up",
-  waspada: "bg-[#f4b000]/10 text-[#f4b000]",
+  waspada: "bg-accent-yellow/10 text-accent-yellow",
   bahaya: "bg-semantic-down/10 text-semantic-down",
 };
 
@@ -201,7 +201,7 @@ export default function RekapPageClient({
                     b.status === "bahaya"
                       ? "[&>div]:bg-semantic-down"
                       : b.status === "waspada"
-                        ? "[&>div]:bg-[#f4b000]"
+                        ? "[&>div]:bg-accent-yellow"
                         : "[&>div]:bg-semantic-up",
                   )}
                 />

@@ -94,7 +94,7 @@ export function ExportSection() {
               <Input
                 id="dari"
                 type="date"
-                className="w-full appearance-none bg-background dark:bg-input/20 border-input"
+                className="w-full appearance-none bg-background border-input"
                 value={filter.dari}
                 onChange={(e) => setFilter({ ...filter, dari: e.target.value })}
               />
@@ -106,7 +106,7 @@ export function ExportSection() {
               <Input
                 id="sampai"
                 type="date"
-                className="w-full appearance-none bg-background dark:bg-input/20 border-input"
+                className="w-full appearance-none bg-background border-input"
                 value={filter.sampai}
                 onChange={(e) =>
                   setFilter({ ...filter, sampai: e.target.value })

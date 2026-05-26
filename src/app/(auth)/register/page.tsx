@@ -77,7 +77,7 @@ export default function RegisterPage() {
           tersebut untuk mengaktifkan akun.
         </p>
         <Link href="/login">
-          <Button className="mt-6 bg-primary hover:bg-[#003ecc] text-white w-full rounded-full font-semibold h-11">
+          <Button className="mt-6 bg-primary hover:bg-primary-active text-white w-full rounded-full font-semibold h-11">
             Ke Halaman Login
           </Button>
         </Link>
@@ -219,7 +219,7 @@ export default function RegisterPage() {
         <Button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary hover:bg-[#003ecc] text-white font-semibold h-11 mt-2 rounded-full"
+          className="w-full bg-primary hover:bg-primary-active text-white font-semibold h-11 mt-2 rounded-full"
         >
           {loading ? (
             <>

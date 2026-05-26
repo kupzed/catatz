@@ -10,7 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { changePassword } from "@/actions/profile-action";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 type Profile = {
@@ -26,17 +32,20 @@ type Props = {
   profile: Profile | null;
 };
 
-const schema = z.object({
-  currentPassword: z.string().min(1, "Password lama harus diisi"),
-  newPassword: z.string().min(8, "Password minimal 8 karakter").max(100),
-  confirmPassword: z.string()
-}).refine(data => data.newPassword === data.confirmPassword, {
-  message: "Konfirmasi password tidak cocok",
-  path: ["confirmPassword"]
-}).refine(data => data.currentPassword !== data.newPassword, {
-  message: "Password baru tidak boleh sama dengan password lama",
-  path: ["newPassword"]
-});
+const schema = z
+  .object({
+    currentPassword: z.string().min(1, "Password lama harus diisi"),
+    newPassword: z.string().min(8, "Password minimal 8 karakter").max(100),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Konfirmasi password tidak cocok",
+    path: ["confirmPassword"],
+  })
+  .refine((data) => data.currentPassword !== data.newPassword, {
+    message: "Password baru tidak boleh sama dengan password lama",
+    path: ["newPassword"],
+  });
 
 type FormValues = z.infer<typeof schema>;
 
@@ -77,22 +86,22 @@ export function PasswordSection({ profile }: Props) {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting }
+    formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       currentPassword: "",
       newPassword: "",
-      confirmPassword: ""
-    }
+      confirmPassword: "",
+    },
   });
 
   const newPasswordValue = useWatch({ control, name: "newPassword" }) || "";
 
   const onSubmit = async (values: FormValues) => {
-    const res = await changePassword({ 
+    const res = await changePassword({
       currentPassword: values.currentPassword,
-      newPassword: values.newPassword 
+      newPassword: values.newPassword,
     });
     if (res.success) {
       toast.success(res.message || "Password berhasil diperbarui");
@@ -103,11 +112,27 @@ export function PasswordSection({ profile }: Props) {
   };
 
   const getStrength = (pwd: string) => {
-    if (!pwd || pwd.length < 8) return { label: 'Lemah', width: 'w-1/3', color: 'bg-semantic-down', textColor: 'text-semantic-down' };
+    if (!pwd || pwd.length < 8)
+      return {
+        label: "Lemah",
+        width: "w-1/3",
+        color: "bg-semantic-down",
+        textColor: "text-semantic-down",
+      };
     if (pwd.length >= 12 && /[0-9]/.test(pwd) && /[^A-Za-z0-9]/.test(pwd)) {
-      return { label: 'Kuat', width: 'w-full', color: 'bg-semantic-up', textColor: 'text-semantic-up' };
+      return {
+        label: "Kuat",
+        width: "w-full",
+        color: "bg-semantic-up",
+        textColor: "text-semantic-up",
+      };
     }
-    return { label: 'Sedang', width: 'w-2/3', color: 'bg-[#f4b000]', textColor: 'text-[#f4b000]' };
+    return {
+      label: "Sedang",
+      width: "w-2/3",
+      color: "bg-[#f4b000]",
+      textColor: "text-[#f4b000]",
+    };
   };
 
   const strength = getStrength(newPasswordValue);
@@ -122,25 +147,37 @@ export function PasswordSection({ profile }: Props) {
       </CardHeader>
       <CardContent className="space-y-0">
         <SettingRow label="Email Terdaftar" description="Email utama akun Anda">
-          <Input 
-            value={profile?.email || ""} 
-            readOnly 
-            className="text-sm h-9 bg-muted/50" 
+          <Input
+            value={profile?.email || ""}
+            readOnly
+            className="text-sm h-9 bg-muted/50"
           />
         </SettingRow>
 
         <Separator />
 
-        <SettingRow label="Metode Login Aktif" description="Otentikasi yang terhubung">
+        <SettingRow
+          label="Metode Login Aktif"
+          description="Otentikasi yang terhubung"
+        >
           <div className="flex flex-wrap gap-2">
             {isEmailProvider && (
-              <Badge variant="outline" className="bg-muted/30">Email & Password</Badge>
+              <Badge variant="outline" className="bg-muted/30">
+                Email & Password
+              </Badge>
             )}
             {isGoogleProvider && (
-              <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">Akun Google</Badge>
+              <Badge
+                variant="outline"
+                className="bg-primary/10 text-primary border-primary/20"
+              >
+                Akun Google
+              </Badge>
             )}
             {!isEmailProvider && !isGoogleProvider && (
-              <span className="text-sm text-muted-foreground">Tidak diketahui</span>
+              <span className="text-sm text-muted-foreground">
+                Tidak diketahui
+              </span>
             )}
           </div>
         </SettingRow>
@@ -154,14 +191,20 @@ export function PasswordSection({ profile }: Props) {
               <div className="space-y-1">
                 <p className="font-medium leading-none">Login via Google</p>
                 <p className="text-sm opacity-90 leading-relaxed mt-1.5">
-                  Anda mendaftar dan masuk menggunakan akun Google. Jika sewaktu-waktu Anda ingin login menggunakan password, Anda bisa mengaturnya melalui fitur <b>Lupa Password</b> di halaman depan.
+                  Anda mendaftar dan masuk menggunakan akun Google. Jika
+                  sewaktu-waktu Anda ingin login menggunakan password, Anda bisa
+                  mengaturnya melalui fitur <b>Lupa Password</b> di halaman
+                  depan.
                 </p>
               </div>
             </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-0">
-            <SettingRow label="Password Lama" description="Masukkan password saat ini">
+            <SettingRow
+              label="Password Lama"
+              description="Masukkan password saat ini"
+            >
               <div className="space-y-2">
                 <div className="relative">
                   <Input
@@ -175,11 +218,17 @@ export function PasswordSection({ profile }: Props) {
                     onClick={() => setShowCurrent(!showCurrent)}
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
-                    {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showCurrent ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
                 {errors.currentPassword && (
-                  <p className="text-xs text-red-500">{errors.currentPassword.message}</p>
+                  <p className="text-xs text-red-500">
+                    {errors.currentPassword.message}
+                  </p>
                 )}
               </div>
             </SettingRow>
@@ -200,21 +249,33 @@ export function PasswordSection({ profile }: Props) {
                     onClick={() => setShowNew(!showNew)}
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
-                    {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showNew ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
                 {errors.newPassword && (
-                  <p className="text-xs text-red-500">{errors.newPassword.message}</p>
+                  <p className="text-xs text-red-500">
+                    {errors.newPassword.message}
+                  </p>
                 )}
-                
+
                 {newPasswordValue.length > 0 && (
                   <div className="space-y-1 mt-2">
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground">Kekuatan:</span>
-                      <span className={`font-medium ${strength.color.replace('bg-semantic-down', 'text-semantic-down').replace('bg-semantic-up', 'text-semantic-up').replace('bg-[#f4b000]', 'text-[#f4b000]').replace('bg-red-500', 'text-red-500').replace('bg-green-500', 'text-green-500').replace('bg-yellow-500', 'text-yellow-500')}`}>{strength.label}</span>
+                      <span
+                        className={`font-medium ${strength.color.replace("bg-semantic-down", "text-semantic-down").replace("bg-semantic-up", "text-semantic-up").replace("bg-[#f4b000]", "text-[#f4b000]").replace("bg-red-500", "text-red-500").replace("bg-green-500", "text-green-500").replace("bg-yellow-500", "text-yellow-500")}`}
+                      >
+                        {strength.label}
+                      </span>
                     </div>
                     <div className="h-1.5 w-full bg-surface-strong rounded-full overflow-hidden">
-                      <div className={`h-full transition-all duration-300 ${strength.width} ${strength.color} rounded-full`} />
+                      <div
+                        className={`h-full transition-all duration-300 ${strength.width} ${strength.color} rounded-full`}
+                      />
                     </div>
                   </div>
                 )}
@@ -223,7 +284,10 @@ export function PasswordSection({ profile }: Props) {
 
             <Separator />
 
-            <SettingRow label="Konfirmasi Password" description="Ketik ulang password baru">
+            <SettingRow
+              label="Konfirmasi Password"
+              description="Ketik ulang password baru"
+            >
               <div className="space-y-2">
                 <div className="relative">
                   <Input
@@ -237,11 +301,17 @@ export function PasswordSection({ profile }: Props) {
                     onClick={() => setShowConfirm(!showConfirm)}
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
-                    {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showConfirm ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
                 {errors.confirmPassword && (
-                  <p className="text-xs text-red-500">{errors.confirmPassword.message}</p>
+                  <p className="text-xs text-red-500">
+                    {errors.confirmPassword.message}
+                  </p>
                 )}
               </div>
             </SettingRow>
@@ -252,7 +322,7 @@ export function PasswordSection({ profile }: Props) {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-primary hover:bg-[#003ecc] text-white rounded-full h-11 px-5"
+                className="bg-primary hover:bg-primary-active text-white rounded-full h-11 px-5"
               >
                 {isSubmitting ? "Memperbarui..." : "Perbarui Password"}
               </Button>

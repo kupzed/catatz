@@ -261,7 +261,7 @@ function CreateForm({
         <Button
           type="submit"
           disabled={submitting}
-          className="bg-primary hover:bg-[#003ecc] text-white rounded-full h-11 px-5"
+          className="bg-primary hover:bg-primary-active text-white rounded-full h-11 px-5"
         >
           {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
           Tambah
@@ -460,7 +460,7 @@ function EditForm({
         <Button
           type="submit"
           disabled={submitting}
-          className="bg-primary hover:bg-[#003ecc] text-white rounded-full h-11 px-5"
+          className="bg-primary hover:bg-primary-active text-white rounded-full h-11 px-5"
         >
           {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
           Perbarui

@@ -202,6 +202,15 @@ Setiap halaman dashboard mengikuti struktur konsisten berikut:
 <SelectTrigger className="text-foreground border-hairline">
   <SelectValue />
 </SelectTrigger>
+
+// RekeningSelect — komponen reusable pemilihan rekening dengan desain dot warna dan jenis rekening
+<RekeningSelect
+  rekening={rekening}
+  value={value}
+  onValueChange={onValueChange}
+  placeholder="Pilih rekening"
+  includeNone={true} // opsional: jika true, menyertakan pilihan "Tanpa rekening"
+/>
 ```
 
 ## Aturan Form

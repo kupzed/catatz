@@ -200,7 +200,7 @@ export default function KategoriPageClient({ kategori }: Props) {
         </div>
         <Button
           onClick={handleOpenAdd}
-          className="gap-2 bg-primary hover:bg-[#003ecc] text-white rounded-full font-semibold shrink-0"
+          className="gap-2 bg-primary hover:bg-primary-active text-white rounded-full font-semibold shrink-0"
           id="btn-tambah-kategori"
         >
           <Plus className="h-4 w-4" />

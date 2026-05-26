@@ -47,6 +47,7 @@
   --color-surface-dark-elevated: var(--surface-dark-elevated);
   --color-semantic-up: var(--semantic-up);
   --color-semantic-down: var(--semantic-down);
+  --color-accent-yellow: var(--accent-yellow);
   --color-body: var(--body-color);
   --color-ink: var(--foreground);
   --color-hairline: var(--border);
@@ -99,6 +100,7 @@
   /* Semantic */
   --semantic-up: oklch(62% 0.17 155);          /* #05b169 income green */
   --semantic-down: oklch(48% 0.19 25);         /* #cf202f expense red */
+  --accent-yellow: oklch(76.5% 0.176 81.3);    /* #f4b000 custom yellow */
 
   /* Secondary & Ghost */
   --secondary: oklch(94% 0.004 220);           /* surface-strong */

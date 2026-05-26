@@ -63,9 +63,9 @@ export const metadata: Metadata = {
     'apple-mobile-web-app-status-bar-style': 'black-translucent',
     'apple-mobile-web-app-title': 'CatatZ',
     'application-name': 'CatatZ',
-    'msapplication-TileColor': '#4f46e5',
+    'msapplication-TileColor': '#0052ff',
     'msapplication-TileImage': '/icons/icon-144x144.png',
-    'theme-color': '#4f46e5',
+    'theme-color': '#0052ff',
   },
 };
 

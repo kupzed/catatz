@@ -207,7 +207,7 @@ export function ConnectedAccountSection({
               size="sm"
               onClick={handleLinkGoogle}
               disabled={isLinkPending}
-              className="bg-primary text-white hover:bg-[#003ecc] rounded-full"
+              className="bg-primary text-white hover:bg-primary-active rounded-full"
             >
               {isLinkPending ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />

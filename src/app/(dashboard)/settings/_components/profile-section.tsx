@@ -256,7 +256,7 @@ export function ProfileSection({ profile }: Props) {
 
         <div className="pt-4 flex justify-end">
           <Button
-            className="bg-primary hover:bg-[#003ecc] text-white gap-2 rounded-full h-11 px-5"
+            className="bg-primary hover:bg-primary-active text-white gap-2 rounded-full h-11 px-5"
             onClick={handleSave}
             disabled={isPending}
           >
