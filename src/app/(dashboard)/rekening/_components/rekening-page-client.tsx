@@ -20,6 +20,7 @@ import {
 import RekeningDialog from "./rekening-dialog";
 import { cn } from "@/lib/utils";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
+import { EmptyState, PageHeader } from "@/components/common";
 
 type Props = { initialRekening: Rekening[] };
 
@@ -84,27 +85,23 @@ export default function RekeningPageClient({ initialRekening }: Props) {
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-[32px] font-normal tracking-[-0.4px] text-foreground leading-tight">
-            Rekening
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Kelola sumber dana Anda
-          </p>
-        </div>
-        <Button
-          onClick={() => {
-            setEditData(null);
-            setDialogOpen(true);
-          }}
-          className="gap-2 bg-primary hover:bg-primary-active text-white rounded-full font-semibold"
-          id="btn-tambah-rekening"
-        >
-          <Plus className="h-4 w-4" />
-          Tambah Rekening
-        </Button>
-      </div>
+      <PageHeader
+        title="Rekening"
+        subtitle="Kelola sumber dana Anda"
+        action={
+          <Button
+            onClick={() => {
+              setEditData(null);
+              setDialogOpen(true);
+            }}
+            className="gap-2 bg-primary hover:bg-primary-active text-white rounded-full font-semibold"
+            id="btn-tambah-rekening"
+          >
+            <Plus className="h-4 w-4" />
+            Tambah
+          </Button>
+        }
+      />
 
       {/* Total Balance Card */}
       <div className="rounded-card bg-primary p-8 text-white ring-1 ring-white/5">
@@ -121,13 +118,11 @@ export default function RekeningPageClient({ initialRekening }: Props) {
 
       {/* Grouped Cards */}
       {rekening.length === 0 ? (
-        <div className="text-center py-16 text-muted-foreground">
-          <Landmark className="h-10 w-10 mx-auto mb-3 opacity-20" />
-          <p className="text-sm">Belum ada rekening</p>
-          <p className="text-xs mt-1">
-            Tambah rekening atau dompet pertama Anda
-          </p>
-        </div>
+        <EmptyState
+          icon={Landmark}
+          title="Belum ada rekening"
+          description="Tambah rekening atau dompet pertama Anda"
+        />
       ) : (
         Object.entries(grouped).map(([jenis, items]) => {
           const cfg = JENIS_CONFIG[jenis as JenisRekening];

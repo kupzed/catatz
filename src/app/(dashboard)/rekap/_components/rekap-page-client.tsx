@@ -9,6 +9,7 @@ import { RekapBarSection } from "./rekap-bar-section";
 import { RekapBudgetSection } from "./rekap-budget-section";
 import { RekapKategoriSection } from "./rekap-kategori-section";
 import { RekapSummaryCards } from "./rekap-summary-cards";
+import { PageHeader } from "@/components/common";
 
 type Props = {
   initialBulanan: RekapBulanan[];
@@ -33,12 +34,7 @@ export default function RekapPageClient({
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-[32px] font-normal tracking-[-0.4px] text-foreground leading-tight">
-          Rekap Keuangan
-        </h1>
-        <p className="text-sm text-muted-foreground">Analitik {currentTahun}</p>
-      </div>
+      <PageHeader title="Rekap Keuangan" subtitle={`Analitik ${currentTahun}`} />
 
       <RekapSummaryCards
         currentBulan={currentBulan}

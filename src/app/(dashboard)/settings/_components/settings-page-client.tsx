@@ -6,6 +6,7 @@ import { Settings, ShieldCheck } from "lucide-react";
 import { UmumTab } from "./umum-tab";
 import { KeamananTab } from "./keamanan-tab";
 import type { ConnectedAccount } from "./connected-account-section";
+import { PageHeader } from "@/components/common";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -62,12 +63,10 @@ export default function SettingsPageClient({
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Page title */}
-      <div>
-        <h1 className="text-[32px] font-normal tracking-[-0.4px] text-foreground leading-tight">Settings</h1>
-        <p className="text-sm text-muted-foreground">
-          Kelola akun, preferensi, dan keamanan aplikasi CatatZ.
-        </p>
-      </div>
+      <PageHeader
+        title="Settings"
+        subtitle="Kelola akun, preferensi, dan keamanan aplikasi CatatZ."
+      />
 
       {/* Layout: sidebar on md+, tab buttons on mobile */}
       <div className="flex flex-col gap-6 md:flex-row md:gap-8">

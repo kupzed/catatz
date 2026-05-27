@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { HandCoins, Plus } from "lucide-react";
 import HutangDialog from "./hutang-dialog";
+import { EmptyState, PageHeader } from "@/components/common";
 import { RekeningSelect } from "@/components/common/rekening-select";
 import {
   emptyEditDraft,
@@ -106,33 +107,26 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-[32px] font-normal tracking-[-0.4px] text-foreground leading-tight">
-            Hutang &amp; Piutang
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Kelola pinjaman masuk dan keluar
-          </p>
-        </div>
-        <Button
-          onClick={() => {
-            setEditData(null);
-            setDialogOpen(true);
-          }}
-          className="gap-2 bg-primary hover:bg-primary-active text-white rounded-full font-semibold"
-          id="btn-tambah-hutang"
-        >
-          <Plus className="h-4 w-4" />
-          Tambah
-        </Button>
-      </div>
+      <PageHeader
+        title="Hutang & Piutang"
+        subtitle="Kelola pinjaman masuk dan keluar"
+        action={
+          <Button
+            onClick={() => {
+              setEditData(null);
+              setDialogOpen(true);
+            }}
+            className="gap-2 bg-primary hover:bg-primary-active text-white rounded-full font-semibold"
+            id="btn-tambah-hutang"
+          >
+            <Plus className="h-4 w-4" />
+            Tambah
+          </Button>
+        }
+      />
 
       {hutang.length === 0 ? (
-        <div className="text-center py-16 text-muted-foreground">
-          <HandCoins className="h-10 w-10 mx-auto mb-3 opacity-20" />
-          <p className="text-sm">Belum ada catatan hutang</p>
-        </div>
+        <EmptyState icon={HandCoins} title="Belum ada catatan hutang" />
       ) : (
         <div className="space-y-6">
           <HutangGroup

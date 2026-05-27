@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import KategoriDialog from "./kategori-dialog";
 import { deleteKategori } from "@/actions/kategori-action";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
+import { EmptyState, PageHeader } from "@/components/common";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -189,24 +190,21 @@ export default function KategoriPageClient({ kategori }: Props) {
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Page header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-[32px] font-normal tracking-[-0.4px] text-foreground leading-tight">
-            Kategori
-          </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Kelola kategori untuk transaksi Anda.
-          </p>
-        </div>
-        <Button
-          onClick={handleOpenAdd}
-          className="gap-2 bg-primary hover:bg-primary-active text-white rounded-full font-semibold shrink-0"
-          id="btn-tambah-kategori"
-        >
-          <Plus className="h-4 w-4" />
-          Tambah Kategori
-        </Button>
-      </div>
+      <PageHeader
+        title="Kategori"
+        subtitle="Kelola kategori untuk transaksi Anda."
+        subtitleClassName="mt-0.5"
+        action={
+          <Button
+            onClick={handleOpenAdd}
+            className="gap-2 bg-primary hover:bg-primary-active text-white rounded-full font-semibold shrink-0"
+            id="btn-tambah-kategori"
+          >
+            <Plus className="h-4 w-4" />
+            Tambah Kategori
+          </Button>
+        }
+      />
 
       {/* Filter bar */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -248,20 +246,24 @@ export default function KategoriPageClient({ kategori }: Props) {
           </Badge>
         </div>
         {filteredCustom.length === 0 ? (
-          <div className="rounded-lg border border-dashed bg-muted/30 py-10 text-center">
-            <Tags className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
-            <p className="text-sm text-muted-foreground">
-              Belum ada kategori kustom.
-            </p>
-            <Button
-              variant="link"
-              size="sm"
-              onClick={handleOpenAdd}
-              className="mt-1 text-primary h-auto p-0 underline-offset-4 hover:underline"
-            >
-              + Tambah kategori pertama
-            </Button>
-          </div>
+          <EmptyState
+            icon={Tags}
+            title="Belum ada kategori kustom."
+            className="rounded-lg border border-dashed bg-muted/30 py-10 text-center"
+            iconClassName="h-8 w-8 mx-auto text-muted-foreground/40 mb-2 opacity-100"
+            titleClassName="text-sm text-muted-foreground"
+            actionClassName="contents"
+            action={
+              <Button
+                variant="link"
+                size="sm"
+                onClick={handleOpenAdd}
+                className="mt-1 text-primary h-auto p-0 underline-offset-4 hover:underline"
+              >
+                + Tambah kategori pertama
+              </Button>
+            }
+          />
         ) : (
           <div className="grid gap-2">
             {filteredCustom.map((k) => (

@@ -2,6 +2,7 @@
 
 import type { DisplayTransaksi } from "@/hooks/use-offline-queue-sync";
 import type { Rekening } from "@/types/rekening";
+import { EmptyState } from "@/components/common";
 import { ArrowLeftRight } from "lucide-react";
 import { TransaksiListItem } from "./transaksi-list-item";
 
@@ -22,11 +23,11 @@ export function TransaksiList({
   return (
     <div className="rounded-card border border-hairline overflow-hidden">
       {transaksi.length === 0 ? (
-        <div className="text-center py-16 text-muted-foreground">
-          <ArrowLeftRight className="h-10 w-10 mx-auto mb-3 opacity-20" />
-          <p className="text-sm">Belum ada transaksi</p>
-          <p className="text-xs mt-1">Klik tombol Tambah untuk mulai mencatat</p>
-        </div>
+        <EmptyState
+          icon={ArrowLeftRight}
+          title="Belum ada transaksi"
+          description="Klik tombol Tambah untuk mulai mencatat"
+        />
       ) : (
         transaksi.map((item) => (
           <TransaksiListItem

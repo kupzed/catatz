@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageHeader } from "@/components/common";
 import TransaksiDialog from "./transaksi-dialog";
 import { TransaksiFilterBar } from "./transaksi-filter-bar";
 import { TransaksiList } from "./transaksi-list";
@@ -217,56 +218,54 @@ export default function TransaksiPageClient({
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-[32px] font-normal tracking-[-0.4px] text-foreground truncate leading-tight">
-            Transaksi
-          </h1>
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-              <span className="truncate">Riwayat arus kas Anda</span>
-            </div>
-            <Badge
-              variant="secondary"
-              className="text-xs px-2.5 py-0.5 rounded-full bg-surface-strong text-muted-foreground border-none shrink-0"
-            >
-              {filtered.length} Data
-            </Badge>
-          </div>
-        </div>
-        <div className="shrink-0">
-          <Select
-            value={preset}
-            onValueChange={(val) => {
-              setPreset(val);
-              setBaseDate(new Date());
-              setCustomStep("dari");
-              if (val !== "custom") {
-                setDateFilter((f) => ({
-                  ...f,
-                  dari: undefined,
-                  sampai: undefined,
-                }));
-              }
-            }}
+      <PageHeader
+        title="Transaksi"
+        subtitle="Riwayat arus kas Anda"
+        titleClassName="truncate"
+        subtitleClassName="truncate"
+        subtitleAction={
+          <Badge
+            variant="secondary"
+            className="text-xs px-2.5 py-0.5 rounded-full bg-surface-strong text-muted-foreground border-none shrink-0"
           >
-            <SelectTrigger
-              className="h-9 sm:h-10 text-sm w-32 sm:w-48 bg-background dark:bg-card border border-hairline text-foreground shrink-0 px-2 sm:px-3"
-              id="filter-periode"
+            {filtered.length} Data
+          </Badge>
+        }
+        action={
+          <div className="shrink-0">
+            <Select
+              value={preset}
+              onValueChange={(val) => {
+                setPreset(val);
+                setBaseDate(new Date());
+                setCustomStep("dari");
+                if (val !== "custom") {
+                  setDateFilter((f) => ({
+                    ...f,
+                    dari: undefined,
+                    sampai: undefined,
+                  }));
+                }
+              }}
             >
-              <SelectValue placeholder="Periode" />
-            </SelectTrigger>
-            <SelectContent align="end" className="min-w-48">
-              <SelectItem value="hari">Hari Ini</SelectItem>
-              <SelectItem value="minggu">Minggu Ini</SelectItem>
-              <SelectItem value="bulan">Bulan Ini</SelectItem>
-              <SelectItem value="tahun">Tahun Ini</SelectItem>
-              <SelectItem value="all">Semua Waktu</SelectItem>
-              <SelectItem value="custom">Custom</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+              <SelectTrigger
+                className="h-9 sm:h-10 text-sm w-32 sm:w-48 bg-background dark:bg-card border border-hairline text-foreground shrink-0 px-2 sm:px-3"
+                id="filter-periode"
+              >
+                <SelectValue placeholder="Periode" />
+              </SelectTrigger>
+              <SelectContent align="end" className="min-w-48">
+                <SelectItem value="hari">Hari Ini</SelectItem>
+                <SelectItem value="minggu">Minggu Ini</SelectItem>
+                <SelectItem value="bulan">Bulan Ini</SelectItem>
+                <SelectItem value="tahun">Tahun Ini</SelectItem>
+                <SelectItem value="all">Semua Waktu</SelectItem>
+                <SelectItem value="custom">Custom</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        }
+      />
 
       <TransaksiSummaryCard
         dateLabel={dateLabel}
