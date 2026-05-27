@@ -61,7 +61,8 @@ function getDismissedState() {
     return { dismissedAt: null, hasBeenDismissed: false };
   }
 
-  const isStillDismissed = Date.now() - dismissedAt.getTime() < dismissCooldownMs;
+  const isStillDismissed =
+    Date.now() - dismissedAt.getTime() < dismissCooldownMs;
 
   if (!isStillDismissed && typeof window !== "undefined") {
     window.localStorage.removeItem(dismissedStorageKey);
@@ -97,11 +98,13 @@ function getDeviceState() {
 
   const userAgent = window.navigator.userAgent;
   const isIOS =
-    /iPad|iPhone|iPod/.test(userAgent) && !(window as WindowWithMSStream).MSStream;
+    /iPad|iPhone|iPod/.test(userAgent) &&
+    !(window as WindowWithMSStream).MSStream;
   const isCriOS = /CriOS/.test(userAgent);
   const isFxiOS = /FxiOS/.test(userAgent);
   const isEdgiOS = /EdgiOS/.test(userAgent);
-  const isSafari = /Safari/.test(userAgent) && !/Chrome|Chromium|Android/.test(userAgent);
+  const isSafari =
+    /Safari/.test(userAgent) && !/Chrome|Chromium|Android/.test(userAgent);
   const isIOSSafari = isIOS && isSafari && !isCriOS && !isFxiOS && !isEdgiOS;
   const isMobile =
     isIOS || /Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
@@ -119,7 +122,10 @@ export function usePWAInstall(): UsePWAInstall {
   const dismissPrompt = useCallback(() => {
     const dismissedAt = new Date();
 
-    window.localStorage.setItem(dismissedStorageKey, String(dismissedAt.getTime()));
+    window.localStorage.setItem(
+      dismissedStorageKey,
+      String(dismissedAt.getTime()),
+    );
     setDismissState({ dismissedAt, hasBeenDismissed: true });
     setIsInstallable(false);
     promptEventRef.current = null;
@@ -187,8 +193,14 @@ export function usePWAInstall(): UsePWAInstall {
 
     return () => {
       window.clearTimeout(timeoutId);
-      standaloneQuery.removeEventListener("change", handleInstalledStatusChange);
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      standaloneQuery.removeEventListener(
+        "change",
+        handleInstalledStatusChange,
+      );
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt,
+      );
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, []);
