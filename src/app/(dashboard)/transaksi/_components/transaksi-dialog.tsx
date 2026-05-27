@@ -46,6 +46,7 @@ import {
 import { NominalInput } from "@/components/common/nominal-input";
 import { RekeningSelect } from "@/components/common/rekening-select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TIPE_TABS } from "@/constants/transaksi";
 import { Loader2, Sparkles, Copy, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -63,27 +64,6 @@ type Props = {
   /** Tanggal default untuk mode create normal, mengikuti periode yang dipilih. */
   defaultTanggal?: string;
 };
-
-const TIPE_TABS = [
-  {
-    value: "expense",
-    label: "🔴 Keluar",
-    color:
-      "data-[state=active]:text-semantic-down data-[state=active]:border-semantic-down",
-  },
-  {
-    value: "income",
-    label: "🟢 Masuk",
-    color:
-      "data-[state=active]:text-semantic-up data-[state=active]:border-semantic-up",
-  },
-  {
-    value: "transfer",
-    label: "🔵 Transfer",
-    color:
-      "data-[state=active]:text-primary data-[state=active]:border-primary",
-  },
-];
 
 export default function TransaksiDialog({
   open,

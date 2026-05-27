@@ -47,6 +47,7 @@ import { cn } from "@/lib/utils";
 import { NominalInput } from "@/components/common/nominal-input";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { RekeningSelect } from "@/components/common/rekening-select";
+import { STATUS_BADGE } from "@/constants/hutang";
 
 type Props = { initialHutang: Hutang[]; rekening: Rekening[] };
 
@@ -56,12 +57,6 @@ type CicilanDraft = {
   tanggal: string;
   waktu: string;
   catatan: string;
-};
-
-const STATUS_BADGE: Record<string, string> = {
-  aktif: "bg-primary/10 text-primary",
-  lunas: "bg-semantic-up/10 text-semantic-up",
-  overdue: "bg-semantic-down/10 text-semantic-down",
 };
 
 const emptyEditDraft = (): CicilanDraft => ({

@@ -14,21 +14,7 @@ import {
 } from "recharts";
 import { formatRupiah } from "@/lib/utils";
 import type { RekapBulanan, RekapKategori } from "@/actions/rekap-action";
-
-const BULAN_NAMES = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "Mei",
-  "Jun",
-  "Jul",
-  "Agu",
-  "Sep",
-  "Okt",
-  "Nov",
-  "Des",
-];
+import { BULAN_NAMES } from "@/constants/rekap";
 
 export function RekapBarChart({ data }: { data: RekapBulanan[] }) {
   const barData = data.map((item) => ({

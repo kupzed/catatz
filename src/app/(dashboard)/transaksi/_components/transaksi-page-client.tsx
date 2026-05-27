@@ -49,8 +49,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  ArrowDownLeft,
-  ArrowUpRight,
   ArrowLeftRight,
   Plus,
   Search,
@@ -58,11 +56,11 @@ import {
   Pencil,
   ChevronLeft,
   ChevronRight,
-  SlidersHorizontal,
   CalendarIcon,
 } from "lucide-react";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { RekeningSelect } from "@/components/common/rekening-select";
+import { TIPE_CONFIG } from "@/constants/transaksi";
 import TransaksiDialog from "./transaksi-dialog";
 import { cn } from "@/lib/utils";
 
@@ -76,37 +74,6 @@ type DisplayTransaksi = Transaksi & {
   _queuedId?: string;
   _pendingSync?: boolean;
 };
-
-const TIPE_CONFIG = {
-  income: {
-    label: "Pemasukan",
-    icon: ArrowDownLeft,
-    color: "text-semantic-up",
-    bg: "bg-surface-strong",
-    badge: "bg-surface-strong text-muted-foreground",
-  },
-  expense: {
-    label: "Pengeluaran",
-    icon: ArrowUpRight,
-    color: "text-semantic-down",
-    bg: "bg-surface-strong",
-    badge: "bg-surface-strong text-muted-foreground",
-  },
-  transfer: {
-    label: "Transfer",
-    icon: ArrowLeftRight,
-    color: "text-foreground",
-    bg: "bg-surface-strong",
-    badge: "bg-surface-strong text-muted-foreground",
-  },
-  correction: {
-    label: "Koreksi Saldo",
-    icon: SlidersHorizontal,
-    color: "text-accent-yellow",
-    bg: "bg-surface-strong",
-    badge: "bg-surface-strong text-muted-foreground",
-  },
-} as const;
 
 export default function TransaksiPageClient({
   initialTransaksi,

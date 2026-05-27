@@ -10,22 +10,9 @@ import type {
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BULAN_NAMES } from "@/constants/rekap";
 import { cn } from "@/lib/utils";
 
-const BULAN_NAMES = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "Mei",
-  "Jun",
-  "Jul",
-  "Agu",
-  "Sep",
-  "Okt",
-  "Nov",
-  "Des",
-];
 const RekapBarChart = lazy(() =>
   import("./rekap-charts").then((module) => ({
     default: module.RekapBarChart,
