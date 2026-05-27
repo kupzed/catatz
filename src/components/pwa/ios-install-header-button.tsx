@@ -31,7 +31,7 @@ export function IOSInstallHeaderButton() {
           className="relative h-8 w-8"
         >
           <Share className="h-4 w-4" />
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-sky-500 ring-2 ring-background" />
+          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary ring-2 ring-background" />
         </Button>
       </TooltipTrigger>
       <TooltipContent>Pasang ke layar utama</TooltipContent>

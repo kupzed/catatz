@@ -24,7 +24,7 @@ export function OfflineIndicator() {
     <div
       role="status"
       aria-live="polite"
-      className={`fixed inset-x-3 bottom-3 z-50 mx-auto flex max-w-md items-center gap-3 rounded-md border border-amber-300/60 bg-amber-100 px-4 py-3 text-sm font-medium text-amber-950 shadow-lg shadow-black/10 transition-all duration-300 ease-out dark:border-amber-400/30 dark:bg-amber-500 dark:text-slate-950 ${
+      className={`fixed inset-x-3 bottom-3 z-50 mx-auto flex max-w-md items-center gap-3 rounded-card border border-accent-yellow/30 bg-background/95 px-4 py-3 text-sm font-medium text-accent-yellow shadow-sm backdrop-blur transition-all duration-300 ease-out ${
         isOnline
           ? "pointer-events-none translate-y-6 opacity-0"
           : "translate-y-0 opacity-100"

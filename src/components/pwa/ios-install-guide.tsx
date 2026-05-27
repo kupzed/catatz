@@ -159,20 +159,21 @@ export function IOSInstallGuide() {
       <Button
         type="button"
         size="icon"
+        variant="default"
         aria-label="Buka panduan pasang CatatZ"
         onClick={() => setIsOpen(true)}
-        className="fixed right-4 bottom-16 z-50 h-10 w-10 rounded-full bg-indigo-600 text-white shadow-lg shadow-indigo-950/20 hover:bg-indigo-500"
+        className="fixed right-4 bottom-16 z-50 h-10 w-10 shadow-lg shadow-primary/20"
       >
         <Share className="h-4 w-4" />
         {!hasSeenGuide && (
-          <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-background bg-sky-400" />
+          <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-background bg-primary" />
         )}
       </Button>
 
       <Sheet open={isOpen} onOpenChange={handleOpenChange}>
         <SheetContent
           side="bottom"
-          className="max-h-[92vh] overflow-y-auto rounded-t-lg"
+          className="max-h-[92vh] overflow-y-auto rounded-t-card"
         >
           <SheetHeader>
             <SheetTitle>Tambahkan ke Layar Utama</SheetTitle>
@@ -187,7 +188,7 @@ export function IOSInstallGuide() {
               <div className="mx-auto h-44 max-w-55 rounded-[1.75rem] border-4 border-slate-700 bg-slate-950 p-3 shadow-inner dark:border-slate-600">
                 <div className="h-full rounded-[1.2rem] bg-linear-to-b from-slate-800 to-slate-950 p-3">
                   <div className="h-5 w-20 rounded-full bg-slate-700" />
-                  <div className="mt-5 h-16 rounded-lg bg-indigo-500/20" />
+                  <div className="mt-5 h-16 rounded-lg bg-primary/20" />
                   <div className="mt-3 grid grid-cols-4 gap-2">
                     {Array.from({ length: 8 }).map((_, index) => (
                       <div
@@ -196,9 +197,9 @@ export function IOSInstallGuide() {
                       />
                     ))}
                   </div>
-                  <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 flex-col items-center text-indigo-500">
-                    <span className="h-8 w-px animate-pulse bg-indigo-500" />
-                    <span className="h-3 w-3 animate-bounce rotate-45 border-b-2 border-r-2 border-indigo-500" />
+                  <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 flex-col items-center text-primary">
+                    <span className="h-8 w-px animate-pulse bg-primary" />
+                    <span className="h-3 w-3 animate-bounce rotate-45 border-b-2 border-r-2 border-primary" />
                   </div>
                 </div>
               </div>
@@ -213,12 +214,10 @@ export function IOSInstallGuide() {
                   key={step.text}
                   className="grid grid-cols-[2rem_2.75rem_1fr] items-center gap-3 rounded-lg border border-border p-3"
                 >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-sm font-semibold text-white">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
                     {index + 1}
                   </span>
-                  <span className="text-indigo-600 dark:text-indigo-400">
-                    {step.icon}
-                  </span>
+                  <span className="text-primary">{step.icon}</span>
                   <p className="m-0 text-sm leading-6 text-foreground">
                     {step.text}
                   </p>

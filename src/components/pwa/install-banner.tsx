@@ -50,7 +50,7 @@ export function InstallBanner() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 animate-in slide-in-from-bottom-4 duration-300">
-      <div className="flex flex-col gap-3 bg-indigo-600 px-4 py-3 text-white shadow-lg shadow-black/20 dark:bg-indigo-700 sm:flex-row sm:items-center sm:justify-center sm:px-6">
+      <div className="flex flex-col gap-3 border-t border-hairline bg-background/95 px-4 py-3 text-foreground shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-center sm:px-6">
         <div className="flex min-w-0 items-center gap-2 text-sm font-medium">
           <Image
             src="/catatz.svg"
@@ -58,16 +58,16 @@ export function InstallBanner() {
             width={16}
             height={16}
             aria-hidden="true"
-            className="h-4 w-4 shrink-0 rounded-full bg-white"
+            className="h-4 w-4 shrink-0 rounded-full"
           />
-          <span>Pasang CatatZ di layar utama untuk akses lebih cepat!</span>
+          <span className="text-body font-normal">Pasang CatatZ di layar utama untuk akses lebih cepat!</span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <Button
             type="button"
             onClick={handleInstall}
             disabled={isPrompting}
-            className="bg-white text-indigo-700 hover:bg-indigo-50"
+            variant="default"
           >
             {isPrompting ? "Membuka..." : "Pasang Sekarang"}
           </Button>
@@ -75,7 +75,6 @@ export function InstallBanner() {
             type="button"
             variant="ghost"
             onClick={dismissPrompt}
-            className="text-white hover:bg-white/10 hover:text-white"
           >
             Nanti
           </Button>
