@@ -186,7 +186,6 @@ export async function deleteTransaksi(id: string): Promise<ActionResult> {
 
 /**
  * Mengembalikan suggestion judul berdasarkan query (debounced dari UI).
- * Menggantikan getNamaSuggestions yang berbasis catatan.
  */
 export async function getJudulSuggestions(query: string): Promise<JudulSuggestion[]> {
   if (!query || query.length < 1) return [];
@@ -287,44 +286,4 @@ export async function suggestKategori(catatan: string): Promise<string | null> {
 
   const topCategory = Object.entries(freq).sort((a, b) => b[1] - a[1])[0];
   return topCategory ? topCategory[0] : null;
-}
-
-/**
- * @deprecated Gunakan getJudulSuggestions sebagai gantinya.
- * Dipertahankan untuk backward compatibility.
- */
-export async function getNamaSuggestions(query: string): Promise<Array<{ catatan: string, kategori_id: string | null }>> {
-  if (!query || query.length < 2) return [];
-
-  const supabase = await createClient();
-
-  const { data } = await supabase
-    .from('transaksi')
-    .select('catatan, kategori_id')
-    .ilike('catatan', `%${query}%`)
-    .order('created_at', { ascending: false })
-    .limit(50);
-
-  if (!data) return [];
-
-  const grouped: Record<string, Record<string, number>> = {};
-  data.forEach((t) => {
-    if (!t.catatan) return;
-    const cat = t.catatan.trim();
-    if (!grouped[cat]) grouped[cat] = {};
-    if (t.kategori_id) {
-      grouped[cat][t.kategori_id] = (grouped[cat][t.kategori_id] || 0) + 1;
-    }
-  });
-
-  const suggestions = Object.keys(grouped).map(catatan => {
-    const categories = grouped[catatan];
-    let topCatId = null;
-    if (Object.keys(categories).length > 0) {
-      topCatId = Object.entries(categories).sort((a, b) => b[1] - a[1])[0][0];
-    }
-    return { catatan, kategori_id: topCatId };
-  });
-
-  return suggestions.sort((a, b) => a.catatan.length - b.catatan.length).slice(0, 5);
 }

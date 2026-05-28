@@ -16,7 +16,15 @@ import { formatRupiah } from "@/lib/utils";
 import type { RekapBulanan, RekapKategori } from "@/actions/rekap-action";
 import { BULAN_NAMES } from "@/constants/rekap";
 
-export function RekapBarChart({ data }: { data: RekapBulanan[] }) {
+export type RekapBarChartProps = {
+  data: RekapBulanan[];
+};
+
+export type RekapPieChartProps = {
+  data: RekapKategori[];
+};
+
+export function RekapBarChart({ data }: RekapBarChartProps) {
   const barData = data.map((item) => ({
     name: BULAN_NAMES[item.bulan - 1],
     Pemasukan: item.total_income,
@@ -37,7 +45,7 @@ export function RekapBarChart({ data }: { data: RekapBulanan[] }) {
   );
 }
 
-export function RekapPieChart({ data }: { data: RekapKategori[] }) {
+export function RekapPieChart({ data }: RekapPieChartProps) {
   return (
     <ResponsiveContainer width="100%" height={200}>
       <PieChart>

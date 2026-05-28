@@ -1,14 +1,12 @@
 "use client";
 
 import type { DisplayTransaksi } from "@/hooks/use-offline-queue-sync";
-import type { Rekening } from "@/types/rekening";
 import { EmptyState } from "@/components/common";
 import { ArrowLeftRight } from "lucide-react";
 import { TransaksiListItem } from "./transaksi-list-item";
 
 export type TransaksiListProps = {
   transaksi: DisplayTransaksi[];
-  rekening: Rekening[];
   onEdit: (transaksi: DisplayTransaksi) => void;
   onDelete: (id: string) => void;
   deleting: string | null;

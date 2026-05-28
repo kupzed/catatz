@@ -26,11 +26,6 @@ function detectIOSPWA(): boolean {
   return ios && standalone;
 }
 
-function detectIOS(): boolean {
-  if (typeof window === "undefined") return false;
-  return /iPad|iPhone|iPod/.test(window.navigator.userAgent);
-}
-
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Props = {
@@ -61,13 +56,17 @@ export default function VoiceInputButton({
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isIOSPWA, setIsIOSPWA] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
   const processedTranscriptRef = useRef("");
 
   // Deteksi platform di client side
   useEffect(() => {
-    setIsIOSPWA(detectIOSPWA());
-    setIsIOS(detectIOS());
+    const timeoutId = window.setTimeout(() => {
+      setIsIOSPWA(detectIOSPWA());
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, []);
 
   // ── Process transcript setelah listening selesai ────────────────────────

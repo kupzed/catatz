@@ -179,7 +179,7 @@ export async function deleteAccount(): Promise<ActionResult> {
     cookieStore.delete("device_id");
     cookieStore.delete("last_ping");
 
-  } catch (err) {
+  } catch {
     return { success: false, error: 'Terjadi kesalahan sistem.' };
   }
 

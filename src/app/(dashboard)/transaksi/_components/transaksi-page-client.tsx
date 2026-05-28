@@ -290,7 +290,6 @@ export default function TransaksiPageClient({
 
       <TransaksiList
         transaksi={filtered}
-        rekening={rekening}
         onEdit={handleEdit}
         onDelete={handleDelete}
         deleting={deleting}

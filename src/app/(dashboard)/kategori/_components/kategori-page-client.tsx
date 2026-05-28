@@ -67,17 +67,15 @@ function TipeBadge({ tipe }: TipeBadgeProps) {
   );
 }
 
-// ─── KategoriCard ─────────────────────────────────────────────────────────────
-
-function KategoriCard({
-  kategori,
-  onEdit,
-  onDelete,
-}: {
+type KategoriCardProps = {
   kategori: Kategori;
   onEdit: (k: Kategori) => void;
   onDelete: (k: Kategori) => void;
-}) {
+};
+
+// ─── KategoriCard ─────────────────────────────────────────────────────────────
+
+function KategoriCard({ kategori, onEdit, onDelete }: KategoriCardProps) {
   return (
     <div className="group flex items-center justify-between rounded-input border border-hairline bg-card px-4 py-3 transition-colors hover:bg-surface-soft">
       <div className="flex items-center gap-3 min-w-0">
@@ -201,7 +199,7 @@ export default function KategoriPageClient({ kategori }: Props) {
             id="btn-tambah-kategori"
           >
             <Plus className="h-4 w-4" />
-            Tambah Kategori
+            Tambah
           </Button>
         }
       />

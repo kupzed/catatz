@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { useTheme } from "next-themes";
@@ -20,7 +21,13 @@ type Props = {
   preferences: UserPreferences;
 };
 
-function SettingRow({ label, description, children }: { label: string; description?: string; children: React.ReactNode }) {
+type SettingRowProps = {
+  label: string;
+  description?: string;
+  children: ReactNode;
+};
+
+function SettingRow({ label, description, children }: SettingRowProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4">
       <div className="min-w-0">
