@@ -296,7 +296,7 @@ export async function generatePDF(
       0: { cellWidth: 10, halign: "center" }, // No
       1: { cellWidth: 22 }, // Tanggal
       2: { cellWidth: 30 }, // Judul & Kategori
-      3: { cellWidth: 42 }, // Catatan
+      3: { cellWidth: 40 }, // Catatan
       4: { cellWidth: 33 }, // Rekening
       5: { cellWidth: 22, halign: "center" }, // Tipe
       6: { cellWidth: 25, halign: "right" }, // Nominal
@@ -361,6 +361,8 @@ export async function generatePDF(
       // Gambar ulang teks "Judul & Kategori" secara custom
       if (data.section === "body" && data.column.index === 2) {
         const row = transaksi[data.row.index];
+        if (!row) return;
+
         const judul = row.judul;
         const kategori = row.kategori;
 
