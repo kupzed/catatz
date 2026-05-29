@@ -2,16 +2,16 @@
 
 ## Status
 
-Status: Aktif untuk rekap dan export PDF. Budget usage tampil jika data budget tersedia.
+Status: Aktif untuk rekap dan export PDF/XLSX/CSV. Budget usage tampil jika data budget tersedia.
 
 ## Deskripsi
 
-Fitur laporan/rekap menampilkan ringkasan pemasukan, pengeluaran, breakdown kategori, chart, dan export PDF transaksi.
+Fitur laporan/rekap menampilkan ringkasan pemasukan, pengeluaran, breakdown kategori, chart, dan export transaksi.
 
 ## Route
 
 - `/rekap`
-- Export PDF berada di `/settings` tab `Export Data`.
+- Export data berada di `/settings` tab `Export Data`.
 
 ## Lokasi File
 
@@ -22,7 +22,8 @@ Fitur laporan/rekap menampilkan ringkasan pemasukan, pengeluaran, breakdown kate
 - Rekap actions: `src/actions/rekap-action.ts`
 - Export actions: `src/actions/export-action.ts`
 - PDF generator: `src/lib/pdf-generator.ts`
-- Export tab: `src/app/(dashboard)/settings/_components/export-tab.tsx`
+- Spreadsheet generator: `src/lib/spreadsheet-generator.ts`
+- Export section: `src/app/(dashboard)/settings/_components/export-section.tsx`
 
 ## Data Source
 
@@ -60,8 +61,10 @@ Export data:
 - Transfer dikecualikan dari perhitungan income/expense tahunan.
 - Breakdown kategori hanya menghitung transaksi `expense`.
 - Budget usage menghitung expense per kategori pada bulan/tahun aktif.
-- Export PDF dapat difilter dengan tanggal `dari` dan `sampai`.
+- Export PDF, XLSX, dan CSV dapat difilter dengan tanggal `dari` dan `sampai`.
 - Export PDF menampilkan summary, count transaksi, periode, top kategori, dan detail transaksi.
+- Export XLSX menampilkan sheet `Ringkasan` dan `Transaksi`.
+- Export CSV menampilkan detail transaksi dalam format comma-separated values.
 
 ## UI Behavior
 
@@ -70,6 +73,7 @@ Export data:
 - Pie chart kategori hanya tampil jika ada data kategori expense.
 - Budget section hanya tampil jika ada data budget.
 - Export PDF memakai dynamic import `src/lib/pdf-generator.ts`.
+- Export XLSX/CSV memakai dynamic import `src/lib/spreadsheet-generator.ts`.
 
 ## TODO / Improvement
 

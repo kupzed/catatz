@@ -112,7 +112,7 @@ Tambahkan URL local network jika memang dipakai untuk testing mobile.
 - [ ] Buat transaksi income/expense.
 - [ ] Cek saldo rekening berubah.
 - [ ] Cek rekap menampilkan data.
-- [ ] Coba export PDF.
+- [ ] Coba export PDF, XLSX, dan CSV.
 - [ ] Upload dan hapus avatar.
 - [ ] Cek install prompt/PWA di browser yang mendukung.
 - [ ] Cek service worker aktif di HTTPS.

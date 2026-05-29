@@ -1,6 +1,6 @@
 # CatatZ
 
-CatatZ adalah aplikasi pencatatan keuangan pribadi berbasis Next.js dan Supabase PostgreSQL. Aplikasi ini membantu user mencatat pemasukan, pengeluaran, transfer, koreksi saldo, rekening, kategori, hutang/piutang, rekap keuangan, dan export laporan PDF.
+CatatZ adalah aplikasi pencatatan keuangan pribadi berbasis Next.js dan Supabase PostgreSQL. Aplikasi ini membantu user mencatat pemasukan, pengeluaran, transfer, koreksi saldo, rekening, kategori, hutang/piutang, rekap keuangan, dan export laporan PDF/XLSX/CSV.
 
 ## Tech Stack
 
@@ -21,7 +21,7 @@ CatatZ adalah aplikasi pencatatan keuangan pribadi berbasis Next.js dan Supabase
 - Kategori system dan kategori custom user.
 - Hutang/piutang dengan cicilan dan status pelunasan.
 - Rekap bulanan, breakdown kategori, dan tampilan budget jika data budget tersedia.
-- Pengaturan profil, avatar, password, tema, dan export PDF.
+- Pengaturan profil, avatar, password, tema, dan export PDF/XLSX/CSV.
 - PWA install prompt, offline shell, update prompt, dan offline queue untuk aksi transaksi.
 - Input suara transaksi menggunakan browser Speech Recognition dan Gemini API server-side.
 

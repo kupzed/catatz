@@ -378,7 +378,7 @@ Lokasi: `src/actions/export-action.ts`
 
 ### `getExportData`
 
-Deskripsi: mengambil transaksi user untuk laporan PDF, optional filter tanggal, summary income/expense/net, count, periode, dan top kategori expense.
+Deskripsi: mengambil transaksi user untuk export PDF/XLSX/CSV, optional filter tanggal, summary income/expense/net, count, periode, dan top kategori expense.
 
 Input:
 
@@ -400,6 +400,8 @@ ActionResult<{
 ```
 
 Tabel: `profiles`, `transaksi`, `kategori`, `rekening`.
+
+Catatan: action ini hanya mengambil data dan summary. Pembuatan file PDF, XLSX, dan CSV berjalan di browser melalui generator client-side.
 
 ### `getExportCount`
 

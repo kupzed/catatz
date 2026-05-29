@@ -45,7 +45,7 @@ catatz/
 - `src/configs`: konfigurasi environment dan Supabase client.
 - `src/constants`: data konstan seperti daftar bank/e-wallet.
 - `src/hooks`: hook client untuk mobile, online status, PWA install, dan voice input.
-- `src/lib`: helper umum seperti formatter, PDF generator, offline queue, service worker registration, dan voice parser.
+- `src/lib`: helper umum seperti formatter, PDF/spreadsheet generator, offline queue, service worker registration, dan voice parser.
 - `src/migrations`: SQL migration manual untuk schema, RLS, trigger, storage bucket, dan grant API.
 - `src/providers`: provider global untuk theme dan React Query.
 - `src/scripts`: script maintenance, saat ini generator icon PWA.

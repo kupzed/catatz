@@ -47,7 +47,7 @@ Settings page mengambil user dan profile dari Supabase server client:
 
 - `profiles`
 - Storage bucket `avatars`
-- `transaksi`, `kategori`, `rekening` untuk export PDF
+- `transaksi`, `kategori`, `rekening` untuk export PDF, XLSX, dan CSV
 
 ## Server Action Terkait
 
@@ -70,7 +70,9 @@ Settings page mengambil user dan profile dari Supabase server client:
 - Connected Account memakai Supabase Auth identities aktual, bukan hanya `app_metadata.providers`.
 - Tombol Hubungkan Google memakai `linkIdentity` dan callback hanya menerima link jika email Google sama dengan email utama user.
 - Tombol Putuskan Google hanya tersedia jika user masih punya metode login lain.
-- Export PDF tidak berjalan jika tidak ada transaksi.
+- Export file tidak berjalan jika tidak ada transaksi pada filter aktif.
+- Export XLSX berisi sheet `Ringkasan` dan `Transaksi`.
+- Export CSV berisi baris transaksi dengan delimiter koma agar mudah diimport.
 
 ## UI Behavior
 
@@ -78,7 +80,7 @@ Settings page mengambil user dan profile dari Supabase server client:
 - Mobile memakai tab strip horizontal.
 - Upload avatar menampilkan preview lokal sebelum hasil upload.
 - Akun Terhubung menampilkan status Google dan toast hasil callback `google-linked` / error.
-- Export PDF menampilkan jumlah transaksi siap export.
+- Export data menampilkan jumlah transaksi siap export.
 - Theme memakai `next-themes`.
 
 ## TODO / Improvement

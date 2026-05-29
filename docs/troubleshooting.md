@@ -195,12 +195,13 @@ Solusi:
 - Pastikan bucket `avatars` public.
 - Upload file image di bawah 2 MB.
 
-## Export PDF gagal
+## Export file gagal
 
 Kemungkinan penyebab:
 
 - Tidak ada transaksi pada filter tanggal.
-- Dynamic import `jspdf`/`jspdf-autotable` gagal.
+- Dynamic import generator PDF atau spreadsheet gagal.
+- Dependency export seperti `jspdf`, `jspdf-autotable`, atau `exceljs` gagal dimuat.
 - Data transaksi tidak bisa dibaca karena RLS/session.
 
 Solusi:
