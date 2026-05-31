@@ -10,6 +10,7 @@ import type {
   Hutang,
   HutangFormValues,
 } from '@/types/hutang';
+import { hutangSchema, cicilanSchema } from '@/validations/hutang-validation';
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
@@ -63,17 +64,23 @@ export async function createHutang(
 
   if (!user) return { success: false, error: 'Tidak terautentikasi' };
 
+  // Validasi schema server-side
+  const parsed = hutangSchema.safeParse(values);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? 'Data hutang/piutang tidak valid' };
+  }
+
   const { data, error } = await supabase
     .from('hutang')
     .insert({
       user_id: user.id,
-      ...values,
-      rekening_id: normalizeOptionalId(values.rekening_id),
+      ...parsed.data,
+      rekening_id: normalizeOptionalId(parsed.data.rekening_id),
       tanggal_jatuh_tempo:
-        values.tanggal_jatuh_tempo === '' ? null : values.tanggal_jatuh_tempo,
-      waktu: values.waktu === '' ? null : values.waktu,
-      catatan: values.catatan === '' ? null : values.catatan,
-      sisa_tagihan: values.total_pinjaman,
+        parsed.data.tanggal_jatuh_tempo === '' ? null : parsed.data.tanggal_jatuh_tempo,
+      waktu: parsed.data.waktu === '' ? null : parsed.data.waktu,
+      catatan: parsed.data.catatan === '' ? null : parsed.data.catatan,
+      sisa_tagihan: parsed.data.total_pinjaman,
     })
     .select('*, cicilan:hutang_cicilan(*)')
     .single();
@@ -89,6 +96,12 @@ export async function updateHutang(
   values: Partial<HutangFormValues>,
 ): Promise<ActionResult<Hutang>> {
   const supabase = await createClient();
+
+  // Validasi schema server-side (partial — hanya field yang dikirim)
+  const parsed = hutangSchema.partial().safeParse(values);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? 'Data hutang/piutang tidak valid' };
+  }
 
   const { data: existing, error: existingError } = await supabase
     .from('hutang')
@@ -107,7 +120,7 @@ export async function updateHutang(
 
   const hasCicilan = (cicilan ?? []).length > 0;
 
-  if (values.tipe && values.tipe !== existing?.tipe && hasCicilan) {
+  if (parsed.data.tipe && parsed.data.tipe !== existing?.tipe && hasCicilan) {
     return {
       success: false,
       error:
@@ -118,39 +131,39 @@ export async function updateHutang(
   let sisa_tagihan: number | undefined;
   let status: 'aktif' | 'lunas' | 'overdue' | undefined;
 
-  if (values.total_pinjaman !== undefined) {
+  if (parsed.data.total_pinjaman !== undefined) {
     const total_cicilan = (cicilan ?? []).reduce(
       (acc, curr) => acc + Number(curr.nominal),
       0,
     );
-    sisa_tagihan = Math.max(Number(values.total_pinjaman) - total_cicilan, 0);
+    sisa_tagihan = Math.max(Number(parsed.data.total_pinjaman) - total_cicilan, 0);
     status = sisa_tagihan <= 0 ? 'lunas' : 'aktif';
   }
 
   const updatePayload = {
-    ...values,
+    ...parsed.data,
     rekening_id:
-      values.rekening_id === undefined
+      parsed.data.rekening_id === undefined
         ? undefined
-        : normalizeOptionalId(values.rekening_id),
+        : normalizeOptionalId(parsed.data.rekening_id),
     tanggal_jatuh_tempo:
-      values.tanggal_jatuh_tempo === undefined
+      parsed.data.tanggal_jatuh_tempo === undefined
         ? undefined
-        : values.tanggal_jatuh_tempo === ''
+        : parsed.data.tanggal_jatuh_tempo === ''
           ? null
-          : values.tanggal_jatuh_tempo,
+          : parsed.data.tanggal_jatuh_tempo,
     waktu:
-      values.waktu === undefined
+      parsed.data.waktu === undefined
         ? undefined
-        : values.waktu === ''
+        : parsed.data.waktu === ''
           ? null
-          : values.waktu,
+          : parsed.data.waktu,
     catatan:
-      values.catatan === undefined
+      parsed.data.catatan === undefined
         ? undefined
-        : values.catatan === ''
+        : parsed.data.catatan === ''
           ? null
-          : values.catatan,
+          : parsed.data.catatan,
     ...(sisa_tagihan !== undefined ? { sisa_tagihan, status } : {}),
     updated_at: new Date().toISOString(),
   };
@@ -183,16 +196,22 @@ export async function createCicilan(
 ): Promise<ActionResult<Hutang>> {
   const supabase = await createClient();
 
+  // Validasi schema server-side
+  const parsed = cicilanSchema.safeParse(values);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? 'Data cicilan tidak valid' };
+  }
+
   const { error } = await supabase.from('hutang_cicilan').insert({
-    ...values,
-    rekening_id: normalizeOptionalId(values.rekening_id),
-    waktu: values.waktu === '' ? null : values.waktu,
-    catatan: values.catatan === '' ? null : values.catatan,
+    ...parsed.data,
+    rekening_id: normalizeOptionalId(parsed.data.rekening_id),
+    waktu: parsed.data.waktu === '' ? null : parsed.data.waktu,
+    catatan: parsed.data.catatan === '' ? null : parsed.data.catatan,
   });
 
   if (error) return { success: false, error: error.message };
 
-  const refreshed = await getHutangById(supabase, values.hutang_id);
+  const refreshed = await getHutangById(supabase, parsed.data.hutang_id);
   if (!refreshed.success) return refreshed;
 
   revalidateHutangSaldoPaths();

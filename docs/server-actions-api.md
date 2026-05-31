@@ -299,7 +299,7 @@ Deskripsi: membuat rekening baru. `saldo_saat_ini` diinisialisasi dari `saldo_aw
 
 Input: `RekeningFormValues`.
 
-Validasi UI: `rekeningCreateSchema`.
+Validasi: `rekeningCreateSchema` dijalankan di sisi server sebelum insert.
 
 Tabel: `rekening`.
 
@@ -316,7 +316,7 @@ id: string;
 values: Partial<RekeningFormValues & { saldo_saat_ini?: number }>;
 ```
 
-Validasi UI: `rekeningEditSchema`.
+Validasi: `rekeningEditSchema` dijalankan di sisi server sebelum proses apapun.
 
 Tabel: `rekening`, `transaksi`.
 
@@ -346,11 +346,17 @@ Lokasi: `src/actions/kategori-action.ts`
 
 | Action           | Tujuan                          | Validasi                        | Tabel      |
 | ---------------- | ------------------------------- | ------------------------------- | ---------- |
-| `createKategori` | Membuat kategori custom user.   | `kategoriSchema`                | `kategori` |
-| `updateKategori` | Mengubah kategori custom user.  | `kategoriSchema`                | `kategori` |
-| `deleteKategori` | Menghapus kategori custom user. | Auth user + `is_system = false` | `kategori` |
+| `createKategori` | Membuat kategori custom user.   | `kategoriSchema` (server-side)  | `kategori` |
+| `updateKategori` | Mengubah kategori custom user.  | `kategoriSchema` (server-side)  | `kategori` |
+| `deleteKategori` | Menghapus kategori custom user. | Auth user + `is_system = false` + usage check | `kategori` |
 
 Action update/delete menambahkan filter `user_id = user.id` dan `is_system = false`, selain proteksi RLS.
+
+Proteksi tambahan:
+
+- **`createKategori`** dan **`updateKategori`**: memvalidasi payload dengan `kategoriSchema` di sisi server sebelum menyentuh database.
+- **`updateKategori`**: menolak perubahan `tipe` dari `income` ke `expense` (atau sebaliknya) jika masih ada transaksi atau template transaksi berulang yang menggunakan kategori tersebut dengan tipe yang tidak kompatibel. Perubahan dari/ke `'all'` selalu diizinkan.
+- **`deleteKategori`**: menolak penghapusan jika kategori masih dipakai oleh transaksi atau template transaksi berulang (`recurring_transaksi`). Pesan error mencantumkan jumlah data yang perlu diubah terlebih dahulu.
 
 ## Hutang Actions
 
@@ -359,18 +365,18 @@ Lokasi: `src/actions/hutang-action.ts`
 | Action            | Tujuan                                                                | Tabel                      |
 | ----------------- | --------------------------------------------------------------------- | -------------------------- |
 | `getHutang`       | Mengambil hutang/piutang dengan relasi cicilan.                       | `hutang`, `hutang_cicilan` |
-| `createHutang`    | Membuat hutang/piutang dan mengisi `sisa_tagihan = total_pinjaman`.   | `hutang`                   |
-| `updateHutang`    | Mengubah hutang/piutang, menghitung ulang sisa jika total berubah, dan menolak perubahan tipe jika sudah ada cicilan. | `hutang`, `hutang_cicilan` |
+| `createHutang`    | Membuat hutang/piutang. Validasi `hutangSchema` server-side.          | `hutang`                   |
+| `updateHutang`    | Mengubah hutang/piutang. Validasi `hutangSchema.partial()` server-side. Menghitung ulang sisa jika total berubah. Menolak perubahan tipe jika sudah ada cicilan. | `hutang`, `hutang_cicilan` |
 | `deleteHutang`    | Menghapus hutang/piutang.                                             | `hutang`                   |
-| `createCicilan`   | Membuat cicilan lalu mengembalikan parent `Hutang` terbaru dengan relasi cicilan. | `hutang_cicilan`, `hutang` |
+| `createCicilan`   | Membuat cicilan. Validasi `cicilanSchema` server-side. Mengembalikan parent `Hutang` terbaru. | `hutang_cicilan`, `hutang` |
 | `updateCicilan`   | Mengubah nominal, tanggal, waktu, rekening, atau catatan cicilan lalu mengembalikan parent `Hutang` terbaru. | `hutang_cicilan`, `hutang` |
 | `deleteCicilan`   | Menghapus cicilan lalu mengembalikan parent `Hutang` terbaru.         | `hutang_cicilan`, `hutang` |
 | `markHutangLunas` | Membuat cicilan sebesar sisa tagihan dengan rekening opsional.        | `hutang_cicilan`, `hutang` |
 
-Validasi UI:
+Validasi server-side:
 
-- `hutangSchema`.
-- `cicilanSchema`.
+- `hutangSchema` (Zod) dijalankan di `createHutang` dan `hutangSchema.partial()` di `updateHutang` sebelum query apapun.
+- `cicilanSchema` (Zod) dijalankan di `createCicilan` sebelum insert.
 
 Catatan: operasi cicilan mengandalkan trigger database untuk memperbarui `sisa_tagihan`, status, dan saldo rekening. UI pelunasan meminta user memilih rekening terlebih dahulu lalu mencatat cicilan sebesar sisa tagihan.
 

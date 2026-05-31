@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import type { ActionResult } from '@/types/general';
 import type { Rekening, RekeningFormValues, RekeningUsageCounts } from '@/types/rekening';
 import { currentTime } from '@/lib/utils';
+import { rekeningCreateSchema, rekeningEditSchema } from '@/validations/rekening-validation';
 
 function emptyRekeningUsageCounts(): RekeningUsageCounts {
   return {
@@ -193,12 +194,18 @@ export async function createRekening(values: RekeningFormValues): Promise<Action
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, error: 'Tidak terautentikasi' };
 
+  // Validasi schema server-side
+  const parsed = rekeningCreateSchema.safeParse(values);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? 'Data rekening tidak valid' };
+  }
+
   const { data, error } = await supabase
     .from('rekening')
     .insert({
       user_id: user.id,
-      ...values,
-      saldo_saat_ini: values.saldo_awal,
+      ...parsed.data,
+      saldo_saat_ini: parsed.data.saldo_awal,
     })
     .select()
     .single();
@@ -217,8 +224,14 @@ export async function updateRekening(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, error: 'Tidak terautentikasi' };
 
+  // Validasi schema server-side (gunakan editSchema yang mengizinkan saldo_saat_ini)
+  const parsed = rekeningEditSchema.safeParse(values);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? 'Data rekening tidak valid' };
+  }
+
   // Jika user mengubah saldo_saat_ini → buat transaksi koreksi dengan tipe 'correction'
-  if (values.saldo_saat_ini !== undefined) {
+  if (parsed.data.saldo_saat_ini !== undefined) {
     const { data: oldData, error: fetchError } = await supabase
       .from('rekening')
       .select('saldo_saat_ini')
@@ -228,7 +241,7 @@ export async function updateRekening(
     if (fetchError) return { success: false, error: fetchError.message };
 
     const oldSaldo = Number(oldData?.saldo_saat_ini ?? 0);
-    const newSaldo = Number(values.saldo_saat_ini);
+    const newSaldo = Number(parsed.data.saldo_saat_ini);
 
     if (oldSaldo !== newSaldo) {
       const selisih = newSaldo - oldSaldo;
@@ -261,7 +274,7 @@ export async function updateRekening(
   // Update field rekening lainnya (nama, jenis, warna, logo, exclude_total)
   // Saldo awal TIDAK diubah dari sini — hanya bisa diset saat create
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { saldo_saat_ini: _saldo_saat_ini, saldo_awal: _saldo_awal, ...otherValues } = values;
+  const { saldo_saat_ini: _saldo_saat_ini, saldo_awal: _saldo_awal, ...otherValues } = parsed.data as typeof values;
 
   const { data, error } = await supabase
     .from('rekening')
