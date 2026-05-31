@@ -19,25 +19,15 @@ import { BULAN_NAMES } from "@/constants/rekap";
 export type RekapBarChartProps = {
   data: RekapBulanan[];
   selectedBulan: number;
-  onSelectMonth: (bulan: number) => void;
 };
 
 export type RekapPieChartProps = {
   data: RekapKategori[];
 };
 
-type ChartClickState = {
-  activePayload?: Array<{
-    payload?: {
-      bulan?: number;
-    };
-  }>;
-};
-
 export function RekapBarChart({
   data,
   selectedBulan,
-  onSelectMonth,
 }: RekapBarChartProps) {
   const barData = data.map((item) => ({
     bulan: item.bulan,
@@ -45,19 +35,10 @@ export function RekapBarChart({
     Pemasukan: item.total_income,
     Pengeluaran: item.total_expense,
   }));
-  const handleChartClick = (state: unknown) => {
-    const bulan = (state as ChartClickState).activePayload?.[0]?.payload?.bulan;
-    if (bulan) onSelectMonth(bulan);
-  };
 
   return (
     <ResponsiveContainer width="100%" height={250}>
-      <BarChart
-        data={barData}
-        barCategoryGap="30%"
-        className="[&_.recharts-bar-rectangle]:cursor-pointer"
-        onClick={handleChartClick}
-      >
+      <BarChart data={barData} barCategoryGap="30%">
         <XAxis dataKey="name" tick={{ fontSize: 11 }} />
         <YAxis tick={{ fontSize: 10 }} tickFormatter={(value) => `${(Number(value) / 1_000_000).toFixed(0)}Jt`} />
         <Tooltip formatter={(value) => formatRupiah(Number(value))} />

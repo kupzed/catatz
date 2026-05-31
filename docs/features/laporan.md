@@ -62,10 +62,10 @@ Export data:
 ## Business Rules
 
 - Rekap bulanan menghitung `income` dan `expense`; `transfer` dan `correction` tidak masuk selisih utama.
-- Detail bulan menampilkan selisih pemasukan/pengeluaran, rata-rata harian, koreksi saldo, dan hutang/piutang secara terpisah.
+- Detail bulan menampilkan selisih pemasukan/pengeluaran, rata-rata harian, serta total selisih koreksi saldo dan hutang/piutang jika ada aktivitas pada bulan tersebut.
 - Koreksi saldo dan hutang/piutang tidak diselisihkan ke nominal utama pemasukan dikurangi pengeluaran.
 - Breakdown detail dapat dilihat berdasarkan kategori atau judul untuk transaksi `income` dan `expense`.
-- Detail hutang/piutang menampilkan hutang/piutang baru dan cicilan pada bulan terpilih, plus sisa hutang/piutang aktif sebagai konteks.
+- Detail hutang/piutang dihitung dari hutang/piutang baru dan cicilan pada bulan terpilih.
 - Budget usage menghitung expense per kategori pada bulan/tahun terpilih.
 - Export PDF, XLSX, dan CSV dapat difilter dengan tanggal `dari` dan `sampai`.
 - Export PDF menampilkan summary, count transaksi, periode, top kategori, dan detail transaksi.
@@ -75,9 +75,9 @@ Export data:
 ## UI Behavior
 
 - Chart memakai Recharts dan di-lazy load untuk mengurangi bundle awal.
-- Klik bulan pada chart memilih bulan aktif dan memuat detail rekap bulan tersebut.
+- Pilihan bulan berada di panel `Detail Rekap` melalui tombol bulan sebelumnya/berikutnya dan dropdown bulan.
 - Summary card menampilkan pemasukan/pengeluaran bulan aktif dan total tahunan.
-- Panel detail bulanan menampilkan rincian finansial, koreksi saldo, hutang/piutang, dan breakdown transaksi.
+- Panel detail bulanan menampilkan rincian finansial dan hanya menampilkan baris total `Koreksi Saldo` atau `Hutang Piutang` jika bulan tersebut memiliki aktivitas terkait.
 - Switch pada panel rincian mengubah breakdown dari kategori ke judul.
 - Item kategori atau judul dapat dibuka untuk melihat daftar detail transaksi dengan pola visual seperti list transaksi.
 - Budget section hanya tampil jika ada data budget untuk bulan aktif.

@@ -92,12 +92,13 @@ export default function RekapPageClient({
       <RekapBarSection
         data={initialBulanan}
         selectedBulan={selectedBulan}
-        onSelectMonth={handleSelectMonth}
         isLoading={isLoadingMonth}
       />
 
       <RekapMonthlyDetailSection
         detail={selectedDetail}
+        months={initialBulanan}
+        onSelectMonth={handleSelectMonth}
         isLoading={isLoadingMonth}
       />
 

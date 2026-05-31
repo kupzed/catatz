@@ -3,39 +3,41 @@
 import { useMemo, useState } from "react";
 import {
   ChevronDown,
-  HandCoins,
+  ChevronLeft,
+  ChevronRight,
   ReceiptText,
-  SlidersHorizontal,
   Tags,
   Type,
 } from "lucide-react";
 import type {
   RekapBreakdown,
   RekapBreakdownItem,
+  RekapBulanan,
   RekapDetailBulanan,
   RekapDetailTransaksi,
-  RekapHutangPiutangItem,
-  RekapKoreksiItem,
 } from "@/actions/rekap-action";
 import { BULAN_NAMES } from "@/constants/rekap";
 import { TIPE_CONFIG } from "@/constants/transaksi";
 import { cn, formatRupiah, formatTanggal } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 
 type BreakdownMode = "kategori" | "judul";
 type RekapMonthlyDetailSectionProps = {
   detail: RekapDetailBulanan;
+  months: RekapBulanan[];
+  onSelectMonth: (bulan: number) => void;
   isLoading?: boolean;
-};
-
-const debtLabels: Record<RekapHutangPiutangItem["jenis"], string> = {
-  piutang_baru: "Piutang baru",
-  hutang_baru: "Hutang baru",
-  cicilan_piutang: "Cicilan piutang",
-  cicilan_hutang: "Cicilan hutang",
 };
 
 function formatSignedRupiah(value: number) {
@@ -71,6 +73,71 @@ function DetailMetric({
       >
         {signed ? formatSignedRupiah(value) : formatRupiah(value)}
       </span>
+    </div>
+  );
+}
+
+function MonthSelector({
+  bulan,
+  months,
+  onSelectMonth,
+  disabled,
+}: {
+  bulan: number;
+  months: RekapBulanan[];
+  onSelectMonth: (bulan: number) => void;
+  disabled?: boolean;
+}) {
+  const previousMonth = bulan === 1 ? 12 : bulan - 1;
+  const nextMonth = bulan === 12 ? 1 : bulan + 1;
+
+  return (
+    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+      <div className="grid grid-cols-[44px_1fr_44px] gap-2 sm:w-64">
+        <Button
+          type="button"
+          variant="secondary"
+          size="icon"
+          className="h-11 w-11"
+          onClick={() => onSelectMonth(previousMonth)}
+          disabled={disabled}
+          aria-label="Bulan sebelumnya"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+
+        <Select
+          value={String(bulan)}
+          onValueChange={(value) => onSelectMonth(Number(value))}
+          disabled={disabled}
+        >
+          <SelectTrigger
+            className="h-11 rounded-full border-hairline bg-surface-strong px-4 text-sm font-semibold text-foreground"
+            aria-label="Pilih bulan rekap"
+          >
+            <SelectValue placeholder="Pilih bulan" />
+          </SelectTrigger>
+          <SelectContent align="center">
+            {months.map((item) => (
+              <SelectItem key={item.bulan} value={String(item.bulan)}>
+                {BULAN_NAMES[item.bulan - 1]} {item.tahun}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Button
+          type="button"
+          variant="secondary"
+          size="icon"
+          className="h-11 w-11"
+          onClick={() => onSelectMonth(nextMonth)}
+          disabled={disabled}
+          aria-label="Bulan berikutnya"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }
@@ -324,102 +391,17 @@ function BreakdownSection({ detail }: { detail: RekapDetailBulanan }) {
   );
 }
 
-function KoreksiSection({ items }: { items: RekapKoreksiItem[] }) {
-  if (items.length === 0) {
-    return (
-      <p className="border-t border-hairline pt-4 text-sm text-muted-foreground">
-        Belum ada koreksi saldo pada periode ini.
-      </p>
-    );
-  }
-
-  return (
-    <div className="border-t border-hairline">
-      {items.map((item) => (
-        <div
-          key={item.id}
-          className="flex items-start justify-between gap-4 border-b border-hairline py-3 last:border-b-0"
-        >
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-foreground">
-              {item.arah === "tambah" ? "Tambah saldo" : "Kurangi saldo"}
-            </p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {formatTanggal(item.tanggal, "d MMM yyyy")}
-              {item.rekening ? ` - ${item.rekening.nama}` : ""}
-            </p>
-          </div>
-          <p
-            className={cn(
-              "shrink-0 text-right font-mono text-sm font-semibold",
-              item.arah === "tambah"
-                ? "text-semantic-up"
-                : "text-semantic-down",
-            )}
-          >
-            {item.arah === "tambah" ? "+" : "-"}
-            {formatRupiah(item.nominal)}
-          </p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function HutangPiutangList({ items }: { items: RekapHutangPiutangItem[] }) {
-  if (items.length === 0) {
-    return (
-      <p className="border-t border-hairline pt-4 text-sm text-muted-foreground">
-        Belum ada aktivitas hutang/piutang pada periode ini.
-      </p>
-    );
-  }
-
-  return (
-    <div className="border-t border-hairline">
-      {items.map((item) => {
-        const isPositive =
-          item.jenis === "piutang_baru" || item.jenis === "cicilan_piutang";
-
-        return (
-          <div
-            key={`${item.jenis}-${item.id}`}
-            className="flex items-start justify-between gap-4 border-b border-hairline py-3 last:border-b-0"
-          >
-            <div className="min-w-0">
-              <div className="flex min-w-0 flex-wrap items-center gap-2">
-                <p className="text-sm font-semibold text-foreground">
-                  {item.label}
-                </p>
-                <Badge className="rounded-full border-0 bg-surface-strong px-2.5 py-0.5 text-xs text-muted-foreground">
-                  {debtLabels[item.jenis]}
-                </Badge>
-              </div>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {formatTanggal(item.tanggal, "d MMM yyyy")}
-                {item.catatan ? ` - ${item.catatan}` : ""}
-              </p>
-            </div>
-            <p
-              className={cn(
-                "shrink-0 text-right font-mono text-sm font-semibold",
-                isPositive ? "text-semantic-up" : "text-semantic-down",
-              )}
-            >
-              {isPositive ? "+" : "-"}
-              {formatRupiah(item.nominal)}
-            </p>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 export function RekapMonthlyDetailSection({
   detail,
+  months,
+  onSelectMonth,
   isLoading,
 }: RekapMonthlyDetailSectionProps) {
+  const hutangPiutangNet =
+    detail.hutang_piutang.piutang_baru +
+    detail.hutang_piutang.cicilan_piutang -
+    detail.hutang_piutang.hutang_baru -
+    detail.hutang_piutang.cicilan_hutang;
   const periodLabel = useMemo(
     () =>
       `${formatTanggal(detail.startDate, "dd MMM yyyy")} - ${formatTanggal(
@@ -444,7 +426,7 @@ export function RekapMonthlyDetailSection({
   return (
     <section className="space-y-4">
       <div className="rounded-card border border-hairline bg-card p-5 sm:p-8">
-        <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
               Detail Rekap
@@ -453,9 +435,12 @@ export function RekapMonthlyDetailSection({
               {BULAN_NAMES[detail.bulan - 1]} {detail.tahun}
             </h2>
           </div>
-          <p className="font-mono text-sm font-semibold text-muted-foreground">
-            {periodLabel}
-          </p>
+          <MonthSelector
+            bulan={detail.bulan}
+            months={months}
+            onSelectMonth={onSelectMonth}
+            disabled={isLoading}
+          />
         </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
@@ -465,6 +450,9 @@ export function RekapMonthlyDetailSection({
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
               Koreksi saldo dan hutang/piutang dipisahkan dari selisih utama.
+            </p>
+            <p className="mt-3 font-mono text-sm font-semibold text-muted-foreground">
+              {periodLabel}
             </p>
           </div>
           <div>
@@ -494,93 +482,23 @@ export function RekapMonthlyDetailSection({
               className={valueColor(detail.net)}
               signed
             />
+            {detail.koreksi.count > 0 && (
+              <DetailMetric
+                label="Koreksi Saldo"
+                value={detail.koreksi.net}
+                className={valueColor(detail.koreksi.net)}
+                signed
+              />
+            )}
+            {detail.hutang_piutang.count > 0 && (
+              <DetailMetric
+                label="Hutang Piutang"
+                value={hutangPiutangNet}
+                className={valueColor(hutangPiutangNet)}
+                signed
+              />
+            )}
           </div>
-        </div>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-card border border-hairline bg-card p-5 sm:p-6">
-          <div className="mb-4 flex items-start justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold text-foreground">
-                Rincian Koreksi Saldo
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {detail.koreksi.count} koreksi pada periode ini
-              </p>
-            </div>
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-strong text-accent-yellow">
-              <SlidersHorizontal className="h-4 w-4" />
-            </span>
-          </div>
-          <div className="mb-4">
-            <DetailMetric
-              label="Saldo ditambah"
-              value={detail.koreksi.total_tambah}
-              className="text-semantic-up"
-            />
-            <DetailMetric
-              label="Saldo dikurangi"
-              value={detail.koreksi.total_kurang}
-              className="text-semantic-down"
-            />
-            <DetailMetric
-              label="Selisih koreksi"
-              value={detail.koreksi.net}
-              className={valueColor(detail.koreksi.net)}
-              signed
-            />
-          </div>
-          <KoreksiSection items={detail.koreksi.items} />
-        </div>
-
-        <div className="rounded-card border border-hairline bg-card p-5 sm:p-6">
-          <div className="mb-4 flex items-start justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold text-foreground">
-                Rincian Hutang Piutang
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {detail.hutang_piutang.count} aktivitas pada periode ini
-              </p>
-            </div>
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-strong text-primary">
-              <HandCoins className="h-4 w-4" />
-            </span>
-          </div>
-          <div className="mb-4 grid gap-x-6 md:grid-cols-2">
-            <DetailMetric
-              label="Piutang baru"
-              value={detail.hutang_piutang.piutang_baru}
-              className="text-semantic-up"
-            />
-            <DetailMetric
-              label="Hutang baru"
-              value={detail.hutang_piutang.hutang_baru}
-              className="text-semantic-down"
-            />
-            <DetailMetric
-              label="Cicilan piutang"
-              value={detail.hutang_piutang.cicilan_piutang}
-              className="text-semantic-up"
-            />
-            <DetailMetric
-              label="Cicilan hutang"
-              value={detail.hutang_piutang.cicilan_hutang}
-              className="text-semantic-down"
-            />
-            <DetailMetric
-              label="Piutang aktif"
-              value={detail.hutang_piutang.piutang_aktif}
-              className="text-semantic-up"
-            />
-            <DetailMetric
-              label="Hutang aktif"
-              value={detail.hutang_piutang.hutang_aktif}
-              className="text-semantic-down"
-            />
-          </div>
-          <HutangPiutangList items={detail.hutang_piutang.items} />
         </div>
       </div>
 

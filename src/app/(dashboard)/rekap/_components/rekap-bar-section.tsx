@@ -14,14 +14,12 @@ const RekapBarChart = lazy(() =>
 export type RekapBarSectionProps = {
   data: RekapBulanan[];
   selectedBulan: number;
-  onSelectMonth: (bulan: number) => void;
   isLoading?: boolean;
 };
 
 export function RekapBarSection({
   data,
   selectedBulan,
-  onSelectMonth,
   isLoading,
 }: RekapBarSectionProps) {
   return (
@@ -37,11 +35,7 @@ export function RekapBarSection({
         </span>
       </div>
       <Suspense fallback={<Skeleton className="h-62.5 w-full" />}>
-        <RekapBarChart
-          data={data}
-          selectedBulan={selectedBulan}
-          onSelectMonth={onSelectMonth}
-        />
+        <RekapBarChart data={data} selectedBulan={selectedBulan} />
       </Suspense>
     </div>
   );
