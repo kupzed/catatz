@@ -49,15 +49,16 @@ Initial data diambil di Server Component dengan:
 - `getJudulSuggestions`
 - `getRecentJudul`
 - `suggestKategori`
-- `getNamaSuggestions` (deprecated)
 - `processVoiceInput` untuk input suara
 
 ## Business Rules
 
 - `nominal` wajib lebih dari 0.
+- `income` dan `expense` wajib memiliki `judul` dan `kategori_id`.
 - `transfer` wajib memiliki `rekening_tujuan`.
 - `rekening_id` dan `rekening_tujuan` tidak boleh sama untuk transfer.
 - `transfer` dan `correction` tidak boleh memiliki `judul` berdasarkan schema UI.
+- Server Action create/update memvalidasi payload dengan `transaksiSchema` agar proteksi tidak hanya bergantung pada UI.
 - Database juga memastikan `correction` tidak memiliki `judul`.
 - Trigger database otomatis mengubah saldo rekening untuk `income`, `expense`, dan `transfer`.
 - `correction` tidak diproses trigger dan ditangani manual oleh Server Action rekening/transaksi.
@@ -65,12 +66,13 @@ Initial data diambil di Server Component dengan:
 
 ## UI Behavior
 
-- User bisa filter periode, tipe, rekening, search judul/catatan, dan sorting.
+- User bisa filter periode, tipe, rekening, search judul/catatan/kategori, dan sorting.
 - Query `?new=true` membuka dialog transaksi baru otomatis.
 - Dialog mendukung mode create, edit, copy, dan correction readonly behavior.
 - Tanggal default dialog create normal mengikuti tanggal/periode yang sedang dipilih di halaman transaksi; waktu tetap memakai waktu saat dialog dibuka.
 - Field kategori hanya tampil untuk income/expense.
 - Field rekening tujuan hanya tampil untuk transfer.
+- Dialog membersihkan field yang tidak relevan saat tipe transaksi berubah, misalnya kategori untuk transfer dan rekening tujuan untuk non-transfer.
 - Judul suggestion diambil dari histori transaksi.
 - Input suara memakai browser Speech Recognition dan Gemini parser server-side.
 - Saat offline, create/update/delete transaksi dapat masuk ke IndexedDB queue.

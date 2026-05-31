@@ -61,6 +61,7 @@ Initial data diambil dengan:
 ## UI Behavior
 
 - Halaman menampilkan daftar hutang/piutang dengan badge status.
+- Halaman menampilkan ringkasan Piutang aktif dan Hutang aktif berdasarkan total `sisa_tagihan`.
 - Progress menunjukkan persentase pembayaran.
 - User bisa tambah/edit/hapus hutang/piutang.
 - User bisa tambah cicilan.

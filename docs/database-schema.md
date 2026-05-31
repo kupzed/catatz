@@ -50,6 +50,11 @@ Deskripsi: rekening, dompet, bank, e-wallet, atau akun investasi user.
 | `created_at` | `timestamptz` | Yes | `now()` | Waktu dibuat. |
 | `updated_at` | `timestamptz` | Yes | `now()` | Waktu terakhir diubah. |
 
+Trigger/function:
+
+- `public.prevent_rekening_delete_when_referenced()` menolak delete rekening yang masih direferensikan oleh `transaksi`, `hutang`, `hutang_cicilan`, atau `recurring_transaksi`.
+- Trigger `trg_prevent_rekening_delete_when_referenced` berjalan sebelum delete pada `rekening`.
+
 ## Tabel `kategori`
 
 Deskripsi: kategori transaksi. Kategori system memiliki `user_id = NULL` dan `is_system = TRUE`; kategori custom dimiliki user.
@@ -289,4 +294,5 @@ Policy storage:
 - Membuat, mengubah rekening/nominal/tipe, atau menghapus hutang/piutang dapat mengubah saldo rekening berdasarkan `tipe`.
 - Membuat, mengubah, atau menghapus cicilan mengubah sisa tagihan, status hutang/piutang, dan saldo rekening.
 - Menghapus parent hutang/piutang dengan cicilan memakai snapshot tipe cicilan agar saldo utama dan saldo cicilan tidak rollback dua kali atau tertinggal.
+- Menghapus rekening yang masih direferensikan data keuangan ditolak oleh trigger database agar histori tidak kehilangan referensi rekening.
 - Kategori system tidak boleh diubah/dihapus user melalui RLS dan Server Action.

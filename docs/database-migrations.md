@@ -17,10 +17,11 @@ Migration project berada di `src/migrations`.
 | `009-user-preferences.sql` | Membuat table `user_preferences`, index, RLS, dan grant API untuk preferensi user. | Active |
 | `010-user-sessions.sql` | Membuat table `user_sessions`, index, RLS, dan grant API untuk tracking sesi aktif. | Active |
 | `011-hutang-cicilan-balance-safety.sql` | Menambah snapshot tipe cicilan, policy UPDATE cicilan, dan memperbaiki trigger saldo/sisa hutang saat cicilan diubah atau parent dihapus. | Active |
+| `012-protect-rekening-delete-references.sql` | Menambah trigger untuk menolak delete rekening yang masih direferensikan transaksi, hutang/piutang, cicilan, atau template transaksi berulang. | Active |
 
 ## Catatan Urutan
 
-File migration yang ada saat ini berurutan dari `001` sampai `011` di `src/migrations`.
+File migration yang ada saat ini berurutan dari `001` sampai `012` di `src/migrations`.
 
 Jangan menjalankan migration otomatis hanya berdasarkan asumsi nomor file tanpa review. Pastikan urutan eksekusi sesuai riwayat production/staging yang sebenarnya.
 

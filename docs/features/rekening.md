@@ -25,16 +25,23 @@ Fitur rekening digunakan untuk mengelola sumber dana seperti tunai, bank, e-wall
 
 ## Data Source
 
-Initial data diambil dengan `getRekening()`.
+Initial data diambil dengan:
+
+- `getRekening()`
+- `getRekeningUsageCountsMap()`
 
 ## Tabel Database Terkait
 
 - `rekening`
 - `transaksi` untuk transaksi correction saat saldo diubah
+- `hutang`
+- `hutang_cicilan`
+- `recurring_transaksi`
 
 ## Server Action Terkait
 
 - `getRekening`
+- `getRekeningUsageCountsMap`
 - `createRekening`
 - `updateRekening`
 - `deleteRekening`
@@ -47,12 +54,15 @@ Initial data diambil dengan `getRekening()`.
 - `saldo_saat_ini` diset dari `saldo_awal` saat create.
 - Saat edit saldo saat ini, action membuat transaksi `correction` dan mengubah saldo rekening.
 - Rekening yang `exclude_total = true` tidak dihitung dalam total saldo UI.
-- Jika rekening dihapus, FK transaksi/hutang terkait memakai `ON DELETE SET NULL`.
+- Rekening tidak bisa dihapus jika masih dipakai oleh transaksi, rekening tujuan transfer, hutang/piutang, cicilan, atau template transaksi berulang.
+- Server Action `deleteRekening` memeriksa pemakaian rekening sebelum delete.
+- Database memiliki trigger `trg_prevent_rekening_delete_when_referenced` sebagai proteksi backend tambahan untuk delete langsung.
 
 ## UI Behavior
 
 - Halaman menampilkan total saldo dari rekening yang tidak di-exclude.
 - User bisa tambah, edit, hapus rekening.
+- Rekening yang masih dipakai menampilkan badge jumlah data dan tombol hapus memberi pesan agar data terkait dihapus terlebih dahulu.
 - User bisa toggle rekening untuk dihitung/tidak dihitung dalam total.
 - Dialog create memakai `rekeningCreateSchema`.
 - Dialog edit memakai `rekeningEditSchema`.
@@ -62,4 +72,3 @@ Initial data diambil dengan `getRekening()`.
 ## TODO / Improvement
 
 - Tambahkan mekanisme reorder rekening jika field `urutan` ingin dipakai aktif di UI.
-- Pertimbangkan warning tambahan sebelum hapus rekening yang masih dipakai transaksi.

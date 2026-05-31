@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { HandCoins, Plus } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, HandCoins, Plus } from "lucide-react";
 import HutangDialog from "./hutang-dialog";
 import { EmptyState, PageHeader } from "@/components/common";
 import { RekeningSelect } from "@/components/common/rekening-select";
@@ -40,6 +40,14 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
 
   const memberi = hutang.filter((h) => h.tipe === "memberi");
   const menerima = hutang.filter((h) => h.tipe === "menerima");
+  const totalPiutangAktif = memberi.reduce(
+    (sum, item) => sum + Number(item.sisa_tagihan),
+    0,
+  );
+  const totalHutangAktif = menerima.reduce(
+    (sum, item) => sum + Number(item.sisa_tagihan),
+    0,
+  );
   const detailHutang = useMemo(
     () => hutang.find((item) => item.id === detailHutangId) ?? null,
     [detailHutangId, hutang],
@@ -124,6 +132,46 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
           </Button>
         }
       />
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="rounded-card border border-hairline bg-card p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                Piutang aktif
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Sisa yang masih perlu diterima
+              </p>
+            </div>
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-surface-strong text-semantic-up">
+              <ArrowUpRight className="h-4 w-4" />
+            </span>
+          </div>
+          <p className="mt-4 font-mono text-2xl font-semibold text-semantic-up">
+            {formatRupiah(totalPiutangAktif)}
+          </p>
+        </div>
+
+        <div className="rounded-card border border-hairline bg-card p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                Hutang aktif
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Sisa yang masih perlu dibayar
+              </p>
+            </div>
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-surface-strong text-semantic-down">
+              <ArrowDownRight className="h-4 w-4" />
+            </span>
+          </div>
+          <p className="mt-4 font-mono text-2xl font-semibold text-semantic-down">
+            {formatRupiah(totalHutangAktif)}
+          </p>
+        </div>
+      </div>
 
       {hutang.length === 0 ? (
         <EmptyState icon={HandCoins} title="Belum ada catatan hutang" />

@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import type { Rekening, JenisRekening } from "@/types/rekening";
+import type {
+  JenisRekening,
+  Rekening,
+  RekeningUsageCounts,
+} from "@/types/rekening";
 import { formatRupiah } from "@/lib/utils";
 import { deleteRekening, toggleExcludeTotal } from "@/actions/rekening-action";
 import { toast } from "sonner";
@@ -22,7 +26,10 @@ import { cn } from "@/lib/utils";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState, PageHeader } from "@/components/common";
 
-type Props = { initialRekening: Rekening[] };
+type Props = {
+  initialRekening: Rekening[];
+  initialUsageCounts: Record<string, RekeningUsageCounts>;
+};
 
 const JENIS_CONFIG: Record<
   JenisRekening,
@@ -36,8 +43,35 @@ const JENIS_CONFIG: Record<
 
 const JENIS_ORDER: JenisRekening[] = ["Bank", "E-Wallet", "Tunai", "Investasi"];
 
-export default function RekeningPageClient({ initialRekening }: Props) {
+function usageDescription(usage: RekeningUsageCounts) {
+  const parts = [
+    usage.transaksi_asal > 0
+      ? `${usage.transaksi_asal} transaksi asal/utama`
+      : null,
+    usage.transaksi_tujuan > 0
+      ? `${usage.transaksi_tujuan} transfer tujuan`
+      : null,
+    usage.hutang > 0 ? `${usage.hutang} hutang/piutang` : null,
+    usage.hutang_cicilan > 0
+      ? `${usage.hutang_cicilan} cicilan hutang/piutang`
+      : null,
+    usage.recurring_asal > 0
+      ? `${usage.recurring_asal} template berulang`
+      : null,
+    usage.recurring_tujuan > 0
+      ? `${usage.recurring_tujuan} template transfer berulang`
+      : null,
+  ].filter(Boolean);
+
+  return `Rekening ini masih dipakai oleh ${parts.join(", ")}. Hapus data terkait terlebih dahulu sebelum menghapus rekening.`;
+}
+
+export default function RekeningPageClient({
+  initialRekening,
+  initialUsageCounts,
+}: Props) {
   const [rekening, setRekening] = useState(initialRekening);
+  const [usageCounts, setUsageCounts] = useState(initialUsageCounts);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editData, setEditData] = useState<Rekening | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -60,10 +94,21 @@ export default function RekeningPageClient({ initialRekening }: Props) {
   }, [rekening]);
 
   async function handleDelete(id: string) {
+    const usage = usageCounts[id];
+    if ((usage?.total ?? 0) > 0) {
+      toast.warning(usageDescription(usage));
+      return;
+    }
+
     setDeleting(id);
     const res = await deleteRekening(id);
     if (res.success) {
       setRekening((prev) => prev.filter((r) => r.id !== id));
+      setUsageCounts((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
       toast.success("Rekening dihapus");
     } else {
       toast.error(res.error ?? "Gagal menghapus");
@@ -134,7 +179,11 @@ export default function RekeningPageClient({ initialRekening }: Props) {
                 {jenis}
               </h3>
               <div className="grid gap-3 sm:grid-cols-2">
-                {items!.map((r) => (
+                {items!.map((r) => {
+                  const usage = usageCounts[r.id];
+                  const isUsed = (usage?.total ?? 0) > 0;
+
+                  return (
                   <div
                     key={r.id}
                     className={cn(
@@ -155,6 +204,14 @@ export default function RekeningPageClient({ initialRekening }: Props) {
                           >
                             {r.jenis}
                           </Badge>
+                          {isUsed && usage ? (
+                            <Badge
+                              variant="secondary"
+                              className="ml-1.5 text-xs mt-0.5 rounded-full bg-primary/10 text-primary border-none"
+                            >
+                              Dipakai {usage.total} data
+                            </Badge>
+                          ) : null}
                         </div>
                         <div className="flex gap-1 flex-wrap">
                           <Button
@@ -166,22 +223,37 @@ export default function RekeningPageClient({ initialRekening }: Props) {
                               setDialogOpen(true);
                             }}
                           >
-                            <Pencil className="h-3.5 w-3.5" />
-                          </Button>
-                          <ConfirmDialog
-                            title="Hapus Rekening?"
-                            description="Transaksi yang terkait dengan rekening ini mungkin akan kehilangan referensinya."
-                            onConfirm={() => handleDelete(r.id)}
-                          >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                          {isUsed && usage ? (
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-7 w-7 rounded-full bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20"
-                              disabled={deleting === r.id}
+                              onClick={() =>
+                                toast.warning(usageDescription(usage))
+                              }
+                              title="Rekening masih dipakai"
+                              aria-label={`Rekening ${r.nama} masih dipakai`}
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
-                          </ConfirmDialog>
+                          ) : (
+                            <ConfirmDialog
+                              title="Hapus Rekening?"
+                              description="Rekening akan dihapus permanen karena belum dipakai oleh data transaksi, hutang/piutang, cicilan, atau template transaksi berulang."
+                              onConfirm={() => handleDelete(r.id)}
+                            >
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 rounded-full bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20"
+                                disabled={deleting === r.id}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </ConfirmDialog>
+                          )}
                         </div>
                       </div>
                       <p className="font-mono text-xl font-medium text-foreground mt-3">
@@ -207,7 +279,8 @@ export default function RekeningPageClient({ initialRekening }: Props) {
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           );
@@ -223,6 +296,18 @@ export default function RekeningPageClient({ initialRekening }: Props) {
         editData={editData}
         onCreated={(r) => {
           setRekening((prev) => [...prev, r]);
+          setUsageCounts((prev) => ({
+            ...prev,
+            [r.id]: {
+              transaksi_asal: 0,
+              transaksi_tujuan: 0,
+              hutang: 0,
+              hutang_cicilan: 0,
+              recurring_asal: 0,
+              recurring_tujuan: 0,
+              total: 0,
+            },
+          }));
           setDialogOpen(false);
         }}
         onUpdated={(r) => {

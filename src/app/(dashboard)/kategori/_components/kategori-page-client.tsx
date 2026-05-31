@@ -13,6 +13,7 @@ import {
   Pencil,
   Trash2,
   ShieldCheck,
+  Search,
   TrendingUp,
   TrendingDown,
   ArrowLeftRight,
@@ -97,7 +98,7 @@ function KategoriCard({ kategori, onEdit, onDelete }: KategoriCardProps) {
             <TipeBadge tipe={kategori.tipe} />
           </div>
         </div>
-      </div>
+        </div>
 
       <div className="flex items-center gap-1 shrink-0 ml-2">
         {kategori.is_system ? (
@@ -155,7 +156,8 @@ export default function KategoriPageClient({ kategori }: Props) {
         !search ||
         k.nama.toLowerCase().includes(search.toLowerCase()) ||
         (k.ikon ?? "").includes(search);
-      const matchTipe = filterTipe === "all" || k.tipe === filterTipe;
+      const matchTipe =
+        filterTipe === "all" || k.tipe === filterTipe || k.tipe === "all";
       return matchSearch && matchTipe;
     });
   }
@@ -205,24 +207,28 @@ export default function KategoriPageClient({ kategori }: Props) {
       />
 
       {/* Filter bar */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div className="rounded-card border border-hairline bg-card p-3 sm:p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="relative w-full lg:max-w-sm">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           id="kategori-search"
-          placeholder="Cari kategori…"
+          placeholder="Cari kategori..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="sm:max-w-xs"
+          className="pl-9"
         />
-        <div className="flex items-center gap-1.5 flex-wrap">
+        </div>
+        <div className="grid grid-cols-3 gap-1 rounded-full bg-surface-strong p-1 sm:inline-grid sm:w-auto">
           {["all", "income", "expense"].map((t) => (
             <button
               key={t}
               onClick={() => setFilterTipe(t)}
               className={cn(
-                "inline-flex items-center rounded-full px-4 py-1 text-sm font-medium transition-colors",
+                "inline-flex h-9 items-center justify-center rounded-full px-3 text-xs font-semibold transition-colors sm:px-4 sm:text-sm",
                 filterTipe === t
                   ? "bg-primary text-white"
-                  : "bg-surface-strong text-muted-foreground hover:text-foreground",
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               {t === "all"
@@ -231,6 +237,7 @@ export default function KategoriPageClient({ kategori }: Props) {
             </button>
           ))}
         </div>
+      </div>
       </div>
 
       {/* Custom kategori */}

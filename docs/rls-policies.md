@@ -27,6 +27,8 @@ Catatan: Tidak ada policy INSERT untuk user biasa karena profile dibuat oleh tri
 | UPDATE | `rekening: update own` | `auth.uid() = user_id` | User hanya mengubah rekening sendiri. |
 | DELETE | `rekening: delete own` | `auth.uid() = user_id` | User hanya menghapus rekening sendiri. |
 
+Catatan: meskipun policy DELETE membatasi row milik user, trigger `trg_prevent_rekening_delete_when_referenced` tetap menolak delete jika rekening masih dipakai data keuangan lain.
+
 ## Tabel `kategori`
 
 | Action | Policy Name | Rule | Description |
@@ -104,7 +106,7 @@ Grant bukan pengganti RLS. Grant membuka akses API pada level table/schema, RLS 
 
 ## Security Notes
 
-- Function `handle_new_user` dan `update_saldo_rekening` dibuat sebagai `SECURITY DEFINER` di schema `public`. Function hutang/cicilan terbaru dari migration 011 memakai `SECURITY INVOKER` dan fully qualified object names agar tetap mengikuti RLS user yang sedang login.
+- Function `handle_new_user` dan `update_saldo_rekening` dibuat sebagai `SECURITY DEFINER` di schema `public`. Function hutang/cicilan terbaru dari migration 011 dan trigger guard rekening dari migration 012 memakai `SECURITY INVOKER` dan fully qualified object names agar tetap mengikuti RLS user yang sedang login.
 - `avatars` bersifat public read. Jangan simpan gambar yang bersifat rahasia di bucket ini.
 - Pastikan semua perubahan table baru selalu mengaktifkan RLS sebelum diberi grant API.
 

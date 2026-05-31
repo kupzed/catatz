@@ -23,3 +23,13 @@ export type RekeningFormValues = {
   logo?: string;
   exclude_total: boolean;
 };
+
+export type RekeningUsageCounts = {
+  transaksi_asal: number;
+  transaksi_tujuan: number;
+  hutang: number;
+  hutang_cicilan: number;
+  recurring_asal: number;
+  recurring_tujuan: number;
+  total: number;
+};

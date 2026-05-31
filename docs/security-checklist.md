@@ -67,8 +67,9 @@ Security headers saat ini:
 
 ## Security Notes
 
-- Function `SECURITY DEFINER` saat ini berada di schema `public`: `handle_new_user` dan `update_saldo_rekening`. Function hutang/cicilan dari migration 011 memakai `SECURITY INVOKER` dan fully qualified object names supaya operasi saldo/sisa hutang tetap mengikuti RLS user yang sedang login.
+- Function `SECURITY DEFINER` saat ini berada di schema `public`: `handle_new_user` dan `update_saldo_rekening`. Function hutang/cicilan dari migration 011 dan guard delete rekening dari migration 012 memakai `SECURITY INVOKER` dan fully qualified object names supaya operasi saldo/sisa hutang dan proteksi referensi rekening tetap mengikuti RLS user yang sedang login.
 - `hutang_cicilan` memiliki policy UPDATE via parent `hutang`; pastikan edit cicilan tetap hanya dilakukan untuk row milik user.
+- Delete rekening diproteksi di Server Action dan trigger database agar transaksi, hutang/piutang, cicilan, atau template berulang tidak kehilangan referensi rekening.
 - Bucket `avatars` public read. Ini cocok untuk avatar, tetapi tidak cocok untuk dokumen privat.
 - `kategori` memberi SELECT kepada `anon`; RLS hanya memperbolehkan kategori system untuk anon karena `auth.uid()` null tidak cocok dengan kategori user.
 - Tidak ada service role key di codebase saat ini. Pertahankan kondisi ini kecuali ada kebutuhan server-only yang kuat.

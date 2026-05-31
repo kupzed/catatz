@@ -48,6 +48,7 @@ export function useTransaksiFilter<T extends Transaksi = Transaksi>({
   const [search, setSearch] = useState("");
 
   const filtered = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
     const result = transaksi.filter((t) => {
       if (filter.tipe && filter.tipe !== "all" && t.tipe !== filter.tipe)
         return false;
@@ -56,9 +57,10 @@ export function useTransaksiFilter<T extends Transaksi = Transaksi>({
       if (filter.kategori_id && t.kategori_id !== filter.kategori_id)
         return false;
       if (
-        search &&
-        !t.catatan?.toLowerCase().includes(search.toLowerCase()) &&
-        !t.judul?.toLowerCase().includes(search.toLowerCase())
+        normalizedSearch &&
+        !t.catatan?.toLowerCase().includes(normalizedSearch) &&
+        !t.judul?.toLowerCase().includes(normalizedSearch) &&
+        !t.kategori?.nama.toLowerCase().includes(normalizedSearch)
       )
         return false;
 

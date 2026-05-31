@@ -4,6 +4,35 @@ import { createClient } from '@/configs/supabase/server';
 import { revalidatePath } from 'next/cache';
 import type { ActionResult } from '@/types/general';
 import type { Transaksi, TransaksiFormValues, TransaksiFilter, Kategori, JudulSuggestion } from '@/types/transaksi';
+import { transaksiSchema } from '@/validations/transaksi-validation';
+
+function validateTransaksiValues(values: TransaksiFormValues): ActionResult<TransaksiFormValues> {
+  const parsed = transaksiSchema.safeParse(values);
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? 'Data transaksi tidak valid',
+    };
+  }
+
+  return { success: true, data: parsed.data as TransaksiFormValues };
+}
+
+function toTransaksiPayload(values: TransaksiFormValues) {
+  return {
+    ...values,
+    judul: values.judul?.trim() || null,
+    kategori_id: values.kategori_id ?? null,
+    rekening_tujuan: values.rekening_tujuan ?? null,
+    waktu: values.waktu === '' ? null : values.waktu,
+    catatan: values.catatan === '' ? null : values.catatan,
+  };
+}
+
+function normalizeSearchTerm(value: string) {
+  return value.replace(/[%_,()]/g, ' ').trim();
+}
 
 export async function getKategori(): Promise<Kategori[]> {
   const supabase = await createClient();
@@ -48,7 +77,30 @@ export async function getTransaksi(filter: TransaksiFilter = {}): Promise<Transa
     query = query.lte('tanggal', filter.sampai);
   }
   if (filter.q) {
-    query = query.or(`catatan.ilike.%${filter.q}%,judul.ilike.%${filter.q}%`);
+    const searchTerm = normalizeSearchTerm(filter.q);
+
+    if (searchTerm) {
+      const { data: matchingKategori, error: kategoriError } = await supabase
+        .from('kategori')
+        .select('id')
+        .ilike('nama', `%${searchTerm}%`);
+
+      if (kategoriError) throw new Error(kategoriError.message);
+
+      const categoryIds = (matchingKategori ?? [])
+        .map((item) => item.id)
+        .filter(Boolean);
+      const searchClauses = [
+        `catatan.ilike.%${searchTerm}%`,
+        `judul.ilike.%${searchTerm}%`,
+      ];
+
+      if (categoryIds.length > 0) {
+        searchClauses.push(`kategori_id.in.(${categoryIds.join(',')})`);
+      }
+
+      query = query.or(searchClauses.join(','));
+    }
   }
 
   const { data, error } = await query;
@@ -61,9 +113,14 @@ export async function createTransaksi(values: TransaksiFormValues): Promise<Acti
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, error: 'Tidak terautentikasi' };
 
+  const validation = validateTransaksiValues(values);
+  if (!validation.success || !validation.data) {
+    return { success: false, error: validation.error };
+  }
+
   const { data, error } = await supabase
     .from('transaksi')
-    .insert({ user_id: user.id, ...values })
+    .insert({ user_id: user.id, ...toTransaksiPayload(validation.data) })
     .select(`
       *,
       kategori:kategori_id(*),
@@ -84,13 +141,45 @@ export async function updateTransaksi(
   values: Partial<TransaksiFormValues>
 ): Promise<ActionResult<Transaksi>> {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Tidak terautentikasi' };
 
   // Ambil data transaksi lama untuk pengecekan tipe 'correction'
-  const { data: oldTrx } = await supabase
+  const { data: oldTrx, error: oldTrxError } = await supabase
     .from('transaksi')
-    .select('tipe, nominal, rekening_id, tags')
+    .select('tipe, judul, nominal, tanggal, waktu, kategori_id, rekening_id, rekening_tujuan, catatan, tags, is_recurring')
     .eq('id', id)
+    .eq('user_id', user.id)
     .single();
+
+  if (oldTrxError || !oldTrx) {
+    return { success: false, error: 'Transaksi tidak ditemukan' };
+  }
+
+  const mergedValues: TransaksiFormValues = {
+    tipe: (values.tipe ?? oldTrx.tipe) as TransaksiFormValues['tipe'],
+    judul: values.judul !== undefined ? values.judul : (oldTrx.judul ?? null),
+    nominal: Number(values.nominal ?? oldTrx.nominal),
+    tanggal: values.tanggal ?? oldTrx.tanggal,
+    waktu: values.waktu !== undefined ? values.waktu : (oldTrx.waktu ?? undefined),
+    kategori_id:
+      values.kategori_id !== undefined
+        ? values.kategori_id
+        : (oldTrx.kategori_id ?? undefined),
+    rekening_id: values.rekening_id ?? oldTrx.rekening_id ?? '',
+    rekening_tujuan:
+      values.rekening_tujuan !== undefined
+        ? values.rekening_tujuan
+        : (oldTrx.rekening_tujuan ?? undefined),
+    catatan:
+      values.catatan !== undefined ? values.catatan : (oldTrx.catatan ?? undefined),
+    tags: values.tags ?? oldTrx.tags ?? [],
+    is_recurring: values.is_recurring ?? oldTrx.is_recurring ?? false,
+  };
+  const validation = validateTransaksiValues(mergedValues);
+  if (!validation.success || !validation.data) {
+    return { success: false, error: validation.error };
+  }
 
   if (oldTrx?.tipe === 'correction' && values.nominal !== undefined && oldTrx.rekening_id) {
     const isAdd = oldTrx.tags?.includes('correction_add');
@@ -123,8 +212,9 @@ export async function updateTransaksi(
 
   const { data, error } = await supabase
     .from('transaksi')
-    .update({ ...values, updated_at: new Date().toISOString() })
+    .update({ ...toTransaksiPayload(validation.data), updated_at: new Date().toISOString() })
     .eq('id', id)
+    .eq('user_id', user.id)
     .select(`
       *,
       kategori:kategori_id(*),

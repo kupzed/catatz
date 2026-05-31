@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { getRekening } from '@/actions/rekening-action';
+import { getRekening, getRekeningUsageCountsMap } from '@/actions/rekening-action';
 import RekeningPageClient from './_components/rekening-page-client';
 
 export const metadata: Metadata = {
@@ -8,6 +8,15 @@ export const metadata: Metadata = {
 };
 
 export default async function RekeningPage() {
-  const rekening = await getRekening();
-  return <RekeningPageClient initialRekening={rekening} />;
+  const [rekening, usageCounts] = await Promise.all([
+    getRekening(),
+    getRekeningUsageCountsMap(),
+  ]);
+
+  return (
+    <RekeningPageClient
+      initialRekening={rekening}
+      initialUsageCounts={usageCounts}
+    />
+  );
 }

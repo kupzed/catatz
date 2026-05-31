@@ -185,7 +185,7 @@ Tabel: `kategori`.
 
 Lokasi: `src/actions/transaksi-action.ts`
 
-Deskripsi: mengambil transaksi dengan relasi kategori, rekening asal, dan rekening tujuan.
+Deskripsi: mengambil transaksi dengan relasi kategori, rekening asal, dan rekening tujuan. Filter `q` mencocokkan judul, catatan, dan nama kategori.
 
 Input:
 
@@ -218,8 +218,10 @@ Input: `TransaksiFormValues`.
 
 Validasi:
 
-- UI memakai `transaksiSchema` di `src/validations/transaksi-validation.ts`.
+- UI dan Server Action memakai `transaksiSchema` di `src/validations/transaksi-validation.ts`.
 - Server action memastikan user login.
+- `income` dan `expense` wajib memiliki `judul` dan `kategori_id`.
+- `transfer` wajib memiliki `rekening_tujuan`, dan rekening asal/tujuan tidak boleh sama.
 - Database constraint memastikan nominal positif, transfer punya rekening tujuan, dan correction tidak punya judul.
 
 Output: `ActionResult<Transaksi>`.
@@ -242,6 +244,8 @@ values: Partial<TransaksiFormValues>;
 ```
 
 Output: `ActionResult<Transaksi>`.
+
+Validasi: action mengambil data lama, merge dengan payload partial, lalu memvalidasi hasilnya dengan `transaksiSchema` sebelum update.
 
 Revalidate: `/transaksi`, `/rekening`, `/rekap`.
 
@@ -270,7 +274,6 @@ Lokasi: `src/actions/transaksi-action.ts`
 | `getJudulSuggestions(query)` | Suggest judul berdasarkan riwayat transaksi dan kategori yang sering dipakai. | `transaksi` |
 | `getRecentJudul()`           | Mengambil judul transaksi terbaru untuk initial suggestion.                   | `transaksi` |
 | `suggestKategori(catatan)`   | Legacy auto-kategorisasi berbasis catatan.                                    | `transaksi` |
-| `getNamaSuggestions(query)`  | Deprecated, backward compatibility untuk suggestion catatan.                  | `transaksi` |
 
 ## Rekening Actions
 
@@ -281,6 +284,14 @@ Lokasi: `src/actions/rekening-action.ts`
 Deskripsi: mengambil rekening user, urut berdasarkan `urutan`.
 
 Tabel: `rekening`.
+
+### `getRekeningUsageCountsMap`
+
+Deskripsi: menghitung pemakaian setiap rekening di transaksi, rekening tujuan transfer, hutang/piutang, cicilan, dan template transaksi berulang.
+
+Output: `Record<string, RekeningUsageCounts>`.
+
+Tabel: `transaksi`, `hutang`, `hutang_cicilan`, `recurring_transaksi`.
 
 ### `createRekening`
 
@@ -313,11 +324,15 @@ Revalidate: `/rekening`, `/transaksi`.
 
 ### `deleteRekening`
 
-Deskripsi: menghapus rekening.
+Deskripsi: menghapus rekening jika belum dipakai oleh data keuangan lain.
 
 Tabel: `rekening`.
 
-Catatan: FK transaksi/hutang ke rekening memakai `ON DELETE SET NULL`.
+Proteksi:
+
+- Action memastikan user login.
+- Action menolak delete jika rekening masih dipakai transaksi, rekening tujuan transfer, hutang/piutang, cicilan, atau template transaksi berulang.
+- Migration `012-protect-rekening-delete-references.sql` menambahkan trigger database untuk menolak delete langsung pada kondisi yang sama.
 
 ### `toggleExcludeTotal`
 

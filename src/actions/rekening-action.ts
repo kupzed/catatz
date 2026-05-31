@@ -3,8 +3,122 @@
 import { createClient } from '@/configs/supabase/server';
 import { revalidatePath } from 'next/cache';
 import type { ActionResult } from '@/types/general';
-import type { Rekening, RekeningFormValues } from '@/types/rekening';
+import type { Rekening, RekeningFormValues, RekeningUsageCounts } from '@/types/rekening';
 import { currentTime } from '@/lib/utils';
+
+function emptyRekeningUsageCounts(): RekeningUsageCounts {
+  return {
+    transaksi_asal: 0,
+    transaksi_tujuan: 0,
+    hutang: 0,
+    hutang_cicilan: 0,
+    recurring_asal: 0,
+    recurring_tujuan: 0,
+    total: 0,
+  };
+}
+
+function incrementUsage(
+  map: Record<string, RekeningUsageCounts>,
+  id: string | null | undefined,
+  key: Exclude<keyof RekeningUsageCounts, 'total'>,
+) {
+  if (!id) return;
+
+  map[id] ??= emptyRekeningUsageCounts();
+  map[id][key] += 1;
+  map[id].total += 1;
+}
+
+function buildRekeningUsageError(usage: RekeningUsageCounts) {
+  return `Rekening ini masih dipakai oleh ${usage.total} data keuangan. Hapus transaksi, hutang/piutang, cicilan, atau template transaksi berulang terkait terlebih dahulu.`;
+}
+
+async function getSingleRekeningUsageCounts(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  id: string,
+): Promise<ActionResult<RekeningUsageCounts>> {
+  const [transaksiAsal, transaksiTujuan, hutang, recurringAsal, recurringTujuan] =
+    await Promise.all([
+      supabase
+        .from('transaksi')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('rekening_id', id),
+      supabase
+        .from('transaksi')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('rekening_tujuan', id),
+      supabase
+        .from('hutang')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('rekening_id', id),
+      supabase
+        .from('recurring_transaksi')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('rekening_id', id),
+      supabase
+        .from('recurring_transaksi')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('rekening_tujuan', id),
+    ]);
+
+  for (const result of [
+    transaksiAsal,
+    transaksiTujuan,
+    hutang,
+    recurringAsal,
+    recurringTujuan,
+  ]) {
+    if (result.error) {
+      return { success: false, error: result.error.message };
+    }
+  }
+
+  const { data: hutangRows, error: hutangRowsError } = await supabase
+    .from('hutang')
+    .select('id')
+    .eq('user_id', userId);
+
+  if (hutangRowsError) return { success: false, error: hutangRowsError.message };
+
+  let cicilanCount = 0;
+  const hutangIds = (hutangRows ?? []).map((item) => item.id);
+
+  if (hutangIds.length > 0) {
+    const { count, error } = await supabase
+      .from('hutang_cicilan')
+      .select('id', { count: 'exact', head: true })
+      .in('hutang_id', hutangIds)
+      .eq('rekening_id', id);
+
+    if (error) return { success: false, error: error.message };
+    cicilanCount = count ?? 0;
+  }
+
+  const data: RekeningUsageCounts = {
+    transaksi_asal: transaksiAsal.count ?? 0,
+    transaksi_tujuan: transaksiTujuan.count ?? 0,
+    hutang: hutang.count ?? 0,
+    hutang_cicilan: cicilanCount,
+    recurring_asal: recurringAsal.count ?? 0,
+    recurring_tujuan: recurringTujuan.count ?? 0,
+    total:
+      (transaksiAsal.count ?? 0) +
+      (transaksiTujuan.count ?? 0) +
+      (hutang.count ?? 0) +
+      cicilanCount +
+      (recurringAsal.count ?? 0) +
+      (recurringTujuan.count ?? 0),
+  };
+
+  return { success: true, data };
+}
 
 export async function getRekening(): Promise<Rekening[]> {
   const supabase = await createClient();
@@ -15,6 +129,63 @@ export async function getRekening(): Promise<Rekening[]> {
 
   if (error) throw new Error(error.message);
   return (data as Rekening[]) ?? [];
+}
+
+export async function getRekeningUsageCountsMap(): Promise<Record<string, RekeningUsageCounts>> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return {};
+
+  const [transaksi, hutang, recurring] = await Promise.all([
+    supabase
+      .from('transaksi')
+      .select('rekening_id, rekening_tujuan')
+      .eq('user_id', user.id),
+    supabase
+      .from('hutang')
+      .select('id, rekening_id')
+      .eq('user_id', user.id),
+    supabase
+      .from('recurring_transaksi')
+      .select('rekening_id, rekening_tujuan')
+      .eq('user_id', user.id),
+  ]);
+
+  if (transaksi.error) throw new Error(transaksi.error.message);
+  if (hutang.error) throw new Error(hutang.error.message);
+  if (recurring.error) throw new Error(recurring.error.message);
+
+  const usageMap: Record<string, RekeningUsageCounts> = {};
+
+  for (const item of transaksi.data ?? []) {
+    incrementUsage(usageMap, item.rekening_id, 'transaksi_asal');
+    incrementUsage(usageMap, item.rekening_tujuan, 'transaksi_tujuan');
+  }
+
+  const hutangIds = (hutang.data ?? []).map((item) => item.id);
+  for (const item of hutang.data ?? []) {
+    incrementUsage(usageMap, item.rekening_id, 'hutang');
+  }
+
+  if (hutangIds.length > 0) {
+    const { data, error } = await supabase
+      .from('hutang_cicilan')
+      .select('rekening_id')
+      .in('hutang_id', hutangIds);
+
+    if (error) throw new Error(error.message);
+
+    for (const item of data ?? []) {
+      incrementUsage(usageMap, item.rekening_id, 'hutang_cicilan');
+    }
+  }
+
+  for (const item of recurring.data ?? []) {
+    incrementUsage(usageMap, item.rekening_id, 'recurring_asal');
+    incrementUsage(usageMap, item.rekening_tujuan, 'recurring_tujuan');
+  }
+
+  return usageMap;
 }
 
 export async function createRekening(values: RekeningFormValues): Promise<ActionResult<Rekening>> {
@@ -107,7 +278,23 @@ export async function updateRekening(
 
 export async function deleteRekening(id: string): Promise<ActionResult> {
   const supabase = await createClient();
-  const { error } = await supabase.from('rekening').delete().eq('id', id);
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Tidak terautentikasi' };
+
+  const usage = await getSingleRekeningUsageCounts(supabase, user.id, id);
+  if (!usage.success || !usage.data) {
+    return { success: false, error: usage.error ?? 'Gagal memeriksa pemakaian rekening' };
+  }
+
+  if (usage.data.total > 0) {
+    return { success: false, error: buildRekeningUsageError(usage.data) };
+  }
+
+  const { error } = await supabase
+    .from('rekening')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user.id);
   if (error) return { success: false, error: error.message };
   revalidatePath('/rekening');
   revalidatePath('/transaksi');

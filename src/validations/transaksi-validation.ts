@@ -18,11 +18,45 @@ export const transaksiSchema = z
   })
   .refine(
     (data) => {
+      if (data.tipe === "income" || data.tipe === "expense") {
+        return !!data.judul?.trim();
+      }
+      return true;
+    },
+    {
+      message: "Judul wajib diisi",
+      path: ["judul"],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.tipe === "income" || data.tipe === "expense") {
+        return !!data.kategori_id;
+      }
+      return true;
+    },
+    {
+      message: "Kategori wajib dipilih",
+      path: ["kategori_id"],
+    },
+  )
+  .refine(
+    (data) => {
       if (data.tipe === "transfer") return !!data.rekening_tujuan;
       return true;
     },
     {
       message: "Rekening tujuan wajib dipilih untuk transfer",
+      path: ["rekening_tujuan"],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.tipe !== "transfer") return !data.rekening_tujuan;
+      return true;
+    },
+    {
+      message: "Rekening tujuan hanya boleh diisi untuk transfer",
       path: ["rekening_tujuan"],
     },
   )

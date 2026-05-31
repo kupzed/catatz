@@ -50,7 +50,9 @@ Initial data diambil dengan `getKategori()`.
 
 - Halaman memisahkan kategori custom dan kategori system.
 - Kategori system tampil read-only.
-- User dapat filter berdasarkan tipe kategori.
+- User dapat search kategori dan filter berdasarkan tipe kategori.
+- Saat filter Pemasukan atau Pengeluaran, kategori bertipe `all` tetap ikut tampil karena dapat digunakan untuk kedua tipe transaksi.
+- Search dan filter ditampilkan sebagai filter bar responsif.
 - Dialog kategori memakai Zod schema `kategoriSchema`.
 - Delete kategori menggunakan confirm dialog.
 

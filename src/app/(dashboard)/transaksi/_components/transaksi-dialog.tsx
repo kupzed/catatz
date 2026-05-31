@@ -170,10 +170,15 @@ export default function TransaksiDialog({
     return () => clearTimeout(timeout);
   }, [judul, isEdit]);
 
-  // Reset judul saat tipe berubah jadi transfer atau correction
+  // Bersihkan field yang tidak relevan agar payload tetap sesuai tipe transaksi.
   useEffect(() => {
     if (tipe === "transfer" || tipe === "correction") {
       setValue("judul", null);
+      setValue("kategori_id", undefined);
+    }
+
+    if (tipe !== "transfer") {
+      setValue("rekening_tujuan", undefined);
     }
   }, [tipe, setValue]);
 
@@ -595,7 +600,10 @@ export default function TransaksiDialog({
                     value={field.value || ""}
                     onValueChange={field.onChange}
                   >
-                    <SelectTrigger id="kategori-select">
+                    <SelectTrigger
+                      id="kategori-select"
+                      className={errors.kategori_id ? "border-rose-500" : ""}
+                    >
                       <SelectValue placeholder="Pilih kategori" />
                     </SelectTrigger>
                     <SelectContent>
@@ -608,6 +616,11 @@ export default function TransaksiDialog({
                   </Select>
                 )}
               />
+              {errors.kategori_id && (
+                <p className="text-xs text-rose-500">
+                  {errors.kategori_id.message}
+                </p>
+              )}
             </div>
           )}
 
