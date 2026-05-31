@@ -18,28 +18,68 @@ import { BULAN_NAMES } from "@/constants/rekap";
 
 export type RekapBarChartProps = {
   data: RekapBulanan[];
+  selectedBulan: number;
+  onSelectMonth: (bulan: number) => void;
 };
 
 export type RekapPieChartProps = {
   data: RekapKategori[];
 };
 
-export function RekapBarChart({ data }: RekapBarChartProps) {
+type ChartClickState = {
+  activePayload?: Array<{
+    payload?: {
+      bulan?: number;
+    };
+  }>;
+};
+
+export function RekapBarChart({
+  data,
+  selectedBulan,
+  onSelectMonth,
+}: RekapBarChartProps) {
   const barData = data.map((item) => ({
+    bulan: item.bulan,
     name: BULAN_NAMES[item.bulan - 1],
     Pemasukan: item.total_income,
     Pengeluaran: item.total_expense,
   }));
+  const handleChartClick = (state: unknown) => {
+    const bulan = (state as ChartClickState).activePayload?.[0]?.payload?.bulan;
+    if (bulan) onSelectMonth(bulan);
+  };
 
   return (
     <ResponsiveContainer width="100%" height={250}>
-      <BarChart data={barData} barCategoryGap="30%">
+      <BarChart
+        data={barData}
+        barCategoryGap="30%"
+        className="[&_.recharts-bar-rectangle]:cursor-pointer"
+        onClick={handleChartClick}
+      >
         <XAxis dataKey="name" tick={{ fontSize: 11 }} />
         <YAxis tick={{ fontSize: 10 }} tickFormatter={(value) => `${(Number(value) / 1_000_000).toFixed(0)}Jt`} />
         <Tooltip formatter={(value) => formatRupiah(Number(value))} />
         <Legend />
-        <Bar dataKey="Pemasukan" fill="#05b169" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="Pengeluaran" fill="#cf202f" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="Pemasukan" radius={[4, 4, 0, 0]}>
+          {barData.map((entry) => (
+            <Cell
+              key={`income-${entry.bulan}`}
+              fill="var(--semantic-up)"
+              opacity={entry.bulan === selectedBulan ? 1 : 0.35}
+            />
+          ))}
+        </Bar>
+        <Bar dataKey="Pengeluaran" radius={[4, 4, 0, 0]}>
+          {barData.map((entry) => (
+            <Cell
+              key={`expense-${entry.bulan}`}
+              fill="var(--semantic-down)"
+              opacity={entry.bulan === selectedBulan ? 1 : 0.35}
+            />
+          ))}
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   );

@@ -1,19 +1,25 @@
 "use client";
 
+import { useState } from "react";
+import { toast } from "sonner";
 import type {
   BudgetWithUsage,
+  RekapDetailBulanan,
   RekapBulanan,
-  RekapKategori,
+} from "@/actions/rekap-action";
+import {
+  getBudgetWithUsage,
+  getRekapDetailBulanan,
 } from "@/actions/rekap-action";
 import { RekapBarSection } from "./rekap-bar-section";
 import { RekapBudgetSection } from "./rekap-budget-section";
-import { RekapKategoriSection } from "./rekap-kategori-section";
+import { RekapMonthlyDetailSection } from "./rekap-monthly-detail-section";
 import { RekapSummaryCards } from "./rekap-summary-cards";
 import { PageHeader } from "@/components/common";
 
 type Props = {
   initialBulanan: RekapBulanan[];
-  initialKategori: RekapKategori[];
+  initialDetail: RekapDetailBulanan;
   initialBudget: BudgetWithUsage[];
   currentBulan: number;
   currentTahun: number;
@@ -21,15 +27,54 @@ type Props = {
 
 export default function RekapPageClient({
   initialBulanan,
-  initialKategori,
+  initialDetail,
   initialBudget,
   currentBulan,
   currentTahun,
 }: Props) {
+  const [selectedBulan, setSelectedBulan] = useState(currentBulan);
+  const [isLoadingMonth, setIsLoadingMonth] = useState(false);
+  const [detailByMonth, setDetailByMonth] = useState<
+    Record<number, RekapDetailBulanan>
+  >(() => ({
+    [currentBulan]: initialDetail,
+  }));
+  const [budgetByMonth, setBudgetByMonth] = useState<
+    Record<number, BudgetWithUsage[]>
+  >(() => ({
+    [currentBulan]: initialBudget,
+  }));
+
   const totalIncome = initialBulanan.reduce((s, d) => s + d.total_income, 0);
   const totalExpense = initialBulanan.reduce((s, d) => s + d.total_expense, 0);
+  const selectedDetail = detailByMonth[selectedBulan] ?? initialDetail;
+  const selectedBudget = budgetByMonth[selectedBulan] ?? [];
+  const selectedMonth = initialBulanan.find((d) => d.bulan === selectedBulan);
 
-  const currentMonth = initialBulanan.find((d) => d.bulan === currentBulan);
+  async function handleSelectMonth(bulan: number) {
+    if (bulan === selectedBulan || isLoadingMonth) return;
+
+    const previousBulan = selectedBulan;
+    setSelectedBulan(bulan);
+
+    if (detailByMonth[bulan]) return;
+
+    setIsLoadingMonth(true);
+    try {
+      const [detail, budget] = await Promise.all([
+        getRekapDetailBulanan(bulan, currentTahun),
+        getBudgetWithUsage(bulan, currentTahun),
+      ]);
+
+      setDetailByMonth((prev) => ({ ...prev, [bulan]: detail }));
+      setBudgetByMonth((prev) => ({ ...prev, [bulan]: budget }));
+    } catch {
+      setSelectedBulan(previousBulan);
+      toast.error("Gagal memuat rincian rekap");
+    } finally {
+      setIsLoadingMonth(false);
+    }
+  }
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
@@ -37,23 +82,28 @@ export default function RekapPageClient({
       <PageHeader title="Rekap Keuangan" subtitle={`Analitik ${currentTahun}`} />
 
       <RekapSummaryCards
-        currentBulan={currentBulan}
+        currentBulan={selectedBulan}
         currentTahun={currentTahun}
-        currentMonth={currentMonth}
+        currentMonth={selectedMonth}
         totalIncome={totalIncome}
         totalExpense={totalExpense}
       />
 
-      <RekapBarSection data={initialBulanan} />
+      <RekapBarSection
+        data={initialBulanan}
+        selectedBulan={selectedBulan}
+        onSelectMonth={handleSelectMonth}
+        isLoading={isLoadingMonth}
+      />
 
-      <RekapKategoriSection
-        data={initialKategori}
-        currentBulan={currentBulan}
+      <RekapMonthlyDetailSection
+        detail={selectedDetail}
+        isLoading={isLoadingMonth}
       />
 
       <RekapBudgetSection
-        budgets={initialBudget}
-        currentBulan={currentBulan}
+        budgets={selectedBudget}
+        currentBulan={selectedBulan}
       />
     </div>
   );

@@ -17,6 +17,7 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 function revalidateHutangSaldoPaths() {
   revalidatePath('/hutang');
   revalidatePath('/rekening');
+  revalidatePath('/rekap');
 }
 
 async function getHutangById(

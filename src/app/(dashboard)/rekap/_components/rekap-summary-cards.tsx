@@ -26,22 +26,22 @@ export function RekapSummaryCards({
         {
           label: `Pemasukan ${BULAN_NAMES[currentBulan - 1]}`,
           value: currentMonth?.total_income ?? 0,
-          color: "text-emerald-500",
+          color: "text-semantic-up",
         },
         {
           label: `Pengeluaran ${BULAN_NAMES[currentBulan - 1]}`,
           value: currentMonth?.total_expense ?? 0,
-          color: "text-rose-500",
+          color: "text-semantic-down",
         },
         {
           label: `Total Pemasukan ${currentTahun}`,
           value: totalIncome,
-          color: "text-emerald-500",
+          color: "text-semantic-up",
         },
         {
           label: `Total Pengeluaran ${currentTahun}`,
           value: totalExpense,
-          color: "text-rose-500",
+          color: "text-semantic-down",
         },
       ].map((c) => (
         <div

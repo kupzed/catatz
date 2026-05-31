@@ -52,7 +52,7 @@ Initial data diambil dengan:
 - Jenis rekening harus salah satu dari `Tunai`, `Bank`, `E-Wallet`, atau `Investasi`.
 - `saldo_awal` diset saat create.
 - `saldo_saat_ini` diset dari `saldo_awal` saat create.
-- Saat edit saldo saat ini, action membuat transaksi `correction` dan mengubah saldo rekening.
+- Saat edit saldo saat ini, action membuat transaksi `correction`, mengubah saldo rekening, dan merevalidate `/rekap`.
 - Rekening yang `exclude_total = true` tidak dihitung dalam total saldo UI.
 - Rekening tidak bisa dihapus jika masih dipakai oleh transaksi, rekening tujuan transfer, hutang/piutang, cicilan, atau template transaksi berulang.
 - Server Action `deleteRekening` memeriksa pemakaian rekening sebelum delete.

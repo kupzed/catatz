@@ -320,7 +320,7 @@ Validasi: `rekeningEditSchema` dijalankan di sisi server sebelum proses apapun.
 
 Tabel: `rekening`, `transaksi`.
 
-Revalidate: `/rekening`, `/transaksi`.
+Revalidate: `/rekening`, `/transaksi`, `/rekap`.
 
 ### `deleteRekening`
 
@@ -378,18 +378,19 @@ Validasi server-side:
 - `hutangSchema` (Zod) dijalankan di `createHutang` dan `hutangSchema.partial()` di `updateHutang` sebelum query apapun.
 - `cicilanSchema` (Zod) dijalankan di `createCicilan` sebelum insert.
 
-Catatan: operasi cicilan mengandalkan trigger database untuk memperbarui `sisa_tagihan`, status, dan saldo rekening. UI pelunasan meminta user memilih rekening terlebih dahulu lalu mencatat cicilan sebesar sisa tagihan.
+Catatan: operasi cicilan mengandalkan trigger database untuk memperbarui `sisa_tagihan`, status, dan saldo rekening. UI pelunasan meminta user memilih rekening terlebih dahulu lalu mencatat cicilan sebesar sisa tagihan. Mutasi hutang/piutang dan cicilan merevalidate `/hutang`, `/rekening`, dan `/rekap`.
 
 ## Rekap Actions
 
 Lokasi: `src/actions/rekap-action.ts`
 
-| Action                             | Tujuan                                                                          | Tabel                             |
-| ---------------------------------- | ------------------------------------------------------------------------------- | --------------------------------- |
-| `getRekapBulanan(tahun)`           | Menghitung income, expense, dan net per bulan. Transfer dikecualikan.           | `transaksi`                       |
-| `getRekapKategori(bulan, tahun)`   | Breakdown expense per kategori untuk bulan tertentu.                            | `transaksi`, `kategori`           |
-| `getBudgetWithUsage(bulan, tahun)` | Mengambil budget dan menghitung pemakaian expense.                              | `budget`, `transaksi`, `kategori` |
-| `upsertBudget(...)`                | Membuat/mengubah budget berdasarkan unique `(user_id,kategori_id,bulan,tahun)`. | `budget`                          |
+| Action                                  | Tujuan                                                                                                           | Tabel                                        |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `getRekapBulanan(tahun)`                | Menghitung income, expense, dan net per bulan. Transfer dan correction tidak masuk total utama.                   | `transaksi`                                  |
+| `getRekapDetailBulanan(bulan, tahun)`   | Mengambil detail bulan: selisih utama, breakdown kategori/judul, koreksi saldo, aktivitas hutang/piutang, dan sisa aktif. | `transaksi`, `kategori`, `rekening`, `hutang`, `hutang_cicilan` |
+| `getRekapKategori(bulan, tahun)`        | Breakdown expense per kategori untuk bulan tertentu.                                                             | `transaksi`, `kategori`                      |
+| `getBudgetWithUsage(bulan, tahun)`      | Mengambil budget dan menghitung pemakaian expense.                                                               | `budget`, `transaksi`, `kategori`            |
+| `upsertBudget(...)`                     | Membuat/mengubah budget berdasarkan unique `(user_id,kategori_id,bulan,tahun)`.                                  | `budget`                                     |
 
 Catatan: `upsertBudget` belum terlihat dipakai oleh UI route yang ada.
 

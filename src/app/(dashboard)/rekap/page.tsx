@@ -1,5 +1,9 @@
 import type { Metadata } from 'next';
-import { getRekapBulanan, getRekapKategori, getBudgetWithUsage } from '@/actions/rekap-action';
+import {
+  getBudgetWithUsage,
+  getRekapBulanan,
+  getRekapDetailBulanan,
+} from '@/actions/rekap-action';
 import RekapPageClient from './_components/rekap-page-client';
 
 export const metadata: Metadata = {
@@ -12,16 +16,16 @@ export default async function RekapPage() {
   const bulan = now.getMonth() + 1;
   const tahun = now.getFullYear();
 
-  const [bulanan, kategori, budget] = await Promise.all([
+  const [bulanan, detail, budget] = await Promise.all([
     getRekapBulanan(tahun),
-    getRekapKategori(bulan, tahun),
+    getRekapDetailBulanan(bulan, tahun),
     getBudgetWithUsage(bulan, tahun),
   ]);
 
   return (
     <RekapPageClient
       initialBulanan={bulanan}
-      initialKategori={kategori}
+      initialDetail={detail}
       initialBudget={budget}
       currentBulan={bulan}
       currentTahun={tahun}
