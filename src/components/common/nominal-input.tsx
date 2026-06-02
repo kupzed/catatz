@@ -112,6 +112,7 @@ function parseDisplayValue(
   allowDecimal: boolean,
 ): { displayValue: string; value: number | null } {
   const decimalSeparator = locale === "en-US" ? "." : ",";
+  const thousandsSeparator = locale === "en-US" ? "," : ".";
   const sanitizedValue = rawValue.replace(/[^\d.,]/g, "");
 
   if (!sanitizedValue) {
@@ -131,17 +132,19 @@ function parseDisplayValue(
     };
   }
 
-  const dotIndex = sanitizedValue.lastIndexOf(".");
-  const commaIndex = sanitizedValue.lastIndexOf(",");
-  const decimalIndex = Math.max(dotIndex, commaIndex);
+  // Strip thousands separators first so they are never mistaken for decimals.
+  // e.g. id-ID: "12.345" → strip "." → "12345"; only "," is decimal.
+  // e.g. en-US: "12,345" → strip "," → "12345"; only "." is decimal.
+  const withoutThousands = sanitizedValue.replaceAll(thousandsSeparator, "");
+  const decimalIndex = withoutThousands.lastIndexOf(decimalSeparator);
   const hasDecimalSeparator = decimalIndex >= 0;
   const integerDigits = (
     hasDecimalSeparator
-      ? sanitizedValue.slice(0, decimalIndex)
-      : sanitizedValue
+      ? withoutThousands.slice(0, decimalIndex)
+      : withoutThousands
   ).replace(/\D/g, "");
   const decimalDigits = hasDecimalSeparator
-    ? sanitizedValue.slice(decimalIndex + 1).replace(/\D/g, "").slice(0, 2)
+    ? withoutThousands.slice(decimalIndex + 1).replace(/\D/g, "").slice(0, 2)
     : "";
   const integerValue = integerDigits ? Number(integerDigits) : 0;
   const displayValue = `${integerValue.toLocaleString(locale)}${
