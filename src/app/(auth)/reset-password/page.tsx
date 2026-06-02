@@ -20,9 +20,9 @@ export default function ResetPasswordPage() {
   }, [state]);
 
   return (
-    <div className="bg-surface-dark-elevated border border-white/10 rounded-card p-8">
-      <h2 className="text-xl font-normal text-white mb-1">Reset Password</h2>
-      <p className="text-white/50 text-sm mb-6">
+    <div className="bg-card dark:bg-surface-dark-elevated border border-border dark:border-white/10 rounded-card p-8">
+      <h2 className="text-xl font-normal text-foreground mb-1">Reset Password</h2>
+      <p className="text-muted-foreground text-sm mb-6">
         Buat password baru untuk akun Anda.
       </p>
 
@@ -30,12 +30,12 @@ export default function ResetPasswordPage() {
         <div className="space-y-2">
           <Label
             htmlFor="password"
-            className="text-white/70 text-sm font-medium"
+            className="text-muted-foreground text-sm font-medium"
           >
             Password Baru
           </Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
             <Input
               id="password"
               name="password"
@@ -43,12 +43,12 @@ export default function ResetPasswordPage() {
               placeholder="Minimal 8 karakter"
               required
               minLength={8}
-              className="pl-10 pr-10 bg-surface-dark border-white/15 text-white placeholder:text-white/30 focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="pl-10 pr-10 bg-background dark:bg-surface-dark border-border dark:border-white/15 text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4" />
@@ -62,12 +62,12 @@ export default function ResetPasswordPage() {
         <div className="space-y-2">
           <Label
             htmlFor="confirmPassword"
-            className="text-white/70 text-sm font-medium"
+            className="text-muted-foreground text-sm font-medium"
           >
             Konfirmasi Password Baru
           </Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
             <Input
               id="confirmPassword"
               name="confirmPassword"
@@ -75,12 +75,12 @@ export default function ResetPasswordPage() {
               placeholder="Ulangi password baru"
               required
               minLength={8}
-              className="pl-10 pr-10 bg-surface-dark border-white/15 text-white placeholder:text-white/30 focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="pl-10 pr-10 bg-background dark:bg-surface-dark border-border dark:border-white/15 text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
             <button
               type="button"
               onClick={() => setShowConfirm(!showConfirm)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
             >
               {showConfirm ? (
                 <EyeOff className="h-4 w-4" />

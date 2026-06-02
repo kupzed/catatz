@@ -69,10 +69,10 @@ export default function RegisterPage() {
 
   if (done) {
     return (
-      <div className="bg-surface-dark-elevated border border-white/10 rounded-card p-8 text-center">
+      <div className="bg-card dark:bg-surface-dark-elevated border border-border dark:border-white/10 rounded-card p-8 text-center">
         <div className="text-5xl mb-4">📬</div>
-        <h2 className="text-xl font-normal text-white mb-2">Cek Email Anda</h2>
-        <p className="text-white/50 text-sm">
+        <h2 className="text-xl font-normal text-foreground mb-2">Cek Email Anda</h2>
+        <p className="text-muted-foreground text-sm">
           Kami telah mengirim link verifikasi ke email Anda. Silakan klik link
           tersebut untuk mengaktifkan akun.
         </p>
@@ -86,9 +86,9 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="bg-surface-dark-elevated border border-white/10 rounded-card p-8">
-      <h2 className="text-xl font-normal text-white mb-1">Buat akun baru</h2>
-      <p className="text-white/50 text-sm mb-6">
+    <div className="bg-card dark:bg-surface-dark-elevated border border-border dark:border-white/10 rounded-card p-8">
+      <h2 className="text-xl font-normal text-foreground mb-1">Buat akun baru</h2>
+      <p className="text-muted-foreground text-sm mb-6">
         Mulai catat keuangan Anda hari ini
       </p>
 
@@ -97,7 +97,7 @@ export default function RegisterPage() {
         variant="outline"
         onClick={handleGoogleLogin}
         disabled={isGooglePending || loading}
-        className="w-full bg-surface-dark-elevated border border-white/15 text-white hover:bg-white/5 hover:text-white h-11 mb-6 rounded-full"
+        className="w-full bg-card dark:bg-surface-dark-elevated border border-border dark:border-white/15 text-foreground hover:bg-muted dark:hover:bg-white/5 h-11 mb-6 rounded-full"
       >
         {isGooglePending ? (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -123,10 +123,10 @@ export default function RegisterPage() {
 
       <div className="relative mb-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-white/10"></div>
+          <div className="w-full border-t border-border dark:border-white/10"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-surface-dark-elevated text-white/40">
+          <span className="px-2 bg-card dark:bg-surface-dark-elevated text-muted-foreground">
             Atau
           </span>
         </div>
@@ -134,35 +134,35 @@ export default function RegisterPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-white/70 text-sm font-medium">
+          <Label htmlFor="name" className="text-muted-foreground text-sm font-medium">
             Nama Lengkap
           </Label>
           <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
             <Input
               id="name"
               name="name"
               type="text"
               placeholder="Nama Anda"
               required
-              className="pl-10 bg-surface-dark border-white/15 text-white placeholder:text-white/30 focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="pl-10 bg-background dark:bg-surface-dark border-border dark:border-white/15 text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-white/70 text-sm font-medium">
+          <Label htmlFor="email" className="text-muted-foreground text-sm font-medium">
             Email
           </Label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
             <Input
               id="email"
               name="email"
               type="email"
               placeholder="nama@email.com"
               required
-              className="pl-10 bg-surface-dark border-white/15 text-white placeholder:text-white/30 focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="pl-10 bg-background dark:bg-surface-dark border-border dark:border-white/15 text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
         </div>
@@ -170,12 +170,12 @@ export default function RegisterPage() {
         <div className="space-y-2">
           <Label
             htmlFor="password"
-            className="text-white/70 text-sm font-medium"
+            className="text-muted-foreground text-sm font-medium"
           >
             Password
           </Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
             <Input
               id="password"
               name="password"
@@ -185,12 +185,12 @@ export default function RegisterPage() {
               required
               value={passwordValue}
               onChange={(e) => setPasswordValue(e.target.value)}
-              className="pl-10 pr-10 bg-surface-dark border-white/15 text-white placeholder:text-white/30 focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="pl-10 pr-10 bg-background dark:bg-surface-dark border-border dark:border-white/15 text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4" />
@@ -202,12 +202,12 @@ export default function RegisterPage() {
           {passwordValue.length > 0 && (
             <div className="space-y-1 mt-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-white/40">Kekuatan:</span>
+                <span className="text-muted-foreground">Kekuatan:</span>
                 <span className={`font-medium ${strength.textColor}`}>
                   {strength.label}
                 </span>
               </div>
-              <div className="h-1.5 w-full bg-surface-dark rounded-full overflow-hidden">
+              <div className="h-1.5 w-full bg-muted dark:bg-surface-dark rounded-full overflow-hidden">
                 <div
                   className={`h-full transition-all duration-300 ${strength.width} ${strength.color} rounded-full`}
                 />
@@ -232,7 +232,7 @@ export default function RegisterPage() {
         </Button>
       </form>
 
-      <p className="text-center text-sm text-white/40 mt-6">
+      <p className="text-center text-sm text-muted-foreground mt-6">
         Sudah punya akun?{" "}
         <Link
           href="/login"

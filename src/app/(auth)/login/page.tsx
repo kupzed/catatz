@@ -58,18 +58,18 @@ function LoginForm() {
   }, [message]);
 
   return (
-    <div className="bg-surface-dark-elevated border border-white/10 rounded-card p-8">
-      <h2 className="text-xl font-normal text-white mb-1">
+    <div className="bg-card dark:bg-surface-dark-elevated border border-border dark:border-white/10 rounded-card p-8">
+      <h2 className="text-xl font-normal text-foreground mb-1">
         Selamat datang kembali
       </h2>
-      <p className="text-white/50 text-sm mb-6">Masuk ke akun CatatZ Anda</p>
+      <p className="text-muted-foreground text-sm mb-6">Masuk ke akun CatatZ Anda</p>
 
       <Button
         type="button"
         variant="outline"
         onClick={handleGoogleLogin}
         disabled={isGooglePending || isPending}
-        className="w-full bg-surface-dark-elevated border border-white/15 text-white hover:bg-white/5 hover:text-white h-11 mb-6 rounded-full"
+        className="w-full bg-card dark:bg-surface-dark-elevated border border-border dark:border-white/15 text-foreground hover:bg-muted dark:hover:bg-white/5 h-11 mb-6 rounded-full"
       >
         {isGooglePending ? (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -95,10 +95,10 @@ function LoginForm() {
 
       <div className="relative mb-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-white/10"></div>
+          <div className="w-full border-t border-border dark:border-white/10"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-surface-dark-elevated text-white/40">
+          <span className="px-2 bg-card dark:bg-surface-dark-elevated text-muted-foreground">
             Atau
           </span>
         </div>
@@ -106,18 +106,18 @@ function LoginForm() {
 
       <form action={formAction} method="POST" className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-white/70 text-sm font-medium">
+          <Label htmlFor="email" className="text-muted-foreground text-sm font-medium">
             Email
           </Label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
             <Input
               id="email"
               name="email"
               type="email"
               placeholder="nama@email.com"
               required
-              className="pl-10 bg-surface-dark border-white/15 text-white placeholder:text-white/30 focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="pl-10 bg-background dark:bg-surface-dark border-border dark:border-white/15 text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
         </div>
@@ -125,24 +125,24 @@ function LoginForm() {
         <div className="space-y-2">
           <Label
             htmlFor="password"
-            className="text-white/70 text-sm font-medium"
+            className="text-muted-foreground text-sm font-medium"
           >
             Password
           </Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
             <Input
               id="password"
               name="password"
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               required
-              className="pl-10 pr-10 bg-surface-dark border-white/15 text-white placeholder:text-white/30 focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="pl-10 pr-10 bg-background dark:bg-surface-dark border-border dark:border-white/15 text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4" />
@@ -177,7 +177,7 @@ function LoginForm() {
         </Button>
       </form>
 
-      <p className="text-center text-sm text-white/40 mt-6">
+      <p className="text-center text-sm text-muted-foreground mt-6">
         Belum punya akun?{" "}
         <Link
           href="/register"
@@ -194,7 +194,7 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="bg-surface-dark-elevated border border-white/10 rounded-card p-8 flex items-center justify-center min-h-[400px]">
+        <div className="bg-card dark:bg-surface-dark-elevated border border-border dark:border-white/10 rounded-card p-8 flex items-center justify-center min-h-[400px]">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       }

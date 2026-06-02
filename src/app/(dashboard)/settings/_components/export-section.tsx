@@ -152,16 +152,16 @@ export function ExportSection() {
             PDF dan XLSX berisi ringkasan keuangan. CSV berisi rincian
             transaksi untuk import data.
           </p>
-          <div className="grid w-full grid-cols-1 gap-2 sm:w-auto sm:grid-cols-3">
+          <div className="flex w-full flex-wrap gap-2 sm:w-auto">
             <Button
               onClick={() => handleExport("pdf")}
               disabled={loadingFormat !== null}
-              className="w-full gap-2 rounded-full h-11"
+              className="min-w-[130px] flex-1 gap-2 rounded-full h-11 whitespace-nowrap sm:flex-none"
             >
               {loadingFormat === "pdf" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
               ) : (
-                <FileText className="h-4 w-4" />
+                <FileText className="h-4 w-4 shrink-0" />
               )}
               {loadingFormat === "pdf" ? "Membuat..." : "Export PDF"}
             </Button>
@@ -169,12 +169,12 @@ export function ExportSection() {
               variant="secondary"
               onClick={() => handleExport("xlsx")}
               disabled={loadingFormat !== null}
-              className="w-full gap-2 rounded-full h-11"
+              className="min-w-[130px] flex-1 gap-2 rounded-full h-11 whitespace-nowrap sm:flex-none"
             >
               {loadingFormat === "xlsx" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
               ) : (
-                <FileSpreadsheet className="h-4 w-4" />
+                <FileSpreadsheet className="h-4 w-4 shrink-0" />
               )}
               {loadingFormat === "xlsx" ? "Membuat..." : "Export XLSX"}
             </Button>
@@ -182,12 +182,12 @@ export function ExportSection() {
               variant="secondary"
               onClick={() => handleExport("csv")}
               disabled={loadingFormat !== null}
-              className="w-full gap-2 rounded-full h-11"
+              className="min-w-[130px] flex-1 gap-2 rounded-full h-11 whitespace-nowrap sm:flex-none"
             >
               {loadingFormat === "csv" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
               ) : (
-                <Download className="h-4 w-4" />
+                <Download className="h-4 w-4 shrink-0" />
               )}
               {loadingFormat === "csv" ? "Membuat..." : "Export CSV"}
             </Button>
