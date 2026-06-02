@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import type { Hutang } from "@/types/hutang";
 import type { Rekening } from "@/types/rekening";
-import { currentTime, formatRupiah, todayISODate } from "@/lib/utils";
+import { currentTime, todayISODate } from "@/lib/utils";
 import { createCicilan, deleteHutang } from "@/actions/hutang-action";
 import { toast } from "sonner";
 import {
@@ -26,11 +26,13 @@ import {
 } from "@/hooks/use-hutang-cicilan";
 import { HutangCicilanDetail } from "./hutang-cicilan-detail";
 import { HutangGroup } from "./hutang-group";
+import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 type Props = { initialHutang: Hutang[]; rekening: Rekening[] };
 type LunasTarget = Hutang & { lunasRekeningId: string };
 
 export default function HutangPageClient({ initialHutang, rekening }: Props) {
+  const { formatRupiah } = useSystemPreferences();
   const [hutang, setHutang] = useState(initialHutang);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editData, setEditData] = useState<Hutang | null>(null);

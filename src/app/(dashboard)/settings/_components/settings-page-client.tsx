@@ -10,7 +10,7 @@ import { PageHeader } from "@/components/common";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-import type { UserPreferences } from "@/actions/preference-action";
+import type { UserPreferences } from "@/lib/user-preferences";
 
 type Profile = {
   id: string;

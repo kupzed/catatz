@@ -6,7 +6,6 @@ import {
   emptyEditDraft,
   type UseHutangCicilanReturn,
 } from "@/hooks/use-hutang-cicilan";
-import { formatRupiah } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { HutangCicilanItem } from "./hutang-cicilan-item";
+import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 export type HutangCicilanDetailProps = {
   hutang: Hutang | null;
@@ -39,6 +39,7 @@ export function HutangCicilanDetail({
   onOpenChange,
   cicilanHook,
 }: HutangCicilanDetailProps) {
+  const { formatRupiah } = useSystemPreferences();
   const cicilan = sortCicilan(hutang?.cicilan);
 
   return (

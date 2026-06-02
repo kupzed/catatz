@@ -2,8 +2,8 @@
 
 import type { RekapBulanan } from "@/actions/rekap-action";
 import { BULAN_NAMES } from "@/constants/rekap";
-import { formatRupiah } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 export type RekapSummaryCardsProps = {
   currentBulan: number;
@@ -20,6 +20,8 @@ export function RekapSummaryCards({
   totalIncome,
   totalExpense,
 }: RekapSummaryCardsProps) {
+  const { formatRupiah } = useSystemPreferences();
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {[

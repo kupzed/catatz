@@ -1,5 +1,8 @@
+"use client";
+
 import React from "react";
 import { Input } from "@/components/ui/input";
+import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 interface NominalInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   value: number | string;
@@ -12,7 +15,8 @@ export function NominalInput({
   className,
   ...props
 }: NominalInputProps) {
-  const displayValue = formatDisplayValue(value);
+  const { preferences } = useSystemPreferences();
+  const displayValue = formatDisplayValue(value, preferences.number_format);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let rawValue = e.target.value;
@@ -41,7 +45,7 @@ export function NominalInput({
   );
 }
 
-function formatDisplayValue(value: number | string) {
+function formatDisplayValue(value: number | string, locale: string) {
   if (value === "") {
     return "";
   }
@@ -55,5 +59,5 @@ function formatDisplayValue(value: number | string) {
     return "";
   }
 
-  return parseInt(numStr, 10).toLocaleString("id-ID");
+  return parseInt(numStr, 10).toLocaleString(locale);
 }

@@ -35,7 +35,8 @@ import { Switch } from "@/components/ui/switch";
 import { NominalInput } from "@/components/common/nominal-input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Loader2, Info } from "lucide-react";
-import { cn, formatRupiah } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 const WARNA_PRESETS = [
   "#6366f1",
@@ -283,6 +284,7 @@ function EditForm({
   onUpdated: (r: Rekening) => void;
   onClose: () => void;
 }) {
+  const { formatRupiah } = useSystemPreferences();
   const [submitting, setSubmitting] = useState(false);
   const {
     control,

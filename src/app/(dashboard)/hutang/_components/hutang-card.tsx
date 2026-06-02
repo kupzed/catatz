@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import type { Hutang } from "@/types/hutang";
 import type { Rekening } from "@/types/rekening";
 import { STATUS_BADGE } from "@/constants/hutang";
-import { formatRupiah, formatTanggal, percentage } from "@/lib/utils";
+import { percentage } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
+import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 export type HutangCardProps = {
   hutang: Hutang;
@@ -49,6 +50,7 @@ export function HutangCard({
   onDelete,
   children,
 }: HutangCardProps) {
+  const { formatRupiah, formatTanggal, formatWaktu } = useSystemPreferences();
   const totalPinjaman = Number(hutang.total_pinjaman);
   const sisaTagihan = Number(hutang.sisa_tagihan);
   const pct = percentage(totalPinjaman - sisaTagihan, totalPinjaman);
@@ -77,6 +79,7 @@ export function HutangCard({
             </div>
             <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-muted-foreground">
               <span>Total: {formatRupiah(totalPinjaman)}</span>
+              {hutang.waktu && <span>Waktu: {formatWaktu(hutang.waktu)}</span>}
               <span>
                 Rekening: {getRekeningLabel(rekening, hutang.rekening_id)}
               </span>

@@ -2,7 +2,14 @@
 
 import type { ExportTransaksi, ExportSummary } from "@/actions/export-action";
 import { format } from "date-fns";
-import { id } from "date-fns/locale";
+import {
+  DEFAULT_USER_PREFERENCES,
+  type UserPreferences,
+} from "@/lib/user-preferences";
+import {
+  formatRupiah as formatRupiahValue,
+  formatTanggal,
+} from "@/lib/utils";
 
 const COLORS = {
   indigo: [79, 70, 229] as [number, number, number], // #4F46E5
@@ -37,6 +44,7 @@ export async function generatePDF(
   transaksi: ExportTransaksi[],
   summary: ExportSummary,
   userName: string = "Pengguna",
+  preferences: UserPreferences = DEFAULT_USER_PREFERENCES,
 ): Promise<void> {
   const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
     import("jspdf"),
@@ -125,7 +133,7 @@ export async function generatePDF(
     doc.setFontSize(8);
     doc.setGState(doc.GState({ opacity: 0.7 }));
     doc.text(
-      `Digenerate: ${format(new Date(), "dd MMMM yyyy", { locale: id })}`,
+      `Digenerate: ${formatTanggal(new Date().toISOString(), undefined, preferences)}`,
       pageW - margin,
       20,
       { align: "right" },
@@ -134,11 +142,7 @@ export async function generatePDF(
   }
 
   function formatRupiah(value: number): string {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      maximumFractionDigits: 0,
-    }).format(value);
+    return formatRupiahValue(value, false, preferences);
   }
 
   let y = 40;

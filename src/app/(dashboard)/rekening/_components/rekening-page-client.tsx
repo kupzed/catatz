@@ -6,7 +6,6 @@ import type {
   Rekening,
   RekeningUsageCounts,
 } from "@/types/rekening";
-import { formatRupiah } from "@/lib/utils";
 import { deleteRekening, toggleExcludeTotal } from "@/actions/rekening-action";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -25,6 +24,7 @@ import RekeningDialog from "./rekening-dialog";
 import { cn } from "@/lib/utils";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState, PageHeader } from "@/components/common";
+import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 type Props = {
   initialRekening: Rekening[];
@@ -70,6 +70,7 @@ export default function RekeningPageClient({
   initialRekening,
   initialUsageCounts,
 }: Props) {
+  const { formatRupiah } = useSystemPreferences();
   const [rekening, setRekening] = useState(initialRekening);
   const [usageCounts, setUsageCounts] = useState(initialUsageCounts);
   const [dialogOpen, setDialogOpen] = useState(false);

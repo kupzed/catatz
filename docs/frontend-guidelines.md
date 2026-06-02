@@ -211,6 +211,12 @@ Setiap halaman dashboard mengikuti struktur konsisten berikut:
   placeholder="Pilih rekening"
   includeNone={true} // opsional: jika true, menyertakan pilihan "Tanpa rekening"
 />
+
+// NominalInput mengikuti separator ribuan dari SystemPreferenceProvider
+<NominalInput value={value} onValueChange={onValueChange} />
+
+// TimeInput mengikuti preferensi 24h/12h dan tetap mengeluarkan value HH:mm
+<TimeInput value={value} onValueChange={onValueChange} />
 ```
 
 ## Aturan Form
@@ -266,14 +272,29 @@ Gunakan `Skeleton` untuk loading route/data yang membutuhkan waktu.
 | Tablet | 640–1024px | 2-column grid, font medium |
 | Desktop | > 1024px | Full layout, sidebar expanded |
 
-## Format Angka dan Tanggal
+## Format Angka, Tanggal, dan Waktu
 
-- Mata uang gunakan Rupiah (`IDR`) via `formatRupiah`.
-- Locale tanggal memakai Bahasa Indonesia via `date-fns/locale/id`.
+- Mata uang tetap Rupiah (`IDR`).
+- Preferensi user didefinisikan di `src/lib/user-preferences.ts`.
+- Dashboard memakai `SystemPreferenceProvider` dari `src/providers/system-preference-provider.tsx`.
+- Di Client Component dashboard, ambil formatter dari `useSystemPreferences()` agar tampilan mengikuti `number_format`, `date_format`, `show_decimal_places`, dan `time_format`.
+- Di Server Action/generator file, panggil helper `src/lib/utils.ts` dengan argumen `preferences`.
+- `formatRupiah(value, compact?, preferences?)`:
+  - Tanpa `preferences`, default tetap `id-ID` tanpa 2 angka desimal.
+  - Nominal penuh mengikuti `number_format` dan `show_decimal_places`.
+  - Nominal compact tetap ringkas dan tidak dipaksa 2 angka desimal.
+- `formatNumber(value, preferences?)` dipakai untuk export CSV ketika angka harus tanpa simbol mata uang.
+- `formatTanggal(date, fmt?, preferences?)` memilih locale `id-ID` atau `en-US`.
+- `formatWaktu(value, preferences?)` memilih tampilan `14:30` atau `02:30 PM`.
+- `TimeInput` di `src/components/common/time-input.tsx` wajib dipakai untuk input waktu transaksi, hutang, dan cicilan. Mode `12h` hanya mengubah UI; value keluar tetap `HH:mm` untuk database.
+- `NominalInput` di `src/components/common/nominal-input.tsx` mengikuti separator ribuan dari `number_format`, tetapi tetap mengirim angka normal ke form/action.
 - Helper utama ada di `src/lib/utils.ts`:
   - `formatRupiah`
+  - `formatNumber`
+  - `getRupiahSpreadsheetFormat`
   - `parseNominal`
   - `formatTanggal`
+  - `formatWaktu`
   - `todayISODate`
   - `currentTime`
   - `percentage`

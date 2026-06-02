@@ -2,8 +2,13 @@
 
 import { createClient } from "@/configs/supabase/server";
 import type { ActionResult } from "@/types/general";
-import { format, parseISO } from "date-fns";
-import { id } from "date-fns/locale";
+import { formatTanggal, formatWaktu } from "@/lib/utils";
+import {
+  DEFAULT_USER_PREFERENCES,
+  USER_PREFERENCE_SELECT,
+  normalizeUserPreferences,
+  type UserPreferences,
+} from "@/lib/user-preferences";
 
 export type ExportTransaksi = {
   tanggal: string;
@@ -75,6 +80,7 @@ export async function getExportData(filter?: {
     transaksi: ExportTransaksi[];
     summary: ExportSummary;
     userName: string;
+    preferences: UserPreferences;
   }>
 > {
   const supabase = await createClient();
@@ -89,7 +95,18 @@ export async function getExportData(filter?: {
     .eq("id", user.id)
     .single();
 
-  const userName = profile?.name || user.user_metadata?.name || user.email || "Pengguna";
+  const userName =
+    profile?.name || user.user_metadata?.name || user.email || "Pengguna";
+
+  const { data: preferenceRow } = await supabase
+    .from("user_preferences")
+    .select(USER_PREFERENCE_SELECT)
+    .eq("user_id", user.id)
+    .single();
+
+  const preferences = preferenceRow
+    ? normalizeUserPreferences(preferenceRow)
+    : DEFAULT_USER_PREFERENCES;
 
   let query = supabase
     .from("transaksi")
@@ -131,11 +148,7 @@ export async function getExportData(filter?: {
   };
 
   const formatDate = (dateString: string) => {
-    try {
-      return format(parseISO(dateString), "dd MMM yyyy", { locale: id });
-    } catch {
-      return dateString;
-    }
+    return formatTanggal(dateString, "dd MMM yyyy", preferences);
   };
 
   const rows = (tData ?? []) as ExportTransaksiRow[];
@@ -147,7 +160,7 @@ export async function getExportData(filter?: {
 
     return {
       tanggal: formatDate(t.tanggal),
-      waktu: t.waktu ? t.waktu.substring(0, 5) : "-",
+      waktu: t.waktu ? formatWaktu(t.waktu, preferences) : "-",
       tipe: formatTipe(t.tipe),
       judul: t.judul ?? "-",
       nominal: Number(t.nominal),
@@ -182,11 +195,11 @@ export async function getExportData(filter?: {
 
   let periode = "Semua Waktu";
   if (filter?.dari && filter?.sampai) {
-    periode = `${format(parseISO(filter.dari), "dd MMM yyyy", { locale: id })} – ${format(parseISO(filter.sampai), "dd MMM yyyy", { locale: id })}`;
+    periode = `${formatDate(filter.dari)} - ${formatDate(filter.sampai)}`;
   } else if (filter?.dari) {
-    periode = `Sejak ${format(parseISO(filter.dari), "dd MMM yyyy", { locale: id })}`;
+    periode = `Sejak ${formatDate(filter.dari)}`;
   } else if (filter?.sampai) {
-    periode = `Hingga ${format(parseISO(filter.sampai), "dd MMM yyyy", { locale: id })}`;
+    periode = `Hingga ${formatDate(filter.sampai)}`;
   }
 
   let katQuery = supabase
@@ -262,7 +275,7 @@ export async function getExportData(filter?: {
     kategori_breakdown,
   };
 
-  return { success: true, data: { transaksi, summary, userName } };
+  return { success: true, data: { transaksi, summary, userName, preferences } };
 }
 
 export async function getExportCount(): Promise<

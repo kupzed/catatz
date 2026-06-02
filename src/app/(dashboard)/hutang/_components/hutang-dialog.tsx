@@ -14,6 +14,7 @@ import type { Rekening } from "@/types/rekening";
 import { todayISODate, currentTime } from "@/lib/utils";
 import { RekeningSelect } from "@/components/common/rekening-select";
 import { NominalInput } from "@/components/common/nominal-input";
+import { TimeInput } from "@/components/common/time-input";
 import {
   Dialog,
   DialogContent,
@@ -193,7 +194,7 @@ export default function HutangDialog({
 
           {/* Dates & Waktu */}
           <div className="flex flex-col gap-3">
-            <div className="flex flex-row items-start gap-3">
+            <div className="grid gap-3 sm:grid-cols-[1fr_14rem]">
               <div className="flex-1 space-y-1.5 min-w-0">
                 <Label htmlFor="tgl-mulai">Tanggal Mulai</Label>
                 <Input
@@ -206,15 +207,20 @@ export default function HutangDialog({
                   <p className="text-xs text-rose-500 mt-1">
                     {errors.tanggal_mulai.message}
                   </p>
-                )}
-              </div>
-              <div className="w-28 space-y-1.5 shrink-0">
+                  )}
+                </div>
+              <div className="space-y-1.5">
                 <Label htmlFor="waktu">Waktu</Label>
-                <Input
-                  id="waktu"
-                  type="time"
-                  {...register("waktu")}
-                  className="w-full appearance-none bg-background border-input"
+                <Controller
+                  control={control}
+                  name="waktu"
+                  render={({ field }) => (
+                    <TimeInput
+                      id="waktu"
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    />
+                  )}
                 />
               </div>
             </div>

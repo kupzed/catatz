@@ -4,14 +4,15 @@ import type { Dispatch, SetStateAction } from "react";
 import type { Hutang, HutangCicilan } from "@/types/hutang";
 import type { Rekening } from "@/types/rekening";
 import type { CicilanDraft } from "@/hooks/use-hutang-cicilan";
-import { formatRupiah, formatTanggal } from "@/lib/utils";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { NominalInput } from "@/components/common/nominal-input";
 import { RekeningSelect } from "@/components/common/rekening-select";
+import { TimeInput } from "@/components/common/time-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Pencil, Save, Trash2, X } from "lucide-react";
+import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 export type HutangCicilanItemProps = {
   cicilan: HutangCicilan;
@@ -46,6 +47,8 @@ export function HutangCicilanItem({
   onDelete,
   isLoading,
 }: HutangCicilanItemProps) {
+  const { formatRupiah, formatTanggal, formatWaktu } = useSystemPreferences();
+
   return (
     <div className="rounded-lg border p-3 space-y-3">
       {isEditing ? (
@@ -96,16 +99,14 @@ export function HutangCicilanItem({
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Waktu</Label>
-              <Input
-                type="time"
+              <TimeInput
                 value={editDraft.waktu}
-                onChange={(event) =>
+                onValueChange={(value) =>
                   onEditDraftChange((prev) => ({
                     ...prev,
-                    waktu: event.target.value,
+                    waktu: value,
                   }))
                 }
-                className="w-full appearance-none bg-background border-input"
               />
             </div>
           </div>
@@ -152,7 +153,7 @@ export function HutangCicilanItem({
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {formatTanggal(cicilan.tanggal, "d MMM yyyy")}
-                {cicilan.waktu ? `, ${cicilan.waktu.substring(0, 5)}` : ""}
+                {cicilan.waktu ? `, ${formatWaktu(cicilan.waktu)}` : ""}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5 truncate">
                 {getRekeningLabel(rekening, cicilan.rekening_id)}

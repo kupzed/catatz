@@ -3,9 +3,9 @@
 import { lazy, Suspense } from "react";
 import type { RekapKategori } from "@/actions/rekap-action";
 import { BULAN_NAMES } from "@/constants/rekap";
-import { formatRupiah } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 const RekapPieChart = lazy(() =>
   import("./rekap-charts").then((module) => ({
@@ -22,6 +22,8 @@ export function RekapKategoriSection({
   data,
   currentBulan,
 }: RekapKategoriSectionProps) {
+  const { formatRupiah } = useSystemPreferences();
+
   if (data.length === 0) return null;
 
   return (

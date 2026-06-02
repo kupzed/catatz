@@ -16,8 +16,9 @@ import {
   subWeeks,
   subYears,
 } from "date-fns";
-import { id as idLocale } from "date-fns/locale";
+import { enUS, id as idLocale } from "date-fns/locale";
 import type { TransaksiFilter } from "@/types/transaksi";
+import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 export type CustomDateStep = "dari" | "sampai";
 export type DateNavigationFilter = Pick<TransaksiFilter, "dari" | "sampai">;
@@ -40,6 +41,7 @@ export type UseDateNavigationReturn = {
 
 /** Mengelola preset, label, dan perpindahan tanggal untuk halaman transaksi. */
 export function useDateNavigation(): UseDateNavigationReturn {
+  const { preferences } = useSystemPreferences();
   const [preset, setPreset] = useState<string>("hari");
   const [baseDate, setBaseDate] = useState<Date>(new Date());
   const [dateFilter, setDateFilter] = useState<DateNavigationFilter>({});
@@ -87,30 +89,39 @@ export function useDateNavigation(): UseDateNavigationReturn {
   }
 
   const dateLabel = useMemo(() => {
+    const locale = preferences.date_format === "en-US" ? enUS : idLocale;
+
     if (preset === "all") return "Semua Waktu";
     if (preset === "hari")
-      return format(baseDate, "EEEE, dd MMM yyyy", { locale: idLocale });
+      return format(baseDate, "EEEE, dd MMM yyyy", { locale });
     if (preset === "minggu") {
       const start = startOfWeek(baseDate, { weekStartsOn: 1 });
       const end = endOfWeek(baseDate, { weekStartsOn: 1 });
-      return `${format(start, "dd MMM", { locale: idLocale })} - ${format(end, "dd MMM yyyy", { locale: idLocale })}`;
+      return `${format(start, "dd MMM", { locale })} - ${format(end, "dd MMM yyyy", { locale })}`;
     }
     if (preset === "bulan")
-      return format(baseDate, "MMMM yyyy", { locale: idLocale });
+      return format(baseDate, "MMMM yyyy", { locale });
     if (preset === "tahun")
-      return format(baseDate, "yyyy", { locale: idLocale });
+      return format(baseDate, "yyyy", { locale });
     if (preset === "custom") {
       if (dateFilter.dari && dateFilter.sampai) {
-        return `${format(parseISO(dateFilter.dari), "dd MMM yy", { locale: idLocale })} - ${format(parseISO(dateFilter.sampai), "dd MMM yyyy", { locale: idLocale })}`;
+        return `${format(parseISO(dateFilter.dari), "dd MMM yy", { locale })} - ${format(parseISO(dateFilter.sampai), "dd MMM yyyy", { locale })}`;
       } else if (dateFilter.dari) {
         if (customStep === "sampai")
-          return `${format(parseISO(dateFilter.dari), "dd MMM", { locale: idLocale })} \u2192 Pilih akhir`;
-        return `Mulai ${format(parseISO(dateFilter.dari), "dd MMM yyyy", { locale: idLocale })}`;
+          return `${format(parseISO(dateFilter.dari), "dd MMM", { locale })} \u2192 Pilih akhir`;
+        return `Mulai ${format(parseISO(dateFilter.dari), "dd MMM yyyy", { locale })}`;
       }
       return "Klik untuk pilih rentang";
     }
     return "Rentang Waktu";
-  }, [baseDate, preset, dateFilter.dari, dateFilter.sampai, customStep]);
+  }, [
+    baseDate,
+    preset,
+    dateFilter.dari,
+    dateFilter.sampai,
+    customStep,
+    preferences.date_format,
+  ]);
 
   const canNavigateDate = preset !== "all" && preset !== "custom";
 

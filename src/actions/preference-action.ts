@@ -3,14 +3,14 @@
 import { createClient } from '@/configs/supabase/server';
 import { revalidatePath } from 'next/cache';
 import type { ActionResult } from '@/types/general';
-
-export type UserPreferences = {
-  theme: string;
-  currency: string;
-  date_format: string;
-  number_format: string;
-  default_landing_page: string;
-};
+import {
+  DEFAULT_USER_PREFERENCES,
+  USER_PREFERENCE_SELECT,
+  normalizeUserPreferences,
+  validateUserPreferenceUpdate,
+  type UserPreferences,
+  type UserPreferenceUpdate,
+} from '@/lib/user-preferences';
 
 export async function getUserPreferences(): Promise<ActionResult<UserPreferences>> {
   const supabase = await createClient();
@@ -22,7 +22,7 @@ export async function getUserPreferences(): Promise<ActionResult<UserPreferences
 
   const { data, error } = await supabase
     .from('user_preferences')
-    .select('theme, currency, date_format, number_format, default_landing_page')
+    .select(USER_PREFERENCE_SELECT)
     .eq('user_id', user.id)
     .single();
 
@@ -31,23 +31,16 @@ export async function getUserPreferences(): Promise<ActionResult<UserPreferences
   }
 
   if (!data) {
-    // Return default preferences if not found
     return {
       success: true,
-      data: {
-        theme: 'system',
-        currency: 'IDR',
-        date_format: 'id-ID',
-        number_format: 'id-ID',
-        default_landing_page: '/transaksi',
-      }
+      data: DEFAULT_USER_PREFERENCES
     };
   }
 
-  return { success: true, data };
+  return { success: true, data: normalizeUserPreferences(data) };
 }
 
-export async function updateUserPreferences(values: Partial<UserPreferences>): Promise<ActionResult<UserPreferences>> {
+export async function updateUserPreferences(values: UserPreferenceUpdate): Promise<ActionResult<UserPreferences>> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
@@ -55,8 +48,13 @@ export async function updateUserPreferences(values: Partial<UserPreferences>): P
     return { success: false, error: 'Tidak terautentikasi' };
   }
 
+  const validation = validateUserPreferenceUpdate(values);
+  if (!validation.success) {
+    return { success: false, error: validation.error };
+  }
+
   const payload = {
-    ...values,
+    ...validation.data,
     user_id: user.id,
     updated_at: new Date().toISOString()
   };
@@ -64,7 +62,7 @@ export async function updateUserPreferences(values: Partial<UserPreferences>): P
   const { data, error } = await supabase
     .from('user_preferences')
     .upsert(payload, { onConflict: 'user_id' })
-    .select('theme, currency, date_format, number_format, default_landing_page')
+    .select(USER_PREFERENCE_SELECT)
     .single();
 
   if (error) {
@@ -72,7 +70,11 @@ export async function updateUserPreferences(values: Partial<UserPreferences>): P
   }
 
   revalidatePath('/settings');
+  revalidatePath('/transaksi');
+  revalidatePath('/rekening');
+  revalidatePath('/rekap');
+  revalidatePath('/hutang');
   revalidatePath('/'); // Revalidate root for potential landing page redirect
 
-  return { success: true, data };
+  return { success: true, data: normalizeUserPreferences(data) };
 }

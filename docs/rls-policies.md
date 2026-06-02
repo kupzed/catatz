@@ -18,6 +18,16 @@
 
 Catatan: Tidak ada policy INSERT untuk user biasa karena profile dibuat oleh trigger `handle_new_user`.
 
+## Tabel `user_preferences`
+
+| Action | Policy Name | Rule | Description |
+|---|---|---|---|
+| SELECT | `user_preferences: select own` | `auth.uid() = user_id` | User hanya membaca preferensi sendiri. |
+| INSERT | `user_preferences: insert own` | `WITH CHECK auth.uid() = user_id` | User hanya membuat preferensi untuk dirinya sendiri. |
+| UPDATE | `user_preferences: update own` | `auth.uid() = user_id` | User hanya mengubah preferensi sendiri. |
+
+Catatan: Migration `013-extend-user-preferences-formatting.sql` hanya menambah kolom formatting pada table ini; policy RLS lama tetap mencakup kolom baru.
+
 ## Tabel `rekening`
 
 | Action | Policy Name | Rule | Description |

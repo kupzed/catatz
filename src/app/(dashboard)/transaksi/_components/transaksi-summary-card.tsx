@@ -1,9 +1,9 @@
 "use client";
 
-import { formatRupiah } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 export type TransaksiSummaryCardProps = {
   dateLabel: string;
@@ -28,6 +28,8 @@ export function TransaksiSummaryCard({
   totalIncome,
   totalExpense,
 }: TransaksiSummaryCardProps) {
+  const { formatRupiah } = useSystemPreferences();
+
   return (
     <div className="rounded-card border border-hairline bg-surface-dark dark:bg-surface-dark-elevated text-white overflow-hidden ring-1 ring-white/5">
       {/* Navigator Header */}

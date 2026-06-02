@@ -18,7 +18,7 @@ import type {
 } from "@/actions/rekap-action";
 import { BULAN_NAMES } from "@/constants/rekap";
 import { TIPE_CONFIG } from "@/constants/transaksi";
-import { cn, formatRupiah, formatTanggal } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 type BreakdownMode = "kategori" | "judul";
 type RekapMonthlyDetailSectionProps = {
@@ -40,9 +41,12 @@ type RekapMonthlyDetailSectionProps = {
   isLoading?: boolean;
 };
 
-function formatSignedRupiah(value: number) {
-  if (value === 0) return formatRupiah(0);
-  return `${value > 0 ? "+" : "-"}${formatRupiah(Math.abs(value))}`;
+function formatSignedRupiah(
+  value: number,
+  formatter: (value: number) => string,
+) {
+  if (value === 0) return formatter(0);
+  return `${value > 0 ? "+" : "-"}${formatter(Math.abs(value))}`;
 }
 
 function valueColor(value: number) {
@@ -62,6 +66,8 @@ function DetailMetric({
   className?: string;
   signed?: boolean;
 }) {
+  const { formatRupiah } = useSystemPreferences();
+
   return (
     <div className="flex items-center justify-between gap-4 border-b border-hairline py-3 last:border-b-0">
       <span className="min-w-0 text-sm text-muted-foreground">{label}</span>
@@ -71,7 +77,7 @@ function DetailMetric({
           className,
         )}
       >
-        {signed ? formatSignedRupiah(value) : formatRupiah(value)}
+        {signed ? formatSignedRupiah(value, formatRupiah) : formatRupiah(value)}
       </span>
     </div>
   );
@@ -143,9 +149,11 @@ function MonthSelector({
 }
 
 function DetailListItem({ item }: { item: RekapDetailTransaksi }) {
+  const { formatRupiah, formatTanggal, formatWaktu } = useSystemPreferences();
   const cfg = TIPE_CONFIG[item.tipe];
   const TipeIcon = cfg.icon;
   const displayName = item.judul || item.catatan || cfg.label;
+  const waktuLabel = formatWaktu(item.waktu);
 
   return (
     <div className="flex flex-col gap-3 border-t border-hairline bg-transparent p-3 transition-colors hover:bg-surface-soft sm:flex-row sm:items-center sm:p-4">
@@ -171,6 +179,7 @@ function DetailListItem({ item }: { item: RekapDetailTransaksi }) {
           </div>
           <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
             <span>{formatTanggal(item.tanggal, "d MMM yyyy")}</span>
+            {waktuLabel && <span>- {waktuLabel}</span>}
             {item.rekening && (
               <span className="truncate">- {item.rekening.nama}</span>
             )}
@@ -233,6 +242,8 @@ function BreakdownRows({
   activeId: string | null;
   onToggle: (id: string) => void;
 }) {
+  const { formatRupiah } = useSystemPreferences();
+
   if (items.length === 0) {
     return (
       <div className="rounded-card border border-dashed border-hairline p-5 text-sm text-muted-foreground">
@@ -397,6 +408,7 @@ export function RekapMonthlyDetailSection({
   onSelectMonth,
   isLoading,
 }: RekapMonthlyDetailSectionProps) {
+  const { formatTanggal } = useSystemPreferences();
   const hutangPiutangNet =
     detail.hutang_piutang.piutang_baru +
     detail.hutang_piutang.cicilan_piutang -
@@ -408,7 +420,7 @@ export function RekapMonthlyDetailSection({
         detail.endDate,
         "dd MMM yyyy",
       )}`,
-    [detail.endDate, detail.startDate],
+    [detail.endDate, detail.startDate, formatTanggal],
   );
 
   if (isLoading) {

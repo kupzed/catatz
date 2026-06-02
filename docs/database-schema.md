@@ -222,6 +222,30 @@ Deskripsi: template transaksi berulang.
 
 Catatan: table sudah ada di migration, tetapi belum terlihat ada UI/Server Action khusus recurring transaction.
 
+## Tabel `user_preferences`
+
+Deskripsi: preferensi tampilan dan format data milik user.
+
+| Column | Type | Nullable | Default | Description |
+|---|---|---:|---|---|
+| `id` | `uuid` | No | `gen_random_uuid()` | Primary key. |
+| `user_id` | `uuid` | No | - | FK ke `profiles(id)` dengan `ON DELETE CASCADE`, unique per user. |
+| `theme` | `text` | Yes | `'system'` | Theme `light`, `dark`, atau `system`. |
+| `currency` | `text` | Yes | `'IDR'` | Mata uang tampilan. UI saat ini hanya menyediakan IDR. |
+| `date_format` | `text` | Yes | `'id-ID'` | Locale/tampilan tanggal aplikasi dan export. |
+| `number_format` | `text` | Yes | `'id-ID'` | Locale pemisah ribuan/desimal angka. |
+| `default_landing_page` | `text` | Yes | `'/transaksi'` | Route awal setelah login. |
+| `show_decimal_places` | `boolean` | No | `false` | Jika true, nominal penuh tampil dengan 2 digit desimal. |
+| `time_format` | `text` | No | `'24h'` | Format waktu tampilan/input, `24h` atau `12h`. |
+| `created_at` | `timestamptz` | Yes | `now()` | Waktu dibuat. |
+| `updated_at` | `timestamptz` | Yes | `now()` | Waktu terakhir diubah dari application layer. |
+
+Constraints/index:
+
+- Unique `user_id`.
+- Check `chk_user_preferences_time_format`: `time_format IN ('24h', '12h')`.
+- Index `idx_user_preferences_user_id` pada `user_id`.
+
 ## Tabel `user_sessions`
 
 Deskripsi: mencatat perangkat dan sesi pengguna yang aktif untuk fitur Keamanan (Active Sessions).
@@ -281,6 +305,7 @@ Policy storage:
 - `recurring_transaksi.kategori_id` -> `kategori.id`.
 - `recurring_transaksi.rekening_id` -> `rekening.id`.
 - `recurring_transaksi.rekening_tujuan` -> `rekening.id`.
+- `user_preferences.user_id` -> `profiles.id`.
 - `user_sessions.user_id` -> `profiles.id`.
 
 ## Business Rule Database

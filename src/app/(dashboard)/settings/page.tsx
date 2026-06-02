@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import { createClient } from "@/configs/supabase/server";
 import SettingsPageClient from "./_components/settings-page-client";
 import type { ConnectedAccount } from "./_components/connected-account-section";
+import {
+  DEFAULT_USER_PREFERENCES,
+  USER_PREFERENCE_SELECT,
+  normalizeUserPreferences,
+} from "@/lib/user-preferences";
 
 export const metadata: Metadata = {
   title: "Pengaturan",
@@ -52,17 +57,13 @@ export default async function SettingsPage() {
 
   const { data: preferences } = await supabase
     .from("user_preferences")
-    .select("theme, currency, date_format, number_format, default_landing_page")
+    .select(USER_PREFERENCE_SELECT)
     .eq("user_id", user?.id)
     .single();
 
-  const preferencesData = preferences || {
-    theme: "system",
-    currency: "IDR",
-    date_format: "id-ID",
-    number_format: "id-ID",
-    default_landing_page: "/transaksi",
-  };
+  const preferencesData = preferences
+    ? normalizeUserPreferences(preferences)
+    : DEFAULT_USER_PREFERENCES;
 
   return (
     <SettingsPageClient

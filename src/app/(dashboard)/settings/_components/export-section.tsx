@@ -69,13 +69,23 @@ export function ExportSection() {
 
       if (format === "pdf") {
         const { generatePDF } = await import("@/lib/pdf-generator");
-        await generatePDF(res.data.transaksi, res.data.summary, userName);
+        await generatePDF(
+          res.data.transaksi,
+          res.data.summary,
+          userName,
+          res.data.preferences,
+        );
       } else if (format === "xlsx") {
         const { generateXLSX } = await import("@/lib/spreadsheet-generator");
-        await generateXLSX(res.data.transaksi, res.data.summary, userName);
+        await generateXLSX(
+          res.data.transaksi,
+          res.data.summary,
+          userName,
+          res.data.preferences,
+        );
       } else {
         const { generateCSV } = await import("@/lib/spreadsheet-generator");
-        generateCSV(res.data.transaksi);
+        generateCSV(res.data.transaksi, res.data.preferences);
       }
 
       toast.success(

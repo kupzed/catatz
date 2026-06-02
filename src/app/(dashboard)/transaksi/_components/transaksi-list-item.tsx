@@ -1,13 +1,13 @@
 "use client";
 
 import type { DisplayTransaksi } from "@/hooks/use-offline-queue-sync";
-import { formatRupiah, formatTanggal } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { TIPE_CONFIG } from "@/constants/transaksi";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
+import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 export type TransaksiListItemProps = {
   transaksi: DisplayTransaksi;
@@ -22,9 +22,11 @@ export function TransaksiListItem({
   onDelete,
   isDeleting,
 }: TransaksiListItemProps) {
+  const { formatRupiah, formatTanggal, formatWaktu } = useSystemPreferences();
   const cfg = TIPE_CONFIG[transaksi.tipe] ?? TIPE_CONFIG.expense;
   const TipeIcon = cfg.icon;
   const displayName = transaksi.judul || transaksi.catatan || cfg.label;
+  const waktuLabel = formatWaktu(transaksi.waktu);
 
   return (
     <div className="group relative flex flex-col sm:flex-row sm:items-center gap-3 p-3 sm:p-4 border-b border-hairline last:border-b-0 bg-transparent hover:bg-surface-soft transition-colors">
@@ -108,6 +110,11 @@ export function TransaksiListItem({
           <span className="text-xs text-muted-foreground shrink-0">
             {formatTanggal(transaksi.tanggal)}
           </span>
+          {waktuLabel && (
+            <span className="text-xs text-muted-foreground shrink-0">
+              {"\u00B7"} {waktuLabel}
+            </span>
+          )}
           {transaksi.rekening && (
             <span className="text-xs text-muted-foreground truncate max-w-30">
               {"\u00B7"} {transaksi.rekening.nama}
@@ -149,6 +156,7 @@ export function TransaksiListItem({
         <div className="flex flex-col sm:hidden">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span>{formatTanggal(transaksi.tanggal)}</span>
+            {waktuLabel && <span>{"\u00B7"} {waktuLabel}</span>}
             {transaksi.rekening && (
               <span>
                 {"\u00B7"} {transaksi.rekening.nama}

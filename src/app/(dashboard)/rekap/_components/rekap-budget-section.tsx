@@ -2,10 +2,10 @@
 
 import type { BudgetWithUsage } from "@/actions/rekap-action";
 import { BULAN_NAMES } from "@/constants/rekap";
-import { formatRupiah } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 const BUDGET_STATUS_COLORS: Record<string, string> = {
   aman: "bg-semantic-up/10 text-semantic-up",
@@ -22,6 +22,8 @@ export function RekapBudgetSection({
   budgets,
   currentBulan,
 }: RekapBudgetSectionProps) {
+  const { formatRupiah } = useSystemPreferences();
+
   if (budgets.length === 0) return null;
 
   return (

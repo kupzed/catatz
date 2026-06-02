@@ -18,6 +18,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 type Profile = {
   id: string;
@@ -52,6 +53,7 @@ function SettingRow({
 }
 
 export function ProfileSection({ profile }: Props) {
+  const { formatTanggal } = useSystemPreferences();
   const [name, setName] = useState(profile?.name ?? "");
   const [isPending, setIsPending] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -137,11 +139,7 @@ export function ProfileSection({ profile }: Props) {
     : (profile?.email?.[0]?.toUpperCase() ?? "U");
 
   const formattedJoinDate = profile?.created_at
-    ? new Intl.DateTimeFormat("id-ID", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }).format(new Date(profile.created_at))
+    ? formatTanggal(profile.created_at)
     : null;
 
   return (

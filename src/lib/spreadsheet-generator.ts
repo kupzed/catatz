@@ -2,11 +2,18 @@
 
 import type { ExportSummary, ExportTransaksi } from "@/actions/export-action";
 import type { Worksheet } from "exceljs";
+import {
+  DEFAULT_USER_PREFERENCES,
+  type UserPreferences,
+} from "@/lib/user-preferences";
+import {
+  formatNumber,
+  getRupiahSpreadsheetFormat,
+} from "@/lib/utils";
 
 const XLSX_MIME =
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 const CSV_MIME = "text/csv;charset=utf-8";
-const RUPIAH_NUMBER_FORMAT = '"Rp"#,##0;[Red]-"Rp"#,##0';
 const HEADER_FILL = "FF0052FF";
 const HEADER_TEXT = "FFFFFFFF";
 const HAIRLINE = "FFDEE1E6";
@@ -107,7 +114,9 @@ function addSummarySheet(
   workbook: import("exceljs").Workbook,
   summary: ExportSummary,
   userName: string,
+  preferences: UserPreferences,
 ): void {
+  const rupiahNumberFormat = getRupiahSpreadsheetFormat(preferences);
   const sheet = workbook.addWorksheet("Ringkasan", {
     views: [{ state: "frozen", ySplit: 3 }],
   });
@@ -145,7 +154,7 @@ function addSummarySheet(
   ]);
 
   [5, 6, 7].forEach((rowNumber) => {
-    sheet.getCell(`B${rowNumber}`).numFmt = RUPIAH_NUMBER_FORMAT;
+    sheet.getCell(`B${rowNumber}`).numFmt = rupiahNumberFormat;
   });
 
   sheet.getColumn(1).font = { bold: true };
@@ -166,7 +175,7 @@ function addSummarySheet(
 
     sheet.getColumn(3).width = 14;
     styleHeaderRow(sheet, headerRowNumber);
-    sheet.getColumn(2).numFmt = RUPIAH_NUMBER_FORMAT;
+    sheet.getColumn(2).numFmt = rupiahNumberFormat;
     sheet.getColumn(3).numFmt = "0.00%";
   }
 }
@@ -174,7 +183,9 @@ function addSummarySheet(
 function addTransactionsSheet(
   workbook: import("exceljs").Workbook,
   transaksi: ExportTransaksi[],
+  preferences: UserPreferences,
 ): void {
+  const rupiahNumberFormat = getRupiahSpreadsheetFormat(preferences);
   const sheet = workbook.addWorksheet("Transaksi", {
     views: [{ state: "frozen", ySplit: 1 }],
   });
@@ -193,7 +204,7 @@ function addTransactionsSheet(
   ];
 
   sheet.addRows(toTransactionRows(transaksi));
-  sheet.getColumn("nominal").numFmt = RUPIAH_NUMBER_FORMAT;
+  sheet.getColumn("nominal").numFmt = rupiahNumberFormat;
   styleHeaderRow(sheet);
   styleBodyRows(sheet);
   sheet.autoFilter = "A1:J1";
@@ -210,6 +221,7 @@ export async function generateXLSX(
   transaksi: ExportTransaksi[],
   summary: ExportSummary,
   userName: string,
+  preferences: UserPreferences = DEFAULT_USER_PREFERENCES,
 ): Promise<void> {
   const ExcelJS = await import("exceljs");
   const workbook = new ExcelJS.Workbook();
@@ -220,8 +232,8 @@ export async function generateXLSX(
   workbook.title = `CatatZ Laporan Keuangan ${summary.periode}`;
   workbook.subject = "Laporan Keuangan Pribadi";
 
-  addSummarySheet(workbook, summary, userName);
-  addTransactionsSheet(workbook, transaksi);
+  addSummarySheet(workbook, summary, userName, preferences);
+  addTransactionsSheet(workbook, transaksi, preferences);
 
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer as BlobPart], { type: XLSX_MIME });
@@ -229,7 +241,10 @@ export async function generateXLSX(
   downloadBlob(blob, `catatz-laporan-${fileDate()}.xlsx`);
 }
 
-export function generateCSV(transaksi: ExportTransaksi[]): void {
+export function generateCSV(
+  transaksi: ExportTransaksi[],
+  preferences: UserPreferences = DEFAULT_USER_PREFERENCES,
+): void {
   const headers = [
     "No",
     "Tanggal",
@@ -253,7 +268,7 @@ export function generateCSV(transaksi: ExportTransaksi[]): void {
     row.catatan,
     row.rekening,
     row.rekening_tujuan,
-    row.nominal,
+    formatNumber(row.nominal, preferences),
   ]);
 
   const csv = [

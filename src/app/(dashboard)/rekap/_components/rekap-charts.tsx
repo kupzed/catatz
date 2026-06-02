@@ -12,9 +12,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { formatRupiah } from "@/lib/utils";
 import type { RekapBulanan, RekapKategori } from "@/actions/rekap-action";
 import { BULAN_NAMES } from "@/constants/rekap";
+import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 export type RekapBarChartProps = {
   data: RekapBulanan[];
@@ -29,6 +29,7 @@ export function RekapBarChart({
   data,
   selectedBulan,
 }: RekapBarChartProps) {
+  const { formatRupiah } = useSystemPreferences();
   const barData = data.map((item) => ({
     bulan: item.bulan,
     name: BULAN_NAMES[item.bulan - 1],
@@ -67,6 +68,8 @@ export function RekapBarChart({
 }
 
 export function RekapPieChart({ data }: RekapPieChartProps) {
+  const { formatRupiah } = useSystemPreferences();
+
   return (
     <ResponsiveContainer width="100%" height={200}>
       <PieChart>

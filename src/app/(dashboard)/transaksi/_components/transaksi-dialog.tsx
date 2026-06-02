@@ -24,7 +24,7 @@ const VoiceInputButton = dynamic(() => import("./voice-input-button"), {
 import { toast } from "sonner";
 import type { Transaksi, Kategori, JudulSuggestion } from "@/types/transaksi";
 import type { Rekening } from "@/types/rekening";
-import { todayISODate, currentTime, formatRupiah } from "@/lib/utils";
+import { todayISODate, currentTime } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -45,10 +45,12 @@ import {
 } from "@/components/ui/select";
 import { NominalInput } from "@/components/common/nominal-input";
 import { RekeningSelect } from "@/components/common/rekening-select";
+import { TimeInput } from "@/components/common/time-input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TIPE_TABS } from "@/constants/transaksi";
 import { Loader2, Sparkles, Copy, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 type Props = {
   open: boolean;
@@ -82,6 +84,7 @@ export default function TransaksiDialog({
   const [submitting, setSubmitting] = useState(false);
   const [copying, setCopying] = useState(false);
   const [suggestions, setSuggestions] = useState<JudulSuggestion[]>([]);
+  const { formatRupiah } = useSystemPreferences();
 
   const {
     control,
@@ -425,7 +428,7 @@ export default function TransaksiDialog({
           )}
 
           {/* Tanggal & Waktu */}
-          <div className="flex items-start gap-4">
+          <div className="grid gap-4 sm:grid-cols-[1fr_14rem]">
             <div className="flex-1 space-y-1.5 min-w-0">
               <Label htmlFor="tanggal">Tanggal</Label>
               <Input
@@ -440,13 +443,18 @@ export default function TransaksiDialog({
                 </p>
               )}
             </div>
-            <div className="w-32 space-y-1.5 shrink-0">
+            <div className="space-y-1.5">
               <Label htmlFor="waktu">Waktu</Label>
-              <Input
-                id="waktu"
-                type="time"
-                {...register("waktu")}
-                className="w-full appearance-none bg-background border-input"
+              <Controller
+                control={control}
+                name="waktu"
+                render={({ field }) => (
+                  <TimeInput
+                    id="waktu"
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  />
+                )}
               />
             </div>
           </div>

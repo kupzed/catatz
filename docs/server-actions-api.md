@@ -394,13 +394,72 @@ Lokasi: `src/actions/rekap-action.ts`
 
 Catatan: `upsertBudget` belum terlihat dipakai oleh UI route yang ada.
 
+## Preference Actions
+
+Lokasi: `src/actions/preference-action.ts`
+
+Shared type/default/validation: `src/lib/user-preferences.ts`
+
+### `getUserPreferences`
+
+Deskripsi: mengambil preferensi sistem user saat ini. Jika row `user_preferences` belum ada, action mengembalikan default aplikasi tanpa membuat row baru.
+
+Output:
+
+```ts
+ActionResult<UserPreferences>;
+```
+
+`UserPreferences`:
+
+```ts
+type UserPreferences = {
+  theme: "light" | "dark" | "system";
+  currency: "IDR";
+  date_format: "id-ID" | "en-US";
+  number_format: "id-ID" | "en-US";
+  default_landing_page:
+    | "/transaksi"
+    | "/rekening"
+    | "/rekap"
+    | "/hutang"
+    | "/kategori";
+  show_decimal_places: boolean;
+  time_format: "24h" | "12h";
+};
+```
+
+Tabel: `user_preferences`.
+
+### `updateUserPreferences`
+
+Deskripsi: mengubah sebagian preferensi sistem user dengan runtime validation whitelist. Action menolak key yang tidak dikenal dan value yang tidak ada di daftar opsi.
+
+Input:
+
+```ts
+Partial<UserPreferences>
+```
+
+Output:
+
+```ts
+ActionResult<UserPreferences>;
+```
+
+Tabel: `user_preferences`.
+
+Revalidate: `/settings`, `/transaksi`, `/rekening`, `/rekap`, `/hutang`, dan `/`.
+
+Catatan: preferensi format memengaruhi tampilan dashboard dan export, tetapi tidak mengubah kontrak data transaksi/hutang; waktu tetap disimpan sebagai `HH:mm`.
+
 ## Export Actions
 
 Lokasi: `src/actions/export-action.ts`
 
 ### `getExportData`
 
-Deskripsi: mengambil transaksi user untuk export PDF/XLSX/CSV, optional filter tanggal, summary income/expense/net, count, periode, dan top kategori expense.
+Deskripsi: mengambil transaksi user untuk export PDF/XLSX/CSV, optional filter tanggal, summary income/expense/net, count, periode, top kategori expense, dan preferensi format user.
 
 Input:
 
@@ -418,12 +477,13 @@ ActionResult<{
   transaksi: ExportTransaksi[];
   summary: ExportSummary;
   userName: string;
+  preferences: UserPreferences;
 }>;
 ```
 
-Tabel: `profiles`, `transaksi`, `kategori`, `rekening`.
+Tabel: `profiles`, `user_preferences`, `transaksi`, `kategori`, `rekening`.
 
-Catatan: action ini hanya mengambil data dan summary. Pembuatan file PDF, XLSX, dan CSV berjalan di browser melalui generator client-side.
+Catatan: action ini memformat tanggal/waktu transaksi dan periode sesuai preferensi user sebelum data dikirim ke browser. Pembuatan file PDF, XLSX, dan CSV tetap berjalan di browser melalui generator client-side; generator memakai `preferences` untuk format nominal PDF/XLSX/CSV.
 
 ### `getExportCount`
 
