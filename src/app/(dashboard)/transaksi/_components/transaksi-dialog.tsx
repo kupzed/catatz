@@ -45,7 +45,6 @@ import {
 } from "@/components/ui/select";
 import { NominalInput } from "@/components/common/nominal-input";
 import { RekeningSelect } from "@/components/common/rekening-select";
-import { TimeInput } from "@/components/common/time-input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TIPE_TABS } from "@/constants/transaksi";
 import { Loader2, Sparkles, Copy, SlidersHorizontal } from "lucide-react";
@@ -428,7 +427,7 @@ export default function TransaksiDialog({
           )}
 
           {/* Tanggal & Waktu */}
-          <div className="grid gap-4 sm:grid-cols-[1fr_14rem]">
+          <div className="grid grid-cols-[3fr_1fr] gap-4">
             <div className="flex-1 space-y-1.5 min-w-0">
               <Label htmlFor="tanggal">Tanggal</Label>
               <Input
@@ -449,10 +448,12 @@ export default function TransaksiDialog({
                 control={control}
                 name="waktu"
                 render={({ field }) => (
-                  <TimeInput
+                  <Input
                     id="waktu"
-                    value={field.value}
-                    onValueChange={field.onChange}
+                    type="time"
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                    className="w-full appearance-none bg-background border-input px-2 sm:px-4"
                   />
                 )}
               />
@@ -677,7 +678,7 @@ export default function TransaksiDialog({
               <Button
                 type="submit"
                 disabled={submitting}
-                className="bg-primary hover:bg-[#003ecc] text-white rounded-full h-11 px-5"
+                className="bg-primary hover:bg-primary-active text-white rounded-full h-11 px-5"
               >
                 {submitting ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />

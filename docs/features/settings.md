@@ -99,7 +99,7 @@ Settings page mengambil user dan profile dari Supabase server client:
 - Theme memakai `next-themes`.
 - System Preference menyimpan perubahan secara optimistic, menyinkronkan `SystemPreferenceProvider`, lalu refresh server boundary setelah action sukses.
 - Section System Preference menampilkan preview nominal, tanggal, dan waktu berdasarkan pilihan aktif.
-- Input waktu transaksi, hutang, dan cicilan memakai `TimeInput`; mode `24h` memakai native time input, sedangkan mode `12h` memakai pilihan jam, menit, dan AM/PM.
+- Input waktu transaksi, hutang, dan cicilan tetap memakai native `Input type="time"` agar layout form tanggal/waktu konsisten satu baris. Preferensi `time_format` dipakai untuk tampilan dan export; value database tetap `HH:mm`.
 
 ## TODO / Improvement
 

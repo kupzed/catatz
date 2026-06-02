@@ -215,8 +215,8 @@ Setiap halaman dashboard mengikuti struktur konsisten berikut:
 // NominalInput mengikuti separator ribuan dari SystemPreferenceProvider
 <NominalInput value={value} onValueChange={onValueChange} />
 
-// TimeInput mengikuti preferensi 24h/12h dan tetap mengeluarkan value HH:mm
-<TimeInput value={value} onValueChange={onValueChange} />
+// Input waktu tetap memakai native input; browser menentukan picker 12h/24h
+<Input type="time" value={value} onChange={onChange} />
 ```
 
 ## Aturan Form
@@ -286,8 +286,8 @@ Gunakan `Skeleton` untuk loading route/data yang membutuhkan waktu.
 - `formatNumber(value, preferences?)` dipakai untuk export CSV ketika angka harus tanpa simbol mata uang.
 - `formatTanggal(date, fmt?, preferences?)` memilih locale `id-ID` atau `en-US`.
 - `formatWaktu(value, preferences?)` memilih tampilan `14:30` atau `02:30 PM`.
-- `TimeInput` di `src/components/common/time-input.tsx` wajib dipakai untuk input waktu transaksi, hutang, dan cicilan. Mode `12h` hanya mengubah UI; value keluar tetap `HH:mm` untuk database.
-- `NominalInput` di `src/components/common/nominal-input.tsx` mengikuti separator ribuan dari `number_format`, tetapi tetap mengirim angka normal ke form/action.
+- Input waktu transaksi, hutang, dan cicilan tetap memakai native `Input type="time"` agar picker browser/OS bekerja normal. Untuk layout tanggal/waktu dalam dialog, gunakan satu baris `grid-cols-[3fr_1fr]`.
+- `NominalInput` di `src/components/common/nominal-input.tsx` mengikuti separator ribuan/desimal dari `number_format`, menerima koma atau titik saat decimal aktif, tetapi tetap mengirim angka normal ke form/action.
 - Helper utama ada di `src/lib/utils.ts`:
   - `formatRupiah`
   - `formatNumber`

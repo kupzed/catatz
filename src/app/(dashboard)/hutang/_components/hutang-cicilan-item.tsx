@@ -7,7 +7,6 @@ import type { CicilanDraft } from "@/hooks/use-hutang-cicilan";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { NominalInput } from "@/components/common/nominal-input";
 import { RekeningSelect } from "@/components/common/rekening-select";
-import { TimeInput } from "@/components/common/time-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -83,31 +82,35 @@ export function HutangCicilanItem({
                 className="h-9 text-xs"
               />
             </div>
-            <div className="space-y-1">
-              <Label className="text-xs">Tanggal</Label>
-              <Input
-                type="date"
-                value={editDraft.tanggal}
-                onChange={(event) =>
-                  onEditDraftChange((prev) => ({
-                    ...prev,
-                    tanggal: event.target.value,
-                  }))
-                }
-                className="w-full appearance-none bg-background border-input"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs">Waktu</Label>
-              <TimeInput
-                value={editDraft.waktu}
-                onValueChange={(value) =>
-                  onEditDraftChange((prev) => ({
-                    ...prev,
-                    waktu: value,
-                  }))
-                }
-              />
+            <div className="grid grid-cols-[3fr_1fr] gap-3 sm:col-span-2">
+              <div className="space-y-1">
+                <Label className="text-xs">Tanggal</Label>
+                <Input
+                  type="date"
+                  value={editDraft.tanggal}
+                  onChange={(event) =>
+                    onEditDraftChange((prev) => ({
+                      ...prev,
+                      tanggal: event.target.value,
+                    }))
+                  }
+                  className="w-full appearance-none bg-background border-input"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Waktu</Label>
+                <Input
+                  type="time"
+                  value={editDraft.waktu}
+                  onChange={(event) =>
+                    onEditDraftChange((prev) => ({
+                      ...prev,
+                      waktu: event.target.value,
+                    }))
+                  }
+                  className="w-full appearance-none bg-background border-input px-2 sm:px-4"
+                />
+              </div>
             </div>
           </div>
           <div className="space-y-1">

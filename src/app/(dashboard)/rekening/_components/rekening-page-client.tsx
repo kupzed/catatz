@@ -150,11 +150,11 @@ export default function RekeningPageClient({
       />
 
       {/* Total Balance Card */}
-      <div className="rounded-card bg-primary p-8 text-white ring-1 ring-white/5">
+      <div className="rounded-card bg-primary p-5 text-white ring-1 ring-white/5 sm:p-8">
         <p className="text-sm text-white uppercase tracking-wider mb-2">
           Total Saldo (aktif)
         </p>
-        <p className="font-mono text-[44px] font-normal tracking-[-1px] text-white leading-none">
+        <p className="break-all font-mono text-[28px] font-normal tracking-0 text-white leading-tight sm:text-[40px] lg:text-[44px]">
           {formatRupiah(totalSaldo)}
         </p>
         <p className="text-xs text-white/60 mt-3">
