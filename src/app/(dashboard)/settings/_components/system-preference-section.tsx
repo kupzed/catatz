@@ -6,10 +6,25 @@ import { Separator } from "@/components/ui/separator";
 import { useTheme } from "next-themes";
 import { Monitor, Moon, Sun, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
-import { updateUserPreferences, type UserPreferences } from "@/actions/preference-action";
+import {
+  updateUserPreferences,
+  type UserPreferences,
+} from "@/actions/preference-action";
 
 const THEME_OPTIONS = [
   { value: "light", label: "Terang", icon: Sun },
@@ -32,7 +47,9 @@ function SettingRow({ label, description, children }: SettingRowProps) {
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4">
       <div className="min-w-0">
         <p className="text-sm font-medium leading-tight">{label}</p>
-        {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
+        {description && (
+          <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+        )}
       </div>
       <div className="shrink-0 w-full sm:w-48 max-w-full">{children}</div>
     </div>
@@ -44,7 +61,10 @@ export function SystemPreferenceSection({ preferences }: Props) {
   const [localPrefs, setLocalPrefs] = useState<UserPreferences>(preferences);
   const [isPending, setIsPending] = useState(false);
 
-  const handlePreferenceChange = async (key: keyof UserPreferences, value: string) => {
+  const handlePreferenceChange = async (
+    key: keyof UserPreferences,
+    value: string,
+  ) => {
     // Optimistic UI update
     const previous = { ...localPrefs };
     setLocalPrefs((prev) => ({ ...prev, [key]: value }));
@@ -79,7 +99,9 @@ export function SystemPreferenceSection({ preferences }: Props) {
               Atur tampilan, format data, dan preferensi sistem aplikasi.
             </CardDescription>
           </div>
-          {isPending && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+          {isPending && (
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-0">
@@ -87,7 +109,9 @@ export function SystemPreferenceSection({ preferences }: Props) {
         <div className="flex items-center justify-between gap-6 py-4">
           <div>
             <p className="text-sm font-medium">Tema Warna</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Pilih tema terang, gelap, atau ikuti sistem</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Pilih tema terang, gelap, atau ikuti sistem
+            </p>
           </div>
           <div className="flex items-center gap-1 rounded-[8px] border bg-surface-strong p-1">
             {THEME_OPTIONS.map(({ value, icon: Icon }) => (
@@ -99,7 +123,7 @@ export function SystemPreferenceSection({ preferences }: Props) {
                   "flex items-center justify-center w-8 h-8 rounded-[8px] transition-all",
                   theme === value
                     ? "bg-card text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -111,7 +135,10 @@ export function SystemPreferenceSection({ preferences }: Props) {
         <Separator />
 
         <SettingRow label="Mata Uang" description="Format mata uang default">
-          <Select value={localPrefs.currency} onValueChange={(val) => handlePreferenceChange("currency", val)}>
+          <Select
+            value={localPrefs.currency}
+            onValueChange={(val) => handlePreferenceChange("currency", val)}
+          >
             <SelectTrigger className="text-sm h-9">
               <SelectValue />
             </SelectTrigger>
@@ -124,28 +151,42 @@ export function SystemPreferenceSection({ preferences }: Props) {
 
         <Separator />
 
-        <SettingRow label="Format Tanggal" description="Tampilan tanggal aplikasi">
-          <Select value={localPrefs.date_format} onValueChange={(val) => handlePreferenceChange("date_format", val)}>
+        <SettingRow
+          label="Format Tanggal"
+          description="Tampilan tanggal aplikasi"
+        >
+          <Select
+            value={localPrefs.date_format}
+            onValueChange={(val) => handlePreferenceChange("date_format", val)}
+          >
             <SelectTrigger className="text-sm h-9">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="id-ID">Indonesia (DD/MM/YYYY)</SelectItem>
-              <SelectItem value="en-US">US (MM/DD/YYYY)</SelectItem>
+              <SelectItem value="id-ID">DD/MM/YYYY</SelectItem>
+              <SelectItem value="en-US">MM/DD/YYYY</SelectItem>
             </SelectContent>
           </Select>
         </SettingRow>
 
         <Separator />
 
-        <SettingRow label="Format Angka" description="Pemisah ribuan dan desimal">
-          <Select value={localPrefs.number_format} onValueChange={(val) => handlePreferenceChange("number_format", val)}>
+        <SettingRow
+          label="Format Angka"
+          description="Pemisah ribuan dan desimal"
+        >
+          <Select
+            value={localPrefs.number_format}
+            onValueChange={(val) =>
+              handlePreferenceChange("number_format", val)
+            }
+          >
             <SelectTrigger className="text-sm h-9">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="id-ID">Indonesia (1.000,00)</SelectItem>
-              <SelectItem value="en-US">US (1,000.00)</SelectItem>
+              <SelectItem value="id-ID">10.000,00</SelectItem>
+              <SelectItem value="en-US">10,000.00</SelectItem>
             </SelectContent>
           </Select>
         </SettingRow>
@@ -153,14 +194,20 @@ export function SystemPreferenceSection({ preferences }: Props) {
         <Separator />
 
         <SettingRow label="Halaman Awal" description="Halaman setelah login">
-          <Select value={localPrefs.default_landing_page} onValueChange={(val) => handlePreferenceChange("default_landing_page", val)}>
+          <Select
+            value={localPrefs.default_landing_page}
+            onValueChange={(val) =>
+              handlePreferenceChange("default_landing_page", val)
+            }
+          >
             <SelectTrigger className="text-sm h-9">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="/">Dashboard / Rekap</SelectItem>
               <SelectItem value="/transaksi">Transaksi</SelectItem>
               <SelectItem value="/rekening">Rekening</SelectItem>
+              <SelectItem value="/rekap">Rekap</SelectItem>
+              <SelectItem value="/hutang">Hutang</SelectItem>
               <SelectItem value="/kategori">Kategori</SelectItem>
             </SelectContent>
           </Select>

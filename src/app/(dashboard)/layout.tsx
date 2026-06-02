@@ -32,6 +32,15 @@ export default async function DashboardLayout({
     .eq("id", user.id)
     .single();
 
+  // Fetch theme preference
+  const { data: preferences } = await supabase
+    .from("user_preferences")
+    .select("theme")
+    .eq("user_id", user.id)
+    .single();
+
+  const themePreference = preferences?.theme ?? "system";
+
   const sidebarUser = {
     name: profile?.name ?? null,
     email: user.email ?? "",
@@ -50,7 +59,7 @@ export default async function DashboardLayout({
           </div>
           <div className="flex items-center gap-2">
             <IOSInstallHeaderButton />
-            <DarkmodeToggle />
+            <DarkmodeToggle initialTheme={themePreference} />
           </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:p-6 md:pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
