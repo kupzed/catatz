@@ -85,14 +85,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html lang="id" className={`${inter.variable} ${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <head>
         {supabaseOrigin ? <link rel="preconnect" href={supabaseOrigin} /> : null}
         <link rel="dns-prefetch" href="https://generativelanguage.googleapis.com" />
         {/* Apple startup images require explicit link tags. */}
         <AppleSplashScreens />
       </head>
-      <body className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className="antialiased">
         <ReactQueryProvider>
           <ThemeProvider
             attribute="class"
