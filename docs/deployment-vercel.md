@@ -18,11 +18,13 @@ File terkait:
 ```json
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
   "regions": ["sin1"]
 }
 ```
 
 Region production diset ke `sin1`.
+`buildCommand` dikunci di repository agar setting dashboard Vercel tidak menjalankan default `next build` yang memakai Turbopack pada Next.js 16.
 
 ## Package Manager
 
@@ -42,7 +44,7 @@ next build --webpack
 
 Catatan: webpack dipakai agar Serwist menghasilkan `public/sw.js`.
 
-Serwist dikonfigurasi dengan `disable: process.env.NODE_ENV !== "production"`. Phase deteksi/config Vercel yang bukan production build tidak mengaktifkan plugin Serwist, sehingga tidak memunculkan warning Turbopack palsu. Build production tetap memakai webpack dan tetap menghasilkan service worker.
+Serwist dikonfigurasi dengan `disable: process.env.NODE_ENV !== "production"`. Build production tetap mengaktifkan Serwist, sehingga Vercel wajib menjalankan `npm run build` yang meneruskan flag `--webpack`.
 
 ## Output Directory
 
@@ -138,7 +140,8 @@ Cek:
 
 Cek:
 
-- Build command adalah `npm run build`.
+- `vercel.json` memiliki `"buildCommand": "npm run build"`.
+- Build log menampilkan `Running "npm run build"` dan `Next.js ... (webpack)`, bukan `Running "next build"` atau `(Turbopack)`.
 - `next build --webpack` berhasil.
 - `next.config.ts` hanya menonaktifkan Serwist saat `NODE_ENV` bukan `production`.
 - File `public/sw.js` ada setelah build.
