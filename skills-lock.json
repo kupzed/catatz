@@ -12,6 +12,72 @@
       "sourceType": "github",
       "skillPath": "skills/supabase-postgres-best-practices/SKILL.md",
       "computedHash": "38fb49d3b57c46cba18b07a44254bd42c4c93903fda1d8cb683429615d32fec4"
+    },
+    "coding-standards": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/coding-standards/SKILL.md",
+      "computedHash": "924693e7254789462dd4a459ae44e9842f34a422fd09be0c53c739287ed815fd"
+    },
+    "frontend-patterns": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/frontend-patterns/SKILL.md",
+      "computedHash": "fbaea313237c8031d8db5fa1064fac16257394cd9419547329b54dcdadc9454e"
+    },
+    "security-review": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/security-review/SKILL.md",
+      "computedHash": "e60a179eac26386cfc72d4bdebbe280f94a2d94ed889d6e221edbf1939f944d4"
+    },
+    "verification-loop": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/verification-loop/SKILL.md",
+      "computedHash": "abe40a95fc1fe7d5ff47ed2bab27600f160871e487fb1698546b0c80e45b1fbb"
+    },
+    "documentation-lookup": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/documentation-lookup/SKILL.md",
+      "computedHash": "142fbfdffbcb6eb80c47afa5705a2a8130387bab2500bb0930f557de08640b9a"
+    },
+    "strategic-compact": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/strategic-compact/SKILL.md",
+      "computedHash": "bab8749c044636ae3de0f42e0cd79f681755c76a075907b6a2d19f46951935f0"
+    },
+    "agent-introspection-debugging": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/agent-introspection-debugging/SKILL.md",
+      "computedHash": "1c2125c955ddc950ee9faafa198568031c07beaf08a97412b90dccc23405615d"
+    },
+    "product-capability": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/product-capability/SKILL.md",
+      "computedHash": "ae6e95205fcdcb2fa6d231d6665cdb11776796cfacb9891244522887f279c103"
+    },
+    "tdd-workflow": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/tdd-workflow/SKILL.md",
+      "computedHash": "27cfe7148aeb4385153236aded47ef3c5b2b7a2579ea1fc4b948ff987ce4e2ae"
+    },
+    "e2e-testing": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/e2e-testing/SKILL.md",
+      "computedHash": "7e8fe72760f9274656f2b3d5a501b9535b4fe3acd8d83a79cd15f207c21bd937"
+    },
+    "nextjs-turbopack": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/nextjs-turbopack/SKILL.md",
+      "computedHash": "e35a6a04301792f4cb290cb5f21bc6d64fe9272790d1822431dbfb1747ae9d04"
     }
   }
 }

@@ -1,0 +1,5 @@
+sandbox_mode = "read-only"
+
+developer_instructions = """
+Review CatatZ changes like an owner. Prioritize correctness, financial-data safety, behavioral regressions, maintainability, and missing tests. Cite exact files and lines. Do not edit files or run mutating commands.
+"""

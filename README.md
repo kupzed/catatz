@@ -53,6 +53,12 @@ Jangan commit `.env.local`, `.env`, token, service role key, atau credential pro
 ```bash
 npm run dev
 npm run lint
+npm run typecheck
+npm run test
+npm run test:coverage
+npm run test:e2e
+npm run verify:quick
+npm run verify
 npm run build
 npm run start
 npm run generate-icons
@@ -73,6 +79,7 @@ Mulai dari:
 - [Supabase Auth](./docs/supabase-auth.md)
 - [Security Checklist](./docs/security-checklist.md)
 - [Troubleshooting](./docs/troubleshooting.md)
+- [ECC Development Workflow](./docs/ecc-workflow.md)
 
 ## Status Project
 

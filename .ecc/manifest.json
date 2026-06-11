@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "installedAt": "2026-06-11T16:30:17Z",
+  "installation": {
+    "scope": "project-local",
+    "harnesses": ["codex", "claude-code"],
+    "canonicalSkillDirectory": ".agents/skills",
+    "claudeWrapperDirectory": ".claude/skills"
+  },
+  "source": {
+    "repository": "https://github.com/affaan-m/everything-claude-code",
+    "version": "2.0.0",
+    "commit": "c888d2b73f26d605ff6c172b433d4cad2200206f",
+    "describe": "v2.0.0-2-gc888d2b7-dirty",
+    "sourceCheckoutDirty": true,
+    "sourcePath": ".agents/skills"
+  },
+  "skills": [
+    { "name": "coding-standards", "tier": "daily", "sha256": "924693e7254789462dd4a459ae44e9842f34a422fd09be0c53c739287ed815fd" },
+    { "name": "frontend-patterns", "tier": "daily", "sha256": "fbaea313237c8031d8db5fa1064fac16257394cd9419547329b54dcdadc9454e" },
+    { "name": "security-review", "tier": "daily", "sha256": "e60a179eac26386cfc72d4bdebbe280f94a2d94ed889d6e221edbf1939f944d4" },
+    { "name": "verification-loop", "tier": "daily", "sha256": "abe40a95fc1fe7d5ff47ed2bab27600f160871e487fb1698546b0c80e45b1fbb" },
+    { "name": "documentation-lookup", "tier": "daily", "sha256": "142fbfdffbcb6eb80c47afa5705a2a8130387bab2500bb0930f557de08640b9a" },
+    { "name": "strategic-compact", "tier": "daily", "sha256": "bab8749c044636ae3de0f42e0cd79f681755c76a075907b6a2d19f46951935f0" },
+    { "name": "agent-introspection-debugging", "tier": "daily", "sha256": "1c2125c955ddc950ee9faafa198568031c07beaf08a97412b90dccc23405615d" },
+    { "name": "product-capability", "tier": "daily", "sha256": "ae6e95205fcdcb2fa6d231d6665cdb11776796cfacb9891244522887f279c103" },
+    { "name": "tdd-workflow", "tier": "daily", "sha256": "27cfe7148aeb4385153236aded47ef3c5b2b7a2579ea1fc4b948ff987ce4e2ae" },
+    { "name": "e2e-testing", "tier": "daily", "sha256": "7e8fe72760f9274656f2b3d5a501b9535b4fe3acd8d83a79cd15f207c21bd937" },
+    { "name": "nextjs-turbopack", "tier": "library", "sha256": "e35a6a04301792f4cb290cb5f21bc6d64fe9272790d1822431dbfb1747ae9d04" }
+  ],
+  "runtime": {
+    "memoryMode": "metadata-only",
+    "runtimeDirectory": ".ecc/runtime",
+    "retentionDays": 30,
+    "maximumSessions": 100,
+    "qualityMode": "warning"
+  },
+  "mcp": {
+    "enabled": [
+      { "name": "chrome-devtools", "package": "chrome-devtools-mcp", "version": "1.2.0" }
+    ],
+    "forbidden": ["supabase-production", "github", "memory"]
+  }
+}

@@ -2,7 +2,7 @@
 
 ## Origin
 
-CatatZ adalah aplikasi pencatatan keuangan berbasis Next.js 16 App Router, Supabase, Server Actions, dan PWA Serwist. File ini adalah instruksi repository-level untuk Codex saat bekerja di `C:\laragon\www\catatz`.
+CatatZ adalah aplikasi pencatatan keuangan berbasis Next.js 16 App Router, Supabase, Server Actions, dan PWA Serwist. File ini adalah instruksi repository-level untuk agent saat bekerja dari root repository CatatZ.
 
 Instruksi detail tetap berada di `docs/ai-development-rules.md`. Anggap file ini sebagai operating manual singkat yang mengikat Codex agar setiap task selesai dengan perubahan yang rapi, dokumentasi yang sinkron, validasi yang jujur, dan suggested commit message yang teknis.
 
@@ -19,6 +19,25 @@ Ada beberapa sumber kebenaran yang harus dipakai sebelum membuat perubahan:
 - `.env.example` hanya boleh berisi nama variable dan placeholder aman. Jangan expose nilai secret dari `.env`.
 
 Jika dokumentasi dan source code berbeda, percaya source code dulu, lalu update dokumentasi yang relevan dalam task yang sama.
+
+## ECC Workflow Overlay
+
+CatatZ memakai subset Everything Claude Code (ECC) secara project-local untuk Codex dan Claude Code.
+
+- `.agents/skills/` adalah canonical skill surface. `.claude/skills/` hanya berisi wrapper kompatibilitas yang menunjuk ke canonical skill.
+- Gunakan skills `coding-standards`, `frontend-patterns`, `security-review`, `verification-loop`, `documentation-lookup`, `strategic-compact`, `agent-introspection-debugging`, `product-capability`, `tdd-workflow`, dan `e2e-testing` sesuai task.
+- `nextjs-turbopack` adalah library reference, bukan aturan production build. Production CatatZ tetap memakai `next build --webpack` untuk Serwist.
+- Specialized agents di `.codex/agents/` dan `.claude/agents/` bersifat read-only. Main agent adalah satu-satunya pihak yang boleh mengedit file.
+- Hooks project memblokir command destruktif dan perubahan secret file, tetapi quality check hanya warning. CI tetap menjadi enforcement utama.
+- Memory hook hanya boleh menyimpan metadata di `.ecc/runtime/`: path file, status verifikasi, timestamp, dan identifier sesi yang sudah di-hash. Jangan simpan prompt, tool arguments, isi file, secret, atau data finansial.
+- MCP project hanya `chrome-devtools`. Jangan tambahkan Supabase, database production, GitHub, memory, atau connector lain tanpa review eksplisit.
+
+Workflow default:
+
+1. Fitur/refactor kompleks: planner -> TDD -> implementasi main agent.
+2. Setelah perubahan: code review; tambahkan security review untuk auth, RLS, input, upload, Server Actions, secret, atau data sensitif.
+3. Jalankan `npm run verify:quick` selama iterasi dan `npm run verify` sebelum PR jika browser Playwright tersedia.
+4. Target 80% berlaku untuk kode baru/diubah dan modul pure yang dimasukkan ke coverage, bukan klaim coverage global legacy code.
 
 ## Design Contract
 

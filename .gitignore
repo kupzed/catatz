@@ -12,6 +12,11 @@
 
 # testing
 /coverage
+/playwright-report/
+/test-results/
+
+# ECC runtime metadata (local-only)
+/.ecc/runtime/
 
 # next.js
 /.next/

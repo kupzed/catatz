@@ -4,6 +4,11 @@
 
 ```txt
 catatz/
+├── .agents/skills/          # canonical Agent Skills
+├── .claude/                 # Claude agents, wrappers, hooks, settings
+├── .codex/                  # Codex agents, hooks, config, MCP declaration
+├── .ecc/                    # manifest dan shared hook implementation
+├── .github/workflows/       # CI quality dan E2E
 ├── public/
 │   ├── icons/
 │   ├── manifest.json
@@ -25,7 +30,12 @@ catatz/
 │   ├── types/
 │   └── validations/
 ├── docs/
+├── tests/
+│   ├── unit/
+│   └── e2e/
 ├── next.config.ts
+├── vitest.config.ts
+├── playwright.config.ts
 ├── package.json
 ├── package-lock.json
 ├── vercel.json
@@ -54,7 +64,14 @@ catatz/
 - `src/validations`: schema validasi Zod untuk form.
 - `public`: asset static, PWA manifest, icons, offline page, dan generated service worker.
 - `docs`: dokumentasi teknis project.
-- `AGENTS.md`: instruksi repository-level untuk workflow Codex, documentation gate, final response, dan suggested Conventional Commit message.
+- `tests/unit`: unit test Vitest untuk helper, policy hook, dan modul pure.
+- `tests/e2e`: smoke test Playwright dan mock service lokal; tidak memakai Supabase production.
+- `.agents/skills`: canonical skills, termasuk skills Supabase dan subset ECC yang relevan.
+- `.claude`: project agents read-only, skill wrappers, dan hook adapter untuk Claude Code.
+- `.codex`: project agents read-only, hook lifecycle, serta konfigurasi Chrome DevTools MCP untuk Codex.
+- `.ecc`: manifest instalasi dan shared hook implementation. `.ecc/runtime` bersifat lokal dan diabaikan Git.
+- `.github/workflows`: CI lint, typecheck, unit coverage, build, dan Playwright smoke test.
+- `AGENTS.md`: instruksi repository-level lintas agent, documentation gate, ECC workflow, final response, dan suggested Conventional Commit message.
 
 ## Routing
 
@@ -101,4 +118,5 @@ Tidak ada folder `src/app/api` pada kondisi repo saat ini.
 - Project memakai `src/proxy.ts`, bukan `middleware.ts`.
 - Migration SQL berada di `src/migrations`, bukan folder `supabase/migrations`.
 - Root `AGENTS.md` menjadi operating instructions untuk Codex dan merujuk ke `docs/ai-development-rules.md`.
+- `CLAUDE.md` mendelegasikan instruksi repository ke `AGENTS.md`; skill Claude hanya wrapper ke `.agents/skills`.
 - File `env-example` masih ada sebagai contoh lama. `.env.example` menjadi contoh env yang lebih konvensional untuk dokumentasi baru.

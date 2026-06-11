@@ -1,0 +1,28 @@
+[features]
+hooks = true
+multi_agent = true
+
+[agents]
+max_threads = 3
+max_depth = 1
+
+[agents.planner]
+description = "Read-only implementation planner for CatatZ features and refactors."
+config_file = "agents/planner.toml"
+
+[agents.code_reviewer]
+description = "Read-only reviewer focused on correctness, regressions, and test gaps."
+config_file = "agents/code-reviewer.toml"
+
+[agents.security_reviewer]
+description = "Read-only reviewer for auth, RLS, secrets, uploads, and Server Actions."
+config_file = "agents/security-reviewer.toml"
+
+[agents.docs_researcher]
+description = "Read-only researcher that verifies framework behavior against primary docs."
+config_file = "agents/docs-researcher.toml"
+
+[mcp_servers.chrome-devtools]
+command = "npx"
+args = ["-y", "chrome-devtools-mcp@1.2.0"]
+startup_timeout_sec = 30

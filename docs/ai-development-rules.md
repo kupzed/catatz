@@ -15,6 +15,10 @@
 - Gunakan Bahasa Indonesia untuk UI user-facing kecuali istilah teknis.
 - Buat suggested Conventional Commit message dalam Bahasa Inggris setelah selesai.
 - Jangan membuat commit Git otomatis kecuali user meminta eksplisit.
+- Gunakan `.agents/skills/` sebagai canonical skill surface dan jangan menduplikasi isi skill ke `.claude/skills/`.
+- Specialized agent hanya boleh membaca dan menganalisis. Main agent adalah satu-satunya pihak yang mengedit file.
+- Jangan mengaktifkan MCP database production. MCP project yang diizinkan saat ini hanya Chrome DevTools.
+- Memory workflow hanya boleh menyimpan metadata yang diizinkan di `docs/ecc-workflow.md`.
 
 ## Project-Specific Rules
 
@@ -41,6 +45,15 @@
 | Env/deployment | `docs/environment-variables.md`, `docs/deployment-vercel.md`, `README.md` jika quick start berubah |
 | PWA/offline | `docs/pwa.md`, fitur terkait, `docs/security-checklist.md` jika caching berubah |
 | UI guideline reusable | `docs/frontend-guidelines.md` |
+| Agent workflow, skills, hooks, tests, CI, atau MCP | `docs/ecc-workflow.md`, `docs/folder-structure.md`, `README.md` jika command berubah |
+
+## Testing dan Verification
+
+- Fitur, bug fix, dan refactor harus dimulai dari test yang gagal jika behavior dapat diuji secara otomatis.
+- Vitest digunakan untuk unit test dan komponen sinkron. Async Server Components dan critical browser flows diuji dengan Playwright.
+- Supabase dan Gemini harus dimock sampai tersedia project Supabase test khusus. Jangan gunakan production database sebagai test target.
+- Target 80% berlaku untuk kode baru/diubah dan modul pure yang tercantum pada coverage baseline. Jangan mengklaim coverage global legacy code.
+- Gunakan `npm run verify:quick` untuk iterasi dan `npm run verify` sebelum PR jika browser Playwright tersedia.
 
 ## Required Final Response Format
 

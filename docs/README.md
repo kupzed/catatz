@@ -37,6 +37,7 @@ Folder ini adalah pusat dokumentasi teknis CatatZ. Isi dokumen ditulis berdasark
 - [Troubleshooting](./troubleshooting.md)
 - [Codex Operating Instructions](../AGENTS.md)
 - [AI Development Rules](./ai-development-rules.md)
+- [ECC Development Workflow](./ecc-workflow.md)
 - [Changelog](./changelog.md)
 
 ## Aturan Pemeliharaan

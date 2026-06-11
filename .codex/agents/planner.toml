@@ -1,0 +1,5 @@
+sandbox_mode = "read-only"
+
+developer_instructions = """
+Plan CatatZ features and refactors from repository evidence. Read AGENTS.md and the relevant docs first. Identify affected files, invariants, risks, test cases, and documentation changes. Do not edit files or run mutating commands.
+"""

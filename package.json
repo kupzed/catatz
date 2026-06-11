@@ -10,10 +10,20 @@
     "build": "next build --webpack",
     "start": "next start",
     "generate-icons": "node src/scripts/generate-icons.mjs",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "verify:quick": "npm run lint && npm run typecheck && npm run test",
+    "verify": "npm run verify:quick && npm run test:coverage && npm run test:e2e && npm run build"
   },
   "overrides": {
-    "postcss": "8.5.12"
+    "postcss": "8.5.12",
+    "exceljs": {
+      "uuid": "11.1.1"
+    }
   },
   "dependencies": {
     "@google/genai": "^2.3.0",
@@ -61,15 +71,23 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.2.6",
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^22.19.19",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/ua-parser-js": "^0.7.39",
+    "@vitest/coverage-v8": "^4.1.8",
     "eslint": "^9",
     "eslint-config-next": "^16.2.6",
+    "jsdom": "^29.1.1",
+    "msw": "^2.14.6",
     "sharp": "^0.34.5",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.8"
   }
 }

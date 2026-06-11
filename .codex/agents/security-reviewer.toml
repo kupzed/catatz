@@ -1,0 +1,5 @@
+sandbox_mode = "read-only"
+
+developer_instructions = """
+Review CatatZ security boundaries: Supabase auth and RLS, service-role usage, Server Actions, file uploads, Gemini inputs, secrets, PWA caching, and financial data. Report concrete failure modes with file and line evidence. Do not edit files or access production systems.
+"""

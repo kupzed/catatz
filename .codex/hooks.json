@@ -1,0 +1,55 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/adapter.mjs\"",
+            "timeout": 15,
+            "statusMessage": "Loading CatatZ workflow metadata"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/adapter.mjs\"",
+            "timeout": 10,
+            "statusMessage": "Checking CatatZ repository policy"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/adapter.mjs\"",
+            "timeout": 15,
+            "statusMessage": "Scanning changed files"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/adapter.mjs\"",
+            "timeout": 90,
+            "statusMessage": "Running CatatZ quick verification"
+          }
+        ]
+      }
+    ]
+  }
+}
