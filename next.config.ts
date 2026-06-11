@@ -34,6 +34,7 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
       allowedOrigins: allowedDevOrigins,
+      bodySizeLimit: "4.5mb",
     },
   },
   async headers() {

@@ -502,13 +502,16 @@ Lokasi: `src/actions/profile-action.ts`
 | `removeAvatar`   | Hapus semua file avatar di folder user dan set `avatar_url = null`. | Storage `avatars`, `profiles` |
 | `changePassword` | Verifikasi password lama lalu update password baru.                 | Supabase Auth                 |
 
-## Voice Actions
+## AI Input Actions
 
 Lokasi:
 
 - `src/actions/voice-action.ts`
 - `src/lib/voice-parser.ts`
 - `src/hooks/use-voice-input.ts`
+- `src/actions/transaction-file-action.ts`
+- `src/lib/transaction-file-parser.ts`
+- `src/lib/transaction-parser.ts`
 
 ### `processVoiceInput`
 
@@ -532,6 +535,35 @@ Dependency:
 - Permission microphone dan audio stream client melalui `navigator.mediaDevices.getUserMedia`.
 - Gemini API melalui `@google/genai` di server.
 - `AI_API_KEY` dan optional `AI_MODEL`.
+
+### `processTransactionFile`
+
+Deskripsi: menerima satu file transaksi melalui `FormData`, memvalidasi user, ukuran, MIME, dan signature file, lalu meminta Gemini mengekstrak data transaksi untuk mengisi form.
+
+Input:
+
+```ts
+FormData {
+  file: File;
+}
+```
+
+Output:
+
+```ts
+ActionResult<FileAutoFillResult>;
+```
+
+Aturan:
+
+- User wajib terautentikasi sebelum request Gemini dijalankan.
+- Format yang diterima: JPEG, PNG, WebP, HEIC/HEIF, dan PDF.
+- Ukuran aplikasi maksimal 4 MB. `next.config.ts` memakai `serverActions.bodySizeLimit: "4.5mb"` untuk menyisakan multipart overhead di bawah batas request deployment.
+- File dikonversi menjadi Gemini `inlineData` di memory dan tidak disimpan ke Storage, database, cache, atau log produksi.
+- Isi dokumen diperlakukan sebagai input tidak tepercaya; parser mengabaikan instruksi di dalam dokumen dan tidak boleh mengarang field yang tidak tersedia.
+- Parser membedakan nominal transaksi utama dari saldo, subtotal, biaya, cashback, dan angka referensi.
+- Output memakai bentuk transaksi terstruktur yang sama dengan Voice Input dan melalui sanitasi server bersama.
+- Action hanya mengembalikan hasil ekstraksi. Penyimpanan transaksi tetap melalui `createTransaksi` setelah user memeriksa form dan menekan `Simpan`.
 
 ## Error Handling
 

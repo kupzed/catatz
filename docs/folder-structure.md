@@ -40,12 +40,12 @@ catatz/
 - `src/app/(auth)`: halaman auth user-facing, yaitu `/login` dan `/register`.
 - `src/app/(dashboard)`: halaman protected setelah login.
 - `src/app/auth/callback/route.ts`: Route Handler untuk menukar auth code Supabase menjadi session.
-- `src/actions`: Server Actions untuk auth, transaksi, rekening, kategori, hutang, rekap, profil, export, dan voice parsing.
+- `src/actions`: Server Actions untuk auth, transaksi, rekening, kategori, hutang, rekap, profil, export, voice parsing, dan file Auto Fill.
 - `src/components`: komponen reusable, termasuk shadcn/ui di `components/ui`, common component, error boundary, dan PWA components.
 - `src/configs`: konfigurasi environment dan Supabase client.
 - `src/constants`: data konstan seperti daftar bank/e-wallet.
 - `src/hooks`: hook client untuk mobile, online status, PWA install, dan voice input.
-- `src/lib`: helper umum seperti formatter, PDF/spreadsheet generator, offline queue, service worker registration, dan voice parser.
+- `src/lib`: helper umum seperti formatter, PDF/spreadsheet generator, offline queue, service worker registration, parser AI bersama, voice parser, dan parser file transaksi.
 - `src/migrations`: SQL migration manual untuk schema, RLS, trigger, storage bucket, dan grant API.
 - `src/providers`: provider global untuk theme dan React Query.
 - `src/scripts`: script maintenance, saat ini generator icon PWA.

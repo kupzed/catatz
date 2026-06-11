@@ -20,9 +20,12 @@ Fitur transaksi digunakan untuk mencatat pemasukan, pengeluaran, transfer antar 
 - Client page: `src/app/(dashboard)/transaksi/_components/transaksi-page-client.tsx`
 - Dialog: `src/app/(dashboard)/transaksi/_components/transaksi-dialog.tsx`
 - Voice button: `src/app/(dashboard)/transaksi/_components/voice-input-button.tsx`
+- File Auto Fill button: `src/app/(dashboard)/transaksi/_components/transaction-file-auto-fill-button.tsx`
 - Actions: `src/actions/transaksi-action.ts`
+- File parsing action: `src/actions/transaction-file-action.ts`
 - Validation: `src/validations/transaksi-validation.ts`
 - Types: `src/types/transaksi.d.ts`
+- AI parser types: `src/types/transaction-parser.d.ts`
 - Offline queue: `src/lib/offline-queue.ts`
 
 ## Data Source
@@ -50,6 +53,7 @@ Initial data diambil di Server Component dengan:
 - `getRecentJudul`
 - `suggestKategori`
 - `processVoiceInput` untuk input suara
+- `processTransactionFile` untuk Auto Fill gambar/PDF
 
 ## Business Rules
 
@@ -75,6 +79,12 @@ Initial data diambil di Server Component dengan:
 - Dialog membersihkan field yang tidak relevan saat tipe transaksi berubah, misalnya kategori untuk transfer dan rekening tujuan untuk non-transfer.
 - Judul suggestion diambil dari histori transaksi.
 - Input suara memakai browser Speech Recognition dan Gemini parser server-side.
+- Tombol Auto Fill berada di sebelah Voice Input pada mode tambah transaksi.
+- Auto Fill menerima satu file JPEG, PNG, WebP, HEIC/HEIF, atau PDF maksimal 4 MB dan langsung menganalisis file setelah dipilih.
+- File Auto Fill hanya diproses sementara di memory request, tidak disimpan ke Supabase Storage/database, dan hasil AI tidak membuat transaksi sampai user menekan `Simpan`.
+- Hanya field yang dikenali dengan cukup yakin yang menimpa form. Kategori dan rekening dipilih otomatis hanya jika ada satu kecocokan nama/logo yang kuat.
+- Jika satu file memuat beberapa transaksi, transaksi pertama mengisi form dan UI memberi informasi bahwa hasil lain perlu dimasukkan terpisah.
+- Voice Input dan Auto Fill tidak dapat berjalan bersamaan. Auto Fill bersifat online-only.
 - Saat offline, create/update/delete transaksi dapat masuk ke IndexedDB queue.
 - Pending transaksi offline ditampilkan sebagai data sementara dengan status menunggu sinkronisasi.
 

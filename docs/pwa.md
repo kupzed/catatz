@@ -69,6 +69,7 @@ Behavior:
 - Aplikasi mendeteksi mode standalone untuk mengetahui status installed.
 - Voice Input di mode Add to Home Screen meminta izin mikrofon melalui `getUserMedia`, memvalidasi audio track masih `live`, menunggu event start/audio start sebelum menandai state mendengar, dan membersihkan stream saat stop/error/end.
 - Error mikrofon seperti izin ditolak, audio capture gagal, koneksi speech gagal, atau pembatasan iOS standalone ditampilkan sebagai pesan fallback yang aman.
+- File Auto Fill transaksi bersifat online-only. Tombol dinonaktifkan saat offline dan file tidak dimasukkan ke offline queue.
 
 ## Service Worker
 
@@ -100,6 +101,8 @@ Behavior:
 - Fallback document -> `/offline.html`.
 
 Auth-sensitive request yang memiliki header authorization/cookie tidak diarahkan ke cache asset.
+
+Server Action Auto Fill tetap mengikuti rule POST same-origin `NetworkOnly`, sehingga file transaksi dan hasil parsing tidak disimpan oleh service worker.
 
 ## Offline Queue
 

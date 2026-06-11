@@ -27,6 +27,7 @@ Aplikasi saat ini berfokus pada pencatatan transaksi harian, pengelolaan rekenin
 - CRUD transaksi: income, expense, transfer, dan correction.
 - Offline queue untuk create, update, dan delete transaksi.
 - Input suara transaksi menggunakan browser Speech Recognition dan Gemini API melalui server action.
+- Auto Fill transaksi dari screenshot atau PDF menggunakan Gemini multimodal dengan file sementara yang tidak disimpan.
 - CRUD rekening dan koreksi saldo berbasis transaksi correction.
 - CRUD kategori custom dan kategori system read-only.
 - Hutang/piutang, cicilan, detail/edit/hapus cicilan, pelunasan dengan pilihan rekening, dan progress pembayaran.
@@ -38,7 +39,7 @@ Aplikasi saat ini berfokus pada pencatatan transaksi harian, pengelolaan rekenin
 
 - Auth: `src/app/(auth)`, `src/actions/auth-action.ts`, `src/app/auth/callback/route.ts`.
 - Dashboard shell: `src/app/(dashboard)/layout.tsx`, `src/components/common/app-sidebar.tsx`.
-- Transaksi: `src/app/(dashboard)/transaksi`, `src/actions/transaksi-action.ts`.
+- Transaksi: `src/app/(dashboard)/transaksi`, `src/actions/transaksi-action.ts`, `src/actions/voice-action.ts`, `src/actions/transaction-file-action.ts`.
 - Rekening: `src/app/(dashboard)/rekening`, `src/actions/rekening-action.ts`.
 - Kategori: `src/app/(dashboard)/kategori`, `src/actions/kategori-action.ts`.
 - Hutang/Piutang: `src/app/(dashboard)/hutang`, `src/actions/hutang-action.ts`.

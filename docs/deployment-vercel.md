@@ -106,6 +106,8 @@ Tambahkan URL local network jika memang dipakai untuk testing mobile.
 - [ ] `npm run build` menghasilkan `public/sw.js`.
 - [ ] `NEXT_PUBLIC_APP_URL` memakai origin production.
 - [ ] `AI_API_KEY` tersedia untuk fitur voice parsing.
+- [ ] `AI_API_KEY` dan model Gemini mendukung parsing gambar/PDF untuk Auto Fill transaksi.
+- [ ] Server Action body limit tetap `4.5mb`; UI/action membatasi file Auto Fill maksimal 4 MB agar request beserta multipart overhead tetap di bawah batas Vercel.
 
 ## Post-deployment Checklist
 
@@ -114,6 +116,7 @@ Tambahkan URL local network jika memang dipakai untuk testing mobile.
 - [ ] Login dan logout.
 - [ ] Buat rekening pertama.
 - [ ] Buat transaksi income/expense.
+- [ ] Uji Auto Fill dengan satu gambar dan satu PDF di bawah 4 MB; pastikan file tidak tersimpan dan transaksi baru dibuat hanya setelah menekan `Simpan`.
 - [ ] Cek saldo rekening berubah.
 - [ ] Cek rekap menampilkan data.
 - [ ] Coba export PDF, XLSX, dan CSV.

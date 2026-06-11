@@ -31,6 +31,7 @@ function detectIOSPWA(): boolean {
 type Props = {
   onParsed: (result: VoiceParseResult) => void;
   onError: (message: string) => void;
+  onBusyChange?: (busy: boolean) => void;
   disabled?: boolean;
 };
 
@@ -39,6 +40,7 @@ type Props = {
 export default function VoiceInputButton({
   onParsed,
   onError,
+  onBusyChange,
   disabled,
 }: Props) {
   const {
@@ -57,6 +59,21 @@ export default function VoiceInputButton({
   const [isProcessing, setIsProcessing] = useState(false);
   const [isIOSPWA, setIsIOSPWA] = useState(false);
   const processedTranscriptRef = useRef("");
+  const containerClassName =
+    "flex min-w-0 basis-full flex-col items-start gap-1.5 sm:min-w-48 sm:flex-1 sm:basis-0";
+  const isBusy =
+    isListening ||
+    isStarting ||
+    isProcessing ||
+    recordingState === "stopping";
+
+  useEffect(() => {
+    onBusyChange?.(isBusy);
+  }, [isBusy, onBusyChange]);
+
+  useEffect(() => {
+    return () => onBusyChange?.(false);
+  }, [onBusyChange]);
 
   // Deteksi platform di client side
   useEffect(() => {
@@ -86,12 +103,10 @@ export default function VoiceInputButton({
         } else {
           const msg = result.error ?? "Gagal memproses suara.";
           onError(msg);
-          toast.error(msg);
         }
       } catch {
         const msg = "Gagal memproses suara.";
         onError(msg);
-        toast.error(msg);
       } finally {
         setIsProcessing(false);
         resetTranscript();
@@ -138,25 +153,27 @@ export default function VoiceInputButton({
 
   if (!isSupported) {
     return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled
-              className="h-8 gap-1.5 text-muted-foreground"
-            >
-              <Mic className="h-3.5 w-3.5" />
-              Voice Input
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Browser tidak mendukung voice input</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <div className={containerClassName}>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled
+                className="h-11 gap-1.5 text-muted-foreground"
+              >
+                <Mic className="h-3.5 w-3.5" />
+                Voice Input
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Browser tidak mendukung voice input</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
     );
   }
 
@@ -172,16 +189,18 @@ export default function VoiceInputButton({
     }
 
     return (
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        disabled
-        className="h-8 gap-1.5"
-      >
-        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-        {label}
-      </Button>
+      <div className={containerClassName}>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled
+          className="h-11 gap-1.5"
+        >
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          {label}
+        </Button>
+      </div>
     );
   }
 
@@ -194,7 +213,7 @@ export default function VoiceInputButton({
   // ── Render: normal ─────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col items-start gap-1.5 w-full">
+    <div className={containerClassName}>
       <div className="flex items-center gap-2 w-full">
         <Button
           type="button"
@@ -202,7 +221,7 @@ export default function VoiceInputButton({
           size="sm"
           onClick={handleToggle}
           disabled={disabled || recordingState === "stopping"}
-          className={`h-8 gap-1.5 transition-all duration-200 ${
+          className={`h-11 gap-1.5 transition-all duration-200 ${
             isListening ? "animate-pulse" : ""
           }`}
         >
@@ -245,7 +264,7 @@ export default function VoiceInputButton({
 
       {/* Transcript live */}
       {isListening && transcript.length > 0 && (
-        <p className="text-[11px] text-muted-foreground italic leading-tight px-1 max-w-full truncate">
+        <p className="max-w-full break-words px-1 text-[11px] italic leading-tight text-muted-foreground">
           Mendengar: {transcript}
         </p>
       )}
