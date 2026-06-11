@@ -42,6 +42,8 @@ next build --webpack
 
 Catatan: webpack dipakai agar Serwist menghasilkan `public/sw.js`.
 
+Serwist dikonfigurasi dengan `disable: process.env.NODE_ENV !== "production"`. Phase deteksi/config Vercel yang bukan production build tidak mengaktifkan plugin Serwist, sehingga tidak memunculkan warning Turbopack palsu. Build production tetap memakai webpack dan tetap menghasilkan service worker.
+
 ## Output Directory
 
 Tidak ada output directory custom di `vercel.json`. Gunakan default Next.js/Vercel.
@@ -138,6 +140,7 @@ Cek:
 
 - Build command adalah `npm run build`.
 - `next build --webpack` berhasil.
+- `next.config.ts` hanya menonaktifkan Serwist saat `NODE_ENV` bukan `production`.
 - File `public/sw.js` ada setelah build.
 - Browser mengakses aplikasi melalui HTTPS.
 

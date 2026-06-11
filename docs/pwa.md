@@ -77,7 +77,7 @@ Serwist dikonfigurasi di `next.config.ts`:
 ```ts
 swSrc: "src/app/sw.ts"
 swDest: "public/sw.js"
-disable: process.env.NODE_ENV === "development"
+disable: process.env.NODE_ENV !== "production"
 register: false
 ```
 
@@ -86,6 +86,7 @@ Registration manual dilakukan oleh `src/lib/sw-register.ts`.
 Behavior:
 
 - Production mendaftarkan `/sw.js` melalui `navigator.serviceWorker.register("/sw.js", { scope: "/" })`.
+- Serwist hanya aktif saat `NODE_ENV=production`; development dan phase deteksi/config non-production tidak menjalankan plugin webpack Serwist.
 - Development tidak mendaftarkan service worker.
 - Development mencoba unregister service worker lama untuk origin saat ini dan menghapus cache `serwist-*`/`catatz-*` agar build production lama tidak memicu `bad-precaching-response` saat ngrok/local testing.
 
