@@ -74,7 +74,7 @@ Jika ingin memakai Supabase CLI local di masa depan:
 
 ## PWA Local
 
-- Development mode menonaktifkan Serwist melalui `disable: process.env.NODE_ENV === "development"`.
+- Semua phase selain production menonaktifkan Serwist melalui `disable: process.env.NODE_ENV !== "production"`.
 - Hook registration PWA juga tidak mendaftarkan `/sw.js` di development dan akan mencoba unregister service worker lama beserta cache `serwist-*`/`catatz-*`.
 - Service worker production dibuat saat `npm run build`.
 - Untuk test PWA lengkap, gunakan build production dan akses via HTTPS/domain yang valid.

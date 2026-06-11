@@ -18,11 +18,13 @@ File terkait:
 ```json
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
   "regions": ["sin1"]
 }
 ```
 
 Region production diset ke `sin1`.
+`buildCommand` dikunci di repository agar setting dashboard Vercel tidak menjalankan default `next build` yang memakai Turbopack pada Next.js 16.
 
 ## Package Manager
 
@@ -41,6 +43,8 @@ next build --webpack
 ```
 
 Catatan: webpack dipakai agar Serwist menghasilkan `public/sw.js`.
+
+Serwist dikonfigurasi dengan `disable: process.env.NODE_ENV !== "production"`. Build production tetap mengaktifkan Serwist, sehingga Vercel wajib menjalankan `npm run build` yang meneruskan flag `--webpack`.
 
 ## Output Directory
 
@@ -102,6 +106,8 @@ Tambahkan URL local network jika memang dipakai untuk testing mobile.
 - [ ] `npm run build` menghasilkan `public/sw.js`.
 - [ ] `NEXT_PUBLIC_APP_URL` memakai origin production.
 - [ ] `AI_API_KEY` tersedia untuk fitur voice parsing.
+- [ ] `AI_API_KEY` dan model Gemini mendukung parsing gambar/PDF untuk Auto Fill transaksi.
+- [ ] Server Action body limit tetap `4.5mb`; UI/action membatasi file Auto Fill maksimal 4 MB agar request beserta multipart overhead tetap di bawah batas Vercel.
 
 ## Post-deployment Checklist
 
@@ -110,6 +116,7 @@ Tambahkan URL local network jika memang dipakai untuk testing mobile.
 - [ ] Login dan logout.
 - [ ] Buat rekening pertama.
 - [ ] Buat transaksi income/expense.
+- [ ] Uji Auto Fill dengan satu gambar dan satu PDF di bawah 4 MB; pastikan file tidak tersimpan dan transaksi baru dibuat hanya setelah menekan `Simpan`.
 - [ ] Cek saldo rekening berubah.
 - [ ] Cek rekap menampilkan data.
 - [ ] Coba export PDF, XLSX, dan CSV.
@@ -136,8 +143,10 @@ Cek:
 
 Cek:
 
-- Build command adalah `npm run build`.
+- `vercel.json` memiliki `"buildCommand": "npm run build"`.
+- Build log menampilkan `Running "npm run build"` dan `Next.js ... (webpack)`, bukan `Running "next build"` atau `(Turbopack)`.
 - `next build --webpack` berhasil.
+- `next.config.ts` hanya menonaktifkan Serwist saat `NODE_ENV` bukan `production`.
 - File `public/sw.js` ada setelah build.
 - Browser mengakses aplikasi melalui HTTPS.
 

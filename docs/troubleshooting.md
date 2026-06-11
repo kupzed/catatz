@@ -99,6 +99,23 @@ Solusi:
 - Jika browser masih memakai service worker lama, hapus site data untuk origin ngrok/local dari DevTools.
 - Service worker penuh hanya divalidasi di production build melalui `npm run build`.
 
+## Warning Serwist tentang `next dev --turbopack` di Vercel
+
+Penyebab:
+
+- `@serwist/next` menampilkan warning saat environment `TURBOPACK` tersedia dan opsi `disable` bernilai false.
+- Next.js 16 memakai Turbopack secara default saat Vercel menjalankan `next build` tanpa flag bundler.
+- Build Command override di dashboard Vercel dapat melewati script `build` pada `package.json`.
+- Tanda masalah ini terlihat dari log `Running "next build"` dan banner `Next.js ... (Turbopack)`.
+
+Solusi:
+
+- Pertahankan `"buildCommand": "npm run build"` di `vercel.json` agar konfigurasi repository mengoverride Build Command dashboard.
+- Pertahankan `disable: process.env.NODE_ENV !== "production"` di `next.config.ts`.
+- Pertahankan script build `next build --webpack`.
+- Redeploy dan pastikan log menampilkan `Running "npm run build"` serta banner `(webpack)`.
+- Jangan hanya menambahkan `SERWIST_SUPPRESS_TURBOPACK_WARNING=1`, karena itu menyembunyikan warning tanpa membuat service worker Serwist kompatibel dengan bundler yang dipakai.
+
 ## Build error
 
 Kemungkinan penyebab:

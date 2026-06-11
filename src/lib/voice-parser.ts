@@ -4,7 +4,14 @@ import { GoogleGenAI, Type } from '@google/genai';
 import { serverEnvironment } from '@/configs/server-environment';
 import { format } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
-import type { VoiceParseResult, VoiceTransaction } from '@/types/voice-parser';
+import {
+  PARSED_TRANSACTION_SCHEMA,
+  cleanStructuredJson,
+  getErrorStatus,
+  isGeminiQuotaError,
+  sanitizeParsedTransaction,
+} from '@/lib/transaction-parser';
+import type { VoiceParseResult } from '@/types/voice-parser';
 
 // ═══════════════════════════════════════
 // BAGIAN 1: SYSTEM PROMPT CONSTANT
@@ -731,37 +738,12 @@ function buildDateContext(): string {
 // BAGIAN 4: RESPONSE SCHEMA (Gemini Structured Output)
 // ═══════════════════════════════════════
 
-const VOICE_TRANSACTION_SCHEMA = {
-  type: Type.OBJECT,
-  properties: {
-    tipe:                 { type: Type.STRING },
-    nominal:              { type: Type.NUMBER },
-    tanggal:              { type: Type.STRING },
-    waktu:                { type: Type.STRING },
-    kategori_hint:        { type: Type.STRING },
-    rekening_hint:        { type: Type.STRING },
-    rekening_tujuan_hint: { type: Type.STRING },
-    judul:                { type: Type.STRING },
-    catatan:              { type: Type.STRING },
-    entitas:              { type: Type.STRING },
-    confidence:           { type: Type.NUMBER },
-    needs_clarification:  { type: Type.BOOLEAN },
-    clarification_fields: { type: Type.ARRAY, items: { type: Type.STRING } },
-    flags:                { type: Type.ARRAY, items: { type: Type.STRING } },
-  },
-  required: [
-    'tipe', 'nominal', 'tanggal', 'waktu', 'kategori_hint', 'rekening_hint',
-    'rekening_tujuan_hint', 'judul', 'catatan', 'entitas',
-    'confidence', 'needs_clarification', 'clarification_fields', 'flags',
-  ],
-};
-
 const RESPONSE_SCHEMA = {
   type: Type.OBJECT,
   properties: {
     transactions: {
       type: Type.ARRAY,
-      items: VOICE_TRANSACTION_SCHEMA,
+      items: PARSED_TRANSACTION_SCHEMA,
     },
     raw_input:     { type: Type.STRING },
     parse_summary: { type: Type.STRING },
@@ -773,20 +755,8 @@ const RESPONSE_SCHEMA = {
 // BAGIAN 5: VALIDASI & SANITASI RESULT
 // ═══════════════════════════════════════
 
-const VALID_TIPE = ['expense', 'income', 'transfer', 'hutang_baru', 'piutang_baru', 'bayar_hutang'];
 const MAX_TRANSCRIPT_LENGTH = 1200;
 const GEMINI_TIMEOUT_MS = 20_000;
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
-function getErrorStatus(error: unknown) {
-  if (!isRecord(error)) return undefined;
-
-  const status = error.status;
-  return typeof status === 'number' ? status : undefined;
-}
 
 function logGeminiError(error: unknown) {
   if (process.env.NODE_ENV === 'production') return;
@@ -797,51 +767,6 @@ function logGeminiError(error: unknown) {
     status: getErrorStatus(error),
     message,
   });
-}
-
-function sanitizeTransaction(t: VoiceTransaction): VoiceTransaction {
-  // 1. Validasi tipe
-  if (!VALID_TIPE.includes(t.tipe)) {
-    t.tipe = 'expense';
-  }
-
-  // 2. Validasi nominal
-  const nominal = Number(t.nominal);
-  t.nominal = isNaN(nominal) || nominal < 0 ? 0 : Math.round(nominal);
-
-  // 3. Validasi tanggal format YYYY-MM-DD
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(t.tanggal)) {
-    t.tanggal = format(new Date(), 'yyyy-MM-dd');
-  }
-
-  // 4. Clamp confidence
-  t.confidence = Math.min(1, Math.max(0, Number(t.confidence) || 0.5));
-
-  // 5. Auto-flag nominal_missing saat nominal 0
-  if (!Array.isArray(t.flags)) t.flags = [];
-  if (t.nominal === 0 && !t.flags.includes('nominal_missing')) {
-    t.flags.push('nominal_missing');
-  }
-
-  // 6. Auto-fill clarification_fields dari flags bila kosong
-  if (!Array.isArray(t.clarification_fields)) t.clarification_fields = [];
-  if (t.needs_clarification && t.clarification_fields.length === 0) {
-    if (t.flags.includes('nominal_missing'))  t.clarification_fields.push('nominal');
-    if (t.flags.includes('rekening_ambigu')) t.clarification_fields.push('rekening_hint');
-    if (t.flags.includes('tipe_ambigu'))     t.clarification_fields.push('tipe');
-  }
-
-  // 7. Truncate judul ≤ 50 chars
-  if (typeof t.judul === 'string' && t.judul.length > 50) {
-    t.judul = t.judul.slice(0, 50);
-  }
-
-  // 8. Truncate catatan ≤ 200 chars
-  if (typeof t.catatan === 'string' && t.catatan.length > 200) {
-    t.catatan = t.catatan.slice(0, 200);
-  }
-
-  return t;
 }
 
 // ═══════════════════════════════════════
@@ -908,14 +833,15 @@ export async function parseVoiceTranscript(rawTranscript: string): Promise<Voice
       clearTimeout(timeoutId);
 
       // 5. Parse JSON
-      let parsed: VoiceParseResult;
+      let parsed: {
+        transactions?: unknown[];
+        parse_summary?: unknown;
+      };
       try {
-        const cleaned = rawText
-          .trim()
-          .replace(/^```(?:json)?\s*/i, '')
-          .replace(/\s*```$/, '')
-          .trim();
-        parsed = JSON.parse(cleaned) as VoiceParseResult;
+        parsed = JSON.parse(cleanStructuredJson(rawText)) as {
+          transactions?: unknown[];
+          parse_summary?: unknown;
+        };
       } catch {
         return {
           transactions: [],
@@ -925,10 +851,16 @@ export async function parseVoiceTranscript(rawTranscript: string): Promise<Voice
       }
 
       // 6. Sanitasi setiap transaksi
-      parsed.transactions = (parsed.transactions ?? []).map(sanitizeTransaction);
-
-      // 7. Return
-      return parsed;
+      return {
+        transactions: (parsed.transactions ?? []).map((transaction) =>
+          sanitizeParsedTransaction(transaction, format(new Date(), 'yyyy-MM-dd')),
+        ),
+        raw_input: rawTranscript,
+        parse_summary:
+          typeof parsed.parse_summary === 'string'
+            ? parsed.parse_summary.trim().slice(0, 300)
+            : '',
+      };
     } finally {
       clearTimeout(timeoutId);
     }
@@ -944,14 +876,7 @@ export async function parseVoiceTranscript(rawTranscript: string): Promise<Voice
       };
     }
 
-    const status = getErrorStatus(err);
-    const message = err instanceof Error ? err.message : String(err);
-    if (
-      status === 429 ||
-      message.includes('quota') ||
-      message.includes('429') ||
-      message.includes('RESOURCE_EXHAUSTED')
-    ) {
+    if (isGeminiQuotaError(err)) {
       return {
         transactions: [],
         raw_input: rawTranscript,

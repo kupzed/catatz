@@ -69,6 +69,7 @@ Behavior:
 - Aplikasi mendeteksi mode standalone untuk mengetahui status installed.
 - Voice Input di mode Add to Home Screen meminta izin mikrofon melalui `getUserMedia`, memvalidasi audio track masih `live`, menunggu event start/audio start sebelum menandai state mendengar, dan membersihkan stream saat stop/error/end.
 - Error mikrofon seperti izin ditolak, audio capture gagal, koneksi speech gagal, atau pembatasan iOS standalone ditampilkan sebagai pesan fallback yang aman.
+- File Auto Fill transaksi bersifat online-only. Tombol dinonaktifkan saat offline dan file tidak dimasukkan ke offline queue.
 
 ## Service Worker
 
@@ -77,7 +78,7 @@ Serwist dikonfigurasi di `next.config.ts`:
 ```ts
 swSrc: "src/app/sw.ts"
 swDest: "public/sw.js"
-disable: process.env.NODE_ENV === "development"
+disable: process.env.NODE_ENV !== "production"
 register: false
 ```
 
@@ -86,6 +87,7 @@ Registration manual dilakukan oleh `src/lib/sw-register.ts`.
 Behavior:
 
 - Production mendaftarkan `/sw.js` melalui `navigator.serviceWorker.register("/sw.js", { scope: "/" })`.
+- Serwist hanya aktif saat `NODE_ENV=production`; development dan phase deteksi/config non-production tidak menjalankan plugin webpack Serwist.
 - Development tidak mendaftarkan service worker.
 - Development mencoba unregister service worker lama untuk origin saat ini dan menghapus cache `serwist-*`/`catatz-*` agar build production lama tidak memicu `bad-precaching-response` saat ngrok/local testing.
 
@@ -99,6 +101,8 @@ Behavior:
 - Fallback document -> `/offline.html`.
 
 Auth-sensitive request yang memiliki header authorization/cookie tidak diarahkan ke cache asset.
+
+Server Action Auto Fill tetap mengikuti rule POST same-origin `NetworkOnly`, sehingga file transaksi dan hasil parsing tidak disimpan oleh service worker.
 
 ## Offline Queue
 

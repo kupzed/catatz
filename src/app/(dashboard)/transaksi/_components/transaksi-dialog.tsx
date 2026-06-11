@@ -14,13 +14,21 @@ import {
   getRecentJudul,
 } from "@/actions/transaksi-action";
 import dynamic from "next/dynamic";
-import type { VoiceParseResult } from "@/types/voice-parser";
+import type { ParsedTransactionResult } from "@/types/transaction-parser";
 import { addToQueue, type QueuedAction } from "@/lib/offline-queue";
+import { resolveAutoFillTransaction } from "@/lib/transaction-auto-fill";
 
 const VoiceInputButton = dynamic(() => import("./voice-input-button"), {
   ssr: false,
   loading: () => null,
 });
+const TransactionFileAutoFillButton = dynamic(
+  () => import("./transaction-file-auto-fill-button"),
+  {
+    ssr: false,
+    loading: () => null,
+  },
+);
 import { toast } from "sonner";
 import type { Transaksi, Kategori, JudulSuggestion } from "@/types/transaksi";
 import type { Rekening } from "@/types/rekening";
@@ -82,6 +90,8 @@ export default function TransaksiDialog({
   const isCorrection = editData?.tipe === "correction";
   const [submitting, setSubmitting] = useState(false);
   const [copying, setCopying] = useState(false);
+  const [voiceBusy, setVoiceBusy] = useState(false);
+  const [fileBusy, setFileBusy] = useState(false);
   const [suggestions, setSuggestions] = useState<JudulSuggestion[]>([]);
   const { formatRupiah } = useSystemPreferences();
 
@@ -198,7 +208,10 @@ export default function TransaksiDialog({
     }
   }
 
-  function handleVoiceParsed(result: VoiceParseResult) {
+  function handleParsedResult(
+    result: ParsedTransactionResult,
+    source: "suara" | "file",
+  ) {
     const transactions = result.transactions;
     if (transactions.length === 0) {
       toast.info(result.parse_summary || "Tidak ada transaksi terdeteksi");
@@ -206,61 +219,58 @@ export default function TransaksiDialog({
     }
 
     const first = transactions[0];
+    const resolved = resolveAutoFillTransaction(first, kategori, rekening);
+    const nextTipe =
+      resolved.tipe ??
+      (tipe === "income" || tipe === "expense" || tipe === "transfer"
+        ? tipe
+        : "expense");
+    const dirtyOptions = { shouldDirty: true };
 
-    // Set field form dari hasil parsing transaksi pertama
-    if (
-      first.tipe === "expense" ||
-      first.tipe === "income" ||
-      first.tipe === "transfer"
+    if (resolved.tipe) {
+      setValue("tipe", resolved.tipe, dirtyOptions);
+    } else if (
+      first.tipe === "hutang_baru" ||
+      first.tipe === "piutang_baru" ||
+      first.tipe === "bayar_hutang"
     ) {
-      setValue("tipe", first.tipe);
-    } else {
-      // Untuk hutang/piutang: default ke expense dengan toast info
-      setValue("tipe", "expense");
       toast.info(`Terdeteksi: ${first.tipe}. Silakan sesuaikan manual.`);
     }
 
-    if (first.nominal > 0) setValue("nominal", first.nominal);
-    if (first.tanggal) setValue("tanggal", first.tanggal);
-    if (first.waktu) setValue("waktu", first.waktu);
-    if (first.judul) setValue("judul", first.judul);
-    if (first.catatan) setValue("catatan", first.catatan);
+    if (
+      first.nominal > 0 &&
+      !first.flags.includes("nominal_ambigu") &&
+      !first.flags.includes("total_ambigu")
+    ) {
+      setValue("nominal", first.nominal, dirtyOptions);
+    }
+    if (first.tanggal && !first.flags.includes("tanggal_ambigu")) {
+      setValue("tanggal", first.tanggal, dirtyOptions);
+    }
+    if (first.waktu) setValue("waktu", first.waktu, dirtyOptions);
 
-    // Fuzzy match kategori
-    if (first.kategori_hint) {
-      const matchedKat = kategori.find(
-        (k) =>
-          k.nama.toLowerCase().includes(first.kategori_hint.toLowerCase()) ||
-          first.kategori_hint.toLowerCase().includes(k.nama.toLowerCase()),
-      );
-      if (matchedKat) {
-        setTimeout(() => setValue("kategori_id", matchedKat.id), 50);
+    if (nextTipe === "transfer") {
+      setValue("judul", null, dirtyOptions);
+      setValue("kategori_id", undefined, dirtyOptions);
+    } else if (resolved.judul) {
+      setValue("judul", resolved.judul, dirtyOptions);
+    }
+
+    if (resolved.catatan) {
+      setValue("catatan", resolved.catatan, dirtyOptions);
+    }
+    if (resolved.rekeningId) {
+      setValue("rekening_id", resolved.rekeningId, dirtyOptions);
+    }
+
+    window.setTimeout(() => {
+      if (nextTipe !== "transfer" && resolved.kategoriId) {
+        setValue("kategori_id", resolved.kategoriId, dirtyOptions);
       }
-    }
-
-    // Fuzzy match rekening asal
-    if (first.rekening_hint) {
-      const matchedRek = rekening.find(
-        (r) =>
-          r.nama.toLowerCase().includes(first.rekening_hint.toLowerCase()) ||
-          r.logo?.toLowerCase().includes(first.rekening_hint.toLowerCase()),
-      );
-      if (matchedRek) setValue("rekening_id", matchedRek.id);
-    }
-
-    // Fuzzy match rekening tujuan (untuk tipe transfer)
-    if (first.rekening_tujuan_hint) {
-      const matchedRekTujuan = rekening.find(
-        (r) =>
-          r.nama
-            .toLowerCase()
-            .includes(first.rekening_tujuan_hint.toLowerCase()) ||
-          r.logo
-            ?.toLowerCase()
-            .includes(first.rekening_tujuan_hint.toLowerCase()),
-      );
-      if (matchedRekTujuan) setValue("rekening_tujuan", matchedRekTujuan.id);
-    }
+      if (nextTipe === "transfer" && resolved.rekeningTujuanId) {
+        setValue("rekening_tujuan", resolved.rekeningTujuanId, dirtyOptions);
+      }
+    }, 0);
 
     // Handle multiple transactions: toast info
     if (transactions.length > 1) {
@@ -272,14 +282,37 @@ export default function TransaksiDialog({
       );
     }
 
-    // Handle needs_clarification
-    if (first.needs_clarification) {
-      const fieldsText = first.clarification_fields.join(", ");
-      toast.warning(`Mohon periksa: ${fieldsText}`, { duration: 6000 });
+    const clarificationLabels: Record<string, string> = {
+      nominal: "nominal",
+      tanggal: "tanggal",
+      waktu: "waktu",
+      tipe: "jenis transaksi",
+      rekening: "rekening",
+      rekening_hint: "rekening",
+      rekening_tujuan: "rekening tujuan",
+      kategori: "kategori",
+    };
+    const clarificationWarnings = first.clarification_fields.map(
+      (field) => clarificationLabels[field] ?? field.replaceAll("_", " "),
+    );
+    const warnings = Array.from(
+      new Set([...resolved.warnings, ...clarificationWarnings]),
+    );
+
+    if (warnings.length > 0) {
+      toast.warning(`Mohon periksa: ${warnings.join(", ")}`, {
+        duration: 6000,
+      });
     }
 
-    // Toast sukses
-    toast.success(`Terisi dari suara: ${first.judul || result.parse_summary}`);
+    toast.success(
+      `Terisi dari ${source}: ${
+        first.judul ||
+        first.entitas ||
+        result.parse_summary ||
+        "periksa kembali form transaksi"
+      }`,
+    );
   }
 
   async function onSubmit(values: TransaksiSchema) {
@@ -379,16 +412,30 @@ export default function TransaksiDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {/* AI Voice Input — hanya tampil saat create (bukan edit & bukan correction) */}
+        {/* AI input hanya tampil saat create (bukan edit & bukan correction). */}
         {!isEdit && !copyFrom && (
-          <div className="space-y-2 p-3 rounded-input bg-primary/5 border border-primary/20">
+          <div className="space-y-3 rounded-card border border-primary/20 bg-primary/5 p-4">
             <Label className="text-xs text-primary flex items-center gap-1">
-              <Sparkles className="h-3 w-3" /> Input Natural (AI)
+              <Sparkles className="h-3.5 w-3.5" /> Input Otomatis (AI)
             </Label>
-            <VoiceInputButton
-              onParsed={handleVoiceParsed}
-              onError={(msg) => toast.error(msg)}
-            />
+            <div className="flex flex-wrap items-start gap-2">
+              <VoiceInputButton
+                onParsed={(result) => handleParsedResult(result, "suara")}
+                onError={(msg) => toast.error(msg)}
+                onBusyChange={setVoiceBusy}
+                disabled={fileBusy}
+              />
+              <TransactionFileAutoFillButton
+                onParsed={(result) => handleParsedResult(result, "file")}
+                onError={(msg) => toast.error(msg)}
+                onBusyChange={setFileBusy}
+                disabled={voiceBusy}
+              />
+            </div>
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              Unggah screenshot atau PDF maksimal 4 MB. File diproses sementara
+              oleh AI dan tidak disimpan.
+            </p>
           </div>
         )}
 
@@ -478,7 +525,7 @@ export default function TransaksiDialog({
                 <span className="text-muted-foreground text-xs">
                   ({correctionRekening?.jenis})
                 </span>
-                <span className="ml-auto text-xs text-muted-foreground">
+                <span className="ml-auto font-mono text-xs text-muted-foreground">
                   {formatRupiah(correctionRekening?.saldo_saat_ini ?? 0)}
                 </span>
               </div>
@@ -544,7 +591,7 @@ export default function TransaksiDialog({
                   value={field.value || ""}
                   onValueChange={field.onChange}
                   className={cn(
-                    "text-lg font-semibold",
+                    "font-mono text-lg font-semibold",
                     errors.nominal && "border-rose-500",
                   )}
                 />
@@ -677,7 +724,7 @@ export default function TransaksiDialog({
               </Button>
               <Button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || voiceBusy || fileBusy}
                 className="bg-primary hover:bg-primary-active text-white rounded-full h-11 px-5"
               >
                 {submitting ? (

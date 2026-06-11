@@ -33,6 +33,8 @@ Security headers saat ini:
 - [ ] `.env` dan `.env.local` tidak ter-commit.
 - [ ] Secret tidak memakai prefix `NEXT_PUBLIC_`.
 - [ ] `AI_API_KEY` hanya server-side.
+- [ ] File Auto Fill divalidasi ukuran, MIME, dan signature sebelum dikirim ke Gemini.
+- [ ] File Auto Fill tidak disimpan ke Storage, database, cache, atau log produksi.
 - [ ] Service role key tidak digunakan di client.
 - [ ] Production env di Vercel lengkap.
 - [ ] `NEXT_PUBLIC_APP_URL` sesuai domain production.
@@ -72,5 +74,6 @@ Security headers saat ini:
 - Delete rekening diproteksi di Server Action dan trigger database agar transaksi, hutang/piutang, cicilan, atau template berulang tidak kehilangan referensi rekening.
 - Kolom formatting baru di `user_preferences` (`show_decimal_places`, `time_format`) tetap berada di table user-owned yang dibatasi RLS `auth.uid() = user_id`.
 - Bucket `avatars` public read. Ini cocok untuk avatar, tetapi tidak cocok untuk dokumen privat.
+- Bukti transaksi Auto Fill diproses sementara di memory request dan tidak menggunakan bucket `avatars` atau bucket public lain.
 - `kategori` memberi SELECT kepada `anon`; RLS hanya memperbolehkan kategori system untuk anon karena `auth.uid()` null tidak cocok dengan kategori user.
 - Tidak ada service role key di codebase saat ini. Pertahankan kondisi ini kecuali ada kebutuhan server-only yang kuat.
