@@ -64,7 +64,14 @@ test.describe("mobile dashboard layout", () => {
     );
 
     await page.getByRole("button", { name: "Close" }).click();
-    await page.getByRole("button", { name: "Edit transaksi TopUp Games" }).click();
+    await page.locator("#filter-periode").click();
+    await page.getByRole("option", { name: "Semua Waktu" }).click();
+
+    const editTransactionButton = page.getByRole("button", {
+      name: "Edit transaksi TopUp Games",
+    });
+    await expect(editTransactionButton).toBeVisible();
+    await editTransactionButton.click();
 
     const footerButtons = ["Copy", "Batal", "Perbarui"].map((name) =>
       page.getByRole("button", { name, exact: true }),
