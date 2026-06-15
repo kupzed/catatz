@@ -67,6 +67,8 @@ Behavior:
 - Dismiss install banner disimpan di localStorage key `catatz_pwa_dismissed` dengan cooldown 7 hari.
 - iOS Safari memakai guide manual, bukan prompt native.
 - Aplikasi mendeteksi mode standalone untuk mengetahui status installed.
+- Dashboard, drawer sidebar, dialog, dan area konten mengonsumsi CSS safe-area inset agar header, footer, dan form tidak bertabrakan dengan status bar, home indicator, atau area notch pada mode standalone.
+- Dialog form panjang dibatasi dengan `100dvh` dan scroll internal sehingga tetap dapat digunakan pada layar mobile kecil tanpa keluar dari viewport.
 - Voice Input di mode Add to Home Screen meminta izin mikrofon melalui `getUserMedia`, memvalidasi audio track masih `live`, menunggu event start/audio start sebelum menandai state mendengar, dan membersihkan stream saat stop/error/end.
 - Error mikrofon seperti izin ditolak, audio capture gagal, koneksi speech gagal, atau pembatasan iOS standalone ditampilkan sebagai pesan fallback yang aman.
 - File Auto Fill transaksi bersifat online-only. Tombol dinonaktifkan saat offline dan file tidak dimasukkan ke offline queue.
@@ -151,6 +153,7 @@ Dependency:
 - [x] POST dan `/api/*` tidak di-cache.
 - [x] Offline queue transaksi tersedia.
 - [x] Voice Input memiliki permission/stream fallback untuk iOS Add to Home Screen.
+- [x] Dashboard drawer dan dialog menghormati safe area perangkat.
 
 ## Deployment HTTPS
 

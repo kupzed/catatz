@@ -257,12 +257,16 @@ Gunakan `Skeleton` untuk loading route/data yang membutuhkan waktu.
 - Mobile memakai sidebar trigger dan layout safe-area.
 - Header dashboard sticky dan memperhitungkan `env(safe-area-inset-top)`.
 - Main content memperhitungkan `env(safe-area-inset-bottom)`.
+- Drawer mobile memberi padding `safe-area-inset-top`, `safe-area-inset-bottom`, dan inset horizontal sesuai sisi drawer agar header/footer tidak masuk ke area sistem perangkat.
+- Dialog mobile memakai `100dvh`, batas tinggi yang dikurangi safe area, `overscroll-contain`, dan padding lebih ringkas. Mulai breakpoint `sm`, dialog kembali terpusat dengan padding desktop.
 - Settings memakai sidebar nav desktop dan tab strip mobile.
 
 **Aturan responsive untuk angka dan teks:**
 - Angka nominal di grid 3-kolom (mobile): gunakan `text-xs sm:text-sm`, `break-all`, `min-w-0`.
 - Teks panjang (email, nama): gunakan `truncate` dan pastikan container punya `min-w-0 overflow-hidden`.
 - Padding card: `px-3 sm:px-6` agar lebih lega di mobile.
+- Filter yang memiliki tiga kontrol menggunakan grid dua kolom pada layar kecil; kontrol terpanjang dapat memakai `col-span-2`, lalu kembali menjadi tiga kolom mulai `sm`.
+- Kelompok action yang wajib selalu terlihat memakai grid kompak tanpa horizontal scroll. Tombol ikon tetap wajib memiliki nama aksesibel dan touch target minimum 44px.
 
 ### Breakpoint Reference (DESIGN.md)
 

@@ -115,7 +115,7 @@ export default function HutangDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-sm sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
             {isEdit ? "Edit Hutang" : "Catat Hutang/Piutang"}

@@ -22,6 +22,12 @@ const isDevelopment = process.env.NODE_ENV === "development";
 const allowedDevOrigins = isDevelopment ? environment.allowedDevOrigins : [];
 
 const nextConfig: NextConfig = {
+  distDir: process.env.NEXT_DIST_DIR || ".next",
+  typescript: {
+    tsconfigPath: process.env.NEXT_DIST_DIR === ".next-e2e"
+      ? "tsconfig.e2e.json"
+      : "tsconfig.json",
+  },
   // Serwist is used because @serwist/next 9.5.11 peers Next >=14, React >=18, and TS >=5.
   // @ducanh2912/next-pwa also peers Next >=14, but still requires webpack >=5.
   // CatatZ keeps Turbopack config for the app, while the production build script uses

@@ -107,7 +107,7 @@ export default function TransactionFileAutoFillButton({
   }
 
   return (
-    <div className="flex min-w-0 basis-full flex-col items-start gap-1.5 sm:min-w-48 sm:flex-1 sm:basis-0">
+    <div className="flex min-w-0 w-full flex-col items-start gap-1.5">
       <input
         ref={inputRef}
         type="file"
@@ -123,7 +123,7 @@ export default function TransactionFileAutoFillButton({
         type="button"
         variant="outline"
         size="sm"
-        className="h-11 gap-1.5"
+        className="h-11 w-full gap-1 px-2 text-xs sm:px-4 sm:text-sm"
         onClick={() => inputRef.current?.click()}
         disabled={disabled || isProcessing || !isOnline}
         aria-label="Pilih file untuk Auto Fill transaksi"

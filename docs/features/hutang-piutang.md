@@ -69,6 +69,7 @@ Initial data diambil dengan:
 - User bisa membuka Detail untuk melihat daftar cicilan.
 - User bisa mengedit dan menghapus cicilan dari Detail.
 - User bisa lunaskan catatan melalui dialog pilihan rekening.
+- Action Detail, Cicilan, Lunas, Edit, dan Hapus menggunakan grid satu baris pada mobile tanpa horizontal scroll; tombol ikon memiliki label aksesibel dan touch target 44px.
 - Tombol WhatsApp reminder tidak tersedia.
 
 ## TODO / Improvement

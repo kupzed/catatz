@@ -54,7 +54,7 @@ export function TransaksiFilterBar({
         </Button>
       </div>
 
-      <div className="flex w-full gap-2">
+      <div className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3">
         <Select
           value={`${filter.sortBy}-${filter.sortOrder}`}
           onValueChange={(v) => {
@@ -67,7 +67,8 @@ export function TransaksiFilterBar({
         >
           <SelectTrigger
             size="sm"
-            className="flex-1 text-xs text-foreground border-hairline"
+            className="h-11! min-w-0 text-sm text-foreground border-hairline"
+            id="filter-sort"
           >
             <SelectValue placeholder="Urutkan" />
           </SelectTrigger>
@@ -98,7 +99,7 @@ export function TransaksiFilterBar({
         >
           <SelectTrigger
             size="sm"
-            className="flex-1 text-xs text-foreground border-hairline"
+            className="h-11! min-w-0 text-sm text-foreground border-hairline"
             id="filter-tipe"
           >
             <SelectValue placeholder="Semua tipe" />
@@ -125,7 +126,7 @@ export function TransaksiFilterBar({
           includeNone={true}
           noneLabel="Semua Rekening"
           size="sm"
-          className="flex-1 text-xs text-foreground border-hairline"
+          className="col-span-2 h-11! min-w-0 text-sm text-foreground border-hairline sm:col-span-1"
           id="filter-rekening"
         />
       </div>

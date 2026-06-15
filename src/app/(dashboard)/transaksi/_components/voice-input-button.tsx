@@ -59,8 +59,9 @@ export default function VoiceInputButton({
   const [isProcessing, setIsProcessing] = useState(false);
   const [isIOSPWA, setIsIOSPWA] = useState(false);
   const processedTranscriptRef = useRef("");
-  const containerClassName =
-    "flex min-w-0 basis-full flex-col items-start gap-1.5 sm:min-w-48 sm:flex-1 sm:basis-0";
+  const containerClassName = "flex min-w-0 w-full flex-col items-start gap-1.5";
+  const buttonClassName =
+    "h-11 w-full gap-1 px-2 text-xs sm:px-4 sm:text-sm";
   const isBusy =
     isListening ||
     isStarting ||
@@ -162,7 +163,7 @@ export default function VoiceInputButton({
                 variant="outline"
                 size="sm"
                 disabled
-                className="h-11 gap-1.5 text-muted-foreground"
+                className={`${buttonClassName} text-muted-foreground`}
               >
                 <Mic className="h-3.5 w-3.5" />
                 Voice Input
@@ -195,7 +196,7 @@ export default function VoiceInputButton({
           variant="outline"
           size="sm"
           disabled
-          className="h-11 gap-1.5"
+          className={buttonClassName}
         >
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
           {label}
@@ -214,14 +215,14 @@ export default function VoiceInputButton({
 
   return (
     <div className={containerClassName}>
-      <div className="flex items-center gap-2 w-full">
+      <div className="relative flex w-full items-center">
         <Button
           type="button"
           variant={isListening ? "destructive" : "outline"}
           size="sm"
           onClick={handleToggle}
           disabled={disabled || recordingState === "stopping"}
-          className={`h-11 gap-1.5 transition-all duration-200 ${
+          className={`${buttonClassName} transition-all duration-200 ${
             isListening ? "animate-pulse" : ""
           }`}
         >
@@ -245,7 +246,7 @@ export default function VoiceInputButton({
               <TooltipTrigger asChild>
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center h-7 w-7 rounded-full text-amber-500 hover:bg-amber-500/10 transition-colors"
+                  className="absolute top-1/2 right-1.5 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-amber-500 transition-colors hover:bg-surface-strong"
                   aria-label="Informasi voice input iOS"
                 >
                   <Info className="h-3.5 w-3.5" />

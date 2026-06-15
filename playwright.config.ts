@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3000";
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3100";
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -33,16 +33,10 @@ export default defineConfig({
           timeout: 30_000,
         },
         {
-          command: "npm run dev -- --hostname 127.0.0.1",
+          command: "node tests/e2e/start-app.mjs",
           url: baseURL,
           reuseExistingServer: !process.env.CI,
           timeout: 120_000,
-          env: {
-            NEXT_PUBLIC_APP_URL: baseURL,
-            NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:55431",
-            NEXT_PUBLIC_SUPABASE_ANON_KEY: "catatz-e2e-anon-key",
-            AI_API_KEY: "catatz-e2e-ai-key",
-          },
         },
       ],
 });

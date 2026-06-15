@@ -30,11 +30,11 @@ CatatZ memakai subset Everything Claude Code (ECC) untuk menstandarkan planning,
 | `npm run test` | Unit test Vitest satu kali |
 | `npm run test:watch` | Unit test dalam watch mode |
 | `npm run test:coverage` | Coverage V8 untuk modul yang sudah masuk baseline |
-| `npm run test:e2e` | Playwright Chromium dengan mock Supabase lokal |
+| `npm run test:e2e` | Playwright Chromium dengan mock Supabase lokal terautentikasi |
 | `npm run verify:quick` | Lint, typecheck, dan unit test |
 | `npm run verify` | Quick verification, coverage, E2E, dan production build |
 
-Vitest dipakai untuk helper, validation, state, dan komponen sinkron. Playwright dipakai untuk async Server Components dan alur browser. Test awal tidak menghubungi Supabase atau Gemini production. Target 80% diterapkan pada kode baru/diubah dan modul pure yang secara eksplisit masuk konfigurasi coverage.
+Vitest dipakai untuk helper, validation, state, dan komponen sinkron. Playwright dipakai untuk async Server Components dan alur browser. Test E2E menjalankan aplikasi pada port `3100` dengan output Next.js terisolasi di `.next-e2e`, memakai fixture Supabase lokal terautentikasi, dan tidak menghubungi Supabase atau Gemini production. Target 80% diterapkan pada kode baru/diubah dan modul pure yang secara eksplisit masuk konfigurasi coverage.
 
 ## Hooks dan Privacy
 

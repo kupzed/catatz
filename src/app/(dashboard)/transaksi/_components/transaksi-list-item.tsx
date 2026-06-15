@@ -178,6 +178,7 @@ export function TransaksiListItem({
             className="h-8 w-8 rounded-full bg-surface-strong hover:bg-surface-strong/80"
             disabled={transaksi._pendingSync}
             onClick={() => onEdit(transaksi)}
+            aria-label={`Edit transaksi ${displayName}`}
           >
             <Pencil className="h-3.5 w-3.5" />
           </Button>
@@ -199,6 +200,7 @@ export function TransaksiListItem({
               size="icon"
               className="h-8 w-8 rounded-full bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20"
               disabled={isDeleting}
+              aria-label={`Hapus transaksi ${displayName}`}
             >
               <Trash2 className="h-3.5 w-3.5" />
             </Button>

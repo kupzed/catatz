@@ -44,7 +44,7 @@ export function HutangCicilanDetail({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-sm sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Detail Cicilan</DialogTitle>
           <DialogDescription>

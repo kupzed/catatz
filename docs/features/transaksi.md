@@ -71,8 +71,10 @@ Initial data diambil di Server Component dengan:
 ## UI Behavior
 
 - User bisa filter periode, tipe, rekening, search judul/catatan/kategori, dan sorting.
+- Pada mobile, filter urutan dan tipe tampil dalam dua kolom, sedangkan filter rekening memakai satu baris penuh agar label tidak terpotong. Mulai breakpoint `sm`, ketiganya kembali sejajar dalam satu baris.
 - Query `?new=true` membuka dialog transaksi baru otomatis.
 - Dialog mendukung mode create, edit, copy, dan correction readonly behavior.
+- Dialog mobile menghormati safe area dan tinggi viewport dinamis, dengan scroll internal untuk form panjang.
 - Tanggal default dialog create normal mengikuti tanggal/periode yang sedang dipilih di halaman transaksi; waktu tetap memakai waktu saat dialog dibuka.
 - Field kategori hanya tampil untuk income/expense.
 - Field rekening tujuan hanya tampil untuk transfer.
@@ -80,6 +82,8 @@ Initial data diambil di Server Component dengan:
 - Judul suggestion diambil dari histori transaksi.
 - Input suara memakai browser Speech Recognition dan Gemini parser server-side.
 - Tombol Auto Fill berada di sebelah Voice Input pada mode tambah transaksi.
+- Voice Input dan Auto Fill memakai dua kolom dengan lebar serta tinggi tombol yang seragam pada mobile.
+- Footer edit transaksi menampilkan Copy, Batal, dan Perbarui dalam satu baris tiga kolom pada mobile; mode tanpa Copy memakai dua kolom.
 - Auto Fill menerima satu file JPEG, PNG, WebP, HEIC/HEIF, atau PDF maksimal 4 MB dan langsung menganalisis file setelah dipilih.
 - File Auto Fill hanya diproses sementara di memory request, tidak disimpan ke Supabase Storage/database, dan hasil AI tidak membuat transaksi sampai user menekan `Simpan`.
 - Hanya field yang dikenali dengan cukup yakin yang menimpa form. Kategori dan rekening dipilih otomatis hanya jika ada satu kecocokan nama/logo yang kuat.

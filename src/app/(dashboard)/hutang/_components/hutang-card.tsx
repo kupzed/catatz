@@ -56,7 +56,7 @@ export function HutangCard({
   const pct = percentage(totalPinjaman - sisaTagihan, totalPinjaman);
 
   return (
-    <div className="rounded-2xl border bg-card overflow-hidden">
+    <div className="overflow-hidden rounded-card border border-hairline bg-card">
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
@@ -107,14 +107,14 @@ export function HutangCard({
           <Progress value={pct} className="h-2 [&>div]:bg-primary" />
         </div>
 
-        <div className="flex gap-2 mt-3 flex-wrap">
+        <div className="mt-3 grid grid-cols-5 gap-1">
           <Button
             size="sm"
             variant="ghost"
-            className="h-7 text-xs gap-1 rounded-full bg-surface-strong text-foreground px-3"
+            className="h-11 min-w-0 w-full gap-0.5 rounded-full bg-surface-strong px-1 text-[10px] text-foreground min-[360px]:text-xs"
             onClick={() => onDetail(hutang.id)}
           >
-            <ListChecks className="h-3 w-3" />
+            <ListChecks className="hidden h-3 w-3 sm:block" />
             Detail
           </Button>
           {hutang.status !== "lunas" && (
@@ -122,24 +122,25 @@ export function HutangCard({
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-7 text-xs gap-1 rounded-full bg-surface-strong text-foreground px-3"
+                className="h-11 min-w-0 w-full gap-0.5 rounded-full bg-surface-strong px-1 text-[10px] text-foreground min-[360px]:text-xs"
                 onClick={() => onExpandToggle(hutang)}
               >
-                <Plus className="h-3 w-3" />
-                Cicilan
+                <Plus className="hidden h-3 w-3 sm:block" />
+                <span className="min-[360px]:hidden">Cicil</span>
+                <span className="hidden min-[360px]:inline">Cicilan</span>
                 {isExpanded ? (
-                  <ChevronUp className="h-3 w-3" />
+                  <ChevronUp className="hidden h-3 w-3 sm:block" />
                 ) : (
-                  <ChevronDown className="h-3 w-3" />
+                  <ChevronDown className="hidden h-3 w-3 sm:block" />
                 )}
               </Button>
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-7 text-xs gap-1 rounded-full bg-semantic-up/10 text-semantic-up px-3"
+                className="h-11 min-w-0 w-full gap-0.5 rounded-full bg-surface-strong px-1 text-[10px] text-semantic-up min-[360px]:text-xs"
                 onClick={() => onLunas(hutang)}
               >
-                <CheckCircle2 className="h-3 w-3" />
+                <CheckCircle2 className="hidden h-3 w-3 sm:block" />
                 Lunas
               </Button>
             </>
@@ -147,8 +148,9 @@ export function HutangCard({
           <Button
             size="sm"
             variant="ghost"
-            className="h-7 text-xs ml-auto rounded-full bg-surface-strong"
+            className="h-11 min-w-0 w-full rounded-full bg-surface-strong p-0"
             onClick={() => onEdit(hutang)}
+            aria-label={`Edit hutang ${hutang.nama_entitas}`}
           >
             <Pencil className="h-3 w-3" />
           </Button>
@@ -160,7 +162,8 @@ export function HutangCard({
             <Button
               size="sm"
               variant="ghost"
-              className="h-7 text-xs rounded-full bg-semantic-down/10 text-semantic-down px-3"
+              className="h-11 min-w-0 w-full rounded-full bg-surface-strong p-0 text-semantic-down"
+              aria-label={`Hapus hutang ${hutang.nama_entitas}`}
             >
               <Trash2 className="h-3 w-3" />
             </Button>

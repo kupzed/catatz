@@ -390,7 +390,7 @@ export default function TransaksiDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-sm sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
             {isCorrection
@@ -418,7 +418,7 @@ export default function TransaksiDialog({
             <Label className="text-xs text-primary flex items-center gap-1">
               <Sparkles className="h-3.5 w-3.5" /> Input Otomatis (AI)
             </Label>
-            <div className="flex flex-wrap items-start gap-2">
+            <div className="grid grid-cols-2 items-start gap-2">
               <VoiceInputButton
                 onParsed={(result) => handleParsedResult(result, "suara")}
                 onError={(msg) => toast.error(msg)}
@@ -695,16 +695,20 @@ export default function TransaksiDialog({
             />
           </div>
 
-          <DialogFooter className="pt-2 flex-wrap gap-2">
+          <DialogFooter
+            className={cn(
+              "grid gap-2 sm:flex sm:items-center",
+              isEdit && !isCorrection ? "grid-cols-3" : "grid-cols-2",
+            )}
+          >
             {/* Tombol Copy Transaksi — hanya saat edit NON-correction */}
             {isEdit && !isCorrection && (
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
                 onClick={handleCopyTransaksi}
                 disabled={copying}
-                className="gap-1.5 text-primary border-primary/20 hover:bg-primary/5 rounded-full"
+                className="w-full gap-1.5 rounded-full border-primary/20 text-primary hover:bg-primary/5 sm:mr-auto sm:w-auto"
               >
                 {copying ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -714,25 +718,24 @@ export default function TransaksiDialog({
                 Copy
               </Button>
             )}
-            <div className="flex gap-2 ml-auto">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Batal
-              </Button>
-              <Button
-                type="submit"
-                disabled={submitting || voiceBusy || fileBusy}
-                className="bg-primary hover:bg-primary-active text-white rounded-full h-11 px-5"
-              >
-                {submitting ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : null}
-                {isEdit ? "Perbarui" : "Simpan"}
-              </Button>
-            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="w-full sm:w-auto"
+            >
+              Batal
+            </Button>
+            <Button
+              type="submit"
+              disabled={submitting || voiceBusy || fileBusy}
+              className="h-11 w-full rounded-full bg-primary px-3 text-white hover:bg-primary-active sm:w-auto sm:px-5"
+            >
+              {submitting ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : null}
+              {isEdit ? "Perbarui" : "Simpan"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
