@@ -74,7 +74,7 @@ Initial data diambil di Server Component dengan:
 - Pada mobile, filter urutan dan tipe tampil dalam dua kolom, sedangkan filter rekening memakai satu baris penuh agar label tidak terpotong. Mulai breakpoint `sm`, ketiganya kembali sejajar dalam satu baris.
 - Query `?new=true` membuka dialog transaksi baru otomatis.
 - Dialog mendukung mode create, edit, copy, dan correction readonly behavior.
-- Dialog mobile menghormati safe area dan tinggi viewport dinamis, dengan scroll internal untuk form panjang.
+- Dialog mobile dipusatkan di area aman dan memisahkan frame tetap dari scroll container form. Struktur ini menjaga tombol aksi tetap normal setelah momentum scroll cepat di iOS/PWA.
 - Tanggal default dialog create normal mengikuti tanggal/periode yang sedang dipilih di halaman transaksi; waktu tetap memakai waktu saat dialog dibuka.
 - Field kategori hanya tampil untuk income/expense.
 - Field rekening tujuan hanya tampil untuk transfer.

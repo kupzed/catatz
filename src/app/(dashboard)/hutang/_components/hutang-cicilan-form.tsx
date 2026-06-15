@@ -26,7 +26,7 @@ export function HutangCicilanForm({
   isLoading,
 }: HutangCicilanFormProps) {
   return (
-    <div className="border-t bg-muted/30 px-4 py-3 space-y-2">
+    <div className="space-y-3 border-t border-hairline bg-surface-soft/60 p-4">
       <div className="flex flex-col sm:flex-row gap-2">
         <div className="flex-1 space-y-1">
           <Label className="text-xs">Nominal Cicilan (Rp)</Label>
@@ -58,16 +58,16 @@ export function HutangCicilanForm({
             placeholder="Tanpa rekening"
             includeNone={true}
             noneLabel="Tanpa rekening"
-            className="h-8 text-xs"
+            className="h-12 text-sm"
           />
         </div>
       </div>
-      <div className="flex justify-end mt-2">
+      <div className="flex justify-end">
         <Button
           size="sm"
           onClick={onSubmit}
           disabled={isLoading}
-          className="h-8 bg-primary hover:bg-primary-active text-white rounded-full px-4"
+          className="h-11 rounded-full bg-primary px-5 text-white hover:bg-primary-active"
         >
           Catat
         </Button>

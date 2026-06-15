@@ -13,14 +13,32 @@ export function UpdatePrompt() {
   }
 
   return (
-    <div className="fixed inset-x-0 top-0 z-50 animate-in slide-in-from-top-3 duration-300">
-      <div className="flex items-center justify-between gap-3 border-b border-hairline bg-background/95 px-4 py-2 text-sm shadow-sm backdrop-blur">
-        <span className="font-medium text-foreground">Versi baru tersedia!</span>
-        <div className="flex shrink-0 items-center gap-2">
-          <Button type="button" size="sm" onClick={triggerUpdate}>
+    <div
+      role="status"
+      aria-live="polite"
+      data-slot="pwa-update-prompt"
+      className="fixed inset-x-0 top-0 z-[60] animate-in border-b border-hairline bg-background/95 pt-[env(safe-area-inset-top)] backdrop-blur slide-in-from-top-3 duration-300"
+    >
+      <div className="mx-auto flex max-w-3xl items-center gap-2 py-2 pl-[calc(0.75rem+env(safe-area-inset-left))] pr-[calc(0.75rem+env(safe-area-inset-right))]">
+        <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground sm:text-sm">
+          Versi baru tersedia!
+        </span>
+        <div className="flex shrink-0 items-center gap-1">
+          <Button
+            type="button"
+            size="sm"
+            onClick={triggerUpdate}
+            className="h-9 px-3 text-xs sm:px-4 sm:text-sm"
+          >
             Perbarui Sekarang
           </Button>
-          <Button type="button" size="sm" variant="ghost" onClick={() => setIsDismissed(true)}>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={() => setIsDismissed(true)}
+            className="h-9 px-2 text-xs sm:px-4 sm:text-sm"
+          >
             Nanti
           </Button>
         </div>

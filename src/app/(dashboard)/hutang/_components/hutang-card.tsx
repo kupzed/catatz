@@ -24,14 +24,14 @@ import { useSystemPreferences } from "@/providers/system-preference-provider";
 export type HutangCardProps = {
   hutang: Hutang;
   rekening: Rekening[];
-  isExpanded: boolean;
-  onExpandToggle: (hutang: Hutang) => void;
-  onDetail: (id: string) => void;
-  onLunas: (hutang: Hutang) => void;
+  activePanel: HutangPanelMode | null;
+  onPanelToggle: (mode: HutangPanelMode) => void;
   onEdit: (hutang: Hutang) => void;
   onDelete: (id: string) => void;
   children?: ReactNode;
 };
+
+export type HutangPanelMode = "detail" | "cicilan" | "lunas";
 
 function getRekeningLabel(rekening: Rekening[], id?: string | null) {
   if (!id) return "Tanpa rekening";
@@ -42,10 +42,8 @@ function getRekeningLabel(rekening: Rekening[], id?: string | null) {
 export function HutangCard({
   hutang,
   rekening,
-  isExpanded,
-  onExpandToggle,
-  onDetail,
-  onLunas,
+  activePanel,
+  onPanelToggle,
   onEdit,
   onDelete,
   children,
@@ -56,7 +54,10 @@ export function HutangCard({
   const pct = percentage(totalPinjaman - sisaTagihan, totalPinjaman);
 
   return (
-    <div className="overflow-hidden rounded-card border border-hairline bg-card">
+    <div
+      data-testid={`hutang-card-${hutang.id}`}
+      className="overflow-hidden rounded-card border border-hairline bg-card"
+    >
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
@@ -107,12 +108,20 @@ export function HutangCard({
           <Progress value={pct} className="h-2 [&>div]:bg-primary" />
         </div>
 
-        <div className="mt-3 grid grid-cols-5 gap-1">
+        <div
+          className={cn(
+            "mt-3 grid gap-1",
+            hutang.status === "lunas"
+              ? "grid-cols-[minmax(0,1fr)_2.75rem_2.75rem]"
+              : "grid-cols-[repeat(3,minmax(0,1fr))_2.75rem_2.75rem]",
+          )}
+        >
           <Button
             size="sm"
             variant="ghost"
             className="h-11 min-w-0 w-full gap-0.5 rounded-full bg-surface-strong px-1 text-[10px] text-foreground min-[360px]:text-xs"
-            onClick={() => onDetail(hutang.id)}
+            onClick={() => onPanelToggle("detail")}
+            aria-expanded={activePanel === "detail"}
           >
             <ListChecks className="hidden h-3 w-3 sm:block" />
             Detail
@@ -123,12 +132,13 @@ export function HutangCard({
                 size="sm"
                 variant="ghost"
                 className="h-11 min-w-0 w-full gap-0.5 rounded-full bg-surface-strong px-1 text-[10px] text-foreground min-[360px]:text-xs"
-                onClick={() => onExpandToggle(hutang)}
+                onClick={() => onPanelToggle("cicilan")}
+                aria-expanded={activePanel === "cicilan"}
               >
                 <Plus className="hidden h-3 w-3 sm:block" />
                 <span className="min-[360px]:hidden">Cicil</span>
                 <span className="hidden min-[360px]:inline">Cicilan</span>
-                {isExpanded ? (
+                {activePanel === "cicilan" ? (
                   <ChevronUp className="hidden h-3 w-3 sm:block" />
                 ) : (
                   <ChevronDown className="hidden h-3 w-3 sm:block" />
@@ -138,7 +148,8 @@ export function HutangCard({
                 size="sm"
                 variant="ghost"
                 className="h-11 min-w-0 w-full gap-0.5 rounded-full bg-surface-strong px-1 text-[10px] text-semantic-up min-[360px]:text-xs"
-                onClick={() => onLunas(hutang)}
+                onClick={() => onPanelToggle("lunas")}
+                aria-expanded={activePanel === "lunas"}
               >
                 <CheckCircle2 className="hidden h-3 w-3 sm:block" />
                 Lunas

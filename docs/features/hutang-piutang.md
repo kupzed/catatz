@@ -66,10 +66,12 @@ Initial data diambil dengan:
 - Progress menunjukkan persentase pembayaran.
 - User bisa tambah/edit/hapus hutang/piutang.
 - User bisa tambah cicilan.
-- User bisa membuka Detail untuk melihat daftar cicilan.
+- User bisa membuka Detail sebagai panel inline di bawah card untuk melihat daftar cicilan.
 - User bisa mengedit dan menghapus cicilan dari Detail.
-- User bisa lunaskan catatan melalui dialog pilihan rekening.
-- Action Detail, Cicilan, Lunas, Edit, dan Hapus menggunakan grid satu baris pada mobile tanpa horizontal scroll; tombol ikon memiliki label aksesibel dan touch target 44px.
+- User bisa membuka panel Pelunasan inline seperti form Cicilan, memilih rekening, lalu melunaskan sisa tagihan.
+- Hanya satu panel Detail, Cicilan, atau Pelunasan yang terbuka pada satu card.
+- Dialog tambah/edit hutang dipusatkan di area aman viewport.
+- Action Detail, Cicilan, Lunas, Edit, dan Hapus menggunakan grid satu baris pada mobile tanpa horizontal scroll. Edit dan Hapus berada pada kolom tetap 44px di sisi kanan dengan label aksesibel.
 - Tombol WhatsApp reminder tidak tersedia.
 
 ## TODO / Improvement

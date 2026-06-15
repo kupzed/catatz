@@ -258,7 +258,8 @@ Gunakan `Skeleton` untuk loading route/data yang membutuhkan waktu.
 - Header dashboard sticky dan memperhitungkan `env(safe-area-inset-top)`.
 - Main content memperhitungkan `env(safe-area-inset-bottom)`.
 - Drawer mobile memberi padding `safe-area-inset-top`, `safe-area-inset-bottom`, dan inset horizontal sesuai sisi drawer agar header/footer tidak masuk ke area sistem perangkat.
-- Dialog mobile memakai `100dvh`, batas tinggi yang dikurangi safe area, `overscroll-contain`, dan padding lebih ringkas. Mulai breakpoint `sm`, dialog kembali terpusat dengan padding desktop.
+- Dialog ditempatkan di tengah area viewport yang tersisa setelah safe area. Frame dialog memakai `overflow-hidden`, sedangkan konten form memakai scroll container internal dengan `100dvh`, batas tinggi dinamis, `overscroll-contain`, dan momentum scrolling iOS agar header/footer dialog tidak tertahan saat form digulir cepat.
+- Banner PWA yang dipasang di atas viewport wajib mengonsumsi `safe-area-inset-top` dan inset horizontal agar CTA tidak bertabrakan dengan status bar atau notch.
 - Settings memakai sidebar nav desktop dan tab strip mobile.
 
 **Aturan responsive untuk angka dan teks:**
@@ -266,7 +267,7 @@ Gunakan `Skeleton` untuk loading route/data yang membutuhkan waktu.
 - Teks panjang (email, nama): gunakan `truncate` dan pastikan container punya `min-w-0 overflow-hidden`.
 - Padding card: `px-3 sm:px-6` agar lebih lega di mobile.
 - Filter yang memiliki tiga kontrol menggunakan grid dua kolom pada layar kecil; kontrol terpanjang dapat memakai `col-span-2`, lalu kembali menjadi tiga kolom mulai `sm`.
-- Kelompok action yang wajib selalu terlihat memakai grid kompak tanpa horizontal scroll. Tombol ikon tetap wajib memiliki nama aksesibel dan touch target minimum 44px.
+- Kelompok action yang wajib selalu terlihat memakai grid kompak tanpa horizontal scroll. Kolom ikon sekunder dapat dipatok 44px di sisi kanan, dan tombol ikon tetap wajib memiliki nama aksesibel.
 
 ### Breakpoint Reference (DESIGN.md)
 

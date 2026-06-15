@@ -2,6 +2,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 
 const mobileViewport = { width: 390, height: 844 };
 const narrowViewport = { width: 320, height: 844 };
+const fixtureDebtId = "00000000-0000-4000-8000-000000000040";
 
 async function login(page: Page) {
   await page.goto("/login");
@@ -108,6 +109,88 @@ test.describe("mobile dashboard layout", () => {
       await expectInsideViewport(page, action);
       await expect(action).toHaveCSS("height", "44px");
     }
+
+    const [editBox, deleteBox] = await Promise.all([
+      actions[3].boundingBox(),
+      actions[4].boundingBox(),
+    ]);
+    expect(Math.round(editBox!.width)).toBe(44);
+    expect(Math.round(deleteBox!.width)).toBe(44);
+    expect(editBox!.x).toBeLessThan(deleteBox!.x);
+  });
+
+  test("keeps debt detail and settlement forms inline with the card", async ({
+    page,
+  }) => {
+    await page.goto("/hutang");
+
+    await page.getByRole("button", { name: "Tambah", exact: true }).click();
+    const debtDialog = page.getByRole("dialog");
+    const debtDialogBox = await debtDialog.boundingBox();
+    const viewport = page.viewportSize();
+    expect(debtDialogBox).not.toBeNull();
+    expect(viewport).not.toBeNull();
+    expect(
+      Math.abs(
+        debtDialogBox!.y +
+          debtDialogBox!.height / 2 -
+          viewport!.height / 2,
+      ),
+    ).toBeLessThanOrEqual(1);
+    await debtDialog.getByRole("button", { name: "Close" }).click();
+
+    await page.getByRole("button", { name: "Detail", exact: true }).click();
+    await expect(
+      page.getByTestId(`hutang-detail-panel-${fixtureDebtId}`),
+    ).toBeVisible();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+
+    await page.getByRole("button", { name: "Lunas", exact: true }).click();
+    await expect(
+      page.getByTestId(`hutang-detail-panel-${fixtureDebtId}`),
+    ).toBeHidden();
+    await expect(
+      page.getByTestId(`hutang-lunas-panel-${fixtureDebtId}`),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Lunaskan", exact: true }),
+    ).toBeVisible();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+  });
+
+  test("contains transaction momentum scrolling inside the dialog frame", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 640 });
+    await page.locator("#filter-periode").click();
+    await page.getByRole("option", { name: "Semua Waktu" }).click();
+    await page
+      .getByRole("button", { name: "Edit transaksi TopUp Games" })
+      .click();
+
+    const dialog = page.getByRole("dialog");
+    const scrollArea = dialog.locator('[data-slot="dialog-scroll"]');
+
+    await expect(dialog).toHaveCSS("overflow-y", "hidden");
+    await expect(scrollArea).toBeVisible();
+    await expect(scrollArea).toHaveCSS("overflow-y", "auto");
+
+    await scrollArea.evaluate((element) => {
+      element.scrollTop = element.scrollHeight;
+    });
+    await expect
+      .poll(() => scrollArea.evaluate((element) => element.scrollTop))
+      .toBeGreaterThan(0);
+
+    await scrollArea.evaluate((element) => {
+      element.scrollTop = 0;
+    });
+    await expect
+      .poll(() => scrollArea.evaluate((element) => element.scrollTop))
+      .toBe(0);
+    await expect(
+      dialog.getByRole("heading", { name: "Edit Transaksi" }),
+    ).toBeVisible();
   });
 
   test("keeps the mobile sidebar within device safe areas", async ({ page }) => {

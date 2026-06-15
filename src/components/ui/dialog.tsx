@@ -61,12 +61,17 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed top-[calc(env(safe-area-inset-top)+0.75rem)] left-1/2 z-50 grid max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-1.5rem)] w-[calc(100%-2rem-env(safe-area-inset-left)-env(safe-area-inset-right))] max-w-sm -translate-x-1/2 translate-y-0 gap-4 overflow-y-auto overscroll-contain rounded-card border border-hairline bg-card p-5 text-sm text-card-foreground shadow-[0_4px_12px_rgba(0,0,0,0.04)] duration-100 outline-none sm:top-1/2 sm:max-w-sm sm:-translate-y-1/2 sm:p-8 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          "fixed top-[calc(env(safe-area-inset-top)+(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom))/2)] left-1/2 z-50 flex max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-1.5rem)] w-[calc(100%-2rem-env(safe-area-inset-left)-env(safe-area-inset-right))] max-w-sm -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-card border border-hairline bg-card p-0 text-sm text-card-foreground duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           className,
         )}
         {...props}
       >
-        {children}
+        <div
+          data-slot="dialog-scroll"
+          className="grid min-h-0 flex-1 gap-4 overflow-y-auto overscroll-contain p-5 [-webkit-overflow-scrolling:touch] sm:p-8"
+        >
+          {children}
+        </div>
         {showCloseButton && (
           <DialogPrimitive.Close data-slot="dialog-close" asChild>
             <Button

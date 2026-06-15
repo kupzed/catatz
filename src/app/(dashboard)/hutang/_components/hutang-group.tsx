@@ -3,33 +3,45 @@
 import type { Hutang } from "@/types/hutang";
 import type { Rekening } from "@/types/rekening";
 import type { UseHutangCicilanReturn } from "@/hooks/use-hutang-cicilan";
-import { HutangCard } from "./hutang-card";
+import {
+  HutangCard,
+  type HutangPanelMode,
+} from "./hutang-card";
 import { HutangCicilanForm } from "./hutang-cicilan-form";
+import { HutangCicilanDetail } from "./hutang-cicilan-detail";
+import { HutangLunasForm } from "./hutang-lunas-form";
+
+export type ExpandedHutangPanel = {
+  id: string;
+  mode: HutangPanelMode;
+};
 
 export type HutangGroupProps = {
   title: string;
   items: Hutang[];
   rekening: Rekening[];
-  onExpandToggle: (id: string | null) => void;
-  expanded: string | null;
+  expandedPanel: ExpandedHutangPanel | null;
+  onPanelToggle: (hutang: Hutang, mode: HutangPanelMode) => void;
   cicilanHook: UseHutangCicilanReturn;
   onEdit: (hutang: Hutang) => void;
   onDelete: (id: string) => void;
-  onLunas: (hutang: Hutang) => void;
-  onDetail: (id: string) => void;
+  lunasRekening: Record<string, string>;
+  onLunasRekeningChange: (id: string, value: string) => void;
+  onLunasSubmit: (hutang: Hutang) => void;
 };
 
 export function HutangGroup({
   title,
   items,
   rekening,
-  onExpandToggle,
-  expanded,
+  expandedPanel,
+  onPanelToggle,
   cicilanHook,
   onEdit,
   onDelete,
-  onLunas,
-  onDetail,
+  lunasRekening,
+  onLunasRekeningChange,
+  onLunasSubmit,
 }: HutangGroupProps) {
   if (items.length === 0) return null;
 
@@ -40,23 +52,20 @@ export function HutangGroup({
       </h3>
       <div className="space-y-3">
         {items.map((h) => {
-          const isExpanded = expanded === h.id;
+          const activePanel =
+            expandedPanel?.id === h.id ? expandedPanel.mode : null;
 
           return (
             <HutangCard
               key={h.id}
               hutang={h}
               rekening={rekening}
-              isExpanded={isExpanded}
-              onExpandToggle={(target) =>
-                onExpandToggle(isExpanded ? null : target.id)
-              }
-              onDetail={onDetail}
-              onLunas={onLunas}
+              activePanel={activePanel}
+              onPanelToggle={(mode) => onPanelToggle(h, mode)}
               onEdit={onEdit}
               onDelete={onDelete}
             >
-              {isExpanded && h.status !== "lunas" && (
+              {activePanel === "cicilan" && h.status !== "lunas" && (
                 <HutangCicilanForm
                   hutangId={h.id}
                   rekening={rekening}
@@ -65,6 +74,27 @@ export function HutangGroup({
                   onSubmit={() => {
                     void cicilanHook.handleCicilan(h);
                   }}
+                  isLoading={cicilanHook.loadingCicilan === h.id}
+                />
+              )}
+              {activePanel === "detail" && (
+                <HutangCicilanDetail
+                  hutang={h}
+                  rekening={rekening}
+                  cicilanHook={cicilanHook}
+                />
+              )}
+              {activePanel === "lunas" && h.status !== "lunas" && (
+                <HutangLunasForm
+                  hutang={h}
+                  rekening={rekening}
+                  rekeningId={
+                    lunasRekening[h.id] ?? h.rekening_id ?? "none"
+                  }
+                  onRekeningChange={(value) =>
+                    onLunasRekeningChange(h.id, value)
+                  }
+                  onSubmit={() => onLunasSubmit(h)}
                   isLoading={cicilanHook.loadingCicilan === h.id}
                 />
               )}

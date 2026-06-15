@@ -1,44 +1,38 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { Hutang } from "@/types/hutang";
 import type { Rekening } from "@/types/rekening";
 import { currentTime, todayISODate } from "@/lib/utils";
 import { createCicilan, deleteHutang } from "@/actions/hutang-action";
 import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { ArrowDownRight, ArrowUpRight, HandCoins, Plus } from "lucide-react";
 import HutangDialog from "./hutang-dialog";
 import { EmptyState, PageHeader } from "@/components/common";
-import { RekeningSelect } from "@/components/common/rekening-select";
 import {
   emptyEditDraft,
   useHutangCicilan,
 } from "@/hooks/use-hutang-cicilan";
-import { HutangCicilanDetail } from "./hutang-cicilan-detail";
-import { HutangGroup } from "./hutang-group";
+import {
+  HutangGroup,
+  type ExpandedHutangPanel,
+} from "./hutang-group";
+import type { HutangPanelMode } from "./hutang-card";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 type Props = { initialHutang: Hutang[]; rekening: Rekening[] };
-type LunasTarget = Hutang & { lunasRekeningId: string };
 
 export default function HutangPageClient({ initialHutang, rekening }: Props) {
   const { formatRupiah } = useSystemPreferences();
   const [hutang, setHutang] = useState(initialHutang);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editData, setEditData] = useState<Hutang | null>(null);
-  const [expanded, setExpanded] = useState<string | null>(null);
-  const [detailHutangId, setDetailHutangId] = useState<string | null>(null);
-  const [lunasTarget, setLunasTarget] = useState<LunasTarget | null>(null);
+  const [expandedPanel, setExpandedPanel] =
+    useState<ExpandedHutangPanel | null>(null);
+  const [lunasRekening, setLunasRekening] = useState<Record<string, string>>(
+    {},
+  );
 
   const memberi = hutang.filter((h) => h.tipe === "memberi");
   const menerima = hutang.filter((h) => h.tipe === "menerima");
@@ -49,10 +43,6 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
   const totalHutangAktif = menerima.reduce(
     (sum, item) => sum + Number(item.sisa_tagihan),
     0,
-  );
-  const detailHutang = useMemo(
-    () => hutang.find((item) => item.id === detailHutangId) ?? null,
-    [detailHutangId, hutang],
   );
   const cicilanHook = useHutangCicilan({
     rekening,
@@ -69,31 +59,44 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
     const res = await deleteHutang(id);
     if (res.success) {
       setHutang((prev) => prev.filter((h) => h.id !== id));
-      if (detailHutangId === id) setDetailHutangId(null);
+      if (expandedPanel?.id === id) setExpandedPanel(null);
       toast.success("Hutang dihapus");
     } else {
       toast.error(res.error ?? "Gagal menghapus");
     }
   }
 
-  function openLunasDialog(h: Hutang) {
-    setLunasTarget({
-      ...h,
-      lunasRekeningId: h.rekening_id ?? "none",
-    });
+  function handlePanelToggle(h: Hutang, mode: HutangPanelMode) {
+    setExpandedPanel((current) =>
+      current?.id === h.id && current.mode === mode
+        ? null
+        : { id: h.id, mode },
+    );
+
+    if (mode === "lunas") {
+      setLunasRekening((current) => ({
+        ...current,
+        [h.id]: current[h.id] ?? h.rekening_id ?? "none",
+      }));
+    }
+
+    if (mode !== "detail") {
+      cicilanHook.setEditingCicilanId(null);
+      cicilanHook.setEditCicilanDraft(emptyEditDraft());
+    }
   }
 
-  async function handleLunas() {
-    if (!lunasTarget || Number(lunasTarget.sisa_tagihan) <= 0) return;
+  async function handleLunas(target: Hutang) {
+    if (Number(target.sisa_tagihan) <= 0) return;
 
-    cicilanHook.setLoadingCicilan(lunasTarget.id);
+    cicilanHook.setLoadingCicilan(target.id);
+    const rekeningId =
+      lunasRekening[target.id] ?? target.rekening_id ?? "none";
     const res = await createCicilan({
-      hutang_id: lunasTarget.id,
-      nominal: Number(lunasTarget.sisa_tagihan),
+      hutang_id: target.id,
+      nominal: Number(target.sisa_tagihan),
       rekening_id:
-        lunasTarget.lunasRekeningId && lunasTarget.lunasRekeningId !== "none"
-          ? lunasTarget.lunasRekeningId
-          : undefined,
+        rekeningId && rekeningId !== "none" ? rekeningId : undefined,
       tanggal: todayISODate(),
       waktu: currentTime(),
       catatan: "Pelunasan",
@@ -101,7 +104,7 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
 
     if (res.success && res.data) {
       replaceHutang(res.data);
-      setLunasTarget(null);
+      setExpandedPanel(null);
       toast.success("Catatan dilunaskan");
     } else {
       toast.error(res.error ?? "Gagal melunaskan hutang");
@@ -183,25 +186,35 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
             title="Piutang (Memberi Pinjaman)"
             items={memberi}
             rekening={rekening}
-            onExpandToggle={setExpanded}
-            expanded={expanded}
+            expandedPanel={expandedPanel}
+            onPanelToggle={handlePanelToggle}
             cicilanHook={cicilanHook}
             onEdit={handleEdit}
             onDelete={handleDelete}
-            onLunas={openLunasDialog}
-            onDetail={setDetailHutangId}
+            lunasRekening={lunasRekening}
+            onLunasRekeningChange={(id, value) =>
+              setLunasRekening((current) => ({ ...current, [id]: value }))
+            }
+            onLunasSubmit={(target) => {
+              void handleLunas(target);
+            }}
           />
           <HutangGroup
             title="Hutang (Menerima Pinjaman)"
             items={menerima}
             rekening={rekening}
-            onExpandToggle={setExpanded}
-            expanded={expanded}
+            expandedPanel={expandedPanel}
+            onPanelToggle={handlePanelToggle}
             cicilanHook={cicilanHook}
             onEdit={handleEdit}
             onDelete={handleDelete}
-            onLunas={openLunasDialog}
-            onDetail={setDetailHutangId}
+            lunasRekening={lunasRekening}
+            onLunasRekeningChange={(id, value) =>
+              setLunasRekening((current) => ({ ...current, [id]: value }))
+            }
+            onLunasSubmit={(target) => {
+              void handleLunas(target);
+            }}
           />
         </div>
       )}
@@ -222,67 +235,6 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
           replaceHutang(h);
           setDialogOpen(false);
         }}
-      />
-
-      <Dialog
-        open={!!lunasTarget}
-        onOpenChange={(open) => {
-          if (!open) setLunasTarget(null);
-        }}
-      >
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Pilih Rekening Pelunasan</DialogTitle>
-            <DialogDescription>
-              Pilih rekening yang digunakan untuk mencatat pelunasan sebesar{" "}
-              {formatRupiah(Number(lunasTarget?.sisa_tagihan ?? 0))}.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-2">
-            <Label>Rekening</Label>
-            <RekeningSelect
-              rekening={rekening}
-              value={lunasTarget?.lunasRekeningId ?? "none"}
-              onValueChange={(value) =>
-                setLunasTarget((target) =>
-                  target ? { ...target, lunasRekeningId: value } : target,
-                )
-              }
-              placeholder="Tanpa rekening"
-              includeNone={true}
-              noneLabel="Tanpa rekening"
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setLunasTarget(null)}>
-              Batal
-            </Button>
-            <Button
-              onClick={handleLunas}
-              disabled={
-                !!lunasTarget &&
-                cicilanHook.loadingCicilan === lunasTarget.id
-              }
-              className="bg-primary hover:bg-primary-active text-white rounded-full"
-            >
-              Lunaskan
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <HutangCicilanDetail
-        hutang={detailHutang}
-        rekening={rekening}
-        open={!!detailHutang}
-        onOpenChange={(open) => {
-          if (!open) {
-            setDetailHutangId(null);
-            cicilanHook.setEditingCicilanId(null);
-            cicilanHook.setEditCicilanDraft(emptyEditDraft());
-          }
-        }}
-        cicilanHook={cicilanHook}
       />
     </div>
   );

@@ -68,7 +68,8 @@ Behavior:
 - iOS Safari memakai guide manual, bukan prompt native.
 - Aplikasi mendeteksi mode standalone untuk mengetahui status installed.
 - Dashboard, drawer sidebar, dialog, dan area konten mengonsumsi CSS safe-area inset agar header, footer, dan form tidak bertabrakan dengan status bar, home indicator, atau area notch pada mode standalone.
-- Dialog form panjang dibatasi dengan `100dvh` dan scroll internal sehingga tetap dapat digunakan pada layar mobile kecil tanpa keluar dari viewport.
+- Update prompt memakai padding safe area atas dan inset horizontal, serta layout kontrol yang kompak agar tombol `Perbarui Sekarang` tidak tertimpa status bar pada PWA mobile.
+- Dialog dipusatkan di dalam area aman perangkat. Form panjang memakai frame tetap dan scroll container internal berbasis `100dvh` sehingga tetap dapat digunakan pada layar kecil tanpa keluar dari viewport atau menghasilkan artefak momentum scroll iOS.
 - Voice Input di mode Add to Home Screen meminta izin mikrofon melalui `getUserMedia`, memvalidasi audio track masih `live`, menunggu event start/audio start sebelum menandai state mendengar, dan membersihkan stream saat stop/error/end.
 - Error mikrofon seperti izin ditolak, audio capture gagal, koneksi speech gagal, atau pembatasan iOS standalone ditampilkan sebagai pesan fallback yang aman.
 - File Auto Fill transaksi bersifat online-only. Tombol dinonaktifkan saat offline dan file tidak dimasukkan ke offline queue.

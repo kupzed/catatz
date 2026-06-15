@@ -49,7 +49,7 @@ export function HutangCicilanItem({
   const { formatRupiah, formatTanggal, formatWaktu } = useSystemPreferences();
 
   return (
-    <div className="rounded-lg border p-3 space-y-3">
+    <div className="space-y-3 rounded-input border border-hairline bg-card p-3">
       {isEditing ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -171,8 +171,9 @@ export function HutangCicilanItem({
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8"
+                className="h-11 w-11 bg-surface-strong"
                 onClick={() => onStartEdit(cicilan)}
+                aria-label={`Edit cicilan ${formatRupiah(Number(cicilan.nominal))}`}
               >
                 <Pencil className="h-3.5 w-3.5" />
               </Button>
@@ -184,7 +185,8 @@ export function HutangCicilanItem({
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="h-8 w-8 text-rose-500 hover:text-rose-500 hover:bg-rose-500/10"
+                  className="h-11 w-11 bg-surface-strong text-semantic-down hover:bg-surface-strong/80 hover:text-semantic-down"
+                  aria-label={`Hapus cicilan ${formatRupiah(Number(cicilan.nominal))}`}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>

@@ -6,21 +6,12 @@ import {
   emptyEditDraft,
   type UseHutangCicilanReturn,
 } from "@/hooks/use-hutang-cicilan";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { HutangCicilanItem } from "./hutang-cicilan-item";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 export type HutangCicilanDetailProps = {
-  hutang: Hutang | null;
+  hutang: Hutang;
   rekening: Rekening[];
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   cicilanHook: UseHutangCicilanReturn;
 };
 
@@ -35,63 +26,60 @@ function sortCicilan(cicilan?: HutangCicilan[]) {
 export function HutangCicilanDetail({
   hutang,
   rekening,
-  open,
-  onOpenChange,
   cicilanHook,
 }: HutangCicilanDetailProps) {
   const { formatRupiah } = useSystemPreferences();
-  const cicilan = sortCicilan(hutang?.cicilan);
+  const cicilan = sortCicilan(hutang.cicilan);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Detail Cicilan</DialogTitle>
-          <DialogDescription>
-            {hutang
-              ? `${hutang.nama_entitas} - sisa ${formatRupiah(
-                  Number(hutang.sisa_tagihan),
-                )}`
-              : "Daftar cicilan hutang/piutang."}
-          </DialogDescription>
-        </DialogHeader>
+    <div
+      data-testid={`hutang-detail-panel-${hutang.id}`}
+      className="space-y-3 border-t border-hairline bg-surface-soft/60 p-4"
+    >
+      <div>
+        <p className="text-sm font-semibold text-foreground">Detail Cicilan</p>
+        <p className="text-xs text-muted-foreground">
+          {hutang.nama_entitas} · sisa{" "}
+          <span className="font-mono">
+            {formatRupiah(Number(hutang.sisa_tagihan))}
+          </span>
+        </p>
+      </div>
 
-        {hutang &&
-          (cicilan.length === 0 ? (
-            <div className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
-              Belum ada cicilan.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {cicilan.map((item) => (
-                <HutangCicilanItem
-                  key={item.id}
-                  cicilan={item}
-                  hutang={hutang}
-                  rekening={rekening}
-                  isEditing={cicilanHook.editingCicilanId === item.id}
-                  editDraft={cicilanHook.editCicilanDraft}
-                  onEditDraftChange={cicilanHook.setEditCicilanDraft}
-                  onStartEdit={cicilanHook.startEditCicilan}
-                  onCancelEdit={() => {
-                    cicilanHook.setEditingCicilanId(null);
-                    cicilanHook.setEditCicilanDraft(emptyEditDraft());
-                  }}
-                  onSave={(targetHutang, targetCicilan) => {
-                    void cicilanHook.handleUpdateCicilan(
-                      targetHutang,
-                      targetCicilan,
-                    );
-                  }}
-                  onDelete={(id) => {
-                    void cicilanHook.handleDeleteCicilan(id);
-                  }}
-                  isLoading={cicilanHook.loadingCicilan === hutang.id}
-                />
-              ))}
-            </div>
+      {cicilan.length === 0 ? (
+        <div className="rounded-input border border-dashed border-hairline bg-card p-4 text-center text-sm text-muted-foreground">
+          Belum ada cicilan.
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {cicilan.map((item) => (
+            <HutangCicilanItem
+              key={item.id}
+              cicilan={item}
+              hutang={hutang}
+              rekening={rekening}
+              isEditing={cicilanHook.editingCicilanId === item.id}
+              editDraft={cicilanHook.editCicilanDraft}
+              onEditDraftChange={cicilanHook.setEditCicilanDraft}
+              onStartEdit={cicilanHook.startEditCicilan}
+              onCancelEdit={() => {
+                cicilanHook.setEditingCicilanId(null);
+                cicilanHook.setEditCicilanDraft(emptyEditDraft());
+              }}
+              onSave={(targetHutang, targetCicilan) => {
+                void cicilanHook.handleUpdateCicilan(
+                  targetHutang,
+                  targetCicilan,
+                );
+              }}
+              onDelete={(id) => {
+                void cicilanHook.handleDeleteCicilan(id);
+              }}
+              isLoading={cicilanHook.loadingCicilan === hutang.id}
+            />
           ))}
-      </DialogContent>
-    </Dialog>
+        </div>
+      )}
+    </div>
   );
 }
