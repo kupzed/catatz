@@ -64,7 +64,10 @@ Langkah yang dijalankan:
 2. Setup Node.js 24 + cache npm
 3. `npm ci`
 4. `npm run build`
-5. Membuat GitHub Release otomatis dengan release notes yang di-generate dari PR yang sudah di-merge
+5. Generate changelog otomatis dari **commit log** antara tag sebelumnya dan tag baru
+6. Membuat GitHub Release dengan changelog commit
+
+> **Catatan**: Changelog dibuat dari git commit log, bukan dari PR. Cocok untuk solo developer yang push langsung ke branch utama tanpa PR flow. Format commit Conventional Commits (`feat:`, `fix:`, `chore:` dst.) akan langsung terbaca di release notes.
 
 **Cara membuat release baru:**
 
