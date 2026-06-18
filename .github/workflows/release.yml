@@ -27,20 +27,7 @@ jobs:
         env:
           NEXT_TELEMETRY_DISABLED: '1'
 
-      - name: Generate commit-based changelog
-        id: changelog
-        run: |
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo '')
-          if [ -z "$PREV_TAG" ]; then
-            NOTES=$(git log --pretty=format:'- %s (%h)' HEAD)
-          else
-            NOTES=$(git log --pretty=format:'- %s (%h)' "${PREV_TAG}..HEAD")
-          fi
-          echo "NOTES<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$NOTES" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
-
       - uses: softprops/action-gh-release@v2
         with:
-          body: ${{ steps.changelog.outputs.NOTES }}
+          generate_release_notes: true
           make_latest: true
