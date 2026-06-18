@@ -33,6 +33,7 @@ Folder ini adalah pusat dokumentasi teknis CatatZ. Isi dokumen ditulis berdasark
 
 - [Deployment Vercel](./deployment-vercel.md)
 - [PWA](./pwa.md)
+- [GitHub Workflows & Repository Config](./github-workflows.md)
 - [Security Checklist](./security-checklist.md)
 - [Troubleshooting](./troubleshooting.md)
 - [Codex Operating Instructions](../AGENTS.md)

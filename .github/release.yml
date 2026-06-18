@@ -1,0 +1,25 @@
+changelog:
+  categories:
+    - title: ✨ New Features
+      labels:
+        - enhancement
+        - feature
+    - title: 🐛 Bug Fixes
+      labels:
+        - bug
+        - fix
+    - title: 📖 Documentation
+      labels:
+        - docs
+        - documentation
+    - title: 🔧 Tooling & CI
+      labels:
+        - ci
+        - chore
+        - tooling
+    - title: 🔒 Security
+      labels:
+        - security
+  exclude:
+    labels:
+      - skip-changelog
