@@ -14,6 +14,7 @@ Dokumentasi workflow GitHub Actions dan konfigurasi repository `.github/` yang d
 ├── ISSUE_TEMPLATE/
 │   ├── bug_report.md
 │   └── feature_request.md
+├── FUNDING.yml
 └── release.yml
 ```
 
@@ -61,15 +62,23 @@ Berjalan saat **push tag** dengan format `v*.*.*` (mis. `v1.0.0`, `v1.2.3`).
 
 Langkah yang dijalankan:
 1. Checkout kode dengan full history (`fetch-depth: 0`)
-2. Setup Node.js 24 + cache npm
-3. `npm ci`
-4. `npm run build`
-5. Membuat GitHub Release otomatis dengan release notes yang di-generate dari PR yang sudah di-merge
+2. Membuat GitHub Release otomatis dengan body diambil dari file `CHANGELOG.md` di root repository
+
+Build dan validasi kode **tidak** dijalankan di workflow ini — build production dikelola oleh Vercel secara terpisah.
 
 **Cara membuat release baru:**
 
 ```bash
-git tag v1.0.0
+# 1. Update CHANGELOG.md dengan entry versi baru
+# 2. Commit perubahan
+git add CHANGELOG.md package.json
+git commit -m "chore(release): bump version to x.x.x and update changelog"
+
+# 3. Buat annotated tag
+git tag -a v1.0.0 -m "CatatZ v1.0.0 — Release Title"
+
+# 4. Push commit dan tag
+git push origin master
 git push origin v1.0.0
 ```
 
@@ -90,6 +99,15 @@ File `.github/release.yml` (bukan di dalam `workflows/`) mengatur bagaimana GitH
 PR berlabel `skip-changelog` tidak akan muncul di release notes.
 
 **Praktik terbaik**: Pastikan setiap PR diberi label yang sesuai sebelum di-merge agar changelog release terbentuk otomatis dan rapi.
+
+---
+
+## FUNDING.yml
+
+File `.github/FUNDING.yml` mengaktifkan tombol **Sponsor** di halaman repository GitHub. Saat ini dikonfigurasi dengan:
+
+- **GitHub Sponsors**: `kupzed`
+- **Custom**: PayPal (`https://www.paypal.com/paypalme/kupzed`)
 
 ---
 

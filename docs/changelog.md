@@ -4,6 +4,14 @@ Format mengikuti Keep a Changelog sederhana.
 
 ## Unreleased
 
+_(Tidak ada perubahan yang belum dirilis saat ini.)_
+
+---
+
+## [1.0.0] — 2026-06-19
+
+First public release.
+
 ### Added
 
 - Initial project documentation.
@@ -31,6 +39,8 @@ Format mengikuti Keep a Changelog sederhana.
 - Documentation references for the Codex operating instructions.
 - Root `.env.example`.
 - `DESIGN.md` — Coinbase institutional design system reference (colors, typography, components, spacing).
+- `CHANGELOG.md` — root-level release notes consumed by GitHub Actions release workflow.
+- `.github/FUNDING.yml` — GitHub Sponsors and PayPal support links.
 
 ### Changed
 
@@ -42,3 +52,5 @@ Format mengikuti Keep a Changelog sederhana.
   - Auth pages: clean light canvas, card `rounded-[24px]`, pill CTA.
 - `AGENTS.md` diperbarui dengan **Design Contract** — setiap perubahan UI wajib mengikuti `DESIGN.md`.
 - `docs/frontend-guidelines.md` diperbarui secara komprehensif dengan token warna, typography hierarchy, shape rules, pola komponen, dan checklist review UI.
+- `docs/github-workflows.md` diperbarui untuk mencerminkan workflow `release.yml` aktual: tanpa build step, menggunakan `CHANGELOG.md` sebagai body release, dan dokumentasi `FUNDING.yml`.
+- `package.json` version bump ke `1.0.0`.

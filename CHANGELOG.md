@@ -1,4 +1,4 @@
-## 🎉 CatatZ v1.0.0 — First Public Release
+## v1.0.0
 
 CatatZ is a personal finance tracking web app (PWA) built on Next.js 16, Supabase, and Tailwind CSS v4. This is the first public release, shipping a complete set of core features for day-to-day personal finance management.
 
@@ -7,6 +7,7 @@ CatatZ is a personal finance tracking web app (PWA) built on Next.js 16, Supabas
 ### ✨ Core Features
 
 #### 💰 Transaction Management
+
 - Record **Income**, **Expense**, **Transfer** between accounts, and **Balance Correction** transactions
 - Fields: title, amount, category, account, date & time, and notes
 - **AI Voice Input** — speak your transaction using the browser's Speech Recognition API; Gemini AI parses and fills the form automatically
@@ -15,26 +16,31 @@ CatatZ is a personal finance tracking web app (PWA) built on Next.js 16, Supabas
 - Filter, search, and date-based navigation
 
 #### 🏦 Account Management
+
 - Create accounts with a custom name, logo, color, and opening balance
 - Option to exclude specific accounts from the total balance
 - Referential protection: accounts cannot be deleted while linked transactions exist
 
 #### 🗂️ Categories
+
 - Built-in system categories
 - Custom user-defined categories per account
 - Deletion protection: categories in use by transactions cannot be removed
 
 #### 📊 Financial Summary (Rekap)
+
 - Monthly overview: total income, expenses, and net balance
 - Per-category breakdown with interactive charts (Recharts)
 - Drill-down into individual transactions within the selected month
 
 #### 🤝 Debt & Receivables (Hutang/Piutang)
+
 - Track debts and receivables with borrower/lender details
 - Installment system with automatic remaining balance and settlement status
 - PostgreSQL trigger ensures installment balance consistency
 
 #### 📤 Report Export
+
 - Export to **PDF** (jsPDF + autotable)
 - Export to **XLSX** (ExcelJS)
 - Export to **CSV**
@@ -94,21 +100,21 @@ CatatZ is a personal finance tracking web app (PWA) built on Next.js 16, Supabas
 
 ### 🛠️ Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 16 App Router |
-| Runtime | React 19, TypeScript |
-| Database | Supabase PostgreSQL |
-| Auth | Supabase Auth (Email + Google OAuth) |
-| Storage | Supabase Storage |
-| Styling | Tailwind CSS v4, shadcn/ui |
-| Forms | React Hook Form + Zod |
-| State | TanStack Query v5, Zustand |
-| Charts | Recharts |
-| PWA | Serwist |
-| AI | Google Gemini API |
-| Deployment | Vercel |
-| Testing | Vitest, Playwright |
+| Layer      | Technology                           |
+| ---------- | ------------------------------------ |
+| Framework  | Next.js 16 App Router                |
+| Runtime    | React 19, TypeScript                 |
+| Database   | Supabase PostgreSQL                  |
+| Auth       | Supabase Auth (Email + Google OAuth) |
+| Storage    | Supabase Storage                     |
+| Styling    | Tailwind CSS v4, shadcn/ui           |
+| Forms      | React Hook Form + Zod                |
+| State      | TanStack Query v5, Zustand           |
+| Charts     | Recharts                             |
+| PWA        | Serwist                              |
+| AI         | Google Gemini API                    |
+| Deployment | Vercel                               |
+| Testing    | Vitest, Playwright                   |
 
 ---
 
