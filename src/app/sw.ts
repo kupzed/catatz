@@ -100,9 +100,26 @@ const runtimeCaching: RuntimeCaching[] = [
 ];
 
 self.addEventListener("message", (event) => {
-  if (event.data?.type === "SKIP_WAITING") {
-    void self.skipWaiting();
-  }
+  void (async () => {
+    const source = event.source;
+    if (!source || typeof source === "object" && !("id" in source)) {
+      return;
+    }
+
+    const client = await self.clients.get(source.id);
+    if (!client) {
+      return;
+    }
+
+    const sourceOrigin = new URL(client.url).origin;
+    if (sourceOrigin !== self.location.origin) {
+      return;
+    }
+
+    if (event.data?.type === "SKIP_WAITING") {
+      void self.skipWaiting();
+    }
+  })();
 });
 
 self.addEventListener("activate", (event) => {
