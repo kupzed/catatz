@@ -10,6 +10,7 @@ import { OfflineIndicator } from '@/components/pwa/offline-indicator';
 import { PWAComponents } from '@/components/pwa/pwa-components';
 import { SwProvider } from '@/components/pwa/sw-provider';
 import { ErrorBoundary } from '@/components/error-boundary';
+import { Analytics } from '@vercel/analytics/next';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -110,6 +111,7 @@ export default function RootLayout({
             </SwProvider>
           </ThemeProvider>
         </ReactQueryProvider>
+        <Analytics />
       </body>
     </html>
   );
