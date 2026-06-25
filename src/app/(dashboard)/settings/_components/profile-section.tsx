@@ -20,6 +20,27 @@ import {
 import { Loader2 } from "lucide-react";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
 
+/**
+ * Sanitize avatar URL: only allow safe protocols to prevent XSS.
+ * Defined at module level so static analysis tools recognise it as a sanitisation barrier.
+ */
+function sanitizeAvatarUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  // blob: URLs from URL.createObjectURL are always safe local references
+  if (url.startsWith("blob:")) return url;
+  // relative paths served by our own origin
+  if (url.startsWith("/")) return url;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === "https:" || parsed.protocol === "http:") {
+      return parsed.href;
+    }
+  } catch {
+    // malformed URL — reject
+  }
+  return null;
+}
+
 type Profile = {
   id: string;
   email: string;
@@ -58,7 +79,7 @@ export function ProfileSection({ profile }: Props) {
   const [isPending, setIsPending] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
-    profile?.avatar_url ?? null,
+    sanitizeAvatarUrl(profile?.avatar_url),
   );
   const [isAvatarPending, setIsAvatarPending] = useState(false);
 
@@ -78,7 +99,7 @@ export function ProfileSection({ profile }: Props) {
     }
 
     const objectUrl = URL.createObjectURL(file);
-    setAvatarPreview(objectUrl);
+    setAvatarPreview(sanitizeAvatarUrl(objectUrl));
     setIsAvatarPending(true);
 
     const fd = new FormData();
@@ -86,10 +107,10 @@ export function ProfileSection({ profile }: Props) {
 
     const res = await uploadAvatar(fd);
     if (res.success && res.data) {
-      setAvatarPreview(res.data.avatar_url);
+      setAvatarPreview(sanitizeAvatarUrl(res.data.avatar_url));
       toast.success("Avatar berhasil diperbarui");
     } else {
-      setAvatarPreview(profile?.avatar_url ?? null);
+      setAvatarPreview(sanitizeAvatarUrl(profile?.avatar_url));
       toast.error(res.error || "Gagal mengunggah avatar");
     }
 
