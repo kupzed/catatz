@@ -20,6 +20,24 @@ import {
 import { Loader2 } from "lucide-react";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
 
+const sanitizeAvatarUrl = (url: string | null | undefined): string | null => {
+  if (!url) return null;
+  if (url.startsWith("blob:")) return url;
+  if (url.startsWith("/")) return url;
+  if (url.startsWith("data:image/")) return url;
+
+  try {
+    const parsed = new URL(url, window.location.origin);
+    if (parsed.protocol === "https:" || parsed.protocol === "http:") {
+      return parsed.toString();
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+};
+
 type Profile = {
   id: string;
   email: string;
@@ -58,7 +76,7 @@ export function ProfileSection({ profile }: Props) {
   const [isPending, setIsPending] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
-    profile?.avatar_url ?? null,
+    sanitizeAvatarUrl(profile?.avatar_url ?? null),
   );
   const [isAvatarPending, setIsAvatarPending] = useState(false);
 
@@ -78,7 +96,7 @@ export function ProfileSection({ profile }: Props) {
     }
 
     const objectUrl = URL.createObjectURL(file);
-    setAvatarPreview(objectUrl);
+    setAvatarPreview(sanitizeAvatarUrl(objectUrl));
     setIsAvatarPending(true);
 
     const fd = new FormData();
@@ -86,7 +104,7 @@ export function ProfileSection({ profile }: Props) {
 
     const res = await uploadAvatar(fd);
     if (res.success && res.data) {
-      setAvatarPreview(res.data.avatar_url);
+      setAvatarPreview(sanitizeAvatarUrl(res.data.avatar_url));
       toast.success("Avatar berhasil diperbarui");
     } else {
       setAvatarPreview(profile?.avatar_url ?? null);
@@ -197,7 +215,7 @@ export function ProfileSection({ profile }: Props) {
               {avatarPreview ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={avatarPreview}
+                  src={sanitizeAvatarUrl(avatarPreview) ?? undefined}
                   className={`w-full h-full object-cover ${isAvatarPending ? "opacity-50" : ""}`}
                   alt={profile?.name ?? profile?.email ?? "Avatar CatatZ"}
                 />
