@@ -20,6 +20,27 @@ import {
 import { Loader2 } from "lucide-react";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
 
+/**
+ * Sanitize avatar URL: only allow safe protocols to prevent XSS.
+ * Defined at module level so static analysis tools recognise it as a sanitisation barrier.
+ */
+function sanitizeAvatarUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  // blob: URLs from URL.createObjectURL are always safe local references
+  if (url.startsWith("blob:")) return url;
+  // relative paths served by our own origin
+  if (url.startsWith("/")) return url;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === "https:" || parsed.protocol === "http:") {
+      return parsed.href;
+    }
+  } catch {
+    // malformed URL — reject
+  }
+  return null;
+}
+
 type Profile = {
   id: string;
   email: string;
@@ -58,23 +79,9 @@ export function ProfileSection({ profile }: Props) {
   const [isPending, setIsPending] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
-    profile?.avatar_url ?? null,
+    sanitizeAvatarUrl(profile?.avatar_url),
   );
   const [isAvatarPending, setIsAvatarPending] = useState(false);
-
-  // Sanitize avatar URL: only allow safe protocols to prevent XSS via src attribute
-  const getSafeAvatarSrc = (url: string | null): string | null => {
-    if (!url) return null;
-    try {
-      const parsed = new URL(url, self.location?.origin ?? "https://placeholder.invalid");
-      const allowed = ["https:", "blob:", "data:"];
-      return allowed.includes(parsed.protocol) ? url : null;
-    } catch {
-      return null;
-    }
-  };
-
-  const safeAvatarSrc = getSafeAvatarSrc(avatarPreview);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -92,7 +99,7 @@ export function ProfileSection({ profile }: Props) {
     }
 
     const objectUrl = URL.createObjectURL(file);
-    setAvatarPreview(objectUrl);
+    setAvatarPreview(sanitizeAvatarUrl(objectUrl));
     setIsAvatarPending(true);
 
     const fd = new FormData();
@@ -100,10 +107,10 @@ export function ProfileSection({ profile }: Props) {
 
     const res = await uploadAvatar(fd);
     if (res.success && res.data) {
-      setAvatarPreview(res.data.avatar_url);
+      setAvatarPreview(sanitizeAvatarUrl(res.data.avatar_url));
       toast.success("Avatar berhasil diperbarui");
     } else {
-      setAvatarPreview(profile?.avatar_url ?? null);
+      setAvatarPreview(sanitizeAvatarUrl(profile?.avatar_url));
       toast.error(res.error || "Gagal mengunggah avatar");
     }
 
@@ -208,10 +215,10 @@ export function ProfileSection({ profile }: Props) {
               />
             </div>
             <div className="w-10 h-10 rounded-full bg-surface-strong flex items-center justify-center text-foreground text-sm font-semibold shrink-0 overflow-hidden relative">
-              {safeAvatarSrc ? (
+              {avatarPreview ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={safeAvatarSrc}
+                  src={avatarPreview}
                   className={`w-full h-full object-cover ${isAvatarPending ? "opacity-50" : ""}`}
                   alt={profile?.name ?? profile?.email ?? "Avatar CatatZ"}
                 />
