@@ -62,6 +62,20 @@ export function ProfileSection({ profile }: Props) {
   );
   const [isAvatarPending, setIsAvatarPending] = useState(false);
 
+  // Sanitize avatar URL: only allow safe protocols to prevent XSS via src attribute
+  const getSafeAvatarSrc = (url: string | null): string | null => {
+    if (!url) return null;
+    try {
+      const parsed = new URL(url, self.location?.origin ?? "https://placeholder.invalid");
+      const allowed = ["https:", "blob:", "data:"];
+      return allowed.includes(parsed.protocol) ? url : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const safeAvatarSrc = getSafeAvatarSrc(avatarPreview);
+
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -194,10 +208,10 @@ export function ProfileSection({ profile }: Props) {
               />
             </div>
             <div className="w-10 h-10 rounded-full bg-surface-strong flex items-center justify-center text-foreground text-sm font-semibold shrink-0 overflow-hidden relative">
-              {avatarPreview ? (
+              {safeAvatarSrc ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={avatarPreview}
+                  src={safeAvatarSrc}
                   className={`w-full h-full object-cover ${isAvatarPending ? "opacity-50" : ""}`}
                   alt={profile?.name ?? profile?.email ?? "Avatar CatatZ"}
                 />
