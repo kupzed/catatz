@@ -84,3 +84,7 @@ Mulai dari:
 ## Status Project
 
 Status: aktif dikembangkan. Dokumentasi ini mengikuti kondisi repository saat ini dan perlu ikut diperbarui setiap ada perubahan fitur, database, auth, environment variable, deployment, security, atau struktur folder.
+
+## Lisensi
+
+[MIT License](./LICENSE) — Copyright © 2026 Kupzed
