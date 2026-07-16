@@ -104,6 +104,7 @@ const ClearableInput = forwardRef<HTMLInputElement, ClearableInputProps>(
           <button
             type="button"
             tabIndex={-1}
+            onMouseDown={(e) => e.preventDefault()}
             onClick={handleClear}
             className={cn(
               "absolute right-3 top-1/2 -translate-y-1/2",
