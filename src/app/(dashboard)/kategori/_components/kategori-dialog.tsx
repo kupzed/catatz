@@ -19,7 +19,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ClearableInput } from "@/components/common/clearable-input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
@@ -189,10 +189,11 @@ export default function KategoriDialog({
           {/* Nama */}
           <div className="space-y-1.5">
             <Label htmlFor="kat-nama">Nama Kategori</Label>
-            <Input
+            <ClearableInput
               id="kat-nama"
               placeholder="Contoh: Makan Siang"
               {...register("nama")}
+              onClear={() => setValue("nama", "")}
               className={errors.nama ? "border-rose-500" : ""}
             />
             {errors.nama && (
@@ -224,8 +225,9 @@ export default function KategoriDialog({
           <div className="space-y-2">
             <Label>Ikon</Label>
             <div className="flex gap-2 items-center">
-              <Input
+              <ClearableInput
                 {...register("ikon")}
+                onClear={() => setValue("ikon", "")}
                 className={cn(
                   "w-16 text-center text-lg",
                   errors.ikon ? "border-rose-500" : "",

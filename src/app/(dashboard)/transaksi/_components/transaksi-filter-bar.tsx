@@ -4,7 +4,7 @@ import type { Dispatch, SetStateAction } from "react";
 import type { Rekening } from "@/types/rekening";
 import type { TransaksiFilter } from "@/types/transaksi";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ClearableInput } from "@/components/common/clearable-input";
 import {
   Select,
   SelectContent,
@@ -37,10 +37,11 @@ export function TransaksiFilterBar({
       <div className="flex flex-col sm:flex-row gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
+          <ClearableInput
             placeholder="Cari judul, catatan, atau kategori..."
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
+            onClear={() => onSearchChange("")}
             className="pl-9"
           />
         </div>

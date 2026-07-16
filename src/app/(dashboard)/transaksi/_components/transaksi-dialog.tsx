@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ClearableInput } from "@/components/common/clearable-input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -606,11 +607,12 @@ export default function TransaksiDialog({
           {!isCorrection && tipe !== "transfer" && (
             <div className="space-y-1.5">
               <Label htmlFor="judul">Judul</Label>
-              <Input
+              <ClearableInput
                 id="judul"
                 placeholder="Nama transaksi, misal: Gaji Bulanan, Kopi Starb..."
                 autoComplete="off"
                 {...register("judul")}
+                onClear={() => setValue("judul", "")}
               />
               {errors.judul && (
                 <p className="text-xs text-rose-500">{errors.judul.message}</p>
@@ -683,7 +685,7 @@ export default function TransaksiDialog({
           {/* Catatan — selalu tampil (termasuk di correction) */}
           <div className="space-y-1.5">
             <Label htmlFor="catatan">Catatan</Label>
-            <Input
+            <ClearableInput
               id="catatan"
               placeholder={
                 isCorrection
@@ -692,6 +694,7 @@ export default function TransaksiDialog({
               }
               autoComplete="off"
               {...register("catatan")}
+              onClear={() => setValue("catatan", "")}
             />
           </div>
 

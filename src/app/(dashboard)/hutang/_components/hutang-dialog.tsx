@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ClearableInput } from "@/components/common/clearable-input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
@@ -155,10 +156,11 @@ export default function HutangDialog({
             <Label htmlFor="nama-entitas">
               {tipe === "menerima" ? "Nama Pemberi Pinjaman" : "Nama Peminjam"}
             </Label>
-            <Input
+            <ClearableInput
               id="nama-entitas"
               placeholder="Nama orang/lembaga"
               {...register("nama_entitas")}
+              onClear={() => setValue("nama_entitas", "")}
               className={errors.nama_entitas ? "border-rose-500" : ""}
             />
             {errors.nama_entitas && (
@@ -267,10 +269,11 @@ export default function HutangDialog({
           {/* Catatan */}
           <div className="space-y-1.5">
             <Label htmlFor="catatan-hutang">Catatan</Label>
-            <Input
+            <ClearableInput
               id="catatan-hutang"
               placeholder="Keterangan opsional"
               {...register("catatan")}
+              onClear={() => setValue("catatan", "")}
             />
           </div>
 

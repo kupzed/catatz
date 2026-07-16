@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ClearableInput } from "@/components/common/clearable-input";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import {
@@ -245,10 +246,11 @@ export function ProfileSection({ profile }: Props) {
         <Separator />
 
         <SettingRow label="Nama Tampilan">
-          <Input
+          <ClearableInput
             id="profil-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            onClear={() => setName("")}
             placeholder="Nama Anda"
             className="text-sm h-9"
           />
