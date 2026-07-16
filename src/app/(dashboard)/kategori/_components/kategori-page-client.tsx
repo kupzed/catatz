@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import type { Kategori } from "@/types/transaksi";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ClearableInput } from "@/components/common/clearable-input";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import {
@@ -211,11 +211,12 @@ export default function KategoriPageClient({ kategori }: Props) {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="relative w-full lg:max-w-sm">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
+        <ClearableInput
           id="kategori-search"
           placeholder="Cari kategori..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          onClear={() => setSearch("")}
           className="pl-9"
         />
         </div>

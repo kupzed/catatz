@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { Input } from "@/components/ui/input";
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 interface NominalInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -13,6 +15,7 @@ export function NominalInput({
   value,
   onValueChange,
   className,
+  disabled,
   ...props
 }: NominalInputProps) {
   const { preferences } = useSystemPreferences();
@@ -24,6 +27,10 @@ export function NominalInput({
   );
   const [draftValue, setDraftValue] = useState(formattedValue);
   const [isFocused, setIsFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const displayValue = isFocused ? draftValue : formattedValue;
+  const hasValue = displayValue !== "" && displayValue !== "0";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const parsed = parseDisplayValue(
@@ -68,17 +75,49 @@ export function NominalInput({
     props.onBlur?.(event);
   };
 
+  const handleClear = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      onValueChange("");
+      setDraftValue("");
+      inputRef.current?.focus();
+    },
+    [onValueChange],
+  );
+
   return (
-    <Input
-      type="text"
-      inputMode={allowDecimal ? "decimal" : "numeric"}
-      value={isFocused ? draftValue : formattedValue}
-      onChange={handleChange}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      className={className}
-      {...props}
-    />
+    <div className="relative">
+      <Input
+        ref={inputRef}
+        type="text"
+        inputMode={allowDecimal ? "decimal" : "numeric"}
+        value={displayValue}
+        onChange={handleChange}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        disabled={disabled}
+        className={cn(hasValue && !disabled && "pr-10", className)}
+        {...props}
+      />
+      {hasValue && !disabled && (
+        <button
+          type="button"
+          tabIndex={-1}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={handleClear}
+          className={cn(
+            "absolute right-3 top-1/2 -translate-y-1/2",
+            "flex h-5 w-5 items-center justify-center rounded-full",
+            "bg-muted/80 text-muted-foreground",
+            "hover:bg-muted hover:text-foreground",
+            "transition-colors duration-150",
+          )}
+          aria-label="Hapus"
+        >
+          <X className="h-3 w-3" />
+        </button>
+      )}
+    </div>
   );
 }
 

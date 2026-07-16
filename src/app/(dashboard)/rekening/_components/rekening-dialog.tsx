@@ -22,7 +22,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ClearableInput } from "@/components/common/clearable-input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -161,10 +161,11 @@ function CreateForm({
       {/* Nama */}
       <div className="space-y-1.5">
         <Label htmlFor="rek-nama">Nama Rekening</Label>
-        <Input
+        <ClearableInput
           id="rek-nama"
           placeholder="Contoh: BCA Utama"
           {...register("nama")}
+          onClear={() => setValue("nama", "")}
           className={errors.nama ? "border-rose-500" : ""}
         />
         {errors.nama && (
@@ -337,10 +338,11 @@ function EditForm({
       {/* Nama */}
       <div className="space-y-1.5">
         <Label htmlFor="rek-nama-e">Nama Rekening</Label>
-        <Input
+        <ClearableInput
           id="rek-nama-e"
           placeholder="Contoh: BCA Utama"
           {...register("nama")}
+          onClear={() => setValue("nama", "")}
           className={errors.nama ? "border-rose-500" : ""}
         />
         {errors.nama && (

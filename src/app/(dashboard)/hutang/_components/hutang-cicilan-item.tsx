@@ -9,6 +9,7 @@ import { NominalInput } from "@/components/common/nominal-input";
 import { RekeningSelect } from "@/components/common/rekening-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ClearableInput } from "@/components/common/clearable-input";
 import { Label } from "@/components/ui/label";
 import { Pencil, Save, Trash2, X } from "lucide-react";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
@@ -115,12 +116,18 @@ export function HutangCicilanItem({
           </div>
           <div className="space-y-1">
             <Label className="text-xs">Catatan</Label>
-            <Input
+            <ClearableInput
               value={editDraft.catatan}
               onChange={(event) =>
                 onEditDraftChange((prev) => ({
                   ...prev,
                   catatan: event.target.value,
+                }))
+              }
+              onClear={() =>
+                onEditDraftChange((prev) => ({
+                  ...prev,
+                  catatan: "",
                 }))
               }
               placeholder="Catatan opsional"

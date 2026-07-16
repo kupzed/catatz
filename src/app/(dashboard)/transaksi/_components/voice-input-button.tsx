@@ -265,7 +265,7 @@ export default function VoiceInputButton({
 
       {/* Transcript live */}
       {isListening && transcript.length > 0 && (
-        <p className="max-w-full break-words px-1 text-[11px] italic leading-tight text-muted-foreground">
+        <p className="max-w-full wrap-break-word px-1 text-[11px] italic leading-tight text-muted-foreground">
           Mendengar: {transcript}
         </p>
       )}
