@@ -185,15 +185,15 @@ Tabel: `kategori`.
 
 Lokasi: `src/actions/transaksi-action.ts`
 
-Deskripsi: mengambil transaksi dengan relasi kategori, rekening asal, dan rekening tujuan. Filter `q` mencocokkan judul, catatan, dan nama kategori.
+Deskripsi: mengambil transaksi dengan relasi kategori, rekening asal, dan rekening tujuan. Filter `q` mencocokkan judul, catatan, dan nama kategori. Field `tipe`, `rekening_id`, dan `kategori_id` mendukung multi-select (array); array kosong berarti "semua".
 
 Input:
 
 ```ts
 type TransaksiFilter = {
-  tipe?: "income" | "expense" | "transfer" | "correction" | "all";
-  rekening_id?: string;
-  kategori_id?: string;
+  tipe?: TipeTransaksi[];
+  rekening_id?: string[];
+  kategori_id?: string[];
   dari?: string;
   sampai?: string;
   q?: string;
@@ -344,10 +344,10 @@ Tabel: `rekening`.
 
 Lokasi: `src/actions/kategori-action.ts`
 
-| Action           | Tujuan                          | Validasi                        | Tabel      |
-| ---------------- | ------------------------------- | ------------------------------- | ---------- |
-| `createKategori` | Membuat kategori custom user.   | `kategoriSchema` (server-side)  | `kategori` |
-| `updateKategori` | Mengubah kategori custom user.  | `kategoriSchema` (server-side)  | `kategori` |
+| Action           | Tujuan                          | Validasi                                      | Tabel      |
+| ---------------- | ------------------------------- | --------------------------------------------- | ---------- |
+| `createKategori` | Membuat kategori custom user.   | `kategoriSchema` (server-side)                | `kategori` |
+| `updateKategori` | Mengubah kategori custom user.  | `kategoriSchema` (server-side)                | `kategori` |
 | `deleteKategori` | Menghapus kategori custom user. | Auth user + `is_system = false` + usage check | `kategori` |
 
 Action update/delete menambahkan filter `user_id = user.id` dan `is_system = false`, selain proteksi RLS.
@@ -362,16 +362,16 @@ Proteksi tambahan:
 
 Lokasi: `src/actions/hutang-action.ts`
 
-| Action            | Tujuan                                                                | Tabel                      |
-| ----------------- | --------------------------------------------------------------------- | -------------------------- |
-| `getHutang`       | Mengambil hutang/piutang dengan relasi cicilan.                       | `hutang`, `hutang_cicilan` |
-| `createHutang`    | Membuat hutang/piutang. Validasi `hutangSchema` server-side.          | `hutang`                   |
+| Action            | Tujuan                                                                                                                                                           | Tabel                      |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `getHutang`       | Mengambil hutang/piutang dengan relasi cicilan.                                                                                                                  | `hutang`, `hutang_cicilan` |
+| `createHutang`    | Membuat hutang/piutang. Validasi `hutangSchema` server-side.                                                                                                     | `hutang`                   |
 | `updateHutang`    | Mengubah hutang/piutang. Validasi `hutangSchema.partial()` server-side. Menghitung ulang sisa jika total berubah. Menolak perubahan tipe jika sudah ada cicilan. | `hutang`, `hutang_cicilan` |
-| `deleteHutang`    | Menghapus hutang/piutang.                                             | `hutang`                   |
-| `createCicilan`   | Membuat cicilan. Validasi `cicilanSchema` server-side. Mengembalikan parent `Hutang` terbaru. | `hutang_cicilan`, `hutang` |
-| `updateCicilan`   | Mengubah nominal, tanggal, waktu, rekening, atau catatan cicilan lalu mengembalikan parent `Hutang` terbaru. | `hutang_cicilan`, `hutang` |
-| `deleteCicilan`   | Menghapus cicilan lalu mengembalikan parent `Hutang` terbaru.         | `hutang_cicilan`, `hutang` |
-| `markHutangLunas` | Membuat cicilan sebesar sisa tagihan dengan rekening opsional.        | `hutang_cicilan`, `hutang` |
+| `deleteHutang`    | Menghapus hutang/piutang.                                                                                                                                        | `hutang`                   |
+| `createCicilan`   | Membuat cicilan. Validasi `cicilanSchema` server-side. Mengembalikan parent `Hutang` terbaru.                                                                    | `hutang_cicilan`, `hutang` |
+| `updateCicilan`   | Mengubah nominal, tanggal, waktu, rekening, atau catatan cicilan lalu mengembalikan parent `Hutang` terbaru.                                                     | `hutang_cicilan`, `hutang` |
+| `deleteCicilan`   | Menghapus cicilan lalu mengembalikan parent `Hutang` terbaru.                                                                                                    | `hutang_cicilan`, `hutang` |
+| `markHutangLunas` | Membuat cicilan sebesar sisa tagihan dengan rekening opsional.                                                                                                   | `hutang_cicilan`, `hutang` |
 
 Validasi server-side:
 
@@ -384,13 +384,13 @@ Catatan: operasi cicilan mengandalkan trigger database untuk memperbarui `sisa_t
 
 Lokasi: `src/actions/rekap-action.ts`
 
-| Action                                  | Tujuan                                                                                                           | Tabel                                        |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| `getRekapBulanan(tahun)`                | Menghitung income, expense, dan net per bulan. Transfer dan correction tidak masuk total utama.                   | `transaksi`                                  |
-| `getRekapDetailBulanan(bulan, tahun)`   | Mengambil detail bulan: selisih utama, breakdown kategori/judul, koreksi saldo, aktivitas hutang/piutang, dan sisa aktif. | `transaksi`, `kategori`, `rekening`, `hutang`, `hutang_cicilan` |
-| `getRekapKategori(bulan, tahun)`        | Breakdown expense per kategori untuk bulan tertentu.                                                             | `transaksi`, `kategori`                      |
-| `getBudgetWithUsage(bulan, tahun)`      | Mengambil budget dan menghitung pemakaian expense.                                                               | `budget`, `transaksi`, `kategori`            |
-| `upsertBudget(...)`                     | Membuat/mengubah budget berdasarkan unique `(user_id,kategori_id,bulan,tahun)`.                                  | `budget`                                     |
+| Action                                | Tujuan                                                                                                                    | Tabel                                                           |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `getRekapBulanan(tahun)`              | Menghitung income, expense, dan net per bulan. Transfer dan correction tidak masuk total utama.                           | `transaksi`                                                     |
+| `getRekapDetailBulanan(bulan, tahun)` | Mengambil detail bulan: selisih utama, breakdown kategori/judul, koreksi saldo, aktivitas hutang/piutang, dan sisa aktif. | `transaksi`, `kategori`, `rekening`, `hutang`, `hutang_cicilan` |
+| `getRekapKategori(bulan, tahun)`      | Breakdown expense per kategori untuk bulan tertentu.                                                                      | `transaksi`, `kategori`                                         |
+| `getBudgetWithUsage(bulan, tahun)`    | Mengambil budget dan menghitung pemakaian expense.                                                                        | `budget`, `transaksi`, `kategori`                               |
+| `upsertBudget(...)`                   | Membuat/mengubah budget berdasarkan unique `(user_id,kategori_id,bulan,tahun)`.                                           | `budget`                                                        |
 
 Catatan: `upsertBudget` belum terlihat dipakai oleh UI route yang ada.
 
@@ -438,7 +438,7 @@ Deskripsi: mengubah sebagian preferensi sistem user dengan runtime validation wh
 Input:
 
 ```ts
-Partial<UserPreferences>
+Partial<UserPreferences>;
 ```
 
 Output:

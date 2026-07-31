@@ -61,14 +61,14 @@ export async function getTransaksi(filter: TransaksiFilter = {}): Promise<Transa
     query = query.order('waktu', { ascending: filter.sortOrder === 'asc' }).order('created_at', { ascending: filter.sortOrder === 'asc' });
   }
 
-  if (filter.tipe && filter.tipe !== 'all') {
-    query = query.eq('tipe', filter.tipe);
+  if (filter.tipe?.length) {
+    query = query.in('tipe', filter.tipe);
   }
-  if (filter.rekening_id) {
-    query = query.eq('rekening_id', filter.rekening_id);
+  if (filter.rekening_id?.length) {
+    query = query.in('rekening_id', filter.rekening_id);
   }
-  if (filter.kategori_id) {
-    query = query.eq('kategori_id', filter.kategori_id);
+  if (filter.kategori_id?.length) {
+    query = query.in('kategori_id', filter.kategori_id);
   }
   if (filter.dari) {
     query = query.gte('tanggal', filter.dari);

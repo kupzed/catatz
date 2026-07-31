@@ -41,7 +41,9 @@ export function useTransaksiFilter<T extends Transaksi = Transaksi>({
   dateFilter,
 }: UseTransaksiFilterParams<T>): UseTransaksiFilterReturn<T> {
   const [filter, setFilter] = useState<TransaksiFilter>({
-    tipe: "all",
+    tipe: [],
+    rekening_id: [],
+    kategori_id: [],
     sortBy: "tanggal",
     sortOrder: "desc",
   });
@@ -50,11 +52,11 @@ export function useTransaksiFilter<T extends Transaksi = Transaksi>({
   const filtered = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
     const result = transaksi.filter((t) => {
-      if (filter.tipe && filter.tipe !== "all" && t.tipe !== filter.tipe)
+      if (filter.tipe?.length && !filter.tipe.includes(t.tipe))
         return false;
-      if (filter.rekening_id && t.rekening_id !== filter.rekening_id)
+      if (filter.rekening_id?.length && !filter.rekening_id.includes(t.rekening_id ?? ""))
         return false;
-      if (filter.kategori_id && t.kategori_id !== filter.kategori_id)
+      if (filter.kategori_id?.length && !filter.kategori_id.includes(t.kategori_id ?? ""))
         return false;
       if (
         normalizedSearch &&

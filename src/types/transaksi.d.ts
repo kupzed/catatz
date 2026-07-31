@@ -49,9 +49,9 @@ export type TransaksiFormValues = {
 };
 
 export type TransaksiFilter = {
-  tipe?: TipeTransaksi | 'all';
-  rekening_id?: string;
-  kategori_id?: string;
+  tipe?: TipeTransaksi[];      // kosong = semua tipe
+  rekening_id?: string[];      // kosong = semua rekening
+  kategori_id?: string[];      // kosong = semua kategori
   dari?: string;
   sampai?: string;
   q?: string;
