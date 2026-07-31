@@ -285,6 +285,7 @@ export default function TransaksiPageClient({
         filter={filter}
         onFilterChange={setFilter}
         rekening={rekening}
+        kategori={kategori}
         onAddClick={handleAddClick}
       />
 

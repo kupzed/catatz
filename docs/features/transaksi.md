@@ -70,8 +70,8 @@ Initial data diambil di Server Component dengan:
 
 ## UI Behavior
 
-- User bisa filter periode, tipe, rekening, search judul/catatan/kategori, dan sorting.
-- Pada mobile, filter urutan dan tipe tampil dalam dua kolom, sedangkan filter rekening memakai satu baris penuh agar label tidak terpotong. Mulai breakpoint `sm`, ketiganya kembali sejajar dalam satu baris.
+- User bisa filter periode, tipe (multi-select), rekening (multi-select), kategori (multi-select), search judul/catatan/kategori, dan sorting.
+- Filter tipe, rekening, dan kategori mendukung combo/multi-select: user bisa memilih beberapa opsi sekaligus. Sorting tetap single-select. Filter tampil dalam grid dua kolom pada mobile dan empat kolom mulai breakpoint `sm`.
 - Query `?new=true` membuka dialog transaksi baru otomatis.
 - Dialog mendukung mode create, edit, copy, dan correction readonly behavior.
 - Dialog mobile dipusatkan di area aman dan memisahkan frame tetap dari scroll container form. Struktur ini menjaga tombol aksi tetap normal setelah momentum scroll cepat di iOS/PWA.

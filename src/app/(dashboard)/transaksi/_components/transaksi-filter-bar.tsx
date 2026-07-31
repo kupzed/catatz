@@ -2,7 +2,7 @@
 
 import type { Dispatch, SetStateAction } from "react";
 import type { Rekening } from "@/types/rekening";
-import type { TransaksiFilter } from "@/types/transaksi";
+import type { Kategori, TransaksiFilter, TipeTransaksi } from "@/types/transaksi";
 import { Button } from "@/components/ui/button";
 import { ClearableInput } from "@/components/common/clearable-input";
 import {
@@ -12,8 +12,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RekeningSelect } from "@/components/common/rekening-select";
-import { Plus, Search } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { ChevronDown, Plus, Search } from "lucide-react";
 
 export type TransaksiFilterBarProps = {
   search: string;
@@ -21,8 +29,35 @@ export type TransaksiFilterBarProps = {
   filter: TransaksiFilter;
   onFilterChange: Dispatch<SetStateAction<TransaksiFilter>>;
   rekening: Rekening[];
+  kategori: Kategori[];
   onAddClick: () => void;
 };
+
+/* ------------------------------------------------------------------ */
+/*  Helper: toggle item di dalam array                                 */
+/* ------------------------------------------------------------------ */
+function toggleArrayItem<T>(arr: T[] | undefined, item: T): T[] {
+  const current = arr ?? [];
+  return current.includes(item)
+    ? current.filter((i) => i !== item)
+    : [...current, item];
+}
+
+/* ------------------------------------------------------------------ */
+/*  Tipe options                                                       */
+/* ------------------------------------------------------------------ */
+const TIPE_OPTIONS: { value: TipeTransaksi; label: string }[] = [
+  { value: "income", label: "Pemasukan" },
+  { value: "expense", label: "Pengeluaran" },
+  { value: "transfer", label: "Transfer" },
+  { value: "correction", label: "Koreksi Saldo" },
+];
+
+/* ------------------------------------------------------------------ */
+/*  Shared trigger className                                           */
+/* ------------------------------------------------------------------ */
+const triggerClassName =
+  "flex h-12 w-full items-center justify-between gap-1 rounded-input border border-hairline bg-background px-3 py-2 text-sm text-foreground transition-colors hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-card [&>svg]:shrink-0 [&>svg]:text-muted-foreground";
 
 export function TransaksiFilterBar({
   search,
@@ -30,8 +65,36 @@ export function TransaksiFilterBar({
   filter,
   onFilterChange,
   rekening,
+  kategori,
   onAddClick,
 }: TransaksiFilterBarProps) {
+  /* ---- tipe helpers ---- */
+  const selectedTipe = filter.tipe ?? [];
+  const tipeLabel =
+    selectedTipe.length === 0
+      ? "Semua Tipe"
+      : selectedTipe.length === 1
+        ? TIPE_OPTIONS.find((o) => o.value === selectedTipe[0])?.label ?? "Tipe"
+        : `Tipe`;
+
+  /* ---- rekening helpers ---- */
+  const selectedRek = filter.rekening_id ?? [];
+  const rekLabel =
+    selectedRek.length === 0
+      ? "Semua Rekening"
+      : selectedRek.length === 1
+        ? rekening.find((r) => r.id === selectedRek[0])?.nama ?? "Rekening"
+        : `Rekening`;
+
+  /* ---- kategori helpers ---- */
+  const selectedKat = filter.kategori_id ?? [];
+  const katLabel =
+    selectedKat.length === 0
+      ? "Semua Kategori"
+      : selectedKat.length === 1
+        ? kategori.find((k) => k.id === selectedKat[0])?.nama ?? "Kategori"
+        : `Kategori`;
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col sm:flex-row gap-2">
@@ -47,7 +110,7 @@ export function TransaksiFilterBar({
         </div>
         <Button
           onClick={onAddClick}
-          className="h-11 px-5 bg-primary hover:bg-[#003ecc] text-white rounded-full font-semibold gap-2 shrink-0 transition-colors"
+          className="h-12 px-5 bg-primary hover:bg-[#003ecc] text-white rounded-full font-semibold gap-2 shrink-0 transition-colors"
           id="btn-tambah-transaksi"
         >
           <Plus className="h-4 w-4" />
@@ -55,7 +118,8 @@ export function TransaksiFilterBar({
         </Button>
       </div>
 
-      <div className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3">
+      <div className="grid w-full grid-cols-2 gap-2 sm:grid-cols-4">
+        {/* ── Sort (tetap single-select) ── */}
         <Select
           value={`${filter.sortBy}-${filter.sortOrder}`}
           onValueChange={(v) => {
@@ -68,7 +132,7 @@ export function TransaksiFilterBar({
         >
           <SelectTrigger
             size="sm"
-            className="h-11! min-w-0 text-sm text-foreground border-hairline"
+            className="h-12! min-w-0 text-sm text-foreground border-hairline"
             id="filter-sort"
           >
             <SelectValue placeholder="Urutkan" />
@@ -89,47 +153,146 @@ export function TransaksiFilterBar({
           </SelectContent>
         </Select>
 
-        <Select
-          value={filter.tipe ?? "all"}
-          onValueChange={(v) =>
-            onFilterChange((f) => ({
-              ...f,
-              tipe: v as TransaksiFilter["tipe"],
-            }))
-          }
-        >
-          <SelectTrigger
-            size="sm"
-            className="h-11! min-w-0 text-sm text-foreground border-hairline"
-            id="filter-tipe"
-          >
-            <SelectValue placeholder="Semua tipe" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Semua Tipe</SelectItem>
-            <SelectItem value="income">Pemasukan</SelectItem>
-            <SelectItem value="expense">Pengeluaran</SelectItem>
-            <SelectItem value="transfer">Transfer</SelectItem>
-            <SelectItem value="correction">Koreksi Saldo</SelectItem>
-          </SelectContent>
-        </Select>
+        {/* ── Tipe (multi-select) ── */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className={triggerClassName}
+              id="filter-tipe"
+            >
+              <span className="flex items-center gap-1.5 truncate">
+                <span className="truncate">{tipeLabel}</span>
+                {selectedTipe.length > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="text-[10px] px-1.5 py-0 h-4 min-w-4 flex items-center justify-center"
+                  >
+                    {selectedTipe.length}
+                  </Badge>
+                )}
+              </span>
+              <ChevronDown className="h-4 w-4 opacity-50" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="min-w-48">
+            <DropdownMenuLabel>Tipe Transaksi</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {TIPE_OPTIONS.map((opt) => (
+              <DropdownMenuCheckboxItem
+                key={opt.value}
+                checked={selectedTipe.includes(opt.value)}
+                onCheckedChange={() =>
+                  onFilterChange((f) => ({
+                    ...f,
+                    tipe: toggleArrayItem(f.tipe, opt.value),
+                  }))
+                }
+                onSelect={(e) => e.preventDefault()}
+              >
+                {opt.label}
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-        <RekeningSelect
-          rekening={rekening}
-          value={filter.rekening_id ?? "none"}
-          onValueChange={(v) =>
-            onFilterChange((f) => ({
-              ...f,
-              rekening_id: v === "none" ? undefined : v,
-            }))
-          }
-          placeholder="Semua rekening"
-          includeNone={true}
-          noneLabel="Semua Rekening"
-          size="sm"
-          className="col-span-2 h-11! min-w-0 text-sm text-foreground border-hairline sm:col-span-1"
-          id="filter-rekening"
-        />
+        {/* ── Rekening (multi-select) ── */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className={triggerClassName}
+              id="filter-rekening"
+            >
+              <span className="flex items-center gap-1.5 truncate">
+                <span className="truncate">{rekLabel}</span>
+                {selectedRek.length > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="text-[10px] px-1.5 py-0 h-4 min-w-4 flex items-center justify-center"
+                  >
+                    {selectedRek.length}
+                  </Badge>
+                )}
+              </span>
+              <ChevronDown className="h-4 w-4 opacity-50" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="min-w-48">
+            <DropdownMenuLabel>Rekening</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {rekening.map((r) => (
+              <DropdownMenuCheckboxItem
+                key={r.id}
+                checked={selectedRek.includes(r.id)}
+                onCheckedChange={() =>
+                  onFilterChange((f) => ({
+                    ...f,
+                    rekening_id: toggleArrayItem(f.rekening_id, r.id),
+                  }))
+                }
+                onSelect={(e) => e.preventDefault()}
+              >
+                <span className="flex items-center gap-2">
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ background: r.warna }}
+                  />
+                  {r.nama}
+                  <span className="text-muted-foreground text-xs ml-1 font-normal">
+                    ({r.jenis})
+                  </span>
+                </span>
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* ── Kategori (multi-select, baru) ── */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className={triggerClassName}
+              id="filter-kategori"
+            >
+              <span className="flex items-center gap-1.5 truncate">
+                <span className="truncate">{katLabel}</span>
+                {selectedKat.length > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="text-[10px] px-1.5 py-0 h-4 min-w-4 flex items-center justify-center"
+                  >
+                    {selectedKat.length}
+                  </Badge>
+                )}
+              </span>
+              <ChevronDown className="h-4 w-4 opacity-50" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-48 max-h-64 overflow-y-auto">
+            <DropdownMenuLabel>Kategori</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {kategori.map((k) => (
+              <DropdownMenuCheckboxItem
+                key={k.id}
+                checked={selectedKat.includes(k.id)}
+                onCheckedChange={() =>
+                  onFilterChange((f) => ({
+                    ...f,
+                    kategori_id: toggleArrayItem(f.kategori_id, k.id),
+                  }))
+                }
+                onSelect={(e) => e.preventDefault()}
+              >
+                <span className="flex items-center gap-2">
+                  <span>{k.ikon}</span>
+                  {k.nama}
+                </span>
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
