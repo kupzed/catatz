@@ -41,7 +41,7 @@ test.describe("mobile dashboard layout", () => {
     const accountFilter = page.locator("#filter-rekening");
     await expect(accountFilter).toBeVisible();
     await expectInsideViewport(page, accountFilter);
-    await expect(accountFilter).toHaveCSS("height", "44px");
+    await expect(accountFilter).toHaveCSS("height", "48px");
 
     await page.getByRole("button", { name: "Transaksi Baru" }).click();
     const dialog = page.getByRole("dialog");
