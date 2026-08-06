@@ -78,6 +78,7 @@ Mulai dari:
 - [Database Schema](./docs/database-schema.md)
 - [Supabase Auth](./docs/supabase-auth.md)
 - [Security Checklist](./docs/security-checklist.md)
+- [Security Policy](./SECURITY.md)
 - [Troubleshooting](./docs/troubleshooting.md)
 - [ECC Development Workflow](./docs/ecc-workflow.md)
 

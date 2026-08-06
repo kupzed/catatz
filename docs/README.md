@@ -35,6 +35,7 @@ Folder ini adalah pusat dokumentasi teknis CatatZ. Isi dokumen ditulis berdasark
 - [PWA](./pwa.md)
 - [GitHub Workflows & Repository Config](./github-workflows.md)
 - [Security Checklist](./security-checklist.md)
+- [Security Policy](../SECURITY.md)
 - [Troubleshooting](./troubleshooting.md)
 - [Codex Operating Instructions](../AGENTS.md)
 - [AI Development Rules](./ai-development-rules.md)
