@@ -47,16 +47,16 @@ Workflow default:
 
 ### Token Warna
 
-| Token CSS | Nilai | Gunakan untuk |
-|---|---|---|
-| `bg-primary` / `text-primary` | #0052ff | CTA utama, active state nav, accent link |
-| `bg-surface-dark` | #0a0b0d | Dark hero card, editorial band |
-| `bg-surface-dark-elevated` | #16181c | Card di atas dark background |
-| `bg-surface-soft` | #f7f7f7 | Alternating band, muted section background |
-| `bg-surface-strong` | #eef0f3 | Secondary button bg, badge bg, icon plate |
-| `text-semantic-up` | #05b169 | Pemasukan / nilai positif — **text only, jangan pakai sebagai bg** |
-| `text-semantic-down` | #cf202f | Pengeluaran / nilai negatif — **text only, jangan pakai sebagai bg** |
-| `border-hairline` | #dee1e6 | Default border/divider pada surface terang |
+| Token CSS                     | Nilai   | Gunakan untuk                                                        |
+| ----------------------------- | ------- | -------------------------------------------------------------------- |
+| `bg-primary` / `text-primary` | #0052ff | CTA utama, active state nav, accent link                             |
+| `bg-surface-dark`             | #0a0b0d | Dark hero card, editorial band                                       |
+| `bg-surface-dark-elevated`    | #16181c | Card di atas dark background                                         |
+| `bg-surface-soft`             | #f7f7f7 | Alternating band, muted section background                           |
+| `bg-surface-strong`           | #eef0f3 | Secondary button bg, badge bg, icon plate                            |
+| `text-semantic-up`            | #05b169 | Pemasukan / nilai positif — **text only, jangan pakai sebagai bg**   |
+| `text-semantic-down`          | #cf202f | Pengeluaran / nilai negatif — **text only, jangan pakai sebagai bg** |
+| `border-hairline`             | #dee1e6 | Default border/divider pada surface terang                           |
 
 ### Shape Rules
 
@@ -130,16 +130,16 @@ Sebelum final response:
 
 Setiap task wajib melewati documentation gate. Jika area berikut berubah, cek dan update dokumentasi terkait:
 
-| Area perubahan | Dokumentasi yang wajib dicek |
-|---|---|
-| Route, page, component, atau UI behavior fitur | `docs/features/*`, `docs/folder-structure.md`, `docs/server-actions-api.md` jika action berubah |
-| **Komponen UI, styling, token warna, atau desain** | **`DESIGN.md`** (acuan), **`docs/frontend-guidelines.md`** (implementasi) |
-| Server Action atau API Route | `docs/server-actions-api.md`, dokumen fitur terkait |
-| Database schema, migration, trigger, atau RLS | `docs/database-schema.md`, `docs/database-migrations.md`, `docs/rls-policies.md`, `docs/security-checklist.md` |
-| Auth, session, cookie, atau proxy | `docs/supabase-auth.md`, `docs/security-checklist.md`, `docs/troubleshooting.md` |
-| Environment variable atau deployment | `docs/environment-variables.md`, `docs/deployment-vercel.md`, `README.md` jika quick start berubah |
-| PWA, offline, service worker, atau cache | `docs/pwa.md`, dokumen fitur terkait, `docs/security-checklist.md` jika caching berubah |
-| Reusable UI guideline | `docs/frontend-guidelines.md` |
+| Area perubahan                                     | Dokumentasi yang wajib dicek                                                                                   |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Route, page, component, atau UI behavior fitur     | `docs/features/*`, `docs/folder-structure.md`, `docs/server-actions-api.md` jika action berubah                |
+| **Komponen UI, styling, token warna, atau desain** | **`DESIGN.md`** (acuan), **`docs/frontend-guidelines.md`** (implementasi)                                      |
+| Server Action atau API Route                       | `docs/server-actions-api.md`, dokumen fitur terkait                                                            |
+| Database schema, migration, trigger, atau RLS      | `docs/database-schema.md`, `docs/database-migrations.md`, `docs/rls-policies.md`, `docs/security-checklist.md` |
+| Auth, session, cookie, atau proxy                  | `docs/supabase-auth.md`, `docs/security-checklist.md`, `docs/troubleshooting.md`                               |
+| Environment variable atau deployment               | `docs/environment-variables.md`, `docs/deployment-vercel.md`, `README.md` jika quick start berubah             |
+| PWA, offline, service worker, atau cache           | `docs/pwa.md`, dokumen fitur terkait, `docs/security-checklist.md` jika caching berubah                        |
+| Reusable UI guideline                              | `docs/frontend-guidelines.md`                                                                                  |
 
 Jangan dokumentasikan fitur yang belum benar-benar tersedia sebagai fitur selesai. Jika dokumentasi tidak perlu diubah, final response tetap harus menyebut alasannya.
 
