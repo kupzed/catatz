@@ -89,7 +89,7 @@ test.describe("mobile dashboard layout", () => {
   });
 
   test("keeps all debt actions on one row", async ({ page }) => {
-    await page.goto("/hutang");
+    await page.goto("/debts");
 
     const actionNames = [
       "Detail",
@@ -122,7 +122,7 @@ test.describe("mobile dashboard layout", () => {
   test("keeps debt detail and settlement forms inline with the card", async ({
     page,
   }) => {
-    await page.goto("/hutang");
+    await page.goto("/debts");
 
     await page.getByRole("button", { name: "Tambah", exact: true }).click();
     const debtDialog = page.getByRole("dialog");
@@ -217,7 +217,7 @@ test("keeps compact mobile controls usable at 320px", async ({ page }) => {
   await expectInsideViewport(page, page.getByRole("dialog"));
   await page.getByRole("button", { name: "Close" }).click();
 
-  await page.goto("/hutang");
+  await page.goto("/debts");
   const compactDebtActions = [
     "Detail",
     "Cicil",

@@ -73,7 +73,7 @@ export async function updateUserPreferences(values: UserPreferenceUpdate): Promi
   revalidatePath('/transaksi');
   revalidatePath('/rekening');
   revalidatePath('/rekap');
-  revalidatePath('/hutang');
+  revalidatePath('/debts');
   revalidatePath('/'); // Revalidate root for potential landing page redirect
 
   return { success: true, data: normalizeUserPreferences(data) };

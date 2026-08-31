@@ -46,6 +46,7 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       { source: "/kategori/:path*", destination: "/categories/:path*", permanent: false },
+      { source: "/hutang/:path*", destination: "/debts/:path*", permanent: false },
     ];
   },
   async headers() {

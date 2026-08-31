@@ -15,7 +15,7 @@ const ROUTE_NAMES: Record<string, string> = {
   transaksi: "Transaksi",
   rekening: "Rekening",
   rekap: "Rekap",
-  hutang: "Hutang",
+  debts: "Hutang",
   settings: "Pengaturan",
   categories: "Kategori",
 };

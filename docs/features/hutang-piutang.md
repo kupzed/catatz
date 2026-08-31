@@ -10,14 +10,14 @@ Fitur hutang/piutang digunakan untuk mencatat pinjaman yang user berikan atau te
 
 ## Route
 
-- `/hutang`
+- `/debts`
 
 ## Lokasi File
 
-- Page: `src/app/(dashboard)/hutang/page.tsx`
-- Loading: `src/app/(dashboard)/hutang/loading.tsx`
-- Client page: `src/app/(dashboard)/hutang/_components/hutang-page-client.tsx`
-- Dialog: `src/app/(dashboard)/hutang/_components/hutang-dialog.tsx`
+- Page: `src/app/(dashboard)/debts/page.tsx`
+- Loading: `src/app/(dashboard)/debts/loading.tsx`
+- Client page: `src/app/(dashboard)/debts/_components/hutang-page-client.tsx`
+- Dialog: `src/app/(dashboard)/debts/_components/hutang-dialog.tsx`
 - Actions: `src/actions/hutang-action.ts`
 - Validation: `src/validations/hutang-validation.ts`
 - Types: `src/types/hutang.d.ts`

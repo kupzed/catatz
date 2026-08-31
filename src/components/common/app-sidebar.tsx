@@ -63,7 +63,7 @@ const NAV_ITEMS = [
       { href: "/transaksi", label: "Transaksi", icon: ArrowLeftRight },
       { href: "/rekening", label: "Rekening", icon: Landmark },
       { href: "/rekap", label: "Rekap", icon: BarChart3 },
-      { href: "/hutang", label: "Hutang", icon: HandCoins },
+      { href: "/debts", label: "Hutang", icon: HandCoins },
     ],
   },
   {
@@ -80,7 +80,7 @@ function SidebarHeaderContent() {
   const isCollapsed = state === "collapsed" && !isMobile;
 
   return (
-    <div className="flex w-full overflow-hidden items-center justify-between px-2 py-3 min-h-[52px] select-none">
+    <div className="flex w-full overflow-hidden items-center justify-between px-2 py-3 min-h-13 select-none">
       {/* Expanded: logo + name */}
       {!isCollapsed && (
         <Link
@@ -111,7 +111,7 @@ function SidebarHeaderContent() {
           isCollapsed && "w-full justify-center",
         )}
       >
-        <PanelLeft className="h-[18px] w-[18px]" />
+        <PanelLeft className="h-4.5 w-4.5" />
       </button>
     </div>
   );

@@ -7,7 +7,7 @@ export const LANDING_PAGE_PREFERENCES = [
   "/transaksi",
   "/rekening",
   "/rekap",
-  "/hutang",
+  "/debts",
   "/categories",
 ] as const;
 

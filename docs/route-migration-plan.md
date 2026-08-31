@@ -87,11 +87,18 @@ Bagian ini memuat checklist status untuk seluruh 8 fase migrasi. Setiap fase dij
   - [x] Update `public/offline.html`
   - [x] Update `docs/features/kategori.md` & `docs/folder-structure.md`
   - [x] Validasi fungsionalitas kategori & quick check (typecheck, lint, build)
-- [ ] **Fase 3: Migrasi Route Hutang -> Debts**
-  - [ ] Rename folder `src/app/(dashboard)/hutang` -> `src/app/(dashboard)/debts`
-  - [ ] Update `revalidatePath("/debts")` di `src/actions/hutang-action.ts`
-  - [ ] Update navigasi `page.goto("/debts")` di `tests/e2e/mobile-layout.spec.ts`
-  - [ ] Validasi fungsionalitas hutang/piutang & quick check
+- [x] **Fase 3: Migrasi Route Hutang -> Debts**
+  - [x] Rename folder `src/app/(dashboard)/hutang` -> `src/app/(dashboard)/debts`
+  - [x] Update `revalidatePath("/debts")` di `src/actions/hutang-action.ts` & `src/actions/preference-action.ts`
+  - [x] Update `next.config.ts` redirects (`/hutang/:path*` -> `/debts/:path*`)
+  - [x] Update `NAV_ITEMS` di `src/components/common/app-sidebar.tsx`
+  - [x] Update `ROUTE_NAMES` di `src/app/(dashboard)/_components/dashboard-breadcrumb.tsx`
+  - [x] Update `LANDING_PAGE_PREFERENCES` di `src/lib/user-preferences.ts`
+  - [x] Update `SelectItem` di `src/app/(dashboard)/settings/_components/system-preference-section.tsx`
+  - [x] Update `public/offline.html`
+  - [x] Update `docs/features/hutang-piutang.md` & `docs/folder-structure.md`
+  - [x] Update navigasi `page.goto("/debts")` di `tests/e2e/mobile-layout.spec.ts`
+  - [x] Validasi fungsionalitas hutang/piutang & quick check (typecheck, lint, build)
 - [ ] **Fase 4: Migrasi Route Rekap -> Reports**
   - [ ] Rename folder `src/app/(dashboard)/rekap` -> `src/app/(dashboard)/reports`
   - [ ] Update `revalidatePath("/reports")` di `src/actions/transaksi-action.ts`, `rekening-action.ts`, `hutang-action.ts`
@@ -158,61 +165,61 @@ Bagian ini berisi hasil scanning lengkap seluruh repository untuk literal string
 ==========================================
 === CHECKLIST TEMUAN ROUTE /HUTANG (55 item) ===
 ==========================================
-- [ ] docs/README.md:27 — `- [Hutang/Piutang](./features/hutang-piutang.md)` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/architecture.md:28 — `- Route group `(dashboard)` memuat route protected seperti `/transaksi`, `/rekening`, `/rekap`, `/hutang`, `/kategori`, dan `/settings`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/hutang-piutang.md:13 — `- `/hutang`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/hutang-piutang.md:17 — `- Page: `src/app/(dashboard)/hutang/page.tsx`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/hutang-piutang.md:18 — `- Loading: `src/app/(dashboard)/hutang/loading.tsx`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/hutang-piutang.md:19 — `- Client page: `src/app/(dashboard)/hutang/_components/hutang-page-client.tsx`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/hutang-piutang.md:20 — `- Dialog: `src/app/(dashboard)/hutang/_components/hutang-dialog.tsx`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/hutang-piutang.md:21 — `- Actions: `src/actions/hutang-action.ts`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/hutang-piutang.md:22 — `- Validation: `src/validations/hutang-validation.ts`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/hutang-piutang.md:23 — `- Types: `src/types/hutang.d.ts`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/folder-structure.md:88 — `/hutang                -> hutang/piutang` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/frontend-guidelines.md:237 — `- `/hutang`: `src/app/(dashboard)/hutang/loading.tsx`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/frontend-guidelines.md:244 — `- Untuk transaksi/rekening/kategori/hutang, empty state sebaiknya mengarahkan user membuat data pertama.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/overview.md:45 — `- Hutang/Piutang: `src/app/(dashboard)/hutang`, `src/actions/hutang-action.ts`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/server-actions-api.md:363 — `Lokasi: `src/actions/hutang-action.ts`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/server-actions-api.md:381 — `Catatan: operasi cicilan mengandalkan trigger database untuk memperbarui `sisa_tagihan`, status, dan saldo rekening. UI pelunasan meminta user memilih rekening terlebih dahulu lalu mencatat cicilan sebesar sisa tagihan. Mutasi hutang/piutang dan cicilan merevalidate `/hutang`, `/rekening`, dan `/rekap`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/server-actions-api.md:425 — `| "/hutang"` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/server-actions-api.md:452 — `Revalidate: `/settings`, `/transaksi`, `/rekening`, `/rekap`, `/hutang`, dan `/`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/server-actions-api.md:454 — `Catatan: preferensi format memengaruhi tampilan dashboard dan export, tetapi tidak mengubah kontrak data transaksi/hutang; waktu tetap disimpan sebagai `HH:mm`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] public/offline.html:230 — `<li><a href="/hutang">Hutang</a></li>` — [PATH URL, link navigasi / PWA shortcut / start_url / href HTML (WAJIB diganti)]
-- [ ] public/sw.js:1 — bundle build service worker Serwist — [BUKAN PATH URL LANGSUNG, file build service worker serwist hasil kompilasi]
-- [ ] src/actions/hutang-action.ts:12 — `} from '@/types/hutang';` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/actions/hutang-action.ts:13 — `import { hutangSchema, cicilanSchema } from '@/validations/hutang-validation';` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/actions/hutang-action.ts:18 — `revalidatePath('/hutang');` — [PATH URL, target revalidatePath Server Action (WAJIB diganti)]
-- [ ] src/actions/preference-action.ts:76 — `revalidatePath('/hutang');` — [PATH URL, target revalidatePath Server Action (WAJIB diganti)]
-- [ ] src/actions/rekap-action.ts:4 — `import type { TipeHutang } from '@/types/hutang';` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/_components/hutang-card.tsx:4 — `import type { Hutang } from "@/types/hutang";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/_components/hutang-card.tsx:6 — `import { STATUS_BADGE } from "@/constants/hutang";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/_components/hutang-cicilan-detail.tsx:3 — `import type { Hutang, HutangCicilan } from "@/types/hutang";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/_components/hutang-cicilan-detail.tsx:9 — `import { HutangCicilanItem } from "./hutang-cicilan-item";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/_components/hutang-cicilan-item.tsx:4 — `import type { Hutang, HutangCicilan } from "@/types/hutang";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/_components/hutang-dialog.tsx:9 — `} from "@/validations/hutang-validation";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/_components/hutang-dialog.tsx:10 — `import { createHutang, updateHutang } from "@/actions/hutang-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/_components/hutang-dialog.tsx:12 — `import type { Hutang } from "@/types/hutang";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/_components/hutang-group.tsx:3 — `import type { Hutang } from "@/types/hutang";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/_components/hutang-group.tsx:9 — `} from "./hutang-card";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/_components/hutang-group.tsx:10 — `import { HutangCicilanForm } from "./hutang-cicilan-form";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/_components/hutang-group.tsx:11 — `import { HutangCicilanDetail } from "./hutang-cicilan-detail";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/_components/hutang-group.tsx:12 — `import { HutangLunasForm } from "./hutang-lunas-form";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/_components/hutang-lunas-form.tsx:3 — `import type { Hutang } from "@/types/hutang";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/_components/hutang-page-client.tsx:4 — `import type { Hutang } from "@/types/hutang";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/_components/hutang-page-client.tsx:7 — `import { createCicilan, deleteHutang } from "@/actions/hutang-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/_components/hutang-page-client.tsx:11 — `import HutangDialog from "./hutang-dialog";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/_components/hutang-page-client.tsx:20 — `} from "./hutang-group";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/_components/hutang-page-client.tsx:21 — `import type { HutangPanelMode } from "./hutang-card";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/page.tsx:2 — `import { getHutang } from '@/actions/hutang-action';` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/hutang/page.tsx:4 — `import HutangPageClient from './_components/hutang-page-client';` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/settings/_components/system-preference-section.tsx:324 — `<SelectItem value="/hutang">Hutang</SelectItem>` — [PATH URL, value SelectItem preferensi landing page di settings (WAJIB diganti)]
-- [ ] src/components/common/app-sidebar.tsx:66 — `{ href: "/hutang", label: "Hutang", icon: HandCoins },` — [PATH URL, link navigasi / PWA shortcut / start_url / href HTML (WAJIB diganti)]
-- [ ] src/hooks/use-hutang-cicilan.ts:10 — `} from "@/actions/hutang-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/hooks/use-hutang-cicilan.ts:12 — `import type { Hutang, HutangCicilan } from "@/types/hutang";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/lib/user-preferences.ts:10 — `"/hutang",` — [PATH URL, konstanta LANDING_PAGE_PREFERENCES / default_landing_page (WAJIB diganti)]
-- [ ] tests/e2e/mobile-layout.spec.ts:92 — `await page.goto("/hutang");` — [PATH URL, URL navigasi/asersi browser Playwright test e2e (WAJIB diganti)]
-- [ ] tests/e2e/mobile-layout.spec.ts:125 — `await page.goto("/hutang");` — [PATH URL, URL navigasi/asersi browser Playwright test e2e (WAJIB diganti)]
-- [ ] tests/e2e/mobile-layout.spec.ts:220 — `await page.goto("/hutang");` — [PATH URL, URL navigasi/asersi browser Playwright test e2e (WAJIB diganti)]
+- [x] docs/README.md:27 — `- [Hutang/Piutang](./features/hutang-piutang.md)` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/architecture.md:28 — `- Route group `(dashboard)` memuat route protected seperti `/transaksi`, `/rekening`, `/rekap`, `/hutang`, `/kategori`, dan `/settings`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/features/hutang-piutang.md:13 — `- `/debts`` — [PATH URL, dimigrasikan ke /debts]
+- [x] docs/features/hutang-piutang.md:17 — `- Page: `src/app/(dashboard)/debts/page.tsx`` — [BUKAN PATH URL, path file folder route di-update ke debts]
+- [x] docs/features/hutang-piutang.md:18 — `- Loading: `src/app/(dashboard)/debts/loading.tsx`` — [BUKAN PATH URL, path file folder route di-update ke debts]
+- [x] docs/features/hutang-piutang.md:19 — `- Client page: `src/app/(dashboard)/debts/_components/hutang-page-client.tsx`` — [BUKAN PATH URL, path file folder route di-update ke debts]
+- [x] docs/features/hutang-piutang.md:20 — `- Dialog: `src/app/(dashboard)/debts/_components/hutang-dialog.tsx`` — [BUKAN PATH URL, path file folder route di-update ke debts]
+- [x] docs/features/hutang-piutang.md:21 — `- Actions: `src/actions/hutang-action.ts`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/features/hutang-piutang.md:22 — `- Validation: `src/validations/hutang-validation.ts`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/features/hutang-piutang.md:23 — `- Types: `src/types/hutang.d.ts`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/folder-structure.md:88 — `/debts                 -> hutang/piutang` — [PATH URL, routing tree di-update ke /debts]
+- [x] docs/frontend-guidelines.md:237 — `- `/hutang`: `src/app/(dashboard)/hutang/loading.tsx`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/frontend-guidelines.md:244 — `- Untuk transaksi/rekening/kategori/hutang, empty state sebaiknya mengarahkan user membuat data pertama.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/overview.md:45 — `- Hutang/Piutang: `src/app/(dashboard)/debts`, `src/actions/hutang-action.ts`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/server-actions-api.md:363 — `Lokasi: `src/actions/hutang-action.ts`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/server-actions-api.md:381 — `Catatan: operasi cicilan mengandalkan trigger database untuk memperbarui `sisa_tagihan`, status, dan saldo rekening. UI pelunasan meminta user memilih rekening terlebih dahulu lalu mencatat cicilan sebesar sisa tagihan. Mutasi hutang/piutang dan cicilan merevalidate `/hutang`, `/rekening`, dan `/rekap`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/server-actions-api.md:425 — `| "/debts"` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/server-actions-api.md:452 — `Revalidate: `/settings`, `/transaksi`, `/rekening`, `/rekap`, `/hutang`, dan `/`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/server-actions-api.md:454 — `Catatan: preferensi format memengaruhi tampilan dashboard dan export, tetapi tidak mengubah kontrak data transaksi/hutang; waktu tetap disimpan sebagai `HH:mm`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] public/offline.html:230 — `<li><a href="/debts">Hutang</a></li>` — [PATH URL, dimigrasikan ke /debts]
+- [x] public/sw.js:1 — bundle build service worker Serwist — [BUKAN PATH URL LANGSUNG, file build service worker serwist hasil kompilasi]
+- [x] src/actions/hutang-action.ts:12 — `} from '@/types/hutang';` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/actions/hutang-action.ts:13 — `import { hutangSchema, cicilanSchema } from '@/validations/hutang-validation';` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/actions/hutang-action.ts:18 — `revalidatePath('/debts');` — [PATH URL, dimigrasikan ke /debts]
+- [x] src/actions/preference-action.ts:76 — `revalidatePath('/debts');` — [PATH URL, dimigrasikan ke /debts]
+- [x] src/actions/rekap-action.ts:4 — `import type { TipeHutang } from '@/types/hutang';` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/_components/hutang-card.tsx:4 — `import type { Hutang } from "@/types/hutang";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/_components/hutang-card.tsx:6 — `import { STATUS_BADGE } from "@/constants/hutang";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/_components/hutang-cicilan-detail.tsx:3 — `import type { Hutang, HutangCicilan } from "@/types/hutang";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/_components/hutang-cicilan-detail.tsx:9 — `import { HutangCicilanItem } from "./hutang-cicilan-item";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/_components/hutang-cicilan-item.tsx:4 — `import type { Hutang, HutangCicilan } from "@/types/hutang";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/_components/hutang-dialog.tsx:9 — `} from "@/validations/hutang-validation";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/_components/hutang-dialog.tsx:10 — `import { createHutang, updateHutang } from "@/actions/hutang-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/_components/hutang-dialog.tsx:12 — `import type { Hutang } from "@/types/hutang";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/_components/hutang-group.tsx:3 — `import type { Hutang } from "@/types/hutang";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/_components/hutang-group.tsx:9 — `} from "./hutang-card";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/_components/hutang-group.tsx:10 — `import { HutangCicilanForm } from "./hutang-cicilan-form";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/_components/hutang-group.tsx:11 — `import { HutangCicilanDetail } from "./hutang-cicilan-detail";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/_components/hutang-group.tsx:12 — `import { HutangLunasForm } from "./hutang-lunas-form";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/_components/hutang-lunas-form.tsx:3 — `import type { Hutang } from "@/types/hutang";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/_components/hutang-page-client.tsx:4 — `import type { Hutang } from "@/types/hutang";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/_components/hutang-page-client.tsx:7 — `import { createCicilan, deleteHutang } from "@/actions/hutang-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/_components/hutang-page-client.tsx:11 — `import HutangDialog from "./hutang-dialog";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/_components/hutang-page-client.tsx:20 — `} from "./hutang-group";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/_components/hutang-page-client.tsx:21 — `import type { HutangPanelMode } from "./hutang-card";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/page.tsx:2 — `import { getHutang } from '@/actions/hutang-action';` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/debts/page.tsx:4 — `import HutangPageClient from './_components/hutang-page-client';` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/settings/_components/system-preference-section.tsx:324 — `<SelectItem value="/debts">Hutang</SelectItem>` — [PATH URL, dimigrasikan ke /debts]
+- [x] src/components/common/app-sidebar.tsx:66 — `{ href: "/debts", label: "Hutang", icon: HandCoins },` — [PATH URL, dimigrasikan ke /debts]
+- [x] src/hooks/use-hutang-cicilan.ts:10 — `} from "@/actions/hutang-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/hooks/use-hutang-cicilan.ts:12 — `import type { Hutang, HutangCicilan } from "@/types/hutang";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/lib/user-preferences.ts:10 — `"/debts",` — [PATH URL, dimigrasikan ke /debts]
+- [x] tests/e2e/mobile-layout.spec.ts:92 — `await page.goto("/debts");` — [PATH URL, dimigrasikan ke /debts]
+- [x] tests/e2e/mobile-layout.spec.ts:125 — `await page.goto("/debts");` — [PATH URL, dimigrasikan ke /debts]
+- [x] tests/e2e/mobile-layout.spec.ts:220 — `await page.goto("/debts");` — [PATH URL, dimigrasikan ke /debts]
 
 ==========================================
 === CHECKLIST TEMUAN ROUTE /REKAP (58 item) ===

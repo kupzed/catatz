@@ -321,7 +321,7 @@ export function SystemPreferenceSection({ preferences }: Props) {
               <SelectItem value="/transaksi">Transaksi</SelectItem>
               <SelectItem value="/rekening">Rekening</SelectItem>
               <SelectItem value="/rekap">Rekap</SelectItem>
-              <SelectItem value="/hutang">Hutang</SelectItem>
+              <SelectItem value="/debts">Hutang</SelectItem>
               <SelectItem value="/categories">Kategori</SelectItem>
             </SelectContent>
           </Select>
