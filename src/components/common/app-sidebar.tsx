@@ -68,7 +68,7 @@ const NAV_ITEMS = [
   },
   {
     group: "Lainnya",
-    items: [{ href: "/kategori", label: "Kategori", icon: Tags }],
+    items: [{ href: "/categories", label: "Kategori", icon: Tags }],
   },
 ] as const;
 

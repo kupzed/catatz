@@ -83,7 +83,7 @@ export default function SettingsPageClient({
               className={cn(
                 "flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-left transition-all",
                 activeTab === id
-                  ? "text-foreground font-semibold border-l-2 border-primary pl-[calc(0.75rem-2px)]"
+                  ? "text-foreground font-semibold border-l-2 border-primary pl-2.5"
                   : "text-muted-foreground hover:text-foreground pl-3",
               )}
             >

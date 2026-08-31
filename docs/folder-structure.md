@@ -86,7 +86,7 @@ Route aktual:
 /rekening              -> rekening
 /rekap                 -> laporan/rekap
 /hutang                -> hutang/piutang
-/kategori              -> kategori
+/categories            -> kategori
 /settings              -> pengaturan
 /robots.txt            -> MetadataRoute robots
 /sitemap.xml           -> MetadataRoute sitemap

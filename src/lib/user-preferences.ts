@@ -8,7 +8,7 @@ export const LANDING_PAGE_PREFERENCES = [
   "/rekening",
   "/rekap",
   "/hutang",
-  "/kategori",
+  "/categories",
 ] as const;
 
 export type ThemePreference = (typeof THEME_PREFERENCES)[number];

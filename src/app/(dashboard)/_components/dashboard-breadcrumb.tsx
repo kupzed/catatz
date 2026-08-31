@@ -17,7 +17,7 @@ const ROUTE_NAMES: Record<string, string> = {
   rekap: "Rekap",
   hutang: "Hutang",
   settings: "Pengaturan",
-  kategori: "Kategori",
+  categories: "Kategori",
 };
 
 export default function DashboardBreadcrumb() {

@@ -43,6 +43,11 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "4.5mb",
     },
   },
+  async redirects() {
+    return [
+      { source: "/kategori/:path*", destination: "/categories/:path*", permanent: false },
+    ];
+  },
   async headers() {
     return [
       {
