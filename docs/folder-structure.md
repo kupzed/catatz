@@ -84,7 +84,7 @@ Route aktual:
 /auth/callback         -> Supabase auth callback
 /transaksi             -> transaksi
 /rekening              -> rekening
-/rekap                 -> laporan/rekap
+/reports               -> laporan/rekap
 /debts                 -> hutang/piutang
 /categories            -> kategori
 /settings              -> pengaturan

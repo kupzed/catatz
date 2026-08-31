@@ -213,7 +213,7 @@ export async function createRekening(values: RekeningFormValues): Promise<Action
   if (error) return { success: false, error: error.message };
   revalidatePath('/rekening');
   revalidatePath('/transaksi');
-  revalidatePath('/rekap');
+  revalidatePath('/reports');
   return { success: true, data: data as Rekening };
 }
 

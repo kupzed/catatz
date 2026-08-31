@@ -6,7 +6,7 @@ export const TIME_FORMAT_PREFERENCES = ["24h", "12h"] as const;
 export const LANDING_PAGE_PREFERENCES = [
   "/transaksi",
   "/rekening",
-  "/rekap",
+  "/reports",
   "/debts",
   "/categories",
 ] as const;

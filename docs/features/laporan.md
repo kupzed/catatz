@@ -10,16 +10,16 @@ Fitur laporan/rekap menampilkan ringkasan pemasukan, pengeluaran, detail bulanan
 
 ## Route
 
-- `/rekap`
+- `/reports`
 - Export data berada di `/settings` tab `Export Data`.
 
 ## Lokasi File
 
-- Rekap page: `src/app/(dashboard)/rekap/page.tsx`
-- Loading: `src/app/(dashboard)/rekap/loading.tsx`
-- Client page: `src/app/(dashboard)/rekap/_components/rekap-page-client.tsx`
-- Chart: `src/app/(dashboard)/rekap/_components/rekap-charts.tsx`
-- Detail bulanan: `src/app/(dashboard)/rekap/_components/rekap-monthly-detail-section.tsx`
+- Rekap page: `src/app/(dashboard)/reports/page.tsx`
+- Loading: `src/app/(dashboard)/reports/loading.tsx`
+- Client page: `src/app/(dashboard)/reports/_components/rekap-page-client.tsx`
+- Chart: `src/app/(dashboard)/reports/_components/rekap-charts.tsx`
+- Detail bulanan: `src/app/(dashboard)/reports/_components/rekap-monthly-detail-section.tsx`
 - Rekap actions: `src/actions/rekap-action.ts`
 - Export actions: `src/actions/export-action.ts`
 - PDF generator: `src/lib/pdf-generator.ts`

@@ -97,12 +97,19 @@ Bagian ini memuat checklist status untuk seluruh 8 fase migrasi. Setiap fase dij
   - [x] Update `SelectItem` di `src/app/(dashboard)/settings/_components/system-preference-section.tsx`
   - [x] Update `public/offline.html`
   - [x] Update `docs/features/hutang-piutang.md` & `docs/folder-structure.md`
-  - [x] Update navigasi `page.goto("/debts")` di `tests/e2e/mobile-layout.spec.ts`
   - [x] Validasi fungsionalitas hutang/piutang & quick check (typecheck, lint, build)
-- [ ] **Fase 4: Migrasi Route Rekap -> Reports**
-  - [ ] Rename folder `src/app/(dashboard)/rekap` -> `src/app/(dashboard)/reports`
-  - [ ] Update `revalidatePath("/reports")` di `src/actions/transaksi-action.ts`, `rekening-action.ts`, `hutang-action.ts`
-  - [ ] Validasi fungsionalitas laporan rekap & quick check
+- [x] **Fase 4: Migrasi Route Rekap -> Reports**
+  - [x] Rename folder `src/app/(dashboard)/rekap` -> `src/app/(dashboard)/reports`
+  - [x] Update `revalidatePath("/reports")` di `src/actions/transaksi-action.ts`, `rekening-action.ts`, `hutang-action.ts`, `preference-action.ts`
+  - [x] Update `next.config.ts` redirects (`/rekap/:path*` -> `/reports/:path*`)
+  - [x] Update `NAV_ITEMS` di `src/components/common/app-sidebar.tsx`
+  - [x] Update `ROUTE_NAMES` di `src/app/(dashboard)/_components/dashboard-breadcrumb.tsx`
+  - [x] Update `LANDING_PAGE_PREFERENCES` di `src/lib/user-preferences.ts`
+  - [x] Update `SelectItem` di `src/app/(dashboard)/settings/_components/system-preference-section.tsx`
+  - [x] Update shortcut url di `public/manifest.json`
+  - [x] Update `public/offline.html`
+  - [x] Update `docs/features/laporan.md` & `docs/folder-structure.md`
+  - [x] Validasi fungsionalitas laporan rekap & quick check (typecheck, lint, build)
 - [ ] **Fase 5: Migrasi Route Rekening -> Wallets**
   - [ ] Rename folder `src/app/(dashboard)/rekening` -> `src/app/(dashboard)/wallets`
   - [ ] Update `revalidatePath("/wallets")` di `src/actions/rekening-action.ts`, `transaksi-action.ts`, `hutang-action.ts`
@@ -224,64 +231,64 @@ Bagian ini berisi hasil scanning lengkap seluruh repository untuk literal string
 ==========================================
 === CHECKLIST TEMUAN ROUTE /REKAP (58 item) ===
 ==========================================
-- [ ] docs/architecture.md:28 — `- Route group `(dashboard)` memuat route protected seperti `/transaksi`, `/rekening`, `/rekap`, `/hutang`, `/kategori`, dan `/settings`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/hutang-piutang.md:58 — `- Perubahan hutang/piutang dan cicilan ikut merevalidate `/rekap` karena halaman rekap menampilkan rincian hutang/piutang.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/laporan.md:9 — `Fitur laporan/rekap menampilkan ringkasan pemasukan, pengeluaran, detail bulanan, breakdown kategori/judul, chart, dan export transaksi.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/laporan.md:13 — `- `/rekap`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/laporan.md:18 — `- Rekap page: `src/app/(dashboard)/rekap/page.tsx`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/laporan.md:19 — `- Loading: `src/app/(dashboard)/rekap/loading.tsx`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/laporan.md:20 — `- Client page: `src/app/(dashboard)/rekap/_components/rekap-page-client.tsx`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/laporan.md:21 — `- Chart: `src/app/(dashboard)/rekap/_components/rekap-charts.tsx`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/laporan.md:22 — `- Detail bulanan: `src/app/(dashboard)/rekap/_components/rekap-monthly-detail-section.tsx`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/laporan.md:23 — `- Rekap actions: `src/actions/rekap-action.ts`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/laporan.md:90 — `- Pertimbangkan filter periode di halaman `/rekap` jika kebutuhan analisis lebih luas.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/rekening.md:55 — `- Saat edit saldo saat ini, action membuat transaksi `correction`, mengubah saldo rekening, dan merevalidate `/rekap`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/features/transaksi.md:69 — `- Setelah create/update/delete, route `/transaksi`, `/rekening`, dan `/rekap` di-revalidate.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/folder-structure.md:87 — `/rekap                 -> laporan/rekap` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/frontend-guidelines.md:236 — `- `/rekap`: `src/app/(dashboard)/rekap/loading.tsx`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/overview.md:46 — `- Rekap/Laporan: `src/app/(dashboard)/rekap`, `src/actions/rekap-action.ts`, `src/actions/export-action.ts`, `src/lib/pdf-generator.ts`, `src/lib/spreadsheet-generator.ts`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/server-actions-api.md:229 — `Revalidate: `/transaksi`, `/rekening`, `/rekap`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/server-actions-api.md:250 — `Revalidate: `/transaksi`, `/rekening`, `/rekap`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/server-actions-api.md:264 — `Revalidate: `/transaksi`, `/rekening`, `/rekap`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/server-actions-api.md:323 — `Revalidate: `/rekening`, `/transaksi`, `/rekap`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/server-actions-api.md:381 — `Catatan: operasi cicilan mengandalkan trigger database untuk memperbarui `sisa_tagihan`, status, dan saldo rekening. UI pelunasan meminta user memilih rekening terlebih dahulu lalu mencatat cicilan sebesar sisa tagihan. Mutasi hutang/piutang dan cicilan merevalidate `/hutang`, `/rekening`, dan `/rekap`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/server-actions-api.md:385 — `Lokasi: `src/actions/rekap-action.ts`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/server-actions-api.md:424 — `| "/rekap"` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] docs/server-actions-api.md:452 — `Revalidate: `/settings`, `/transaksi`, `/rekening`, `/rekap`, `/hutang`, dan `/`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
-- [ ] public/manifest.json:101 — `"url": "/rekap",` — [PATH URL, link navigasi / PWA shortcut / start_url / href HTML (WAJIB diganti)]
-- [ ] public/offline.html:229 — `<li><a href="/rekap">Rekap</a></li>` — [PATH URL, link navigasi / PWA shortcut / start_url / href HTML (WAJIB diganti)]
-- [ ] public/sw.js:1 — bundle build service worker Serwist — [BUKAN PATH URL LANGSUNG, file build service worker serwist hasil kompilasi]
-- [ ] src/actions/hutang-action.ts:20 — `revalidatePath('/rekap');` — [PATH URL, target revalidatePath Server Action (WAJIB diganti)]
-- [ ] src/actions/preference-action.ts:75 — `revalidatePath('/rekap');` — [PATH URL, target revalidatePath Server Action (WAJIB diganti)]
-- [ ] src/actions/rekening-action.ts:216 — `revalidatePath('/rekap');` — [PATH URL, target revalidatePath Server Action (WAJIB diganti)]
-- [ ] src/actions/transaksi-action.ts:135 — `revalidatePath('/rekap');` — [PATH URL, target revalidatePath Server Action (WAJIB diganti)]
-- [ ] src/actions/transaksi-action.ts:229 — `revalidatePath('/rekap');` — [PATH URL, target revalidatePath Server Action (WAJIB diganti)]
-- [ ] src/actions/transaksi-action.ts:273 — `revalidatePath('/rekap');` — [PATH URL, target revalidatePath Server Action (WAJIB diganti)]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-bar-section.tsx:4 — `import type { RekapBulanan } from "@/actions/rekap-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-bar-section.tsx:5 — `import { BULAN_NAMES } from "@/constants/rekap";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-bar-section.tsx:9 — `import("./rekap-charts").then((module) => ({` — [UNKNOWN, perlu verifikasi manual]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-budget-section.tsx:3 — `import type { BudgetWithUsage } from "@/actions/rekap-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-budget-section.tsx:4 — `import { BULAN_NAMES } from "@/constants/rekap";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-charts.tsx:15 — `import type { RekapBulanan, RekapKategori } from "@/actions/rekap-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-charts.tsx:16 — `import { BULAN_NAMES } from "@/constants/rekap";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-kategori-section.tsx:4 — `import type { RekapKategori } from "@/actions/rekap-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-kategori-section.tsx:5 — `import { BULAN_NAMES } from "@/constants/rekap";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-kategori-section.tsx:11 — `import("./rekap-charts").then((module) => ({` — [UNKNOWN, perlu verifikasi manual]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-monthly-detail-section.tsx:18 — `} from "@/actions/rekap-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-monthly-detail-section.tsx:19 — `import { BULAN_NAMES } from "@/constants/rekap";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-page-client.tsx:9 — `} from "@/actions/rekap-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-page-client.tsx:13 — `} from "@/actions/rekap-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-page-client.tsx:14 — `import { RekapBarSection } from "./rekap-bar-section";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-page-client.tsx:15 — `import { RekapBudgetSection } from "./rekap-budget-section";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-page-client.tsx:16 — `import { RekapMonthlyDetailSection } from "./rekap-monthly-detail-section";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-page-client.tsx:17 — `import { RekapSummaryCards } from "./rekap-summary-cards";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-summary-cards.tsx:3 — `import type { RekapBulanan } from "@/actions/rekap-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/rekap/_components/rekap-summary-cards.tsx:4 — `import { BULAN_NAMES } from "@/constants/rekap";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/rekap/page.tsx:6 — `} from '@/actions/rekap-action';` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/rekap/page.tsx:7 — `import RekapPageClient from './_components/rekap-page-client';` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
-- [ ] src/app/(dashboard)/settings/_components/system-preference-section.tsx:323 — `<SelectItem value="/rekap">Rekap</SelectItem>` — [PATH URL, value SelectItem preferensi landing page di settings (WAJIB diganti)]
-- [ ] src/components/common/app-sidebar.tsx:65 — `{ href: "/rekap", label: "Rekap", icon: BarChart3 },` — [PATH URL, link navigasi / PWA shortcut / start_url / href HTML (WAJIB diganti)]
-- [ ] src/lib/user-preferences.ts:9 — `"/rekap",` — [PATH URL, konstanta LANDING_PAGE_PREFERENCES / default_landing_page (WAJIB diganti)]
+- [x] docs/architecture.md:28 — `- Route group `(dashboard)` memuat route protected seperti `/transaksi`, `/rekening`, `/rekap`, `/hutang`, `/kategori`, dan `/settings`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/features/hutang-piutang.md:58 — `- Perubahan hutang/piutang dan cicilan ikut merevalidate `/rekap` karena halaman rekap menampilkan rincian hutang/piutang.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/features/laporan.md:9 — `Fitur laporan/rekap menampilkan ringkasan pemasukan, pengeluaran, detail bulanan, breakdown kategori/judul, chart, dan export transaksi.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/features/laporan.md:13 — `- `/reports`` — [PATH URL, dimigrasikan ke /reports]
+- [x] docs/features/laporan.md:18 — `- Rekap page: `src/app/(dashboard)/reports/page.tsx`` — [BUKAN PATH URL, path file folder route di-update ke reports]
+- [x] docs/features/laporan.md:19 — `- Loading: `src/app/(dashboard)/reports/loading.tsx`` — [BUKAN PATH URL, path file folder route di-update ke reports]
+- [x] docs/features/laporan.md:20 — `- Client page: `src/app/(dashboard)/reports/_components/rekap-page-client.tsx`` — [BUKAN PATH URL, path file folder route di-update ke reports]
+- [x] docs/features/laporan.md:21 — `- Chart: `src/app/(dashboard)/reports/_components/rekap-charts.tsx`` — [BUKAN PATH URL, path file folder route di-update ke reports]
+- [x] docs/features/laporan.md:22 — `- Detail bulanan: `src/app/(dashboard)/reports/_components/rekap-monthly-detail-section.tsx`` — [BUKAN PATH URL, path file folder route di-update ke reports]
+- [x] docs/features/laporan.md:23 — `- Rekap actions: `src/actions/rekap-action.ts`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/features/laporan.md:90 — `- Pertimbangkan filter periode di halaman `/rekap` jika kebutuhan analisis lebih luas.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/features/rekening.md:55 — `- Saat edit saldo saat ini, action membuat transaksi `correction`, mengubah saldo rekening, dan merevalidate `/rekap`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/features/transaksi.md:69 — `- Setelah create/update/delete, route `/transaksi`, `/rekening`, dan `/rekap` di-revalidate.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/folder-structure.md:87 — `/reports               -> laporan/rekap` — [PATH URL, routing tree di-update ke /reports]
+- [x] docs/frontend-guidelines.md:236 — `- `/rekap`: `src/app/(dashboard)/rekap/loading.tsx`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/overview.md:46 — `- Rekap/Laporan: `src/app/(dashboard)/reports`, `src/actions/rekap-action.ts`, `src/actions/export-action.ts`, `src/lib/pdf-generator.ts`, `src/lib/spreadsheet-generator.ts`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/server-actions-api.md:229 — `Revalidate: `/transaksi`, `/rekening`, `/rekap`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/server-actions-api.md:250 — `Revalidate: `/transaksi`, `/rekening`, `/rekap`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/server-actions-api.md:264 — `Revalidate: `/transaksi`, `/rekening`, `/rekap`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/server-actions-api.md:323 — `Revalidate: `/rekening`, `/transaksi`, `/rekap`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/server-actions-api.md:381 — `Catatan: operasi cicilan mengandalkan trigger database untuk memperbarui `sisa_tagihan`, status, dan saldo rekening. UI pelunasan meminta user memilih rekening terlebih dahulu lalu mencatat cicilan sebesar sisa tagihan. Mutasi hutang/piutang dan cicilan merevalidate `/hutang`, `/rekening`, dan `/rekap`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/server-actions-api.md:385 — `Lokasi: `src/actions/rekap-action.ts`` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/server-actions-api.md:424 — `| "/reports"` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] docs/server-actions-api.md:452 — `Revalidate: `/settings`, `/transaksi`, `/rekening`, `/rekap`, `/hutang`, dan `/`.` — [BUKAN PATH URL, referensi dokumentasi docs/ (bukan runtime code)]
+- [x] public/manifest.json:101 — `"url": "/reports",` — [PATH URL, dimigrasikan ke /reports]
+- [x] public/offline.html:229 — `<li><a href="/reports">Rekap</a></li>` — [PATH URL, dimigrasikan ke /reports]
+- [x] public/sw.js:1 — bundle build service worker Serwist — [BUKAN PATH URL LANGSUNG, file build service worker serwist hasil kompilasi]
+- [x] src/actions/hutang-action.ts:20 — `revalidatePath('/reports');` — [PATH URL, dimigrasikan ke /reports]
+- [x] src/actions/preference-action.ts:75 — `revalidatePath('/reports');` — [PATH URL, dimigrasikan ke /reports]
+- [x] src/actions/rekening-action.ts:216 — `revalidatePath('/reports');` — [PATH URL, dimigrasikan ke /reports]
+- [x] src/actions/transaksi-action.ts:135 — `revalidatePath('/reports');` — [PATH URL, dimigrasikan ke /reports]
+- [x] src/actions/transaksi-action.ts:229 — `revalidatePath('/reports');` — [PATH URL, dimigrasikan ke /reports]
+- [x] src/actions/transaksi-action.ts:273 — `revalidatePath('/reports');` — [PATH URL, dimigrasikan ke /reports]
+- [x] src/app/(dashboard)/reports/_components/rekap-bar-section.tsx:4 — `import type { RekapBulanan } from "@/actions/rekap-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/reports/_components/rekap-bar-section.tsx:5 — `import { BULAN_NAMES } from "@/constants/rekap";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/reports/_components/rekap-bar-section.tsx:9 — `import("./rekap-charts").then((module) => ({` — [BUKAN PATH URL, dynamic import komponen lokal]
+- [x] src/app/(dashboard)/reports/_components/rekap-budget-section.tsx:3 — `import type { BudgetWithUsage } from "@/actions/rekap-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/reports/_components/rekap-budget-section.tsx:4 — `import { BULAN_NAMES } from "@/constants/rekap";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/reports/_components/rekap-charts.tsx:15 — `import type { RekapBulanan, RekapKategori } from "@/actions/rekap-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/reports/_components/rekap-charts.tsx:16 — `import { BULAN_NAMES } from "@/constants/rekap";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/reports/_components/rekap-kategori-section.tsx:4 — `import type { RekapKategori } from "@/actions/rekap-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/reports/_components/rekap-kategori-section.tsx:5 — `import { BULAN_NAMES } from "@/constants/rekap";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/reports/_components/rekap-kategori-section.tsx:11 — `import("./rekap-charts").then((module) => ({` — [BUKAN PATH URL, dynamic import komponen lokal]
+- [x] src/app/(dashboard)/reports/_components/rekap-monthly-detail-section.tsx:18 — `} from "@/actions/rekap-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/reports/_components/rekap-monthly-detail-section.tsx:19 — `import { BULAN_NAMES } from "@/constants/rekap";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/reports/_components/rekap-page-client.tsx:9 — `} from "@/actions/rekap-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/reports/_components/rekap-page-client.tsx:13 — `} from "@/actions/rekap-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/reports/_components/rekap-bar-section.tsx:14 — `import { RekapBarSection } from "./rekap-bar-section";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/reports/_components/rekap-budget-section.tsx:15 — `import { RekapBudgetSection } from "./rekap-budget-section";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/reports/_components/rekap-monthly-detail-section.tsx:16 — `import { RekapMonthlyDetailSection } from "./rekap-monthly-detail-section";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/reports/_components/rekap-summary-cards.tsx:17 — `import { RekapSummaryCards } from "./rekap-summary-cards";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/reports/_components/rekap-summary-cards.tsx:3 — `import type { RekapBulanan } from "@/actions/rekap-action";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/reports/_components/rekap-summary-cards.tsx:4 — `import { BULAN_NAMES } from "@/constants/rekap";` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/reports/page.tsx:6 — `} from '@/actions/rekap-action';` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/reports/page.tsx:7 — `import RekapPageClient from './_components/rekap-page-client';` — [BUKAN PATH URL, import path modul/tipe/komponen TypeScript (GR-1)]
+- [x] src/app/(dashboard)/settings/_components/system-preference-section.tsx:323 — `<SelectItem value="/reports">Rekap</SelectItem>` — [PATH URL, dimigrasikan ke /reports]
+- [x] src/components/common/app-sidebar.tsx:65 — `{ href: "/reports", label: "Rekap", icon: BarChart3 },` — [PATH URL, dimigrasikan ke /reports]
+- [x] src/lib/user-preferences.ts:9 — `"/reports",` — [PATH URL, dimigrasikan ke /reports]
 
 ==========================================
 === CHECKLIST TEMUAN ROUTE /REKENING (74 item) ===
