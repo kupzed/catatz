@@ -10,14 +10,14 @@ Fitur rekening digunakan untuk mengelola sumber dana seperti tunai, bank, e-wall
 
 ## Route
 
-- `/rekening`
+- `/wallets`
 
 ## Lokasi File
 
-- Page: `src/app/(dashboard)/rekening/page.tsx`
-- Loading: `src/app/(dashboard)/rekening/loading.tsx`
-- Client page: `src/app/(dashboard)/rekening/_components/rekening-page-client.tsx`
-- Dialog: `src/app/(dashboard)/rekening/_components/rekening-dialog.tsx`
+- Page: `src/app/(dashboard)/wallets/page.tsx`
+- Loading: `src/app/(dashboard)/wallets/loading.tsx`
+- Client page: `src/app/(dashboard)/wallets/_components/rekening-page-client.tsx`
+- Dialog: `src/app/(dashboard)/wallets/_components/rekening-dialog.tsx`
 - Actions: `src/actions/rekening-action.ts`
 - Validation: `src/validations/rekening-validation.ts`
 - Types: `src/types/rekening.d.ts`

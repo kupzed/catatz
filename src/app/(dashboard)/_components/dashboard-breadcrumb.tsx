@@ -13,7 +13,7 @@ import { Fragment } from "react";
 
 const ROUTE_NAMES: Record<string, string> = {
   transaksi: "Transaksi",
-  rekening: "Rekening",
+  wallets: "Rekening",
   reports: "Rekap",
   debts: "Hutang",
   settings: "Pengaturan",

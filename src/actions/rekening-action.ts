@@ -211,7 +211,7 @@ export async function createRekening(values: RekeningFormValues): Promise<Action
     .single();
 
   if (error) return { success: false, error: error.message };
-  revalidatePath('/rekening');
+  revalidatePath('/wallets');
   revalidatePath('/transaksi');
   revalidatePath('/reports');
   return { success: true, data: data as Rekening };
@@ -285,7 +285,7 @@ export async function updateRekening(
     .single();
 
   if (error) return { success: false, error: error.message };
-  revalidatePath('/rekening');
+  revalidatePath('/wallets');
   revalidatePath('/transaksi');
   return { success: true, data: data as Rekening };
 }
@@ -310,7 +310,7 @@ export async function deleteRekening(id: string): Promise<ActionResult> {
     .eq('id', id)
     .eq('user_id', user.id);
   if (error) return { success: false, error: error.message };
-  revalidatePath('/rekening');
+  revalidatePath('/wallets');
   revalidatePath('/transaksi');
   return { success: true };
 }
@@ -322,6 +322,6 @@ export async function toggleExcludeTotal(id: string, exclude: boolean): Promise<
     .update({ exclude_total: exclude, updated_at: new Date().toISOString() })
     .eq('id', id);
   if (error) return { success: false, error: error.message };
-  revalidatePath('/rekening');
+  revalidatePath('/wallets');
   return { success: true };
 }

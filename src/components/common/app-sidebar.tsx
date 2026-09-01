@@ -61,7 +61,7 @@ const NAV_ITEMS = [
     group: "Menu Utama",
     items: [
       { href: "/transaksi", label: "Transaksi", icon: ArrowLeftRight },
-      { href: "/rekening", label: "Rekening", icon: Landmark },
+      { href: "/wallets", label: "Rekening", icon: Landmark },
       { href: "/reports", label: "Rekap", icon: BarChart3 },
       { href: "/debts", label: "Hutang", icon: HandCoins },
     ],

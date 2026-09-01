@@ -48,6 +48,7 @@ const nextConfig: NextConfig = {
       { source: "/kategori/:path*", destination: "/categories/:path*", permanent: false },
       { source: "/hutang/:path*", destination: "/debts/:path*", permanent: false },
       { source: "/rekap/:path*", destination: "/reports/:path*", permanent: false },
+      { source: "/rekening/:path*", destination: "/wallets/:path*", permanent: false },
     ];
   },
   async headers() {

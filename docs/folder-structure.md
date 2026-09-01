@@ -83,7 +83,7 @@ Route aktual:
 /register              -> form register
 /auth/callback         -> Supabase auth callback
 /transaksi             -> transaksi
-/rekening              -> rekening
+/wallets               -> rekening
 /reports               -> laporan/rekap
 /debts                 -> hutang/piutang
 /categories            -> kategori

@@ -109,7 +109,7 @@
     },
     {
       "name": "Rekening",
-      "url": "/rekening",
+      "url": "/wallets",
       "icons": [
         {
           "src": "/icons/icon-96x96.png",
