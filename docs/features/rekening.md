@@ -10,14 +10,14 @@ Fitur rekening digunakan untuk mengelola sumber dana seperti tunai, bank, e-wall
 
 ## Route
 
-- `/rekening`
+- `/wallets`
 
 ## Lokasi File
 
-- Page: `src/app/(dashboard)/rekening/page.tsx`
-- Loading: `src/app/(dashboard)/rekening/loading.tsx`
-- Client page: `src/app/(dashboard)/rekening/_components/rekening-page-client.tsx`
-- Dialog: `src/app/(dashboard)/rekening/_components/rekening-dialog.tsx`
+- Page: `src/app/(dashboard)/wallets/page.tsx`
+- Loading: `src/app/(dashboard)/wallets/loading.tsx`
+- Client page: `src/app/(dashboard)/wallets/_components/rekening-page-client.tsx`
+- Dialog: `src/app/(dashboard)/wallets/_components/rekening-dialog.tsx`
 - Actions: `src/actions/rekening-action.ts`
 - Validation: `src/validations/rekening-validation.ts`
 - Types: `src/types/rekening.d.ts`
@@ -52,7 +52,7 @@ Initial data diambil dengan:
 - Jenis rekening harus salah satu dari `Tunai`, `Bank`, `E-Wallet`, atau `Investasi`.
 - `saldo_awal` diset saat create.
 - `saldo_saat_ini` diset dari `saldo_awal` saat create.
-- Saat edit saldo saat ini, action membuat transaksi `correction`, mengubah saldo rekening, dan merevalidate `/rekap`.
+- Saat edit saldo saat ini, action membuat transaksi `correction`, mengubah saldo rekening, dan merevalidate `/reports`.
 - Rekening yang `exclude_total = true` tidak dihitung dalam total saldo UI.
 - Rekening tidak bisa dihapus jika masih dipakai oleh transaksi, rekening tujuan transfer, hutang/piutang, cicilan, atau template transaksi berulang.
 - Server Action `deleteRekening` memeriksa pemakaian rekening sebelum delete.

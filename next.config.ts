@@ -43,6 +43,15 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "4.5mb",
     },
   },
+  async redirects() {
+    return [
+      { source: "/kategori/:path*", destination: "/categories/:path*", permanent: false },
+      { source: "/hutang/:path*", destination: "/debts/:path*", permanent: false },
+      { source: "/rekap/:path*", destination: "/reports/:path*", permanent: false },
+      { source: "/rekening/:path*", destination: "/wallets/:path*", permanent: false },
+      { source: "/transaksi/:path*", destination: "/transactions/:path*", permanent: false },
+    ];
+  },
   async headers() {
     return [
       {

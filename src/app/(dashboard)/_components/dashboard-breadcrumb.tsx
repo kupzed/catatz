@@ -12,12 +12,12 @@ import Link from "next/link";
 import { Fragment } from "react";
 
 const ROUTE_NAMES: Record<string, string> = {
-  transaksi: "Transaksi",
-  rekening: "Rekening",
-  rekap: "Rekap",
-  hutang: "Hutang",
+  transactions: "Transaksi",
+  wallets: "Rekening",
+  reports: "Rekap",
+  debts: "Hutang",
   settings: "Pengaturan",
-  kategori: "Kategori",
+  categories: "Kategori",
 };
 
 export default function DashboardBreadcrumb() {

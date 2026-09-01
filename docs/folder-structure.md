@@ -78,15 +78,15 @@ catatz/
 Route aktual:
 
 ```txt
-/                      -> redirect ke /transaksi
+/                      -> redirect ke /transactions
 /login                 -> form login
 /register              -> form register
 /auth/callback         -> Supabase auth callback
-/transaksi             -> transaksi
-/rekening              -> rekening
-/rekap                 -> laporan/rekap
-/hutang                -> hutang/piutang
-/kategori              -> kategori
+/transactions          -> transaksi
+/wallets               -> rekening
+/reports               -> laporan/rekap
+/debts                 -> hutang/piutang
+/categories            -> kategori
 /settings              -> pengaturan
 /robots.txt            -> MetadataRoute robots
 /sitemap.xml           -> MetadataRoute sitemap

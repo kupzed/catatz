@@ -60,15 +60,15 @@ const NAV_ITEMS = [
   {
     group: "Menu Utama",
     items: [
-      { href: "/transaksi", label: "Transaksi", icon: ArrowLeftRight },
-      { href: "/rekening", label: "Rekening", icon: Landmark },
-      { href: "/rekap", label: "Rekap", icon: BarChart3 },
-      { href: "/hutang", label: "Hutang", icon: HandCoins },
+      { href: "/transactions", label: "Transaksi", icon: ArrowLeftRight },
+      { href: "/wallets", label: "Rekening", icon: Landmark },
+      { href: "/reports", label: "Rekap", icon: BarChart3 },
+      { href: "/debts", label: "Hutang", icon: HandCoins },
     ],
   },
   {
     group: "Lainnya",
-    items: [{ href: "/kategori", label: "Kategori", icon: Tags }],
+    items: [{ href: "/categories", label: "Kategori", icon: Tags }],
   },
 ] as const;
 
@@ -80,11 +80,11 @@ function SidebarHeaderContent() {
   const isCollapsed = state === "collapsed" && !isMobile;
 
   return (
-    <div className="flex w-full overflow-hidden items-center justify-between px-2 py-3 min-h-[52px] select-none">
+    <div className="flex w-full overflow-hidden items-center justify-between px-2 py-3 min-h-13 select-none">
       {/* Expanded: logo + name */}
       {!isCollapsed && (
         <Link
-          href="/transaksi"
+          href="/transactions"
           className="flex items-center gap-3 px-2 flex-1 min-w-0"
         >
           <Image
@@ -111,7 +111,7 @@ function SidebarHeaderContent() {
           isCollapsed && "w-full justify-center",
         )}
       >
-        <PanelLeft className="h-[18px] w-[18px]" />
+        <PanelLeft className="h-4.5 w-4.5" />
       </button>
     </div>
   );
@@ -249,7 +249,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
                 tooltip="Transaksi baru"
                 onClick={handleMobileClick}
               >
-                <Link href="/transaksi?new=true">
+                <Link href="/transactions?new=true">
                   <Plus className="h-4 w-4" />
                   <span>Transaksi baru</span>
                 </Link>

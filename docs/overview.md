@@ -39,11 +39,11 @@ Aplikasi saat ini berfokus pada pencatatan transaksi harian, pengelolaan rekenin
 
 - Auth: `src/app/(auth)`, `src/actions/auth-action.ts`, `src/app/auth/callback/route.ts`.
 - Dashboard shell: `src/app/(dashboard)/layout.tsx`, `src/components/common/app-sidebar.tsx`.
-- Transaksi: `src/app/(dashboard)/transaksi`, `src/actions/transaksi-action.ts`, `src/actions/voice-action.ts`, `src/actions/transaction-file-action.ts`.
-- Rekening: `src/app/(dashboard)/rekening`, `src/actions/rekening-action.ts`.
-- Kategori: `src/app/(dashboard)/kategori`, `src/actions/kategori-action.ts`.
-- Hutang/Piutang: `src/app/(dashboard)/hutang`, `src/actions/hutang-action.ts`.
-- Rekap/Laporan: `src/app/(dashboard)/rekap`, `src/actions/rekap-action.ts`, `src/actions/export-action.ts`, `src/lib/pdf-generator.ts`, `src/lib/spreadsheet-generator.ts`.
+- Transaksi: `src/app/(dashboard)/transactions`, `src/actions/transaksi-action.ts`, `src/actions/voice-action.ts`, `src/actions/transaction-file-action.ts`.
+- Rekening: `src/app/(dashboard)/wallets`, `src/actions/rekening-action.ts`.
+- Kategori: `src/app/(dashboard)/categories`, `src/actions/kategori-action.ts`.
+- Hutang/Piutang: `src/app/(dashboard)/debts`, `src/actions/hutang-action.ts`.
+- Rekap/Laporan: `src/app/(dashboard)/reports`, `src/actions/rekap-action.ts`, `src/actions/export-action.ts`, `src/lib/pdf-generator.ts`, `src/lib/spreadsheet-generator.ts`.
 - Settings: `src/app/(dashboard)/settings`, `src/actions/profile-action.ts`, `src/actions/auth-action.ts`.
 - Supabase config: `src/configs/supabase`.
 - Database migrations: `src/migrations`.

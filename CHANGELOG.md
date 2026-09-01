@@ -1,134 +1,76 @@
-## v1.0.0
+## v1.1.0
 
-CatatZ is a personal finance tracking web app (PWA) built on Next.js 16, Supabase, and Tailwind CSS v4. This is the first public release, shipping a complete set of core features for day-to-day personal finance management.
+The second feature release of CatatZ, focused on **improved transaction filter UX**, **more intuitive input fields**, and **security hardening** from CodeQL audit findings.
 
----
-
-### ✨ Core Features
-
-#### 💰 Transaction Management
-
-- Record **Income**, **Expense**, **Transfer** between accounts, and **Balance Correction** transactions
-- Fields: title, amount, category, account, date & time, and notes
-- **AI Voice Input** — speak your transaction using the browser's Speech Recognition API; Gemini AI parses and fills the form automatically
-- **AI File Auto-fill** — upload a receipt or invoice, and AI extracts the transaction details into the form
-- Smart amount input with accurate thousands/decimal separator masking
-- Filter, search, and date-based navigation
-
-#### 🏦 Account Management
-
-- Create accounts with a custom name, logo, color, and opening balance
-- Option to exclude specific accounts from the total balance
-- Referential protection: accounts cannot be deleted while linked transactions exist
-
-#### 🗂️ Categories
-
-- Built-in system categories
-- Custom user-defined categories per account
-- Deletion protection: categories in use by transactions cannot be removed
-
-#### 📊 Financial Summary (Rekap)
-
-- Monthly overview: total income, expenses, and net balance
-- Per-category breakdown with interactive charts (Recharts)
-- Drill-down into individual transactions within the selected month
-
-#### 🤝 Debt & Receivables (Hutang/Piutang)
-
-- Track debts and receivables with borrower/lender details
-- Installment system with automatic remaining balance and settlement status
-- PostgreSQL trigger ensures installment balance consistency
-
-#### 📤 Report Export
-
-- Export to **PDF** (jsPDF + autotable)
-- Export to **XLSX** (ExcelJS)
-- Export to **CSV**
+This release includes 15 commits since v1.0.1, touching 26 files.
 
 ---
 
-### 🔐 Authentication & Security
+### ✨ New Features
 
-- Email + password login and registration
-- **Google OAuth** — sign in or link a Google account from settings
-- **Forgot password** and **reset password** via email
-- **Active session management** — view and revoke sessions from other devices
-- **Delete account** with full data removal confirmation
-- Row Level Security (RLS) enforced on all Supabase tables
+#### 🔍 Multi-Select Combo Filters ([#8](https://github.com/kupzed/catatz/pull/8))
 
----
+- **Tipe**, **Rekening**, and **Kategori** filters on the transaction page now support **multi-select** using DropdownMenu + CheckboxItem
+- Added new **Kategori** multi-select filter that was previously unavailable
+- Sort filter (newest/oldest/largest/smallest) remains single-select
+- Backend `getTransaksi` server action updated to support array-based filtering via Supabase `.in()` query
+- Filter trigger height corrected from `h-11` to `h-12` per DESIGN.md specification
 
-### ⚙️ Settings & Preferences
+#### ✕ Clearable Input Fields ([#7](https://github.com/kupzed/catatz/pull/7))
 
-- Update display name and profile avatar (uploaded to Supabase Storage)
-- Change password with current password verification
-- **Format preferences**: date format, number format (dot/comma separator), timezone
-- **Theme preferences**: Light, Dark, or System
-- **Dynamic landing page**: choose the default page shown after login
-- All preferences are stored in the database and synced across devices
+- New reusable `ClearableInput` component — wraps the base `Input` with an end-positioned X button to clear the value
+- Clear button added to `NominalInput` for all financial amount fields
+- Applied across all dashboard dialogs: transactions, accounts, categories, debts, search filters, installments, and profile settings
+- Date/time and auth inputs are intentionally excluded
 
 ---
 
-### 📱 Progressive Web App (PWA)
+### 🐛 Bug Fixes
 
-- **Install prompt** for add-to-home-screen on iOS and Android
-- **Offline shell**: app navigation remains functional without a connection
-- **Update prompt**: notification when a new version is available
-- **Offline queue**: transaction actions queued while offline are automatically retried on reconnect
-- Service worker powered by [Serwist](https://serwist.pages.dev/)
+- **fix(ui):** Fix double-click required to clear nominal and text inputs — added `onMouseDown preventDefault` to prevent blur event race condition that restored the formatted value before the clear action could execute ([9aeedd3](https://github.com/kupzed/catatz/commit/9aeedd3))
+- **fix(warning):** Fix word wrapping in voice transcript display on smaller screens ([7e04a4c](https://github.com/kupzed/catatz/commit/7e04a4c))
 
 ---
 
-### 🎨 Design System
+### 🔐 Security
 
-- Institutional design system inspired by **Coinbase brand guidelines**
-- Consistent color tokens, shape rules, typography scale, and elevation
-- Full **Light mode** and **Dark mode** support
-- Typefaces: **Inter** (UI text) · **Geist Mono** (financial figures)
-- Fully responsive: mobile `< 640px` and desktop `> 1024px`
-
----
-
-### 🗄️ Database & Infrastructure
-
-- **13 structured database migrations** (001–013)
-- Schema covers: profiles, accounts, categories, transactions, debts, budgets, recurring, avatar storage, user preferences, and user sessions
-- PostgreSQL triggers for automatic debt balance recalculation
-- Production deployment via **Vercel** (webpack build for Serwist service worker compatibility)
+- **fix(security):** Add `event.source` guard to service worker message handler to prevent untrusted windows from triggering `skipWaiting()` (CWE-20, CWE-940) ([e44a3ee](https://github.com/kupzed/catatz/commit/e44a3ee))
+- **fix(security):** Sanitize URL protocol for avatar `src` attribute — only allow `https:`, `blob:`, and `data:` protocols to prevent potential XSS (CWE-79, CWE-116) ([e44a3ee](https://github.com/kupzed/catatz/commit/e44a3ee))
+- **fix(security):** Move `sanitizeAvatarUrl` to module-level function so CodeQL recognises it as a sanitisation barrier; sanitize at every state entry point ([c6a3d9e](https://github.com/kupzed/catatz/commit/c6a3d9e))
+- **docs(security):** Add [SECURITY.md](./SECURITY.md) with vulnerability reporting policy and CatatZ security architecture documentation ([1cb0682](https://github.com/kupzed/catatz/commit/1cb0682))
 
 ---
 
-### 🛠️ Tech Stack
+### 📝 Documentation & Maintenance
 
-| Layer      | Technology                           |
-| ---------- | ------------------------------------ |
-| Framework  | Next.js 16 App Router                |
-| Runtime    | React 19, TypeScript                 |
-| Database   | Supabase PostgreSQL                  |
-| Auth       | Supabase Auth (Email + Google OAuth) |
-| Storage    | Supabase Storage                     |
-| Styling    | Tailwind CSS v4, shadcn/ui           |
-| Forms      | React Hook Form + Zod                |
-| State      | TanStack Query v5, Zustand           |
-| Charts     | Recharts                             |
-| PWA        | Serwist                              |
-| AI         | Google Gemini API                    |
-| Deployment | Vercel                               |
-| Testing    | Vitest, Playwright                   |
+- Add License (MIT) section to README ([666d9ef](https://github.com/kupzed/catatz/commit/666d9ef))
+- Fix table formatting and references in AGENTS.md ([ad874d2](https://github.com/kupzed/catatz/commit/ad874d2))
+- Update `docs/features/transaksi.md` and `docs/server-actions-api.md` to reflect filter changes
+- Add `continue-on-error` to dependency-review workflow for repos without Dependency Graph enabled
 
 ---
 
-### 📋 Notes
+### 🧪 Tests
 
-- **Budget** schema is in place, but the create/edit budget UI is not yet available in this release
-- **Recurring transactions** schema is ready but not yet exposed in the UI
-- Self-hosting requires your own Supabase instance — see [`.env.example`](./.env.example) for required environment variables
+- Update E2E test assertion: account filter trigger `#filter-rekening` height from 44px to 48px to align with DESIGN.md `h-12` specification ([9655663](https://github.com/kupzed/catatz/commit/9655663))
+
+---
+
+### 📊 Stats
+
+| Metric               | Value             |
+| -------------------- | ----------------- |
+| Commits since v1.0.1 | 15 (10 non-merge) |
+| Files changed        | 26                |
+| Lines added          | 637               |
+| Lines removed        | 141               |
+| Pull Requests merged | #3, #6, #7, #8    |
 
 ---
 
 ### 🔗 Links
 
+- [Full Changelog](https://github.com/kupzed/catatz/compare/v1.0.1...v1.1.0)
 - [README](./README.md)
+- [Security Policy](./SECURITY.md)
 - [Technical Documentation](./docs/README.md)
-- [Environment Variables](./docs/environment-variables.md)
-- [Local Setup Guide](./docs/setup-local.md)

@@ -15,9 +15,9 @@ import { hutangSchema, cicilanSchema } from '@/validations/hutang-validation';
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
 function revalidateHutangSaldoPaths() {
-  revalidatePath('/hutang');
-  revalidatePath('/rekening');
-  revalidatePath('/rekap');
+  revalidatePath('/debts');
+  revalidatePath('/wallets');
+  revalidatePath('/reports');
 }
 
 async function getHutangById(

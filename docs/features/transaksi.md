@@ -10,17 +10,17 @@ Fitur transaksi digunakan untuk mencatat pemasukan, pengeluaran, transfer antar 
 
 ## Route
 
-- `/transaksi`
-- Shortcut PWA: `/transaksi?new=true`
+- `/transactions`
+- Shortcut PWA: `/transactions?new=true`
 
 ## Lokasi File
 
-- Page: `src/app/(dashboard)/transaksi/page.tsx`
-- Loading: `src/app/(dashboard)/transaksi/loading.tsx`
-- Client page: `src/app/(dashboard)/transaksi/_components/transaksi-page-client.tsx`
-- Dialog: `src/app/(dashboard)/transaksi/_components/transaksi-dialog.tsx`
-- Voice button: `src/app/(dashboard)/transaksi/_components/voice-input-button.tsx`
-- File Auto Fill button: `src/app/(dashboard)/transaksi/_components/transaction-file-auto-fill-button.tsx`
+- Page: `src/app/(dashboard)/transactions/page.tsx`
+- Loading: `src/app/(dashboard)/transactions/loading.tsx`
+- Client page: `src/app/(dashboard)/transactions/_components/transaksi-page-client.tsx`
+- Dialog: `src/app/(dashboard)/transactions/_components/transaksi-dialog.tsx`
+- Voice button: `src/app/(dashboard)/transactions/_components/voice-input-button.tsx`
+- File Auto Fill button: `src/app/(dashboard)/transactions/_components/transaction-file-auto-fill-button.tsx`
 - Actions: `src/actions/transaksi-action.ts`
 - File parsing action: `src/actions/transaction-file-action.ts`
 - Validation: `src/validations/transaksi-validation.ts`
@@ -66,7 +66,7 @@ Initial data diambil di Server Component dengan:
 - Database juga memastikan `correction` tidak memiliki `judul`.
 - Trigger database otomatis mengubah saldo rekening untuk `income`, `expense`, dan `transfer`.
 - `correction` tidak diproses trigger dan ditangani manual oleh Server Action rekening/transaksi.
-- Setelah create/update/delete, route `/transaksi`, `/rekening`, dan `/rekap` di-revalidate.
+- Setelah create/update/delete, route `/transactions`, `/wallets`, dan `/reports` di-revalidate.
 
 ## UI Behavior
 

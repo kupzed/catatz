@@ -2,7 +2,7 @@
   "name": "CatatZ — Pencatatan Keuangan",
   "short_name": "CatatZ",
   "description": "Pencatatan keuangan pribadi yang cepat dan cerdas",
-  "start_url": "/transaksi",
+  "start_url": "/transactions",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
@@ -87,7 +87,7 @@
   "shortcuts": [
     {
       "name": "Tambah Transaksi",
-      "url": "/transaksi?new=true",
+      "url": "/transactions?new=true",
       "icons": [
         {
           "src": "/icons/icon-96x96.png",
@@ -98,7 +98,7 @@
     },
     {
       "name": "Rekap",
-      "url": "/rekap",
+      "url": "/reports",
       "icons": [
         {
           "src": "/icons/icon-96x96.png",
@@ -109,7 +109,7 @@
     },
     {
       "name": "Rekening",
-      "url": "/rekening",
+      "url": "/wallets",
       "icons": [
         {
           "src": "/icons/icon-96x96.png",
