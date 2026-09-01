@@ -30,7 +30,7 @@ Provider yang terlihat di codebase:
 2. Form memanggil Server Action `signIn`.
 3. `signIn` memanggil `supabase.auth.signInWithPassword({ email, password })`.
 4. Jika berhasil, action menjalankan `revalidatePath("/", "layout")`.
-5. User diarahkan ke `/transaksi`.
+5. User diarahkan ke `/transactions`.
 6. Session disimpan melalui mekanisme cookie Supabase SSR.
 
 ## Google OAuth Login/Register Flow
@@ -38,9 +38,9 @@ Provider yang terlihat di codebase:
 1. User memilih tombol Google di `/login` atau `/register`.
 2. Client memanggil Server Action `signInWithGoogle`.
 3. Action memanggil `supabase.auth.signInWithOAuth({ provider: "google" })`.
-4. `redirectTo` diarahkan ke `{allowed-origin}/auth/callback?next=/transaksi`.
+4. `redirectTo` diarahkan ke `{allowed-origin}/auth/callback?next=/transactions`.
 5. Setelah Google dan Supabase selesai, `/auth/callback` menukar `code` dengan session.
-6. Jika sukses, callback melakukan smart profile sync untuk nama/avatar kosong, mencatat session, lalu redirect ke `/transaksi`.
+6. Jika sukses, callback melakukan smart profile sync untuk nama/avatar kosong, mencatat session, lalu redirect ke `/transactions`.
 
 Jika user email/password sudah ada dan user masuk via Google dengan email terverifikasi yang sama, automatic identity linking ditangani oleh Supabase Auth.
 
@@ -50,11 +50,11 @@ Jika user email/password sudah ada dan user masuk via Google dengan email terver
 2. Form memanggil Server Action `signUp`.
 3. `signUp` memanggil `supabase.auth.signUp`.
 4. Metadata yang dikirim: `name`.
-5. `emailRedirectTo` diarahkan ke `{allowed-origin}/auth/callback?next=/transaksi`.
+5. `emailRedirectTo` diarahkan ke `{allowed-origin}/auth/callback?next=/transactions`.
 6. User diminta mengecek email verifikasi.
 7. Setelah link diklik, Supabase mengarahkan ke `/auth/callback`.
 8. Route Handler callback menukar `code` menjadi session.
-9. Jika berhasil, user diarahkan ke route `next`, default `/transaksi`.
+9. Jika berhasil, user diarahkan ke route `next`, default `/transactions`.
 
 ## Logout Flow
 

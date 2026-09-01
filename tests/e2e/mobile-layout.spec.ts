@@ -12,7 +12,7 @@ async function login(page: Page) {
     page.waitForResponse((candidate) => candidate.request().method() === "POST"),
     page.getByRole("button", { name: "Masuk", exact: true }).click(),
   ]);
-  await expect(page).toHaveURL(/\/transaksi$/);
+  await expect(page).toHaveURL(/\/transactions$/);
 }
 
 async function expectInsideViewport(page: Page, locator: Locator) {

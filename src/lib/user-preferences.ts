@@ -4,7 +4,7 @@ export const DATE_FORMAT_PREFERENCES = ["id-ID", "en-US"] as const;
 export const NUMBER_FORMAT_PREFERENCES = ["id-ID", "en-US"] as const;
 export const TIME_FORMAT_PREFERENCES = ["24h", "12h"] as const;
 export const LANDING_PAGE_PREFERENCES = [
-  "/transaksi",
+  "/transactions",
   "/wallets",
   "/reports",
   "/debts",
@@ -38,7 +38,7 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
   currency: "IDR",
   date_format: "id-ID",
   number_format: "id-ID",
-  default_landing_page: "/transaksi",
+  default_landing_page: "/transactions",
   show_decimal_places: false,
   time_format: "24h",
 };

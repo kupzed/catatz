@@ -212,7 +212,7 @@ export async function createRekening(values: RekeningFormValues): Promise<Action
 
   if (error) return { success: false, error: error.message };
   revalidatePath('/wallets');
-  revalidatePath('/transaksi');
+  revalidatePath('/transactions');
   revalidatePath('/reports');
   return { success: true, data: data as Rekening };
 }
@@ -286,7 +286,7 @@ export async function updateRekening(
 
   if (error) return { success: false, error: error.message };
   revalidatePath('/wallets');
-  revalidatePath('/transaksi');
+  revalidatePath('/transactions');
   return { success: true, data: data as Rekening };
 }
 
@@ -311,7 +311,7 @@ export async function deleteRekening(id: string): Promise<ActionResult> {
     .eq('user_id', user.id);
   if (error) return { success: false, error: error.message };
   revalidatePath('/wallets');
-  revalidatePath('/transaksi');
+  revalidatePath('/transactions');
   return { success: true };
 }
 

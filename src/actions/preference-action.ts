@@ -70,7 +70,7 @@ export async function updateUserPreferences(values: UserPreferenceUpdate): Promi
   }
 
   revalidatePath('/settings');
-  revalidatePath('/transaksi');
+  revalidatePath('/transactions');
   revalidatePath('/wallets');
   revalidatePath('/reports');
   revalidatePath('/debts');

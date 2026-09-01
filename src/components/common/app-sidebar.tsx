@@ -60,7 +60,7 @@ const NAV_ITEMS = [
   {
     group: "Menu Utama",
     items: [
-      { href: "/transaksi", label: "Transaksi", icon: ArrowLeftRight },
+      { href: "/transactions", label: "Transaksi", icon: ArrowLeftRight },
       { href: "/wallets", label: "Rekening", icon: Landmark },
       { href: "/reports", label: "Rekap", icon: BarChart3 },
       { href: "/debts", label: "Hutang", icon: HandCoins },
@@ -84,7 +84,7 @@ function SidebarHeaderContent() {
       {/* Expanded: logo + name */}
       {!isCollapsed && (
         <Link
-          href="/transaksi"
+          href="/transactions"
           className="flex items-center gap-3 px-2 flex-1 min-w-0"
         >
           <Image
@@ -249,7 +249,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
                 tooltip="Transaksi baru"
                 onClick={handleMobileClick}
               >
-                <Link href="/transaksi?new=true">
+                <Link href="/transactions?new=true">
                   <Plus className="h-4 w-4" />
                   <span>Transaksi baru</span>
                 </Link>

@@ -123,7 +123,7 @@ export async function signUp(formData: FormData): Promise<ActionResult> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const name = formData.get("name") as string;
-  const callbackUrl = await createAuthCallbackUrl("/transaksi");
+  const callbackUrl = await createAuthCallbackUrl("/transactions");
 
   if (!callbackUrl.success) {
     return { success: false, error: callbackUrl.error };
@@ -170,7 +170,7 @@ export async function signIn(
   }
 
   revalidatePath("/", "layout");
-  redirect("/transaksi");
+  redirect("/transactions");
 }
 
 export async function signOut() {
@@ -274,7 +274,7 @@ export async function updatePassword(
 
 export async function signInWithGoogle(): Promise<ActionResult<{ url: string }>> {
   const supabase = await createClient();
-  const callbackUrl = await createAuthCallbackUrl("/transaksi");
+  const callbackUrl = await createAuthCallbackUrl("/transactions");
 
   if (!callbackUrl.success) {
     return { success: false, error: callbackUrl.error };
