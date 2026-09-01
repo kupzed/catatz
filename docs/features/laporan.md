@@ -87,4 +87,4 @@ Export data:
 ## TODO / Improvement
 
 - UI untuk membuat/mengubah budget belum terlihat, walaupun action `upsertBudget` dan table `budget` sudah ada.
-- Pertimbangkan filter periode di halaman `/rekap` jika kebutuhan analisis lebih luas.
+- Pertimbangkan filter periode di halaman `/reports` jika kebutuhan analisis lebih luas.

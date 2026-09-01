@@ -28,7 +28,7 @@ CatatZ memiliki manifest, app icons, iOS metadata, install UX, service worker Se
 
 - `name`: CatatZ
 - `short_name`: CatatZ
-- `start_url`: `/transaksi`
+- `start_url`: `/transactions`
 - `scope`: `/`
 - `display`: `standalone`
 - `orientation`: `portrait-primary`

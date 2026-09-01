@@ -135,10 +135,13 @@ Bagian ini memuat checklist status untuk seluruh 8 fase migrasi. Setiap fase dij
   - [x] Update `public/offline.html` & `src/app/not-found.tsx`
   - [x] Update `next.config.ts` redirects (`/transaksi/:path*` -> `/transactions/:path*`)
   - [x] Update `docs/features/transaksi.md`, `docs/features/auth.md`, `docs/supabase-auth.md`, `docs/architecture.md`, `docs/folder-structure.md`
-  - [x] Validasi fungsionalitas transaksi & quick check (typecheck, lint, test, build)
-- [ ] **Fase 7: Sinkronisasi Dokumentasi (`docs/`)**
-  - [ ] Update referensi URL route di `docs/features/*`, `docs/architecture.md`, `docs/folder-structure.md`, `docs/server-actions-api.md`, `docs/setup-local.md`, `docs/supabase-auth.md`, `docs/troubleshooting.md`, `docs/overview.md`, `docs/pwa.md`
-  - [ ] Pastikan tidak mengubah entry historis di `CHANGELOG.md`
+- [x] **Fase 7: Sinkronisasi Dokumentasi (`docs/`) & Final Sweep**
+  - [x] Update referensi URL route di `docs/features/*`, `docs/architecture.md`, `docs/folder-structure.md`, `docs/server-actions-api.md`, `docs/setup-local.md`, `docs/supabase-auth.md`, `docs/troubleshooting.md`, `docs/overview.md`, `docs/pwa.md`, `docs/database-schema.md`, `docs/frontend-guidelines.md`
+  - [x] Tambahkan entry migrasi route di bagian Unreleased pada `docs/changelog.md` tanpa mengubah rilis historis
+  - [x] Sweep seluruh repository untuk memastikan tidak ada path lama aktif yang tertinggal
+  - [x] Konfirmasi fallback `normalizeUserPreferences` untuk value lama
+  - [x] Validasi `next.config.ts` berisi tepat 5 redirects konsisten
+  - [x] Jalankan `npm run verify:quick` dan `npm run build`
 - [ ] **Fase 8: Verifikasi Menyeluruh & Build/E2E Final Audit**
   - [ ] Jalankan `npm run build` (memverifikasi webpack Serwist & regenerasi `public/sw.js`)
   - [ ] Jalankan `npm run test` (unit tests vitest)

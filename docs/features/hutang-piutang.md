@@ -55,7 +55,7 @@ Initial data diambil dengan:
 - Trigger database menghitung ulang `sisa_tagihan` dan status setelah cicilan dibuat, diubah, atau dihapus.
 - Trigger database mengubah saldo rekening saat hutang/piutang atau cicilan mempengaruhi rekening.
 - Cicilan menyimpan `tipe_hutang_snapshot` agar rollback saldo tetap benar ketika parent hutang/piutang dihapus setelah memiliki cicilan.
-- Perubahan hutang/piutang dan cicilan ikut merevalidate `/rekap` karena halaman rekap menampilkan rincian hutang/piutang.
+- Perubahan hutang/piutang dan cicilan ikut merevalidate `/reports` karena halaman rekap menampilkan rincian hutang/piutang.
 - UI melunaskan hutang dengan meminta user memilih rekening terlebih dahulu, lalu membuat cicilan sebesar sisa tagihan.
 - Tipe hutang/piutang tidak bisa diubah setelah catatan memiliki cicilan.
 

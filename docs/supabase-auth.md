@@ -155,21 +155,21 @@ Auth actions membuat callback URL dengan helper server-side:
 Development default:
 
 ```txt
-http://localhost:3000/auth/callback?next=/transaksi
+http://localhost:3000/auth/callback?next=/transactions
 http://localhost:3000/auth/callback?next=/settings&flow=link_google
 ```
 
 Development dengan ngrok:
 
 ```txt
-https://morphing-easeful-starry.ngrok-free.dev/auth/callback?next=/transaksi
+https://morphing-easeful-starry.ngrok-free.dev/auth/callback?next=/transactions
 https://morphing-easeful-starry.ngrok-free.dev/auth/callback?next=/settings&flow=link_google
 ```
 
 Production:
 
 ```txt
-{NEXT_PUBLIC_APP_URL}/auth/callback?next=/transaksi
+{NEXT_PUBLIC_APP_URL}/auth/callback?next=/transactions
 {NEXT_PUBLIC_APP_URL}/auth/callback?next=/settings&flow=link_google
 ```
 
