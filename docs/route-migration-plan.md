@@ -142,11 +142,12 @@ Bagian ini memuat checklist status untuk seluruh 8 fase migrasi. Setiap fase dij
   - [x] Konfirmasi fallback `normalizeUserPreferences` untuk value lama
   - [x] Validasi `next.config.ts` berisi tepat 5 redirects konsisten
   - [x] Jalankan `npm run verify:quick` dan `npm run build`
-- [ ] **Fase 8: Verifikasi Menyeluruh & Build/E2E Final Audit**
-  - [ ] Jalankan `npm run build` (memverifikasi webpack Serwist & regenerasi `public/sw.js`)
-  - [ ] Jalankan `npm run test` (unit tests vitest)
-  - [ ] Jalankan `npm run test:e2e` (Playwright tests)
-  - [ ] Verifikasi final git diff dan status
+- [x] **Fase 8: Verifikasi Menyeluruh & Build/E2E Final Audit**
+  - [x] Jalankan `npm run build` (memverifikasi webpack Serwist & regenerasi `public/sw.js`)
+  - [x] Jalankan `npm run test` (unit tests vitest)
+  - [x] Jalankan `npm run test:e2e` (Playwright tests)
+  - [x] Verifikasi final git diff dan status
+  - [x] Seluruh migrasi 5 route selesai dan terverifikasi 100%
 
 ---
 
