@@ -10,14 +10,14 @@ Fitur hutang/piutang digunakan untuk mencatat pinjaman yang user berikan atau te
 
 ## Route
 
-- `/hutang`
+- `/debts`
 
 ## Lokasi File
 
-- Page: `src/app/(dashboard)/hutang/page.tsx`
-- Loading: `src/app/(dashboard)/hutang/loading.tsx`
-- Client page: `src/app/(dashboard)/hutang/_components/hutang-page-client.tsx`
-- Dialog: `src/app/(dashboard)/hutang/_components/hutang-dialog.tsx`
+- Page: `src/app/(dashboard)/debts/page.tsx`
+- Loading: `src/app/(dashboard)/debts/loading.tsx`
+- Client page: `src/app/(dashboard)/debts/_components/hutang-page-client.tsx`
+- Dialog: `src/app/(dashboard)/debts/_components/hutang-dialog.tsx`
 - Actions: `src/actions/hutang-action.ts`
 - Validation: `src/validations/hutang-validation.ts`
 - Types: `src/types/hutang.d.ts`
@@ -55,7 +55,7 @@ Initial data diambil dengan:
 - Trigger database menghitung ulang `sisa_tagihan` dan status setelah cicilan dibuat, diubah, atau dihapus.
 - Trigger database mengubah saldo rekening saat hutang/piutang atau cicilan mempengaruhi rekening.
 - Cicilan menyimpan `tipe_hutang_snapshot` agar rollback saldo tetap benar ketika parent hutang/piutang dihapus setelah memiliki cicilan.
-- Perubahan hutang/piutang dan cicilan ikut merevalidate `/rekap` karena halaman rekap menampilkan rincian hutang/piutang.
+- Perubahan hutang/piutang dan cicilan ikut merevalidate `/reports` karena halaman rekap menampilkan rincian hutang/piutang.
 - UI melunaskan hutang dengan meminta user memilih rekening terlebih dahulu, lalu membuat cicilan sebesar sisa tagihan.
 - Tipe hutang/piutang tidak bisa diubah setelah catatan memiliki cicilan.
 

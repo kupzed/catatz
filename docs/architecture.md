@@ -25,7 +25,7 @@ Supabase SSR Client
 
 - Routing menggunakan Next.js App Router di `src/app`.
 - Route group `(auth)` memuat `/login` dan `/register`.
-- Route group `(dashboard)` memuat route protected seperti `/transaksi`, `/rekening`, `/rekap`, `/hutang`, `/kategori`, dan `/settings`.
+- Route group `(dashboard)` memuat route protected seperti `/transactions`, `/wallets`, `/reports`, `/debts`, `/categories`, dan `/settings`.
 - Data awal page dashboard diambil di Server Component, lalu diteruskan ke Client Component.
 - Operasi CRUD dilakukan melalui Server Actions di `src/actions`.
 - Supabase browser client berada di `src/configs/supabase/client.ts`.
@@ -86,13 +86,13 @@ supabase.auth.signInWithPassword / signUp
 Supabase Auth session cookie
   |
   v
-redirect ke /transaksi
+redirect ke /transactions
 ```
 
 Register mengirim `emailRedirectTo` ke:
 
 ```txt
-{NEXT_PUBLIC_APP_URL}/auth/callback?next=/transaksi
+{NEXT_PUBLIC_APP_URL}/auth/callback?next=/transactions
 ```
 
 Callback diproses oleh `src/app/auth/callback/route.ts` dengan `exchangeCodeForSession`.
@@ -114,7 +114,7 @@ updateSession(request)
 supabase.auth.getUser()
   |
   +-- Tidak login dan bukan / atau auth page -> redirect /login
-  +-- Sudah login dan membuka /login atau /register -> redirect /transaksi
+  +-- Sudah login dan membuka /login atau /register -> redirect /transactions
   +-- Selain itu -> allow
 ```
 

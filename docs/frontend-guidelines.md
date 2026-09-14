@@ -231,10 +231,10 @@ Setiap halaman dashboard mengikuti struktur konsisten berikut:
 
 Route yang sudah memiliki loading state:
 
-- `/transaksi`: `src/app/(dashboard)/transaksi/loading.tsx`
-- `/rekening`: `src/app/(dashboard)/rekening/loading.tsx`
-- `/rekap`: `src/app/(dashboard)/rekap/loading.tsx`
-- `/hutang`: `src/app/(dashboard)/hutang/loading.tsx`
+- `/transactions`: `src/app/(dashboard)/transactions/loading.tsx`
+- `/wallets`: `src/app/(dashboard)/wallets/loading.tsx`
+- `/reports`: `src/app/(dashboard)/reports/loading.tsx`
+- `/debts`: `src/app/(dashboard)/debts/loading.tsx`
 
 Gunakan `Skeleton` untuk loading route/data yang membutuhkan waktu.
 

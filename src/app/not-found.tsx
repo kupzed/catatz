@@ -23,7 +23,7 @@ export default function NotFound() {
           </p>
         </div>
         <Button asChild className="bg-indigo-600 text-white hover:bg-indigo-500">
-          <Link href="/transaksi">Ke Transaksi</Link>
+          <Link href="/transactions">Ke Transaksi</Link>
         </Button>
       </div>
     </main>

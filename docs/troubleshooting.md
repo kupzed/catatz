@@ -80,7 +80,7 @@ Kemungkinan penyebab:
 
 Solusi:
 
-- Pastikan Server Action Google OAuth memakai callback `/auth/callback?next=/transaksi`.
+- Pastikan Server Action Google OAuth memakai callback `/auth/callback?next=/transactions`.
 - Pastikan Supabase Redirect URLs berisi origin yang dipakai, misalnya `https://morphing-easeful-starry.ngrok-free.dev/auth/callback`.
 - Restart dev server setelah mengubah `.env.local`.
 - Middleware memiliki safety net yang memindahkan `/login?code=...` dan `/register?code=...` ke `/auth/callback` dengan query yang sama, tetapi konfigurasi Supabase tetap harus dibetulkan.

@@ -5,7 +5,7 @@ import type { UserIdentity } from "@supabase/supabase-js";
 
 function safeNextPath(value: string | null): string {
   if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return "/transaksi";
+    return "/transactions";
   }
 
   return value;

@@ -10,13 +10,13 @@ Fitur kategori digunakan untuk mengelola kategori transaksi. Project membedakan 
 
 ## Route
 
-- `/kategori`
+- `/categories`
 
 ## Lokasi File
 
-- Page: `src/app/(dashboard)/kategori/page.tsx`
-- Client page: `src/app/(dashboard)/kategori/_components/kategori-page-client.tsx`
-- Dialog: `src/app/(dashboard)/kategori/_components/kategori-dialog.tsx`
+- Page: `src/app/(dashboard)/categories/page.tsx`
+- Client page: `src/app/(dashboard)/categories/_components/kategori-page-client.tsx`
+- Dialog: `src/app/(dashboard)/categories/_components/kategori-dialog.tsx`
 - Actions: `src/actions/kategori-action.ts`
 - Validation: `src/validations/kategori-validation.ts`
 - Types: `src/types/transaksi.d.ts`

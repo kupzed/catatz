@@ -50,7 +50,7 @@ Buka:
 http://localhost:3000
 ```
 
-Root `/` akan redirect ke `/transaksi`. Jika belum login, proxy akan redirect ke `/login`.
+Root `/` akan redirect ke `/transactions`. Jika belum login, proxy akan redirect ke `/login`.
 
 ## Command Validasi
 

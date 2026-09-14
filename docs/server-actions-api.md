@@ -38,7 +38,7 @@ Auth requirement: public.
 
 Supabase access: `supabase.auth.signUp`.
 
-Catatan: mengirim `emailRedirectTo` ke `/auth/callback?next=/transaksi` memakai origin production dari `NEXT_PUBLIC_APP_URL` atau origin request development yang ada di `ALLOWED_DEV_ORIGINS`.
+Catatan: mengirim `emailRedirectTo` ke `/auth/callback?next=/transactions` memakai origin production dari `NEXT_PUBLIC_APP_URL` atau origin request development yang ada di `ALLOWED_DEV_ORIGINS`.
 
 ### `signIn`
 
@@ -48,7 +48,7 @@ Deskripsi: login email/password.
 
 Input: `FormData` dengan `email` dan `password`.
 
-Output: redirect ke `/transaksi` jika sukses, `ActionResult` error jika gagal.
+Output: redirect ke `/transactions` jika sukses, `ActionResult` error jika gagal.
 
 Auth requirement: public.
 
@@ -116,7 +116,7 @@ Auth requirement: public.
 
 Supabase access: `supabase.auth.signInWithOAuth`.
 
-Catatan: redirect OAuth diarahkan ke `/auth/callback?next=/transaksi` memakai origin production dari `NEXT_PUBLIC_APP_URL` atau origin request development yang ada di `ALLOWED_DEV_ORIGINS`. Jika origin development belum diizinkan, action mengembalikan error dan tidak membuat URL OAuth.
+Catatan: redirect OAuth diarahkan ke `/auth/callback?next=/transactions` memakai origin production dari `NEXT_PUBLIC_APP_URL` atau origin request development yang ada di `ALLOWED_DEV_ORIGINS`. Jika origin development belum diizinkan, action mengembalikan error dan tidak membuat URL OAuth.
 
 ### `linkGoogleIdentity`
 
@@ -226,7 +226,7 @@ Validasi:
 
 Output: `ActionResult<Transaksi>`.
 
-Revalidate: `/transaksi`, `/rekening`, `/rekap`.
+Revalidate: `/transactions`, `/wallets`, `/reports`.
 
 Tabel: `transaksi`.
 
@@ -247,7 +247,7 @@ Output: `ActionResult<Transaksi>`.
 
 Validasi: action mengambil data lama, merge dengan payload partial, lalu memvalidasi hasilnya dengan `transaksiSchema` sebelum update.
 
-Revalidate: `/transaksi`, `/rekening`, `/rekap`.
+Revalidate: `/transactions`, `/wallets`, `/reports`.
 
 Tabel: `transaksi`, `rekening`.
 
@@ -261,7 +261,7 @@ Input: `id: string`.
 
 Output: `ActionResult`.
 
-Revalidate: `/transaksi`, `/rekening`, `/rekap`.
+Revalidate: `/transactions`, `/wallets`, `/reports`.
 
 Tabel: `transaksi`, `rekening`.
 
@@ -303,7 +303,7 @@ Validasi: `rekeningCreateSchema` dijalankan di sisi server sebelum insert.
 
 Tabel: `rekening`.
 
-Revalidate: `/rekening`, `/transaksi`.
+Revalidate: `/wallets`, `/transactions`.
 
 ### `updateRekening`
 
@@ -320,7 +320,7 @@ Validasi: `rekeningEditSchema` dijalankan di sisi server sebelum proses apapun.
 
 Tabel: `rekening`, `transaksi`.
 
-Revalidate: `/rekening`, `/transaksi`, `/rekap`.
+Revalidate: `/wallets`, `/transactions`, `/reports`.
 
 ### `deleteRekening`
 
@@ -378,7 +378,7 @@ Validasi server-side:
 - `hutangSchema` (Zod) dijalankan di `createHutang` dan `hutangSchema.partial()` di `updateHutang` sebelum query apapun.
 - `cicilanSchema` (Zod) dijalankan di `createCicilan` sebelum insert.
 
-Catatan: operasi cicilan mengandalkan trigger database untuk memperbarui `sisa_tagihan`, status, dan saldo rekening. UI pelunasan meminta user memilih rekening terlebih dahulu lalu mencatat cicilan sebesar sisa tagihan. Mutasi hutang/piutang dan cicilan merevalidate `/hutang`, `/rekening`, dan `/rekap`.
+Catatan: operasi cicilan mengandalkan trigger database untuk memperbarui `sisa_tagihan`, status, dan saldo rekening. UI pelunasan meminta user memilih rekening terlebih dahulu lalu mencatat cicilan sebesar sisa tagihan. Mutasi hutang/piutang dan cicilan merevalidate `/debts`, `/wallets`, dan `/reports`.
 
 ## Rekap Actions
 
@@ -419,11 +419,11 @@ type UserPreferences = {
   date_format: "id-ID" | "en-US";
   number_format: "id-ID" | "en-US";
   default_landing_page:
-    | "/transaksi"
-    | "/rekening"
-    | "/rekap"
-    | "/hutang"
-    | "/kategori";
+    | "/transactions"
+    | "/wallets"
+    | "/reports"
+    | "/debts"
+    | "/categories";
   show_decimal_places: boolean;
   time_format: "24h" | "12h";
 };
@@ -449,7 +449,7 @@ ActionResult<UserPreferences>;
 
 Tabel: `user_preferences`.
 
-Revalidate: `/settings`, `/transaksi`, `/rekening`, `/rekap`, `/hutang`, dan `/`.
+Revalidate: `/settings`, `/transactions`, `/wallets`, `/reports`, `/debts`, dan `/`.
 
 Catatan: preferensi format memengaruhi tampilan dashboard dan export, tetapi tidak mengubah kontrak data transaksi/hutang; waktu tetap disimpan sebagai `HH:mm`.
 

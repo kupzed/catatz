@@ -101,7 +101,7 @@ export default function TransaksiPageClient({
       setCopyFrom(null);
       setDialogOpen(true);
       // Hapus query param tanpa reload
-      router.replace("/transaksi", { scroll: false });
+      router.replace("/transactions", { scroll: false });
     }, 0);
 
     return () => {

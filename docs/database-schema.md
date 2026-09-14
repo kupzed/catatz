@@ -234,7 +234,7 @@ Deskripsi: preferensi tampilan dan format data milik user.
 | `currency` | `text` | Yes | `'IDR'` | Mata uang tampilan. UI saat ini hanya menyediakan IDR. |
 | `date_format` | `text` | Yes | `'id-ID'` | Locale/tampilan tanggal aplikasi dan export. |
 | `number_format` | `text` | Yes | `'id-ID'` | Locale pemisah ribuan/desimal angka. |
-| `default_landing_page` | `text` | Yes | `'/transaksi'` | Route awal setelah login. |
+| `default_landing_page` | `text` | Yes | `'/transactions'` | Route awal setelah login. |
 | `show_decimal_places` | `boolean` | No | `false` | Jika true, nominal penuh tampil dengan 2 digit desimal. |
 | `time_format` | `text` | No | `'24h'` | Format waktu tampilan/input, `24h` atau `12h`. |
 | `created_at` | `timestamptz` | Yes | `now()` | Waktu dibuat. |

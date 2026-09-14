@@ -19,10 +19,11 @@ Migration project berada di `src/migrations`.
 | `011-hutang-cicilan-balance-safety.sql` | Menambah snapshot tipe cicilan, policy UPDATE cicilan, dan memperbaiki trigger saldo/sisa hutang saat cicilan diubah atau parent dihapus. | Active |
 | `012-protect-rekening-delete-references.sql` | Menambah trigger untuk menolak delete rekening yang masih direferensikan transaksi, hutang/piutang, cicilan, atau template transaksi berulang. | Active |
 | `013-extend-user-preferences-formatting.sql` | Menambah preferensi `show_decimal_places` dan `time_format` pada `user_preferences`. | Active |
+| `014-fix-default-landing-page-values.sql` | Mengubah nilai default column `default_landing_page` ke `/transactions` dan memigrasikan nilai landing page lama ke nama route baru. | Active |
 
 ## Catatan Urutan
 
-File migration yang ada saat ini berurutan dari `001` sampai `013` di `src/migrations`.
+File migration yang ada saat ini berurutan dari `001` sampai `014` di `src/migrations`.
 
 Jangan menjalankan migration otomatis hanya berdasarkan asumsi nomor file tanpa review. Pastikan urutan eksekusi sesuai riwayat production/staging yang sebenarnya.
 

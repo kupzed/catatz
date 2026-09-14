@@ -38,8 +38,8 @@ export async function createKategori(values: KategoriSchema): Promise<ActionResu
     return { success: false, error: error.message };
   }
 
-  revalidatePath('/kategori');
-  revalidatePath('/transaksi');
+  revalidatePath('/categories');
+  revalidatePath('/transactions');
   return { success: true, data };
 }
 
@@ -139,8 +139,8 @@ export async function updateKategori(id: string, values: KategoriSchema): Promis
     return { success: false, error: error.message };
   }
 
-  revalidatePath('/kategori');
-  revalidatePath('/transaksi');
+  revalidatePath('/categories');
+  revalidatePath('/transactions');
   return { success: true, data };
 }
 
@@ -195,7 +195,7 @@ export async function deleteKategori(id: string): Promise<ActionResult> {
     return { success: false, error: error.message };
   }
 
-  revalidatePath('/kategori');
-  revalidatePath('/transaksi');
+  revalidatePath('/categories');
+  revalidatePath('/transactions');
   return { success: true };
 }

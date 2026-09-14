@@ -4,7 +4,17 @@ Format mengikuti Keep a Changelog sederhana.
 
 ## Unreleased
 
-_(Tidak ada perubahan yang belum dirilis saat ini.)_
+### Changed
+
+- Migrasi seluruh 5 route dashboard Next.js App Router dari Bahasa Indonesia ke Bahasa Inggris untuk standarisasi konvensi URL path:
+  - `/kategori` -> `/categories`
+  - `/hutang` -> `/debts`
+  - `/rekap` -> `/reports`
+  - `/rekening` -> `/wallets`
+  - `/transaksi` -> `/transactions`
+- Menambahkan HTTP 307 temporary redirects di `next.config.ts` untuk backward compatibility semua URL lama ke URL baru.
+- Memperbarui revalidasi Server Actions, breadcrumb keys, user preferences, PWA shortcuts (`public/manifest.json`), dan offline fallback link (`public/offline.html`).
+- Seluruh teks UI, label menu, nama tabel database, tipe TypeScript, dan file actions tetap dipertahankan tanpa perubahan fungsional.
 
 ---
 
