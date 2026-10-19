@@ -56,7 +56,8 @@ describe("HutangCard component", () => {
 
     expect(screen.getByText("Budi Santoso")).toBeDefined();
     expect(screen.getByText("Teman kantor")).toBeDefined();
-    expect(screen.getByText("Belum Lunas")).toBeDefined();
+    expect(screen.getByText("sisa piutang")).toBeDefined();
+    expect(screen.getByText("Rp 400.000")).toBeDefined();
 
     // Link ke detail
     const detailLinks = screen.getAllByRole("link");

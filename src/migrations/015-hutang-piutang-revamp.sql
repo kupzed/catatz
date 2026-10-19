@@ -17,6 +17,27 @@ ALTER TABLE public.hutang
   DROP CONSTRAINT IF EXISTS hutang_total_pinjaman_check;
 
 ALTER TABLE public.hutang
+  DROP CONSTRAINT IF EXISTS hutang_total_pinjaman_check1;
+
+ALTER TABLE public.hutang
+  DROP CONSTRAINT IF EXISTS hutang_total_pinjaman_check2;
+
+DO $$
+DECLARE
+  r RECORD;
+BEGIN
+  FOR r IN (
+    SELECT conname
+    FROM pg_constraint
+    WHERE conrelid = 'public.hutang'::regclass
+      AND contype = 'c'
+      AND conname ILIKE '%total_pinjaman%'
+  ) LOOP
+    EXECUTE 'ALTER TABLE public.hutang DROP CONSTRAINT IF EXISTS ' || quote_ident(r.conname);
+  END LOOP;
+END $$;
+
+ALTER TABLE public.hutang
   ADD CONSTRAINT hutang_total_pinjaman_check CHECK (total_pinjaman >= 0);
 
 ALTER TABLE public.hutang

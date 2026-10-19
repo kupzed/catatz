@@ -26,15 +26,15 @@ describe("hutang-balance & flexible repayment invariants", () => {
     });
   });
 
-  describe("Invariant 4: Status Lunas hanyalah Tag Visual, tidak mendistorsi kalkulasi saldo aktif", () => {
-    it("tetap memperhitungkan sisa nominal riil meskipun is_lunas bernilai true", () => {
+  describe("Invariant: Kartu yang berstatus / bertag Lunas tidak dihitung dalam ringkasan aktif", () => {
+    it("tidak mengikutsertakan pihak bertag Lunas dalam total Piutang Aktif dan Hutang Aktif", () => {
       const items = [
         {
           id: "1",
           nama_entitas: "Budi",
           tipe: "memberi" as const,
           total_pinjaman: 1000000,
-          sisa_tagihan: 300000, // masih ada sisa 300k
+          sisa_tagihan: 300000,
           status: "lunas" as const, // di-tag Lunas oleh user
           is_lunas_manual: true,
         },
@@ -43,19 +43,19 @@ describe("hutang-balance & flexible repayment invariants", () => {
           nama_entitas: "Ani",
           tipe: "memberi" as const,
           total_pinjaman: 500000,
-          sisa_tagihan: 0, // lunas riil
-          status: "lunas" as const,
-          is_lunas_manual: true,
+          sisa_tagihan: 200000, // masih aktif
+          status: "aktif" as const,
+          is_lunas_manual: false,
         },
       ];
 
-      // Kalkulasi index: harus menghitung sisa nominal riil, bukan mengabaikan karena status = lunas
+      // Kalkulasi index: pihak bertag lunas tidak dihitung dalam total aktif
       const totalPiutangAktif = items
-        .filter((h) => h.tipe === "memberi")
+        .filter((h) => h.tipe === "memberi" && h.status !== "lunas" && !h.is_lunas_manual)
         .reduce((sum, item) => sum + Math.max(Number(item.sisa_tagihan), 0), 0);
 
-      // Budi masih punya sisa 300.000 walau berlabel Lunas
-      expect(totalPiutangAktif).toBe(300000);
+      // Hanya Ani (200.000) yang terhitung, Budi tidak terhitung karena tag lunas
+      expect(totalPiutangAktif).toBe(200000);
     });
   });
 

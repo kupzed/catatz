@@ -54,16 +54,6 @@ export function HutangCard({ hutang, onEdit, onDelete }: HutangCardProps) {
             <span className="font-semibold text-base text-foreground group-hover:text-primary transition-colors">
               {hutang.nama_entitas}
             </span>
-            <Badge
-              className={cn(
-                "text-xs px-2.5 py-0.5 border-0 rounded-full font-medium",
-                isLunasTag
-                  ? "bg-semantic-up/10 text-semantic-up"
-                  : "bg-surface-strong text-muted-foreground",
-              )}
-            >
-              {isLunasTag ? "✓ Lunas" : "Belum Lunas"}
-            </Badge>
           </div>
 
           <p className="text-xs text-muted-foreground truncate max-w-md">
@@ -78,27 +68,37 @@ export function HutangCard({ hutang, onEdit, onDelete }: HutangCardProps) {
           )}
         </Link>
 
-        {/* Right side balance */}
-        <div className="text-right shrink-0">
-          <p
-            className={cn(
-              "font-mono text-lg font-semibold",
-              sisaTagihan > 0
-                ? isPiutang
-                  ? "text-semantic-up"
-                  : "text-semantic-down"
-                : "text-muted-foreground",
-            )}
-          >
-            {formatRupiah(sisaTagihan)}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {sisaTagihan > 0
-              ? isPiutang
-                ? "sisa piutang"
-                : "sisa hutang"
-              : "lunas"}
-          </p>
+        {/* Right side balance / tag */}
+        <div className="text-right shrink-0 flex flex-col items-end justify-center min-h-10">
+          {isLunasTag ? (
+            <Badge
+              className="text-xs px-3 py-1 border-0 rounded-full font-semibold bg-semantic-up/10 text-semantic-up"
+            >
+              ✓ Lunas
+            </Badge>
+          ) : (
+            <>
+              <p
+                className={cn(
+                  "font-mono text-lg font-semibold",
+                  sisaTagihan > 0
+                    ? isPiutang
+                      ? "text-semantic-up"
+                      : "text-semantic-down"
+                    : "text-muted-foreground",
+                )}
+              >
+                {formatRupiah(sisaTagihan)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {sisaTagihan > 0
+                  ? isPiutang
+                    ? "sisa piutang"
+                    : "sisa hutang"
+                  : "belum ada tagihan"}
+              </p>
+            </>
+          )}
         </div>
       </div>
 

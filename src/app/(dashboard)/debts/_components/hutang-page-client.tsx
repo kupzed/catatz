@@ -27,16 +27,16 @@ export default function HutangPageClient({ initialHutang }: Props) {
   const [statusFilter, setStatusFilter] = useState<"semua" | "belum_lunas" | "lunas">("semua");
 
   // Summary calculation:
-  // INVARIANT BUTIR 4: Status Lunas hanya tag, perhitungan menghitung sisa nominal riil
+  // Card bertag Lunas (status === 'lunas' atau is_lunas_manual === true) tidak dihitung dalam ringkasan aktif
   const totalPiutangAktif = useMemo(() => {
     return hutang
-      .filter((h) => h.tipe === "memberi")
+      .filter((h) => h.tipe === "memberi" && h.status !== "lunas" && !h.is_lunas_manual)
       .reduce((sum, item) => sum + Math.max(Number(item.sisa_tagihan), 0), 0);
   }, [hutang]);
 
   const totalHutangAktif = useMemo(() => {
     return hutang
-      .filter((h) => h.tipe === "menerima")
+      .filter((h) => h.tipe === "menerima" && h.status !== "lunas" && !h.is_lunas_manual)
       .reduce((sum, item) => sum + Math.max(Number(item.sisa_tagihan), 0), 0);
   }, [hutang]);
 
@@ -70,7 +70,10 @@ export default function HutangPageClient({ initialHutang }: Props) {
 
       if (!matchSearch) return false;
 
-      const isLunas = h.status === "lunas" || h.is_lunas_manual === true || Number(h.sisa_tagihan) <= 0;
+      const isLunas =
+        h.status === "lunas" ||
+        h.is_lunas_manual === true ||
+        (Number(h.total_pinjaman) > 0 && Number(h.sisa_tagihan) <= 0);
 
       if (statusFilter === "lunas") {
         return isLunas;

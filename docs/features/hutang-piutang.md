@@ -70,9 +70,9 @@ Initial data diambil dengan:
 2. **Fleksibilitas Pengembalian**:
    - Nominal pengembalian/pembayaran tidak dibatasi secara kaku. Pengembalian boleh melebihi pinjaman pokok (misal: pinjam Rp1.000.000, kembali Rp1.200.000 karena bunga atau kelebihan bayar).
    - Sistem mencatat surplus/kelebihan bayar secara transparan tanpa error.
-3. **Independensi Status Lunas (Label/Tag Murni)**:
-   - Status Lunas murni berfungsi sebagai label/tag visual (bisa di-toggle manual atau otomatis).
-   - Perhitungan kartu ringkasan index (Piutang Aktif dan Hutang Aktif) **tidak diabaikan oleh tag Lunas**. Jika ada data yang berlabel Lunas tetapi secara nominal riil masih memiliki sisa yang belum terbayar, nominal sisa tersebut tetap dihitung.
+3. **Status Lunas & Ringkasan Aktif**:
+   - Status Lunas berfungsi sebagai penanda/tag pelunasan (bisa di-toggle manual atau otomatis saat sisa tagihan lunas).
+   - Kartu pihak yang bertag Lunas (`status === 'lunas'` atau `is_lunas_manual === true`) **tidak dihitung** dalam kartu ringkasan index (Piutang Aktif dan Hutang Aktif).
 4. **Perhitungan Saldo Rekening**:
    - Trigger database `trg_rekening_cicilan` menyesuaikan saldo rekening berdasarkan `jenis_transaksi`:
      - Pinjaman piutang: uang keluar (-).
@@ -86,10 +86,10 @@ Initial data diambil dengan:
 ## UI Behavior
 
 - **Index (`/debts`)**:
-  - Ringkasan Piutang Aktif dan Hutang Aktif berdasarkan sisa tagihan nominal riil.
+  - Ringkasan Piutang Aktif dan Hutang Aktif hanya menghitung pihak yang berstatus aktif (belum lunas).
   - Search bar pencarian nama pihak atau catatan.
   - Filter status: Semua | Belum Lunas | Lunas.
-  - Kartu pihak menampilkan nama, catatan, badge status tag, sisa nominal riil, dan link langsung ke halaman detail.
+  - Kartu pihak menampilkan nama dan catatan di sisi kiri, serta nominal sisa aktif atau tag `✓ Lunas` di sisi kanan kartu, lengkap dengan link langsung ke halaman detail.
   - Dialog tambah pihak hanya meminta Nama dan Catatan.
 - **Detail (`/debts/[id]`)**:
   - Breadcrumb dinamis: `Hutang` $\to$ `Detail Hutang & Piutang`.

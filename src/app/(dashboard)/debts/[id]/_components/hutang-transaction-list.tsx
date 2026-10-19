@@ -115,7 +115,7 @@ export function HutangTransactionList({
                   <span>{formatTanggal(item.tanggal, "d MMM yyyy")}</span>
                   {item.waktu && <span>· {formatWaktu(item.waktu)}</span>}
                   {item.catatan && (
-                    <span className="truncate max-w-[200px] sm:max-w-xs">
+                    <span className="truncate max-w-50 sm:max-w-xs">
                       · {item.catatan}
                     </span>
                   )}
@@ -200,7 +200,7 @@ export function HutangTransactionList({
                 <span>{formatTanggal(hutang.tanggal_mulai, "d MMM yyyy")}</span>
                 {hutang.waktu && <span>· {formatWaktu(hutang.waktu)}</span>}
                 {hutang.catatan && (
-                  <span className="truncate max-w-[200px] sm:max-w-xs">
+                  <span className="truncate max-w-50 sm:max-w-xs">
                     · {hutang.catatan}
                   </span>
                 )}
