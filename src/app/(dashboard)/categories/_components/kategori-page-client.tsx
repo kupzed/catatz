@@ -1,157 +1,103 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import type { Kategori } from "@/types/transaksi";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ClearableInput } from "@/components/common/clearable-input";
-import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
-import {
-  Tags,
-  Plus,
-  Pencil,
-  Trash2,
-  ShieldCheck,
-  Search,
-  TrendingUp,
-  TrendingDown,
-  ArrowLeftRight,
-} from "lucide-react";
-import { toast } from "sonner";
-import KategoriDialog from "./kategori-dialog";
+import { useState, useTransition, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import type { Kategori, KategoriUsageCounts } from "@/types/transaksi";
 import { deleteKategori } from "@/actions/kategori-action";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Pencil, Trash2, Search, Tags } from "lucide-react";
+import KategoriDialog from "./kategori-dialog";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState, PageHeader } from "@/components/common";
-
-// ─── Types ───────────────────────────────────────────────────────────────────
+import { ClearableInput } from "@/components/common/clearable-input";
+import { cn } from "@/lib/utils";
 
 type Props = {
-  kategori: Kategori[];
+  initialKategori?: Kategori[];
+  kategori?: Kategori[]; // fallback for backward compatibility
+  initialUsageCounts?: Record<string, KategoriUsageCounts>;
 };
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 const TIPE_CONFIG = {
-  income: {
-    label: "Pemasukan",
-    icon: TrendingUp,
-    badgeClass: "bg-semantic-up/10 text-semantic-up border-0",
-  },
   expense: {
     label: "Pengeluaran",
-    icon: TrendingDown,
-    badgeClass: "bg-semantic-down/10 text-semantic-down border-0",
+    color: "text-semantic-down bg-semantic-down/10",
+  },
+  income: {
+    label: "Pemasukan",
+    color: "text-semantic-up bg-semantic-up/10",
   },
   all: {
     label: "Semua Tipe",
-    icon: ArrowLeftRight,
-    badgeClass: "bg-primary/10 text-primary border-0",
+    color: "text-primary bg-primary/10",
   },
 } as const;
 
-type TipeBadgeProps = { tipe: Kategori["tipe"] };
-function TipeBadge({ tipe }: TipeBadgeProps) {
-  const cfg = TIPE_CONFIG[tipe as keyof typeof TIPE_CONFIG];
-  if (!cfg) return null;
-  const Icon = cfg.icon;
+function TipeBadge({ tipe }: { tipe: Kategori["tipe"] }) {
+  const cfg = TIPE_CONFIG[tipe] ?? TIPE_CONFIG.all;
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium",
-        cfg.badgeClass,
+        "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium leading-none",
+        cfg.color,
       )}
     >
-      <Icon className="h-3 w-3" />
       {cfg.label}
     </span>
   );
 }
 
-type KategoriCardProps = {
-  kategori: Kategori;
-  onEdit: (k: Kategori) => void;
-  onDelete: (k: Kategori) => void;
-};
+function usageDescription(usage: KategoriUsageCounts) {
+  const parts = [
+    usage.transaksi > 0 ? `${usage.transaksi} transaksi` : null,
+    usage.budget > 0 ? `${usage.budget} budget bulanan` : null,
+    usage.recurring > 0 ? `${usage.recurring} template transaksi berulang` : null,
+  ].filter(Boolean);
 
-// ─── KategoriCard ─────────────────────────────────────────────────────────────
-
-function KategoriCard({ kategori, onEdit, onDelete }: KategoriCardProps) {
-  return (
-    <div className="group flex items-center justify-between rounded-input border border-hairline bg-card px-4 py-3 transition-colors hover:bg-surface-soft">
-      <div className="flex items-center gap-3 min-w-0">
-        {/* Ikon + warna indikator */}
-        <div
-          className="w-8 h-8 rounded-[8px] flex items-center justify-center text-base shrink-0"
-          style={{
-            background: kategori.warna ? `${kategori.warna}20` : undefined,
-          }}
-        >
-          {kategori.ikon ?? "📂"}
-        </div>
-        {/* Nama + tipe */}
-        <div className="min-w-0">
-          <p className="text-sm font-semibold text-foreground truncate leading-tight">
-            {kategori.nama}
-          </p>
-          <div className="mt-0.5">
-            <TipeBadge tipe={kategori.tipe} />
-          </div>
-        </div>
-        </div>
-
-      <div className="flex items-center gap-1 shrink-0 ml-2">
-        {kategori.is_system ? (
-          <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
-            <ShieldCheck className="h-3 w-3" /> Sistem
-          </span>
-        ) : (
-          <div className="flex items-center gap-1">
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-7 w-7 rounded-full bg-surface-strong text-foreground hover:bg-surface-strong/80"
-              onClick={() => onEdit(kategori)}
-              aria-label={`Edit ${kategori.nama}`}
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </Button>
-            <ConfirmDialog
-              title={`Hapus kategori "${kategori.nama}"?`}
-              description="Tindakan ini tidak dapat dibatalkan. Kategori ini akan dihapus dari sistem."
-              onConfirm={() => onDelete(kategori)}
-            >
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-7 w-7 rounded-full bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20"
-                aria-label={`Hapus ${kategori.nama}`}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
-            </ConfirmDialog>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  return `Kategori ini masih dipakai oleh ${parts.join(", ")}. Hapus atau ubah data terkait terlebih dahulu sebelum menghapus kategori.`;
 }
 
-// ─── Main Page Client ─────────────────────────────────────────────────────────
-
-export default function KategoriPageClient({ kategori }: Props) {
+export default function KategoriPageClient({
+  initialKategori,
+  kategori: fallbackKategori,
+  initialUsageCounts = {},
+}: Props) {
+  const router = useRouter();
+  const rawList = initialKategori ?? fallbackKategori ?? [];
+  const [items, setItems] = useState<Kategori[]>(rawList);
+  const [usageCounts, setUsageCounts] = useState<Record<string, KategoriUsageCounts>>(initialUsageCounts);
   const [search, setSearch] = useState("");
   const [filterTipe, setFilterTipe] = useState<string>("all");
   const [showDialog, setShowDialog] = useState(false);
   const [editTarget, setEditTarget] = useState<Kategori | null>(null);
-  const [items, setItems] = useState<Kategori[]>(kategori);
   const [, startTransition] = useTransition();
 
-  const systemKat = items.filter((k) => k.is_system);
-  const customKat = items.filter((k) => !k.is_system);
+  // Sync if props update
+  const [prevInitial, setPrevInitial] = useState(rawList);
+  if (rawList !== prevInitial) {
+    setPrevInitial(rawList);
+    setItems(rawList);
+  }
 
-  function applyFilter(list: Kategori[]) {
-    return list.filter((k) => {
+  // Summary counts
+  const summary = useMemo(() => {
+    let income = 0;
+    let expense = 0;
+    let all = 0;
+    for (const k of items) {
+      if (k.tipe === "income") income++;
+      else if (k.tipe === "expense") expense++;
+      else all++;
+    }
+    return { total: items.length, income, expense, all };
+  }, [items]);
+
+  // Filtered items
+  const filteredItems = useMemo(() => {
+    return items.filter((k) => {
       const matchSearch =
         !search ||
         k.nama.toLowerCase().includes(search.toLowerCase()) ||
@@ -160,10 +106,12 @@ export default function KategoriPageClient({ kategori }: Props) {
         filterTipe === "all" || k.tipe === filterTipe || k.tipe === "all";
       return matchSearch && matchTipe;
     });
-  }
+  }, [items, search, filterTipe]);
 
-  const filteredSystem = applyFilter(systemKat);
-  const filteredCustom = applyFilter(customKat);
+  function handleOpenAdd() {
+    setEditTarget(null);
+    setShowDialog(true);
+  }
 
   function handleEdit(k: Kategori) {
     setEditTarget(k);
@@ -175,6 +123,11 @@ export default function KategoriPageClient({ kategori }: Props) {
       const res = await deleteKategori(k.id);
       if (res.success) {
         setItems((prev) => prev.filter((x) => x.id !== k.id));
+        setUsageCounts((prev) => {
+          const next = { ...prev };
+          delete next[k.id];
+          return next;
+        });
         toast.success(`Kategori "${k.nama}" berhasil dihapus`);
       } else {
         toast.error(res.error ?? "Gagal menghapus kategori");
@@ -182,17 +135,12 @@ export default function KategoriPageClient({ kategori }: Props) {
     });
   }
 
-  function handleOpenAdd() {
-    setEditTarget(null);
-    setShowDialog(true);
-  }
-
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
-      {/* Page header */}
+      {/* Page Header */}
       <PageHeader
         title="Kategori"
-        subtitle="Kelola kategori untuk transaksi Anda."
+        subtitle="Kelola kategori pemasukan dan pengeluaran Anda."
         subtitleClassName="mt-0.5"
         action={
           <Button
@@ -206,124 +154,208 @@ export default function KategoriPageClient({ kategori }: Props) {
         }
       />
 
-      {/* Filter bar */}
-      <div className="rounded-card border border-hairline bg-card p-3 sm:p-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="relative w-full lg:max-w-sm">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <ClearableInput
-          id="kategori-search"
-          placeholder="Cari kategori..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onClear={() => setSearch("")}
-          className="pl-9"
-        />
+      {/* Summary Card */}
+      <div className="rounded-card border border-hairline bg-card p-5 sm:p-6 transition-colors">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-1">
+              Total Kategori
+            </p>
+            <p className="font-mono text-3xl sm:text-4xl font-normal text-foreground">
+              {summary.total}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 text-xs">
+            <div className="bg-surface-strong dark:bg-surface-dark-elevated rounded-full px-3.5 py-1.5 border border-hairline flex items-center gap-1.5">
+              <span className="text-muted-foreground font-medium">Pengeluaran:</span>
+              <span className="font-mono font-semibold text-semantic-down">{summary.expense}</span>
+            </div>
+            <div className="bg-surface-strong dark:bg-surface-dark-elevated rounded-full px-3.5 py-1.5 border border-hairline flex items-center gap-1.5">
+              <span className="text-muted-foreground font-medium">Pemasukan:</span>
+              <span className="font-mono font-semibold text-semantic-up">{summary.income}</span>
+            </div>
+            <div className="bg-surface-strong dark:bg-surface-dark-elevated rounded-full px-3.5 py-1.5 border border-hairline flex items-center gap-1.5">
+              <span className="text-muted-foreground font-medium">Semua Tipe:</span>
+              <span className="font-mono font-semibold text-primary">{summary.all}</span>
+            </div>
+          </div>
         </div>
-        <div className="grid grid-cols-3 gap-1 rounded-full bg-surface-strong p-1 sm:inline-grid sm:w-auto">
-          {["all", "income", "expense"].map((t) => (
+      </div>
+
+      {/* Filter Bar */}
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+        <div className="relative flex-1 sm:max-w-md">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <ClearableInput
+            id="kategori-search"
+            placeholder="Cari kategori..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onClear={() => setSearch("")}
+            className="pl-9 h-11 rounded-input bg-card border-hairline"
+          />
+        </div>
+        <div className="grid grid-cols-3 gap-1 rounded-full bg-surface-strong p-1 sm:inline-grid sm:w-auto h-11 items-center">
+          {[
+            { id: "all", label: "Semua" },
+            { id: "expense", label: "Pengeluaran" },
+            { id: "income", label: "Pemasukan" },
+          ].map((tab) => (
             <button
-              key={t}
-              onClick={() => setFilterTipe(t)}
+              key={tab.id}
+              onClick={() => setFilterTipe(tab.id)}
               className={cn(
-                "inline-flex h-9 items-center justify-center rounded-full px-3 text-xs font-semibold transition-colors sm:px-4 sm:text-sm",
-                filterTipe === t
+                "inline-flex h-9 items-center justify-center rounded-full px-3 text-xs font-semibold transition-colors sm:px-4 cursor-pointer",
+                filterTipe === tab.id
                   ? "bg-primary text-white"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
-              {t === "all"
-                ? "Semua"
-                : (TIPE_CONFIG[t as keyof typeof TIPE_CONFIG]?.label ?? t)}
+              {tab.label}
             </button>
           ))}
         </div>
       </div>
-      </div>
 
-      {/* Custom kategori */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-foreground">
-            Kategori Kustom
-          </h2>
-          <Badge variant="secondary" className="text-xs">
-            {filteredCustom.length}
-          </Badge>
-        </div>
-        {filteredCustom.length === 0 ? (
-          <EmptyState
-            icon={Tags}
-            title="Belum ada kategori kustom."
-            className="rounded-lg border border-dashed bg-muted/30 py-10 text-center"
-            iconClassName="h-8 w-8 mx-auto text-muted-foreground/40 mb-2 opacity-100"
-            titleClassName="text-sm text-muted-foreground"
-            actionClassName="contents"
-            action={
-              <Button
-                variant="link"
-                size="sm"
-                onClick={handleOpenAdd}
-                className="mt-1 text-primary h-auto p-0 underline-offset-4 hover:underline"
-              >
-                + Tambah kategori pertama
-              </Button>
-            }
-          />
-        ) : (
-          <div className="grid gap-2">
-            {filteredCustom.map((k) => (
-              <KategoriCard
+      {/* Grid of Categories */}
+      {filteredItems.length === 0 ? (
+        <EmptyState
+          icon={Tags}
+          title={
+            search || filterTipe !== "all"
+              ? "Tidak ada kategori yang cocok"
+              : "Belum ada kategori"
+          }
+          description={
+            search || filterTipe !== "all"
+              ? "Coba sesuaikan kata kunci pencarian atau filter tipe."
+              : "Tambahkan kategori pertama Anda untuk mencatat transaksi."
+          }
+          action={
+            <Button
+              variant="link"
+              onClick={handleOpenAdd}
+              className="mt-2 text-primary font-semibold"
+            >
+              + Tambah Kategori
+            </Button>
+          }
+        />
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredItems.map((k) => {
+            const usage = usageCounts[k.id];
+            const isUsed = (usage?.total ?? 0) > 0;
+
+            return (
+              <div
                 key={k.id}
-                kategori={k}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
-        )}
-      </section>
+                onClick={() => router.push(`/categories/${k.id}`)}
+                className="relative rounded-card border border-hairline bg-card p-5 transition-colors hover:bg-surface-soft group border-t-4 cursor-pointer flex flex-col justify-between"
+                style={{ borderTopColor: k.warna ?? undefined }}
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className="w-10 h-10 rounded-input flex items-center justify-center text-lg shrink-0"
+                        style={{
+                          background: k.warna ? `${k.warna}20` : undefined,
+                        }}
+                      >
+                        {k.ikon ?? "📂"}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors truncate">
+                          {k.nama}
+                        </p>
+                        <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                          <TipeBadge tipe={k.tipe} />
+                          {isUsed && usage ? (
+                            <Link
+                              href={`/categories/${k.id}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-block"
+                              title="Lihat riwayat transaksi kategori ini"
+                            >
+                              <Badge
+                                variant="secondary"
+                                className="text-xs rounded-full bg-primary/10 text-primary border-none hover:bg-primary/20 transition-colors cursor-pointer"
+                              >
+                                Dipakai {usage.total} data
+                              </Badge>
+                            </Link>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
 
-      <Separator />
+                    {/* Action buttons */}
+                    <div
+                      className="flex items-center gap-1 shrink-0"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7 rounded-full bg-surface-strong text-foreground hover:bg-surface-strong/80"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(k);
+                        }}
+                        aria-label={`Edit ${k.nama}`}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
 
-      {/* System kategori */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-sm font-semibold text-foreground">
-              Kategori Sistem
-            </h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Tidak dapat diubah atau dihapus
-            </p>
-          </div>
-          <Badge variant="secondary" className="text-xs">
-            {filteredSystem.length}
-          </Badge>
+                      {isUsed && usage ? (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7 rounded-full bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toast.warning(usageDescription(usage));
+                          }}
+                          aria-label={`Hapus ${k.nama}`}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      ) : (
+                        <ConfirmDialog
+                          title={`Hapus kategori "${k.nama}"?`}
+                          description="Tindakan ini tidak dapat dibatalkan. Kategori ini akan dihapus permanen."
+                          onConfirm={() => handleDelete(k)}
+                        >
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 rounded-full bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20"
+                            aria-label={`Hapus ${k.nama}`}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </ConfirmDialog>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
-        <div className="grid gap-2">
-          {filteredSystem.map((k) => (
-            <KategoriCard
-              key={k.id}
-              kategori={k}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ))}
-        </div>
-      </section>
+      )}
 
+      {/* Add / Edit Dialog */}
       <KategoriDialog
         open={showDialog}
         onOpenChange={setShowDialog}
         editData={editTarget}
         onCreated={(k) => {
-          setItems((prev) => [k, ...prev]);
-          setShowDialog(false);
+          setItems((prev) => [...prev, k]);
         }}
         onUpdated={(k) => {
           setItems((prev) => prev.map((x) => (x.id === k.id ? k : x)));
-          setShowDialog(false);
         }}
       />
     </div>

@@ -49,6 +49,8 @@ export default function DashboardBreadcrumb() {
               label = "Detail Transaksi";
             } else if (isUuid && prevSegment === "debts") {
               label = "Detail Hutang & Piutang";
+            } else if (isUuid && prevSegment === "categories") {
+              label = "Detail Kategori";
             } else {
               label = segment.charAt(0).toUpperCase() + segment.slice(1);
             }
