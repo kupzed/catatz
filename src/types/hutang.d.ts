@@ -1,5 +1,6 @@
 export type TipeHutang = 'memberi' | 'menerima';
 export type StatusHutang = 'aktif' | 'lunas' | 'overdue';
+export type JenisTransaksiHutang = 'pembayaran' | 'pinjaman';
 
 export type Hutang = {
   id: string;
@@ -13,6 +14,7 @@ export type Hutang = {
   waktu: string;
   rekening_id: string | null;
   status: StatusHutang;
+  is_lunas_manual?: boolean;
   catatan: string | null;
   created_at: string;
   updated_at: string;
@@ -28,8 +30,24 @@ export type HutangCicilan = {
   tanggal: string;
   waktu: string;
   tipe_hutang_snapshot: TipeHutang;
+  jenis_transaksi?: JenisTransaksiHutang;
   catatan: string | null;
   created_at: string;
+};
+
+export type HutangContactFormValues = {
+  nama_entitas: string;
+  catatan?: string;
+};
+
+export type HutangTransactionFormValues = {
+  hutang_id: string;
+  jenis_transaksi: JenisTransaksiHutang;
+  nominal: number;
+  tanggal: string;
+  waktu?: string;
+  rekening_id?: string;
+  catatan?: string;
 };
 
 export type HutangFormValues = {
@@ -50,11 +68,13 @@ export type CicilanFormValues = {
   tanggal: string;
   waktu?: string;
   catatan?: string;
+  jenis_transaksi?: JenisTransaksiHutang;
 };
 
 export type CicilanUpdateValues = Partial<
   Pick<
     CicilanFormValues,
-    'rekening_id' | 'nominal' | 'tanggal' | 'waktu' | 'catatan'
+    'rekening_id' | 'nominal' | 'tanggal' | 'waktu' | 'catatan' | 'jenis_transaksi'
   >
 >;
+
