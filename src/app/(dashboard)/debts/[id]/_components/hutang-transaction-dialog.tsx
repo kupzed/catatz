@@ -36,6 +36,7 @@ type Props = {
   rekening: Rekening[];
   editData?: HutangCicilan | null;
   defaultJenis?: JenisTransaksiHutang;
+  totalPinjaman?: number;
   onSuccess: (refreshed: Hutang) => void;
 };
 
@@ -46,6 +47,7 @@ export function HutangTransactionDialog({
   rekening,
   editData,
   defaultJenis = "pembayaran",
+  totalPinjaman,
   onSuccess,
 }: Props) {
   const isEdit = !!editData;
@@ -62,7 +64,7 @@ export function HutangTransactionDialog({
     resolver: zodResolver(hutangTransactionSchema),
     defaultValues: {
       hutang_id: hutang.id,
-      jenis_transaksi: defaultJenis,
+      jenis_transaksi: totalPinjaman === 0 ? "pinjaman" : defaultJenis,
       tanggal: todayISODate(),
       waktu: currentTime(),
     },
@@ -82,14 +84,15 @@ export function HutangTransactionDialog({
         catatan: editData.catatan ?? "",
       });
     } else {
+      const fallbackJenis = totalPinjaman === 0 ? "pinjaman" : defaultJenis;
       reset({
         hutang_id: hutang.id,
-        jenis_transaksi: defaultJenis,
+        jenis_transaksi: fallbackJenis,
         tanggal: todayISODate(),
         waktu: currentTime(),
       });
     }
-  }, [editData, defaultJenis, hutang.id, reset, open]);
+  }, [editData, defaultJenis, totalPinjaman, hutang.id, reset, open]);
 
   async function onSubmit(values: HutangTransactionSchema) {
     setSubmitting(true);
@@ -135,18 +138,30 @@ export function HutangTransactionDialog({
             {isEdit
               ? "Edit Transaksi"
               : jenisTransaksi === "pinjaman"
-                ? "Tambah Pinjaman"
-                : "Catat Pembayaran"}
+                ? totalPinjaman === 0
+                  ? isPiutang
+                    ? "Beri Pinjaman Pertama"
+                    : "Catat Pinjaman Diterima"
+                  : isPiutang
+                    ? "Tambah Pinjaman Diberikan"
+                    : "Tambah Pinjaman Diterima"
+                : isPiutang
+                  ? "Catat Pembayaran"
+                  : "Bayar Hutang"}
           </DialogTitle>
           <DialogDescription>
             {isEdit
               ? "Perbarui riwayat transaksi hutang/piutang ini."
               : isPiutang
                 ? jenisTransaksi === "pinjaman"
-                  ? "Catat pinjaman tambahan yang Anda berikan kepada pihak ini."
+                  ? totalPinjaman === 0
+                    ? "Catat pinjaman awal yang Anda berikan kepada pihak ini."
+                    : "Catat pinjaman tambahan yang Anda berikan kepada pihak ini."
                   : "Catat uang pengembalian/cicilan yang Anda terima dari pihak ini."
                 : jenisTransaksi === "pinjaman"
-                  ? "Catat pinjaman tambahan yang Anda terima dari pihak ini."
+                  ? totalPinjaman === 0
+                    ? "Catat pinjaman awal yang Anda terima dari pihak ini."
+                    : "Catat pinjaman tambahan yang Anda terima dari pihak ini."
                   : "Catat uang pembayaran/cicilan yang Anda bayarkan kepada pihak ini."}
           </DialogDescription>
         </DialogHeader>
@@ -160,11 +175,19 @@ export function HutangTransactionDialog({
             }
           >
             <TabsList className="w-full grid grid-cols-2">
-              <TabsTrigger value="pembayaran">
-                {isPiutang ? "📥 Terima Pengembalian" : "📤 Bayar Hutang"}
-              </TabsTrigger>
               <TabsTrigger value="pinjaman">
                 {isPiutang ? "📤 Tambah Pinjaman" : "📥 Terima Pinjaman"}
+              </TabsTrigger>
+              <TabsTrigger
+                value="pembayaran"
+                disabled={totalPinjaman === 0 && !isEdit}
+                title={
+                  totalPinjaman === 0 && !isEdit
+                    ? "Catat pinjaman terlebih dahulu"
+                    : undefined
+                }
+              >
+                {isPiutang ? "📥 Terima Pengembalian" : "📤 Bayar Hutang"}
               </TabsTrigger>
             </TabsList>
           </Tabs>

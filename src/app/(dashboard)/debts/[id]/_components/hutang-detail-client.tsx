@@ -59,7 +59,7 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
   // Sisa nominal riil
   const sisaRiil = Math.max(totalPinjaman - totalPembayaran, 0);
   const kelebihanBayar = Math.max(totalPembayaran - totalPinjaman, 0);
-  const pct = totalPinjaman > 0 ? percentage(totalPembayaran, totalPinjaman) : 100;
+  const pct = totalPinjaman > 0 ? percentage(totalPembayaran, totalPinjaman) : 0;
 
   // Status Lunas (tag visual)
   const isLunasTag = hutang.status === "lunas" || hutang.is_lunas_manual === true;
@@ -104,7 +104,7 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
 
   function openAddTx(jenis: JenisTransaksiHutang) {
     setEditTxData(null);
-    setDefaultTxJenis(jenis);
+    setDefaultTxJenis(totalPinjaman === 0 ? "pinjaman" : jenis);
     setTxDialogOpen(true);
   }
 
@@ -119,7 +119,7 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Top Header & Navigation */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <Button
             variant="ghost"
@@ -131,13 +131,13 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
             Kembali ke Daftar
           </Button>
 
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-[32px] font-normal tracking-[-0.4px] text-foreground">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h1 className="text-2xl sm:text-[32px] font-normal tracking-[-0.4px] text-foreground">
               {hutang.nama_entitas}
             </h1>
             <Badge
               className={cn(
-                "rounded-full px-3 py-1 text-xs font-semibold border-0",
+                "rounded-full px-2.5 py-0.5 text-xs font-semibold border-0",
                 isLunasTag
                   ? "bg-semantic-up/10 text-semantic-up"
                   : "bg-surface-strong text-muted-foreground",
@@ -147,7 +147,7 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
             </Badge>
           </div>
 
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             {hutang.catatan || "Tidak ada catatan khusus"}
           </p>
         </div>
@@ -159,7 +159,7 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
             size="sm"
             onClick={handleToggleStatus}
             disabled={togglingStatus}
-            className="rounded-full gap-1.5 border-hairline h-10 px-4 text-xs font-semibold"
+            className="rounded-full gap-1.5 border-hairline h-9 sm:h-10 px-3.5 sm:px-4 text-xs font-semibold"
           >
             {isLunasTag ? (
               <>
@@ -178,7 +178,7 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
             variant="outline"
             size="sm"
             onClick={() => setContactDialogOpen(true)}
-            className="rounded-full gap-1.5 border-hairline h-10 px-4 text-xs font-semibold"
+            className="rounded-full gap-1.5 border-hairline h-9 sm:h-10 px-3.5 sm:px-4 text-xs font-semibold"
           >
             <Pencil className="h-3.5 w-3.5" />
             Edit Info
@@ -192,7 +192,7 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
             <Button
               variant="outline"
               size="sm"
-              className="rounded-full h-10 w-10 p-0 text-semantic-down border-hairline hover:bg-semantic-down/10"
+              className="rounded-full h-9 w-9 sm:h-10 sm:w-10 p-0 text-semantic-down border-hairline hover:bg-semantic-down/10"
               aria-label="Hapus kontak"
             >
               <Trash2 className="h-4 w-4" />
@@ -203,26 +203,36 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
 
       {/* Tipe Selector (Only if no transactions yet) */}
       {!hasTransactions && (
-        <div className="rounded-card border border-hairline bg-surface-soft/60 p-4 space-y-2">
+        <div className="rounded-card border border-hairline bg-surface-soft/60 p-4 space-y-2.5">
           <p className="text-xs font-medium text-foreground">
             Tentukan hubungan keuangan dengan pihak ini:
           </p>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
             <Button
               size="sm"
               variant={isPiutang ? "default" : "outline"}
-              className="rounded-full text-xs h-9 px-4"
+              className={cn(
+                "rounded-full text-xs h-10 px-4 w-full justify-center transition-all",
+                isPiutang
+                  ? "bg-primary text-white hover:bg-primary-active font-semibold shadow-none"
+                  : "bg-card border-hairline hover:bg-surface-strong text-foreground",
+              )}
               onClick={() => handleSwitchTipe("memberi")}
             >
-              📤 Piutang (Saya Meminjamkan Uang)
+              📤 Piutang (Saya Meminjamkan)
             </Button>
             <Button
               size="sm"
               variant={!isPiutang ? "default" : "outline"}
-              className="rounded-full text-xs h-9 px-4"
+              className={cn(
+                "rounded-full text-xs h-10 px-4 w-full justify-center transition-all",
+                !isPiutang
+                  ? "bg-primary text-white hover:bg-primary-active font-semibold shadow-none"
+                  : "bg-card border-hairline hover:bg-surface-strong text-foreground",
+              )}
               onClick={() => handleSwitchTipe("menerima")}
             >
-              📥 Hutang (Saya Berhutang Uang)
+              📥 Hutang (Saya Berhutang)
             </Button>
           </div>
         </div>
@@ -230,7 +240,7 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
 
       {/* Financial Summary Cards */}
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-card border border-hairline bg-card p-5">
+        <div className="rounded-card border border-hairline bg-card p-4 sm:p-5">
           <div className="flex items-center justify-between gap-2">
             <p className="text-xs font-medium text-muted-foreground">
               {isPiutang ? "Total Dipinjamkan" : "Total Diterima"}
@@ -239,15 +249,19 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
               <Wallet className="h-4 w-4" />
             </span>
           </div>
-          <p className="mt-3 font-mono text-2xl font-semibold text-foreground">
+          <p className="mt-2.5 sm:mt-3 font-mono text-xl sm:text-2xl font-semibold text-foreground">
             {formatRupiah(totalPinjaman)}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            {isPiutang ? "Pokok piutang yang diberikan" : "Pokok hutang yang diterima"}
+            {totalPinjaman > 0
+              ? isPiutang
+                ? "Pokok piutang yang diberikan"
+                : "Pokok hutang yang diterima"
+              : "Belum ada pokok pinjaman"}
           </p>
         </div>
 
-        <div className="rounded-card border border-hairline bg-card p-5">
+        <div className="rounded-card border border-hairline bg-card p-4 sm:p-5">
           <div className="flex items-center justify-between gap-2">
             <p className="text-xs font-medium text-muted-foreground">
               {isPiutang ? "Total Pengembalian" : "Total Pembayaran"}
@@ -256,15 +270,15 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
               <CheckCircle2 className="h-4 w-4" />
             </span>
           </div>
-          <p className="mt-3 font-mono text-2xl font-semibold text-semantic-up">
+          <p className="mt-2.5 sm:mt-3 font-mono text-xl sm:text-2xl font-semibold text-semantic-up">
             {formatRupiah(totalPembayaran)}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Terbayar {pct}%
+            {totalPinjaman > 0 ? `Terbayar ${pct}%` : "Belum ada pembayaran"}
           </p>
         </div>
 
-        <div className="rounded-card border border-hairline bg-card p-5">
+        <div className="rounded-card border border-hairline bg-card p-4 sm:p-5">
           <div className="flex items-center justify-between gap-2">
             <p className="text-xs font-medium text-muted-foreground">Sisa Tagihan Riil</p>
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-surface-strong text-semantic-down">
@@ -273,14 +287,22 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
           </div>
           <p
             className={cn(
-              "mt-3 font-mono text-2xl font-semibold",
-              sisaRiil > 0 ? "text-semantic-down" : "text-semantic-up",
+              "mt-2.5 sm:mt-3 font-mono text-xl sm:text-2xl font-semibold",
+              totalPinjaman === 0
+                ? "text-muted-foreground"
+                : sisaRiil > 0
+                  ? "text-semantic-down"
+                  : "text-semantic-up",
             )}
           >
             {formatRupiah(sisaRiil)}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            {sisaRiil > 0 ? "Masih belum selesai" : "Tidak ada sisa tagihan"}
+            {totalPinjaman === 0
+              ? "Belum ada pinjaman"
+              : sisaRiil > 0
+                ? "Masih belum selesai"
+                : "Tidak ada sisa tagihan"}
           </p>
         </div>
       </div>
@@ -306,42 +328,57 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
         </div>
       )}
 
-      {/* Progress Bar */}
-      <div className="rounded-card border border-hairline bg-card p-5 space-y-2">
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>Persentase Pelunasan: {pct}%</span>
-          <span className="font-mono">
-            {formatRupiah(totalPembayaran)} / {formatRupiah(totalPinjaman)}
-          </span>
+      {/* Progress Bar (Only when pinjaman > 0) */}
+      {totalPinjaman > 0 && (
+        <div className="rounded-card border border-hairline bg-card p-4 sm:p-5 space-y-2">
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>Persentase Pelunasan: {pct}%</span>
+            <span className="font-mono">
+              {formatRupiah(totalPembayaran)} / {formatRupiah(totalPinjaman)}
+            </span>
+          </div>
+          <Progress value={Math.min(pct, 100)} className="h-2 [&>div]:bg-primary" />
         </div>
-        <Progress value={Math.min(pct, 100)} className="h-2 [&>div]:bg-primary" />
-      </div>
+      )}
 
       {/* Action Buttons for Transactions */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h2 className="text-lg font-semibold text-foreground">
           Riwayat Transaksi
         </h2>
 
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            onClick={() => openAddTx("pembayaran")}
-            className="rounded-full bg-primary hover:bg-primary-active text-white font-semibold gap-1.5 h-10 px-4"
-          >
-            <Plus className="h-4 w-4" />
-            {isPiutang ? "Catat Pembayaran" : "Bayar Hutang"}
-          </Button>
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          {totalPinjaman === 0 ? (
+            <Button
+              size="sm"
+              onClick={() => openAddTx("pinjaman")}
+              className="rounded-full bg-primary hover:bg-primary-active text-white font-semibold gap-1.5 h-10 px-5 w-full sm:w-auto shadow-none"
+            >
+              <Plus className="h-4 w-4" />
+              {isPiutang ? "Beri Pinjaman" : "Catat Pinjaman Diterima"}
+            </Button>
+          ) : (
+            <>
+              <Button
+                size="sm"
+                onClick={() => openAddTx("pembayaran")}
+                className="rounded-full bg-primary hover:bg-primary-active text-white font-semibold gap-1.5 h-10 px-4 flex-1 sm:flex-initial shadow-none"
+              >
+                <Plus className="h-4 w-4" />
+                {isPiutang ? "Catat Pembayaran" : "Bayar Hutang"}
+              </Button>
 
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => openAddTx("pinjaman")}
-            className="rounded-full border-hairline font-semibold gap-1.5 h-10 px-4"
-          >
-            <Plus className="h-4 w-4" />
-            Tambah Pinjaman
-          </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => openAddTx("pinjaman")}
+                className="rounded-full border-hairline font-semibold gap-1.5 h-10 px-4 flex-1 sm:flex-initial bg-card hover:bg-surface-strong"
+              >
+                <Plus className="h-4 w-4" />
+                Tambah Pinjaman
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -350,6 +387,7 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
         hutang={hutang}
         rekening={rekening}
         onEditTransaction={openEditTx}
+        onAddTransaction={openAddTx}
         onSuccess={setHutang}
       />
 
@@ -361,6 +399,7 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
         rekening={rekening}
         editData={editTxData}
         defaultJenis={defaultTxJenis}
+        totalPinjaman={totalPinjaman}
         onSuccess={setHutang}
       />
 

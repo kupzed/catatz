@@ -5,7 +5,7 @@ import type { Rekening } from "@/types/rekening";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowDownLeft, ArrowUpRight, Pencil, Trash2 } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Pencil, Plus, Trash2 } from "lucide-react";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
 import { deleteCicilan } from "@/actions/hutang-action";
 import { toast } from "sonner";
@@ -15,6 +15,7 @@ type Props = {
   hutang: Hutang;
   rekening: Rekening[];
   onEditTransaction: (item: HutangCicilan) => void;
+  onAddTransaction?: (jenis: "pinjaman" | "pembayaran") => void;
   onSuccess: (refreshed: Hutang) => void;
 };
 
@@ -28,6 +29,7 @@ export function HutangTransactionList({
   hutang,
   rekening,
   onEditTransaction,
+  onAddTransaction,
   onSuccess,
 }: Props) {
   const { formatRupiah, formatTanggal, formatWaktu } = useSystemPreferences();
@@ -53,11 +55,27 @@ export function HutangTransactionList({
 
   if (cicilanList.length === 0 && !hasLegacyPinjaman) {
     return (
-      <div className="rounded-card border border-dashed border-hairline p-8 text-center">
-        <p className="text-sm font-medium text-foreground">Belum ada transaksi</p>
-        <p className="text-xs text-muted-foreground mt-1">
-          Gunakan tombol di atas untuk mencatat pinjaman baru atau pembayaran.
-        </p>
+      <div className="rounded-card border border-dashed border-hairline p-6 sm:p-8 text-center space-y-3">
+        <div>
+          <p className="text-sm font-semibold text-foreground">
+            Belum ada transaksi
+          </p>
+          <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
+            {isPiutang
+              ? "Mulai dengan mencatat pinjaman yang Anda berikan kepada pihak ini."
+              : "Mulai dengan mencatat pinjaman yang Anda terima dari pihak ini."}
+          </p>
+        </div>
+        {onAddTransaction && (
+          <Button
+            size="sm"
+            onClick={() => onAddTransaction("pinjaman")}
+            className="rounded-full bg-primary hover:bg-primary-active text-white font-semibold gap-1.5 h-9 px-4 text-xs shadow-none"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            {isPiutang ? "Beri Pinjaman Pertama" : "Catat Pinjaman Diterima"}
+          </Button>
+        )}
       </div>
     );
   }
@@ -83,27 +101,27 @@ export function HutangTransactionList({
         return (
           <div
             key={item.id}
-            className="flex items-center justify-between gap-3 rounded-card border border-hairline bg-card p-4 transition-colors hover:bg-surface-soft/40"
+            className="flex items-center justify-between gap-2 sm:gap-3 rounded-card border border-hairline bg-card p-3 sm:p-4 transition-colors hover:bg-surface-soft/40"
           >
-            <div className="flex items-start gap-3 min-w-0">
+            <div className="flex items-start gap-2.5 sm:gap-3 min-w-0 flex-1">
               <span
                 className={cn(
-                  "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full mt-0.5",
+                  "inline-flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full mt-0.5",
                   isMoneyIn
                     ? "bg-semantic-up/10 text-semantic-up"
                     : "bg-semantic-down/10 text-semantic-down",
                 )}
               >
                 {isMoneyIn ? (
-                  <ArrowDownLeft className="h-4 w-4" />
+                  <ArrowDownLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 ) : (
-                  <ArrowUpRight className="h-4 w-4" />
+                  <ArrowUpRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 )}
               </span>
 
-              <div className="min-w-0 space-y-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-semibold text-foreground">
+              <div className="min-w-0 space-y-1 flex-1">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                  <span className="text-xs sm:text-sm font-semibold text-foreground">
                     {label}
                   </span>
                   <Badge variant="secondary" className="text-[10px] rounded-full px-2">
@@ -111,11 +129,11 @@ export function HutangTransactionList({
                   </Badge>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-muted-foreground">
                   <span>{formatTanggal(item.tanggal, "d MMM yyyy")}</span>
                   {item.waktu && <span>· {formatWaktu(item.waktu)}</span>}
                   {item.catatan && (
-                    <span className="truncate max-w-50 sm:max-w-xs">
+                    <span className="truncate max-w-40 sm:max-w-xs">
                       · {item.catatan}
                     </span>
                   )}
@@ -123,11 +141,11 @@ export function HutangTransactionList({
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               <div className="text-right">
                 <p
                   className={cn(
-                    "font-mono text-base font-semibold",
+                    "font-mono text-sm sm:text-base font-semibold",
                     isMoneyIn ? "text-semantic-up" : "text-semantic-down",
                   )}
                 >
@@ -136,7 +154,7 @@ export function HutangTransactionList({
                 </p>
               </div>
 
-              <div className="flex items-center gap-1 ml-2">
+              <div className="flex items-center gap-0.5 sm:gap-1 ml-1 sm:ml-2">
                 <Button
                   size="icon"
                   variant="ghost"

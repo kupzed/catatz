@@ -95,7 +95,9 @@ Initial data diambil dengan:
   - Breadcrumb dinamis: `Hutang` $\to$ `Detail Hutang & Piutang`.
   - Header dengan tombol kembali, nama pihak, catatan, dan badge tag Lunas.
   - Tombol aksi: Tandai Lunas/Belum Lunas, Edit Info, Hapus Kontak.
-  - Stat cards: Total Pinjaman Pokok, Total Pembayaran, Sisa Tagihan Riil, serta banner kelebihan bayar jika ada.
-  - Progress bar pelunasan.
-  - Tombol aksi pencatatan transaksi: `Catat Pembayaran` dan `Tambah Pinjaman`.
-  - Riwayat transaksi dengan visualisasi arah uang masuk/keluar, info rekening, tanggal/waktu, catatan, serta aksi edit dan hapus.
+  - Selector hubungan keuangan pihak (Piutang / Hutang) responsif (`grid-cols-1 sm:grid-cols-2`) agar rapi di perangkat mobile.
+  - Stat cards: Total Pinjaman Pokok, Total Pembayaran, Sisa Tagihan Riil, serta banner kelebihan bayar jika ada. Saat belum ada pinjaman pokok, progress bar disembunyikan dan stat cards menampilkan keterangan belum ada pinjaman.
+  - Tombol aksi pencatatan transaksi:
+    - Jika belum ada pinjaman (`totalPinjaman === 0`): tombol aksi berfokus mencatat pinjaman awal (`Beri Pinjaman` / `Catat Pinjaman Diterima`), dan opsi pembayaran dinonaktifkan di dialog sampai pinjaman pertama dicatat.
+    - Jika sudah ada pinjaman (`totalPinjaman > 0`): tombol aksi utama adalah pembayaran (`Catat Pembayaran` / `Bayar Hutang`) dengan tombol sekunder `Tambah Pinjaman`.
+  - Riwayat transaksi dengan visualisasi arah uang masuk/keluar, info rekening, tanggal/waktu, catatan, serta aksi edit dan hapus yang dioptimalkan untuk mobile.
