@@ -9,6 +9,15 @@ export type Kategori = {
   created_at: string;
 };
 
+export type KategoriUsageCounts = {
+  transaksi: number;
+  transaksi_masuk: number;
+  transaksi_keluar: number;
+  budget: number;
+  recurring: number;
+  total: number;
+};
+
 export type TipeTransaksi = 'income' | 'expense' | 'transfer' | 'correction';
 
 export type Transaksi = {

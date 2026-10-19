@@ -75,8 +75,8 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   editData?: Kategori | null;
-  onCreated: (k: Kategori) => void;
-  onUpdated: (k: Kategori) => void;
+  onCreated?: (k: Kategori) => void;
+  onUpdated?: (k: Kategori) => void;
 };
 
 export default function KategoriDialog({
@@ -135,7 +135,7 @@ export default function KategoriDialog({
         const res = await updateKategori(editData.id, values);
         if (res.success && res.data) {
           toast.success("Kategori diperbarui");
-          onUpdated(res.data);
+          onUpdated?.(res.data);
         } else {
           toast.error(res.error ?? "Gagal memperbarui");
         }
@@ -143,7 +143,7 @@ export default function KategoriDialog({
         const res = await createKategori(values);
         if (res.success && res.data) {
           toast.success("Kategori ditambahkan");
-          onCreated(res.data);
+          onCreated?.(res.data);
         } else {
           toast.error(res.error ?? "Gagal menambahkan");
         }

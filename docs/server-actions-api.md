@@ -373,19 +373,21 @@ Tabel: `rekening`.
 
 Lokasi: `src/actions/kategori-action.ts`
 
-| Action           | Tujuan                          | Validasi                                      | Tabel      |
-| ---------------- | ------------------------------- | --------------------------------------------- | ---------- |
-| `createKategori` | Membuat kategori custom user.   | `kategoriSchema` (server-side)                | `kategori` |
-| `updateKategori` | Mengubah kategori custom user.  | `kategoriSchema` (server-side)                | `kategori` |
-| `deleteKategori` | Menghapus kategori custom user. | Auth user + `is_system = false` + usage check | `kategori` |
+| Action                      | Tujuan                                                         | Validasi                       | Tabel                                          |
+| --------------------------- | -------------------------------------------------------------- | ------------------------------ | ---------------------------------------------- |
+| `getKategoriUsageCountsMap` | Mengambil map pemakaian data keuangan seluruh kategori user.   | Auth user                      | `transaksi`, `budget`, `recurring_transaksi`   |
+| `getKategoriById`           | Mengambil satu kategori user beserta rincian pemakaian datanya.| Auth user + UUID param         | `kategori`, `transaksi`, `budget`, `recurring` |
+| `createKategori`            | Membuat kategori baru milik user.                              | `kategoriSchema` (server-side) | `kategori`                                     |
+| `updateKategori`            | Mengubah nama, ikon, warna, atau tipe kategori milik user.     | `kategoriSchema` (server-side) | `kategori`                                     |
+| `deleteKategori`            | Menghapus kategori milik user jika tidak memiliki data terkait.| Auth user + usage count check  | `kategori`, `transaksi`, `budget`, `recurring` |
 
-Action update/delete menambahkan filter `user_id = user.id` dan `is_system = false`, selain proteksi RLS.
+Seluruh kategori beroperasi dalam lingkup kepemilikan pengguna (`user_id = auth.uid()`).
 
 Proteksi tambahan:
 
 - **`createKategori`** dan **`updateKategori`**: memvalidasi payload dengan `kategoriSchema` di sisi server sebelum menyentuh database.
 - **`updateKategori`**: menolak perubahan `tipe` dari `income` ke `expense` (atau sebaliknya) jika masih ada transaksi atau template transaksi berulang yang menggunakan kategori tersebut dengan tipe yang tidak kompatibel. Perubahan dari/ke `'all'` selalu diizinkan.
-- **`deleteKategori`**: menolak penghapusan jika kategori masih dipakai oleh transaksi atau template transaksi berulang (`recurring_transaksi`). Pesan error mencantumkan jumlah data yang perlu diubah terlebih dahulu.
+- **`deleteKategori`**: menolak penghapusan jika kategori masih dipakai oleh transaksi (`transaksi`), alokasi budget (`budget`), atau template transaksi berulang (`recurring_transaksi`). Pesan error merinci jumlah data yang terkait agar user dapat memindahkan atau menghapusnya terlebih dahulu.
 
 ## Hutang Actions
 
