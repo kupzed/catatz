@@ -69,14 +69,9 @@ export function useHutangCicilan({
   async function handleCicilan(h: Hutang) {
     const data = cicilanData[h.id] || {};
     const nominal = Number(data.nominal ?? "0");
-    const sisaTagihan = Number(h.sisa_tagihan);
 
     if (!nominal || nominal <= 0) {
       return toast.error("Masukkan nominal cicilan");
-    }
-
-    if (nominal > sisaTagihan) {
-      return toast.error("Nominal melebihi sisa tagihan");
     }
 
     setLoadingCicilan(h.id);
@@ -120,18 +115,6 @@ export function useHutangCicilan({
     const nominal = Number(editCicilanDraft.nominal);
     if (!nominal || nominal <= 0) {
       return toast.error("Masukkan nominal cicilan");
-    }
-
-    const otherCicilanTotal = (h.cicilan ?? [])
-      .filter((item) => item.id !== cicilan.id)
-      .reduce((acc, item) => acc + Number(item.nominal), 0);
-    const maxNominal = Math.max(
-      Number(h.total_pinjaman) - otherCicilanTotal,
-      0,
-    );
-
-    if (nominal > maxNominal) {
-      return toast.error("Total cicilan melebihi total pinjaman");
     }
 
     setLoadingCicilan(h.id);

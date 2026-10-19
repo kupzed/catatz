@@ -129,10 +129,11 @@ Deskripsi: catatan hutang/piutang utama.
 | `waktu` | `time` | Yes | `current_time` | Waktu pencatatan. |
 | `tanggal_jatuh_tempo` | `date` | Yes | - | Tanggal jatuh tempo opsional. |
 | `status` | `status_hutang` | No | `'aktif'` | Status catatan. |
+| `is_lunas_manual` | `boolean` | Yes | `false` | Tag manual status lunas dari user. |
 | `nama_entitas` | `text` | No | - | Nama pihak terkait. |
 | `rekening_id` | `uuid` | Yes | - | FK ke `rekening(id)`, `ON DELETE SET NULL`. |
-| `total_pinjaman` | `numeric(15,2)` | No | - | Total pinjaman, harus lebih dari 0. |
-| `sisa_tagihan` | `numeric(15,2)` | No | - | Sisa yang belum dibayar. |
+| `total_pinjaman` | `numeric(15,2)` | No | `0` | Total pinjaman dasar, harus >= 0 (default 0 saat kontak dibuat). |
+| `sisa_tagihan` | `numeric(15,2)` | No | `0` | Sisa yang belum dibayar. |
 | `catatan` | `text` | Yes | - | Catatan tambahan. |
 | `created_at` | `timestamptz` | Yes | `now()` | Waktu dibuat. |
 | `updated_at` | `timestamptz` | Yes | `now()` | Waktu terakhir diubah. |
@@ -148,18 +149,19 @@ Trigger/function:
 
 ## Tabel `hutang_cicilan`
 
-Deskripsi: pembayaran cicilan untuk row `hutang`.
+Deskripsi: mutasi transaksi pinjaman dan pembayaran untuk row `hutang`.
 
 | Column | Type | Nullable | Default | Description |
 |---|---|---:|---|---|
 | `id` | `uuid` | No | `gen_random_uuid()` | Primary key. |
 | `hutang_id` | `uuid` | No | - | FK ke `hutang(id)`, `ON DELETE CASCADE`. |
-| `nominal` | `numeric(15,2)` | No | - | Nominal cicilan, harus lebih dari 0. |
-| `tanggal` | `date` | No | `current_date` | Tanggal cicilan. |
-| `waktu` | `time` | Yes | `current_time` | Waktu cicilan. |
+| `nominal` | `numeric(15,2)` | No | - | Nominal transaksi, harus lebih dari 0. |
+| `jenis_transaksi` | `varchar(20)` | No | `'pembayaran'` | `'pembayaran'` (mengurangi tagihan) atau `'pinjaman'` (menambah pokok). |
+| `tanggal` | `date` | No | `current_date` | Tanggal transaksi. |
+| `waktu` | `time` | Yes | `current_time` | Waktu transaksi. |
 | `rekening_id` | `uuid` | Yes | - | FK ke `rekening(id)`, `ON DELETE SET NULL`. |
-| `tipe_hutang_snapshot` | `tipe_hutang` | No | Diisi trigger | Snapshot `hutang.tipe` saat cicilan dibuat agar rollback saldo saat cascade delete tetap memakai arah saldo yang benar. |
-| `catatan` | `text` | Yes | - | Catatan cicilan. |
+| `tipe_hutang_snapshot` | `tipe_hutang` | No | Diisi trigger | Snapshot `hutang.tipe` saat transaksi dibuat agar rollback saldo saat cascade delete tetap memakai arah saldo yang benar. |
+| `catatan` | `text` | Yes | - | Catatan transaksi. |
 | `created_at` | `timestamptz` | Yes | `now()` | Waktu dibuat. |
 
 Indexes:
@@ -169,8 +171,8 @@ Indexes:
 Trigger/function:
 
 - `public.set_hutang_cicilan_tipe_snapshot()` mengisi snapshot tipe hutang pada cicilan.
-- `public.update_sisa_hutang()` menghitung ulang `sisa_tagihan` dan status `lunas`/`aktif` saat cicilan dibuat, diubah nominalnya, atau dihapus.
-- `public.update_saldo_rekening_cicilan()` mengubah saldo rekening ketika cicilan dibuat, diubah nominal/rekeningnya, atau dihapus.
+- `public.update_sisa_hutang()` menghitung ulang `sisa_tagihan` dan status `lunas`/`aktif` saat cicilan/pinjaman dibuat, diubah, atau dihapus.
+- `public.update_saldo_rekening_cicilan()` mengubah saldo rekening ketika transaksi cicilan/pinjaman dibuat, diubah nominal/rekening/jenisnya, atau dihapus.
 - Trigger `trg_set_cicilan_tipe_snapshot`.
 - Trigger `trg_update_sisa_hutang`.
 - Trigger `trg_rekening_cicilan`.

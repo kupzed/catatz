@@ -39,7 +39,9 @@ export default function DashboardBreadcrumb() {
             ROUTE_NAMES[segment] ??
             (isUuid && prevSegment === "transactions"
               ? "Detail Transaksi"
-              : segment.charAt(0).toUpperCase() + segment.slice(1));
+              : isUuid && prevSegment === "debts"
+                ? "Detail Hutang & Piutang"
+                : segment.charAt(0).toUpperCase() + segment.slice(1));
           const isLast = index === segments.length - 1;
 
           return (

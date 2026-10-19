@@ -1,53 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { Hutang } from "@/types/hutang";
 import type { Rekening } from "@/types/rekening";
-import { currentTime, todayISODate } from "@/lib/utils";
-import { createCicilan, deleteHutang } from "@/actions/hutang-action";
+import { deleteHutang } from "@/actions/hutang-action";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { ArrowDownRight, ArrowUpRight, HandCoins, Plus } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, HandCoins, Plus, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import HutangDialog from "./hutang-dialog";
 import { EmptyState, PageHeader } from "@/components/common";
-import {
-  emptyEditDraft,
-  useHutangCicilan,
-} from "@/hooks/use-hutang-cicilan";
-import {
-  HutangGroup,
-  type ExpandedHutangPanel,
-} from "./hutang-group";
-import type { HutangPanelMode } from "./hutang-card";
+import { HutangGroup } from "./hutang-group";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
 
 type Props = { initialHutang: Hutang[]; rekening: Rekening[] };
 
-export default function HutangPageClient({ initialHutang, rekening }: Props) {
+export default function HutangPageClient({ initialHutang }: Props) {
   const { formatRupiah } = useSystemPreferences();
   const [hutang, setHutang] = useState(initialHutang);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editData, setEditData] = useState<Hutang | null>(null);
-  const [expandedPanel, setExpandedPanel] =
-    useState<ExpandedHutangPanel | null>(null);
-  const [lunasRekening, setLunasRekening] = useState<Record<string, string>>(
-    {},
-  );
 
-  const memberi = hutang.filter((h) => h.tipe === "memberi");
-  const menerima = hutang.filter((h) => h.tipe === "menerima");
-  const totalPiutangAktif = memberi.reduce(
-    (sum, item) => sum + Number(item.sisa_tagihan),
-    0,
-  );
-  const totalHutangAktif = menerima.reduce(
-    (sum, item) => sum + Number(item.sisa_tagihan),
-    0,
-  );
-  const cicilanHook = useHutangCicilan({
-    rekening,
-    onHutangUpdated: replaceHutang,
-  });
+  // Search and filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"semua" | "belum_lunas" | "lunas">("semua");
+
+  // Summary calculation:
+  // Card bertag Lunas (status === 'lunas' atau is_lunas_manual === true) tidak dihitung dalam ringkasan aktif
+  const totalPiutangAktif = useMemo(() => {
+    return hutang
+      .filter((h) => h.tipe === "memberi" && h.status !== "lunas" && !h.is_lunas_manual)
+      .reduce((sum, item) => sum + Math.max(Number(item.sisa_tagihan), 0), 0);
+  }, [hutang]);
+
+  const totalHutangAktif = useMemo(() => {
+    return hutang
+      .filter((h) => h.tipe === "menerima" && h.status !== "lunas" && !h.is_lunas_manual)
+      .reduce((sum, item) => sum + Math.max(Number(item.sisa_tagihan), 0), 0);
+  }, [hutang]);
 
   function replaceHutang(updated: Hutang) {
     setHutang((prev) =>
@@ -59,58 +50,10 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
     const res = await deleteHutang(id);
     if (res.success) {
       setHutang((prev) => prev.filter((h) => h.id !== id));
-      if (expandedPanel?.id === id) setExpandedPanel(null);
-      toast.success("Hutang dihapus");
+      toast.success("Catatan pihak berhasil dihapus");
     } else {
       toast.error(res.error ?? "Gagal menghapus");
     }
-  }
-
-  function handlePanelToggle(h: Hutang, mode: HutangPanelMode) {
-    setExpandedPanel((current) =>
-      current?.id === h.id && current.mode === mode
-        ? null
-        : { id: h.id, mode },
-    );
-
-    if (mode === "lunas") {
-      setLunasRekening((current) => ({
-        ...current,
-        [h.id]: current[h.id] ?? h.rekening_id ?? "none",
-      }));
-    }
-
-    if (mode !== "detail") {
-      cicilanHook.setEditingCicilanId(null);
-      cicilanHook.setEditCicilanDraft(emptyEditDraft());
-    }
-  }
-
-  async function handleLunas(target: Hutang) {
-    if (Number(target.sisa_tagihan) <= 0) return;
-
-    cicilanHook.setLoadingCicilan(target.id);
-    const rekeningId =
-      lunasRekening[target.id] ?? target.rekening_id ?? "none";
-    const res = await createCicilan({
-      hutang_id: target.id,
-      nominal: Number(target.sisa_tagihan),
-      rekening_id:
-        rekeningId && rekeningId !== "none" ? rekeningId : undefined,
-      tanggal: todayISODate(),
-      waktu: currentTime(),
-      catatan: "Pelunasan",
-    });
-
-    if (res.success && res.data) {
-      replaceHutang(res.data);
-      setExpandedPanel(null);
-      toast.success("Catatan dilunaskan");
-    } else {
-      toast.error(res.error ?? "Gagal melunaskan hutang");
-    }
-
-    cicilanHook.setLoadingCicilan(null);
   }
 
   function handleEdit(h: Hutang) {
@@ -118,35 +61,63 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
     setDialogOpen(true);
   }
 
+  // Filtered items
+  const filteredHutang = useMemo(() => {
+    return hutang.filter((h) => {
+      const matchSearch =
+        h.nama_entitas.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (h.catatan ?? "").toLowerCase().includes(searchQuery.toLowerCase());
+
+      if (!matchSearch) return false;
+
+      const isLunas =
+        h.status === "lunas" ||
+        h.is_lunas_manual === true ||
+        (Number(h.total_pinjaman) > 0 && Number(h.sisa_tagihan) <= 0);
+
+      if (statusFilter === "lunas") {
+        return isLunas;
+      }
+      if (statusFilter === "belum_lunas") {
+        return !isLunas;
+      }
+      return true;
+    });
+  }, [hutang, searchQuery, statusFilter]);
+
+  const memberi = filteredHutang.filter((h) => h.tipe === "memberi");
+  const menerima = filteredHutang.filter((h) => h.tipe === "menerima");
+
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
       <PageHeader
         title="Hutang & Piutang"
-        subtitle="Kelola pinjaman masuk dan keluar"
+        subtitle="Kelola daftar pihak dan pantau sisa pinjaman"
         action={
           <Button
             onClick={() => {
               setEditData(null);
               setDialogOpen(true);
             }}
-            className="gap-2 bg-primary hover:bg-primary-active text-white rounded-full font-semibold"
+            className="gap-2 bg-primary hover:bg-primary-active text-white rounded-full font-semibold h-11 px-5 shadow-none"
             id="btn-tambah-hutang"
           >
             <Plus className="h-4 w-4" />
-            Tambah
+            Tambah Pihak
           </Button>
         }
       />
 
+      {/* Summary Cards */}
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="rounded-card border border-hairline bg-card p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-foreground">
-                Piutang aktif
+                Piutang Aktif
               </p>
               <p className="text-xs text-muted-foreground">
-                Sisa yang masih perlu diterima
+                Total nominal yang masih perlu diterima
               </p>
             </div>
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-surface-strong text-semantic-up">
@@ -162,10 +133,10 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-foreground">
-                Hutang aktif
+                Hutang Aktif
               </p>
               <p className="text-xs text-muted-foreground">
-                Sisa yang masih perlu dibayar
+                Total nominal yang masih perlu dibayar
               </p>
             </div>
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-surface-strong text-semantic-down">
@@ -178,54 +149,73 @@ export default function HutangPageClient({ initialHutang, rekening }: Props) {
         </div>
       </div>
 
-      {hutang.length === 0 ? (
-        <EmptyState icon={HandCoins} title="Belum ada catatan hutang" />
+      {/* Search & Filter Controls */}
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+        <div className="relative flex-1">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Cari nama pihak atau catatan..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 rounded-input h-11 bg-card border-hairline"
+          />
+        </div>
+
+        <Tabs
+          value={statusFilter}
+          onValueChange={(val) => setStatusFilter(val as typeof statusFilter)}
+          className="shrink-0"
+        >
+          <TabsList className="grid grid-cols-3 w-full sm:w-auto h-11 rounded-full p-1 bg-surface-strong">
+            <TabsTrigger value="semua" className="rounded-full text-xs font-semibold px-4">
+              Semua
+            </TabsTrigger>
+            <TabsTrigger value="belum_lunas" className="rounded-full text-xs font-semibold px-4">
+              Belum Lunas
+            </TabsTrigger>
+            <TabsTrigger value="lunas" className="rounded-full text-xs font-semibold px-4">
+              Lunas
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      {/* Contact Cards List */}
+      {filteredHutang.length === 0 ? (
+        <EmptyState
+          icon={HandCoins}
+          title={hutang.length === 0 ? "Belum ada pihak hutang/piutang" : "Tidak ditemukan pihak yang cocok"}
+          description={
+            hutang.length === 0
+              ? "Klik tombol '+ Tambah Pihak' untuk mulai mencatat kontak hutang atau piutang."
+              : "Coba ubah kata kunci pencarian atau filter status."
+          }
+        />
       ) : (
         <div className="space-y-6">
           <HutangGroup
             title="Piutang (Memberi Pinjaman)"
             items={memberi}
-            rekening={rekening}
-            expandedPanel={expandedPanel}
-            onPanelToggle={handlePanelToggle}
-            cicilanHook={cicilanHook}
             onEdit={handleEdit}
             onDelete={handleDelete}
-            lunasRekening={lunasRekening}
-            onLunasRekeningChange={(id, value) =>
-              setLunasRekening((current) => ({ ...current, [id]: value }))
-            }
-            onLunasSubmit={(target) => {
-              void handleLunas(target);
-            }}
           />
+
           <HutangGroup
             title="Hutang (Menerima Pinjaman)"
             items={menerima}
-            rekening={rekening}
-            expandedPanel={expandedPanel}
-            onPanelToggle={handlePanelToggle}
-            cicilanHook={cicilanHook}
             onEdit={handleEdit}
             onDelete={handleDelete}
-            lunasRekening={lunasRekening}
-            onLunasRekeningChange={(id, value) =>
-              setLunasRekening((current) => ({ ...current, [id]: value }))
-            }
-            onLunasSubmit={(target) => {
-              void handleLunas(target);
-            }}
           />
         </div>
       )}
 
+      {/* Simple Contact Add / Edit Dialog */}
       <HutangDialog
         open={dialogOpen}
         onOpenChange={(open) => {
           setDialogOpen(open);
           if (!open) setEditData(null);
         }}
-        rekening={rekening}
         editData={editData}
         onCreated={(h) => {
           setHutang((prev) => [h, ...prev]);
