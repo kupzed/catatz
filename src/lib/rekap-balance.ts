@@ -41,6 +41,7 @@ export type LedgerCicilanItem = {
   nominal: number | string;
   tanggal: string; // YYYY-MM-DD
   tipe_hutang_snapshot?: "memberi" | "menerima" | string;
+  jenis_transaksi?: "pembayaran" | "pinjaman" | string;
   rekening_id?: string | null;
   hutang?: {
     tipe?: "memberi" | "menerima" | string;
@@ -157,11 +158,24 @@ function calculateCicilanDelta(
   if (nominal <= 0) return 0;
 
   const tipe = c.tipe_hutang_snapshot ?? c.hutang?.tipe;
-  if (tipe === "menerima") {
-    return -nominal;
-  }
-  if (tipe === "memberi") {
-    return nominal;
+  const isPinjaman = c.jenis_transaksi === "pinjaman";
+
+  if (isPinjaman) {
+    // Pinjaman baru: menerima = uang masuk (+), memberi = uang keluar (-)
+    if (tipe === "menerima") {
+      return nominal;
+    }
+    if (tipe === "memberi") {
+      return -nominal;
+    }
+  } else {
+    // Pembayaran/cicilan: menerima = bayar hutang (-), memberi = terima piutang (+)
+    if (tipe === "menerima") {
+      return -nominal;
+    }
+    if (tipe === "memberi") {
+      return nominal;
+    }
   }
 
   return 0;
