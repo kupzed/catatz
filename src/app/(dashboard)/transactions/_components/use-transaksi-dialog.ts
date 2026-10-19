@@ -31,6 +31,7 @@ export type UseTransaksiDialogParams = {
   copyFrom?: Transaksi | null;
   defaultTanggal?: string;
   defaultRekeningId?: string;
+  defaultKategoriId?: string;
 };
 
 export function useTransaksiDialog({
@@ -45,6 +46,7 @@ export function useTransaksiDialog({
   copyFrom,
   defaultTanggal,
   defaultRekeningId,
+  defaultKategoriId,
 }: UseTransaksiDialogParams) {
   const isEdit = !!editData;
   const isCorrection = editData?.tipe === "correction";
@@ -98,15 +100,19 @@ export function useTransaksiDialog({
         tags: copyFrom.tags ?? [],
       });
     } else {
+      const targetKat = defaultKategoriId ? kategori.find((k) => k.id === defaultKategoriId) : null;
+      const initialTipe = targetKat?.tipe === "income" ? "income" : "expense";
+
       reset({
-        tipe: "expense",
+        tipe: initialTipe,
         tanggal: defaultTanggal ?? todayISODate(),
         waktu: currentTime(),
         rekening_id: defaultRekeningId ?? "",
+        kategori_id: defaultKategoriId ?? undefined,
         tags: [],
       });
     }
-  }, [editData, copyFrom, defaultTanggal, defaultRekeningId, reset, open]);
+  }, [editData, copyFrom, defaultTanggal, defaultRekeningId, defaultKategoriId, kategori, reset, open]);
 
   // Load recent judul saat dialog pertama dibuka (mode create)
   useEffect(() => {
