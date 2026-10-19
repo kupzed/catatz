@@ -5,7 +5,11 @@ import { revalidatePath } from 'next/cache';
 import type { ActionResult } from '@/types/general';
 import type { Rekening, RekeningFormValues, RekeningUsageCounts } from '@/types/rekening';
 import { currentTime } from '@/lib/utils';
-import { rekeningCreateSchema, rekeningEditSchema } from '@/validations/rekening-validation';
+import {
+  rekeningCreateSchema,
+  rekeningEditSchema,
+  rekeningIdParamSchema,
+} from '@/validations/rekening-validation';
 
 function emptyRekeningUsageCounts(): RekeningUsageCounts {
   return {
@@ -215,6 +219,57 @@ export async function getRekening(): Promise<Rekening[]> {
 
   if (error) throw new Error(error.message);
   return (data as Rekening[]) ?? [];
+}
+
+export async function getRekeningById(
+  id: string,
+): Promise<ActionResult<{ rekening: Rekening; usage: RekeningUsageCounts }>> {
+  const parsedId = rekeningIdParamSchema.safeParse(id);
+  if (!parsedId.success) {
+    return {
+      success: false,
+      error: parsedId.error.issues[0]?.message ?? 'ID rekening tidak valid',
+    };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  const { data: rekening, error } = await supabase
+    .from('rekening')
+    .select('*')
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .single();
+
+  if (error || !rekening) {
+    return {
+      success: false,
+      error: error?.message ?? 'Rekening tidak ditemukan',
+    };
+  }
+
+  const usageRes = await getSingleRekeningUsageCounts(supabase, user.id, id);
+  if (!usageRes.success || !usageRes.data) {
+    return {
+      success: false,
+      error: usageRes.error ?? 'Gagal menghitung pemakaian rekening',
+    };
+  }
+
+  return {
+    success: true,
+    data: {
+      rekening: rekening as Rekening,
+      usage: usageRes.data,
+    },
+  };
 }
 
 export async function fetchAllUserTransaksiUsage(
@@ -454,6 +509,7 @@ export async function updateRekening(
 
   if (error) return { success: false, error: error.message };
   revalidatePath('/wallets');
+  revalidatePath(`/wallets/${id}`);
   revalidatePath('/transactions');
   return { success: true, data: data as Rekening };
 }
@@ -479,6 +535,7 @@ export async function deleteRekening(id: string): Promise<ActionResult> {
     .eq('user_id', user.id);
   if (error) return { success: false, error: error.message };
   revalidatePath('/wallets');
+  revalidatePath(`/wallets/${id}`);
   revalidatePath('/transactions');
   return { success: true };
 }
@@ -491,5 +548,6 @@ export async function toggleExcludeTotal(id: string, exclude: boolean): Promise<
     .eq('id', id);
   if (error) return { success: false, error: error.message };
   revalidatePath('/wallets');
+  revalidatePath(`/wallets/${id}`);
   return { success: true };
 }

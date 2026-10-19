@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type {
   JenisRekening,
@@ -87,6 +88,7 @@ export default function RekeningPageClient({
   initialRekening,
   initialUsageCounts,
 }: Props) {
+  const router = useRouter();
   const { formatRupiah } = useSystemPreferences();
   const [rekening, setRekening] = useState(initialRekening);
   const [usageCounts, setUsageCounts] = useState(initialUsageCounts);
@@ -216,8 +218,9 @@ export default function RekeningPageClient({
                   return (
                   <div
                     key={r.id}
+                    onClick={() => router.push(`/wallets/${r.id}`)}
                     className={cn(
-                      "relative rounded-card border border-hairline bg-card p-6 transition-colors hover:bg-surface-soft group border-t-2",
+                      "relative rounded-card border border-hairline bg-card p-6 transition-colors hover:bg-surface-soft group border-t-2 cursor-pointer",
                       r.exclude_total && "opacity-60",
                     )}
                     style={{ borderTopColor: r.warna ?? undefined }}
@@ -225,7 +228,7 @@ export default function RekeningPageClient({
                     <div>
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="font-semibold text-sm text-foreground">
+                          <p className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors">
                             {r.nama}
                           </p>
                           <Badge
@@ -236,9 +239,10 @@ export default function RekeningPageClient({
                           </Badge>
                           {isUsed && usage ? (
                             <Link
-                              href={`/transactions?rekening_id=${r.id}`}
+                              href={`/wallets/${r.id}`}
+                              onClick={(e) => e.stopPropagation()}
                               className="inline-block"
-                              title="Lihat semua transaksi rekening ini"
+                              title="Lihat detail & riwayat transaksi rekening ini"
                             >
                               <Badge
                                 variant="secondary"
@@ -249,12 +253,16 @@ export default function RekeningPageClient({
                             </Link>
                           ) : null}
                         </div>
-                        <div className="flex gap-1 flex-wrap">
+                        <div
+                          className="flex gap-1 flex-wrap"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-7 w-7 rounded-full bg-surface-strong hover:bg-surface-strong/80"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setEditData(r);
                               setDialogOpen(true);
                             }}
@@ -266,9 +274,10 @@ export default function RekeningPageClient({
                               variant="ghost"
                               size="icon"
                               className="h-7 w-7 rounded-full bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20"
-                              onClick={() =>
-                                toast.warning(usageDescription(usage))
-                              }
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toast.warning(usageDescription(usage));
+                              }}
                               title="Rekening masih dipakai"
                               aria-label={`Rekening ${r.nama} masih dipakai`}
                             >
@@ -285,6 +294,7 @@ export default function RekeningPageClient({
                                 size="icon"
                                 className="h-7 w-7 rounded-full bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20"
                                 disabled={deleting === r.id}
+                                onClick={(e) => e.stopPropagation()}
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>
@@ -295,7 +305,10 @@ export default function RekeningPageClient({
                       <p className="font-mono text-xl font-medium text-foreground mt-3">
                         {formatRupiah(Number(r.saldo_saat_ini))}
                       </p>
-                      <div className="flex items-center gap-2 mt-3">
+                      <div
+                        className="flex items-center gap-2 mt-3"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <Switch
                           checked={!r.exclude_total}
                           onCheckedChange={() =>

@@ -24,6 +24,9 @@ export const rekeningEditSchema = z.object({
 /** @deprecated Gunakan rekeningCreateSchema atau rekeningEditSchema */
 export const rekeningSchema = rekeningCreateSchema;
 
+export const rekeningIdParamSchema = z.string().uuid('ID rekening tidak valid');
+
 export type RekeningCreateSchema = z.infer<typeof rekeningCreateSchema>;
 export type RekeningEditSchema = z.infer<typeof rekeningEditSchema>;
 export type RekeningSchema = RekeningCreateSchema;
+

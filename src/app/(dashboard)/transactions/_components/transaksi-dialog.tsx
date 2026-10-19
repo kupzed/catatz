@@ -31,6 +31,8 @@ export type TransaksiDialogProps = {
   copyFrom?: Transaksi | null;
   /** Tanggal default untuk mode create normal, mengikuti periode yang dipilih. */
   defaultTanggal?: string;
+  /** Rekening default untuk mode create normal */
+  defaultRekeningId?: string;
 };
 
 export default function TransaksiDialog(props: TransaksiDialogProps) {
