@@ -68,10 +68,11 @@ Fitur kategori digunakan untuk mengelola kategori pemasukan dan pengeluaran tran
   - Tombol edit membuka dialog, sedangkan tombol hapus memunculkan dialog konfirmasi atau toast warning jika masih memiliki keterkaitan data keuangan.
 - **Detail `/categories/[id]`**:
   - Tombol kembali ke `/categories`.
-  - Header interaktif: ikon, nama kategori, tipe badge, tombol Edit, tombol Hapus, dan CTA Tambah Transaksi (otomatis memilih kategori ini).
+  - Header interaktif: ikon, nama kategori, tipe badge, tombol Edit Kategori, tombol Hapus, dan CTA Tambah Transaksi (otomatis memilih kategori ini).
+  - Tombol aksi pada mobile tersusun seimbang (grid 2 kolom pill 50/50 untuk Edit Kategori & Hapus, baris kedua full-width pill untuk Tambah Transaksi).
   - Kartu aksen ringkasan kategori dengan kode warna hex.
-  - 3 kartu statistik metrik finansial: Total nominal (pengeluaran/pemasukan/net flow), frekuensi transaksi, dan rata-rata per transaksi, dilengkapi badge rincian pemakaian.
-  - Navigasi tanggal/periode (Bulan Ini, 30 Hari Terakhir, Tahun Ini, dsb.) dan pencarian transaksi.
-  - Tab tipe transaksi jika kategori bertipe `all`.
+  - 3 kartu statistik metrik finansial: Total nominal (pengeluaran/pemasukan/net flow), frekuensi transaksi, dan rata-rata per transaksi, dilengkapi badge rincian pemakaian data.
+  - Kontrol periode & navigasi tanggal identik dengan Detail Rekening dan Index Transaksi (`Semua Waktu`, `Bulan Ini`, `Minggu Ini`, `Hari Ini`, `Tahun Ini`, `Custom`) dengan kapsul tanggal interaktif.
+  - Tab tipe transaksi horizontal scrollable jika kategori bertipe `all`, serta pencarian transaksi instan.
   - Daftar histori transaksi dengan pagination dan detail sheet.
   - Breadcrumb dinamis terintegrasi (`Kategori > [Nama Kategori]`).

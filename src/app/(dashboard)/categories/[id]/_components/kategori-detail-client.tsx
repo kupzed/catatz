@@ -16,7 +16,7 @@ import { deleteTransaksi } from "@/actions/transaksi-action";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ClearableInput } from "@/components/common/clearable-input";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -32,6 +32,8 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
+  Calendar as CalendarIcon,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import KategoriDialog from "../../_components/kategori-dialog";
@@ -309,15 +311,15 @@ export function KategoriDetailClient({
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 flex-wrap">
+        {/* Action Buttons: 2 cols on mobile (Edit + Hapus 50/50, Tambah full width), auto flex on desktop */}
+        <div className="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:items-center sm:shrink-0">
           <Button
             variant="outline"
             onClick={() => setEditKategoriOpen(true)}
             className="rounded-full h-10 sm:h-9 px-4 border-hairline hover:bg-surface-soft text-foreground text-xs font-medium gap-1.5 cursor-pointer justify-center"
           >
             <Pencil className="h-3.5 w-3.5" />
-            <span>Edit</span>
+            <span>Edit Kategori</span>
           </Button>
 
           {isUsed ? (
@@ -337,7 +339,7 @@ export function KategoriDetailClient({
             >
               <Button
                 variant="outline"
-                className="rounded-full h-10 sm:h-9 px-4 border-hairline hover:bg-surface-soft text-semantic-down hover:text-semantic-down text-xs font-medium gap-1.5 cursor-pointer justify-center"
+                className="rounded-full h-10 sm:h-9 px-4 border-hairline hover:bg-surface-soft text-semantic-down hover:text-semantic-down text-xs font-medium gap-1.5 cursor-pointer justify-center w-full"
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 <span>Hapus</span>
@@ -347,7 +349,7 @@ export function KategoriDetailClient({
 
           <Button
             onClick={openCreateTx}
-            className="rounded-full h-10 sm:h-9 px-4 bg-primary hover:bg-[#003ecc] text-white text-xs font-semibold gap-1.5 cursor-pointer shadow-none justify-center"
+            className="col-span-2 sm:col-span-1 rounded-full h-10 sm:h-9 px-4 bg-primary hover:bg-[#003ecc] text-white text-xs font-semibold gap-1.5 cursor-pointer shadow-none justify-center"
             id="btn-tambah-transaksi-kategori"
           >
             <Plus className="h-4 w-4" />
@@ -410,8 +412,9 @@ export function KategoriDetailClient({
             </p>
           </div>
 
-          {/* Controls Periode & Navigasi Tanggal */}
+          {/* Controls Periode & Navigasi Tanggal (Identik dengan Rekening & Index Transaksi) */}
           <div className="flex items-center gap-2 w-full sm:w-auto">
+            {/* Dropdown Periode */}
             <Select
               value={preset}
               onValueChange={(val) => {
@@ -419,96 +422,139 @@ export function KategoriDetailClient({
                 setBaseDate(new Date());
                 setCustomStep("dari");
                 if (val !== "custom") {
-                  setDateFilter({ dari: undefined, sampai: undefined });
+                  setDateFilter((f) => ({
+                    ...f,
+                    dari: undefined,
+                    sampai: undefined,
+                  }));
                 }
               }}
             >
-              <SelectTrigger className="h-9 w-auto min-w-32.5 rounded-full text-xs font-medium border-hairline bg-card cursor-pointer">
-                <SelectValue placeholder="Pilih Periode" />
+              <SelectTrigger
+                size="sm"
+                className={cn(
+                  "h-9! rounded-full! border border-hairline bg-surface-strong dark:bg-surface-dark-elevated text-foreground hover:bg-surface-soft dark:hover:bg-surface-dark text-xs sm:text-sm font-medium transition-colors shadow-none cursor-pointer",
+                  preset !== "all"
+                    ? "w-32 sm:w-36 shrink-0 px-3"
+                    : "w-full sm:w-40 px-3.5",
+                )}
+                id="kategori-filter-periode"
+              >
+                <SelectValue placeholder="Periode" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua</SelectItem>
-                <SelectItem value="this_month">Bulan Ini</SelectItem>
-                <SelectItem value="last_30_days">30 Hari Terakhir</SelectItem>
-                <SelectItem value="this_year">Tahun Ini</SelectItem>
-                <SelectItem value="custom">Pilih Tanggal</SelectItem>
+              <SelectContent align="end" className="min-w-44 rounded-2xl">
+                <SelectItem value="all">Semua Waktu</SelectItem>
+                <SelectItem value="bulan">Bulan Ini</SelectItem>
+                <SelectItem value="minggu">Minggu Ini</SelectItem>
+                <SelectItem value="hari">Hari Ini</SelectItem>
+                <SelectItem value="tahun">Tahun Ini</SelectItem>
+                <SelectItem value="custom">Custom</SelectItem>
               </SelectContent>
             </Select>
 
+            {/* Date Navigator Bar jika periode bukan 'all' */}
             {preset !== "all" && (
-              <div className="flex items-center border border-hairline rounded-full bg-card overflow-hidden">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 rounded-full cursor-pointer hover:bg-surface-soft"
-                  onClick={handlePrevDate}
-                  disabled={!canNavigateDate}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
+              <div className="flex flex-1 sm:flex-initial items-center justify-between sm:justify-start gap-1 bg-surface-strong dark:bg-surface-dark-elevated border border-hairline rounded-full px-2 py-0.5 h-9! text-xs min-w-0">
+                {canNavigateDate && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handlePrevDate}
+                    className="h-6 w-6 rounded-full hover:bg-surface-soft dark:hover:bg-surface-dark p-0 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+                    aria-label="Periode sebelumnya"
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                  </Button>
+                )}
 
-                <div className="relative flex items-center justify-center min-w-25 px-2">
-                  <span className="text-xs font-semibold text-foreground pointer-events-none select-none">
-                    {dateLabel}
-                  </span>
+                {/* Clickable dateLabel with date input */}
+                <div className="relative inline-flex items-center justify-center px-1.5 min-w-0">
+                  <button
+                    type="button"
+                    className="text-xs font-medium text-foreground hover:underline cursor-pointer flex items-center gap-1.5 min-w-0"
+                    title="Klik untuk pilih tanggal"
+                  >
+                    <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <span className="truncate max-w-32.5 sm:max-w-none">{dateLabel}</span>
+                  </button>
                   <input
-                    type={preset === "this_year" ? "number" : "date"}
+                    type="date"
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                     value={currentDate}
-                    onChange={(e) => handleDateLabelPick(e.target.value)}
-                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                    title="Pilih tanggal"
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        handleDateLabelPick(e.target.value);
+                      }
+                    }}
                   />
                 </div>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 rounded-full cursor-pointer hover:bg-surface-soft"
-                  onClick={handleNextDate}
-                  disabled={!canNavigateDate}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+                {canNavigateDate && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleNextDate}
+                    className="h-6 w-6 rounded-full hover:bg-surface-soft dark:hover:bg-surface-dark p-0 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+                    aria-label="Periode berikutnya"
+                  >
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </Button>
+                )}
               </div>
             )}
           </div>
         </div>
 
-        {/* Filter bar: Search + Tipe filter tabs (jika kategori.tipe === 'all') */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <ClearableInput
-              placeholder="Cari transaksi pada kategori ini..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onClear={() => setSearch("")}
-              className="pl-9 h-10 rounded-input border-hairline bg-card text-xs"
-            />
-          </div>
-
-          {kategori.tipe === "all" && (
-            <div className="grid grid-cols-3 gap-1 rounded-full bg-surface-strong p-1 sm:inline-grid sm:w-auto shrink-0">
+        {/* Filter Controls: Tabs & Search */}
+        <div className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between pt-1">
+          {kategori.tipe === "all" ? (
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none -mx-1 px-1">
               {[
                 { label: "Semua", value: "all" as const },
                 { label: "Pengeluaran", value: "expense" as const },
                 { label: "Pemasukan", value: "income" as const },
               ].map((tab) => (
-                <button
+                <Button
                   key={tab.value}
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setSelectedTipe(tab.value)}
                   className={cn(
-                    "inline-flex h-8 items-center justify-center rounded-full px-3 text-xs font-semibold transition-colors",
+                    "rounded-full h-8 px-3 text-xs whitespace-nowrap cursor-pointer transition-colors shrink-0",
                     selectedTipe === tab.value
-                      ? "bg-primary text-white"
-                      : "text-muted-foreground hover:text-foreground",
+                      ? "bg-foreground text-background font-medium hover:bg-foreground hover:text-background"
+                      : "bg-surface-strong text-muted-foreground hover:text-foreground",
                   )}
                 >
                   {tab.label}
-                </button>
+                </Button>
               ))}
             </div>
+          ) : (
+            <div />
           )}
+
+          {/* Search Box */}
+          <div className="relative w-full sm:w-64 shrink-0">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Cari transaksi..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-9 pl-9 pr-8 text-xs rounded-input bg-card border-hairline w-full"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                aria-label="Hapus pencarian"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Transaksi List */}
