@@ -80,11 +80,13 @@ Initial data detail diambil dengan:
 - User bisa toggle rekening untuk dihitung/tidak dihitung dalam total.
 
 ### Detail (`/wallets/[id]`)
+- Menampilkan breadcrumb topnav dinamis dengan nama rekening (misal `Rekening > SeaBank`), menggantikan UUID raw URL.
 - Menampilkan header dengan tombol kembali ke `/wallets`, nama rekening, badge jenis rekening, dan badge status keikutsertaan saldo.
+- Tombol aksi pada mobile tersusun seimbang (grid 2 kolom pill `rounded-full` 50/50).
 - Kartu Saldo Utama menampilkan nominal saldo saat ini dalam `font-mono` besar beserta switch toggle keikutsertaan dalam total saldo.
 - Tiga kartu statistik: Total Masuk (inflow), Total Keluar (outflow), dan Arus Kas Bersih (net flow).
 - Pill ringkasan distribusi data pemakaian (Pemasukan, Pengeluaran, Transfer Keluar, Transfer Masuk, Koreksi Saldo, dan Hutang/Cicilan).
-- Feed histori transaksi lengkap dengan filter tipe (Semua, Pemasukan, Pengeluaran, Transfer, Koreksi), pencarian teks, dan filter tanggal (Semua, Bulan Ini, dsb).
+- Feed histori transaksi lengkap dengan fungsionalitas serupa halaman Index Transaksi: dropdown periode (`Semua Waktu`, `Bulan Ini`, `Minggu Ini`, `Hari Ini`, `Tahun Ini`, `Custom`), navigasi tanggal interaktif dengan pemilih tanggal bawaan, tab tipe transaksi horizontal scrollable, serta pencarian instan.
 - Klik transaksi membuka `TransaksiDetailSheet` (bisa melihat detail, copy transaksi, edit transaksi, hapus transaksi).
 - Tombol "Tambah Transaksi" membuka `TransaksiDialog` dengan default rekening terpilih otomatis ke rekening yang sedang dibuka.
 - Tombol "Edit Rekening" membuka `RekeningDialog` untuk memperbarui informasi atau koreksi saldo rekening.

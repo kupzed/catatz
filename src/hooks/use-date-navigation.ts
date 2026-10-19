@@ -40,9 +40,9 @@ export type UseDateNavigationReturn = {
 };
 
 /** Mengelola preset, label, dan perpindahan tanggal untuk halaman transaksi. */
-export function useDateNavigation(): UseDateNavigationReturn {
+export function useDateNavigation(initialPreset: string = "hari"): UseDateNavigationReturn {
   const { preferences } = useSystemPreferences();
-  const [preset, setPreset] = useState<string>("hari");
+  const [preset, setPreset] = useState<string>(initialPreset);
   const [baseDate, setBaseDate] = useState<Date>(new Date());
   const [dateFilter, setDateFilter] = useState<DateNavigationFilter>({});
   // Untuk custom range: track apakah sedang pilih 'dari' atau 'sampai'

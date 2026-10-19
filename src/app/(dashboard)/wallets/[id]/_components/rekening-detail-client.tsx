@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { format } from "date-fns";
 import type {
   JenisRekening,
   Rekening,
@@ -9,6 +10,7 @@ import type {
 } from "@/types/rekening";
 import type { Kategori, Transaksi, TipeTransaksi } from "@/types/transaksi";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useSetBreadcrumbTitle } from "@/providers/breadcrumb-title-provider";
 import { toggleExcludeTotal } from "@/actions/rekening-action";
 import { deleteTransaksi } from "@/actions/transaksi-action";
 import { toast } from "sonner";
@@ -16,6 +18,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   ArrowLeft,
   Plus,
@@ -27,6 +36,7 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
+  Calendar as CalendarIcon,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -84,6 +94,9 @@ export function RekeningDetailClient({
   const [usage, setUsage] = useState<RekeningUsageCounts>(initialUsage);
   const [transaksi, setTransaksi] = useState<Transaksi[]>(initialTransaksi);
 
+  // Set topnav breadcrumb title to nama rekening (via Zustand store)
+  useSetBreadcrumbTitle(rekening.nama);
+
   // Dialog States
   const [editRekeningOpen, setEditRekeningOpen] = useState(false);
   const [txDialogOpen, setTxDialogOpen] = useState(false);
@@ -99,12 +112,26 @@ export function RekeningDetailClient({
     preset,
     setPreset,
     baseDate,
+    setBaseDate,
+    customStep,
+    setCustomStep,
     dateFilter,
+    setDateFilter,
     handlePrevDate,
     handleNextDate,
+    handleDateLabelPick,
     dateLabel,
     canNavigateDate,
-  } = useDateNavigation();
+  } = useDateNavigation("all");
+
+  const currentDate = useMemo(() => {
+    if (preset === "custom") {
+      return customStep === "dari"
+        ? dateFilter.dari || ""
+        : dateFilter.sampai || "";
+    }
+    return format(baseDate, "yyyy-MM-dd");
+  }, [baseDate, customStep, dateFilter.dari, dateFilter.sampai, preset]);
 
   // Offline sync hook
   const handleSyncSuccess = useCallback(() => {
@@ -236,13 +263,13 @@ export function RekeningDetailClient({
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Top Navigation & Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1.5">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.push("/wallets")}
-            className="gap-1.5 -ml-2 text-muted-foreground hover:text-foreground rounded-full h-8 px-2.5 mb-1 cursor-pointer"
+            className="gap-1.5 -ml-2 text-muted-foreground hover:text-foreground rounded-full h-8 px-2.5 cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
             Kembali ke Rekening
@@ -252,57 +279,57 @@ export function RekeningDetailClient({
             <h1 className="text-2xl sm:text-[32px] font-normal tracking-[-0.4px] text-foreground">
               {rekening.nama}
             </h1>
-            <Badge
-              variant="secondary"
-              className={cn(
-                "rounded-full px-2.5 py-0.5 text-xs font-semibold border-0 flex items-center gap-1",
-                jenisCfg.color,
-              )}
-            >
-              <JenisIcon className="h-3.5 w-3.5" />
-              {rekening.jenis}
-            </Badge>
-            <Badge
-              variant="outline"
-              className={cn(
-                "rounded-full px-2.5 py-0.5 text-xs font-normal border-hairline",
-                rekening.exclude_total
-                  ? "bg-surface-soft text-muted-foreground"
-                  : "bg-surface-strong text-foreground",
-              )}
-            >
-              {rekening.exclude_total ? "Dikecualikan" : "Aktif di Total"}
-            </Badge>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Badge
+                variant="secondary"
+                className={cn(
+                  "rounded-full px-2.5 py-0.5 text-xs font-semibold border-0 flex items-center gap-1",
+                  jenisCfg.color,
+                )}
+              >
+                <JenisIcon className="h-3.5 w-3.5" />
+                {rekening.jenis}
+              </Badge>
+              <Badge
+                variant="outline"
+                className={cn(
+                  "rounded-full px-2.5 py-0.5 text-xs font-normal border-hairline",
+                  rekening.exclude_total
+                    ? "bg-surface-soft text-muted-foreground"
+                    : "bg-surface-strong text-foreground",
+                )}
+              >
+                {rekening.exclude_total ? "Dikecualikan" : "Aktif di Total"}
+              </Badge>
+            </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2 flex-wrap sm:shrink-0">
+        {/* Action Buttons: 2 columns on mobile, auto width flex on desktop */}
+        <div className="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:items-center sm:shrink-0">
           <Button
             variant="outline"
-            size="sm"
             onClick={() => setEditRekeningOpen(true)}
-            className="rounded-full h-9 px-3.5 border-hairline hover:bg-surface-soft text-foreground text-xs font-medium gap-1.5 cursor-pointer"
+            className="rounded-full h-10 sm:h-9 px-4 border-hairline hover:bg-surface-soft text-foreground text-xs font-medium gap-1.5 cursor-pointer justify-center"
           >
             <Pencil className="h-3.5 w-3.5" />
-            Edit Rekening
+            <span>Edit Rekening</span>
           </Button>
 
           <Button
-            size="sm"
             onClick={openCreateTx}
-            className="rounded-full h-9 px-4 bg-primary hover:bg-[#003ecc] text-white text-xs font-semibold gap-1.5 cursor-pointer shadow-none"
+            className="rounded-full h-10 sm:h-9 px-4 bg-primary hover:bg-[#003ecc] text-white text-xs font-semibold gap-1.5 cursor-pointer shadow-none justify-center"
             id="btn-tambah-transaksi-wallet"
           >
             <Plus className="h-4 w-4" />
-            Tambah Transaksi
+            <span>Tambah Transaksi</span>
           </Button>
         </div>
       </div>
 
       {/* Saldo Card */}
       <div
-        className="rounded-card border border-hairline bg-card p-6 sm:p-8 transition-colors border-t-4"
+        className="rounded-card border border-hairline bg-card p-5 sm:p-8 transition-colors border-t-4"
         style={{ borderTopColor: rekening.warna ?? "#0052ff" }}
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -315,7 +342,7 @@ export function RekeningDetailClient({
             </p>
           </div>
 
-          <div className="flex items-center gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-hairline">
+          <div className="flex items-center gap-3 pt-3 sm:pt-0 border-t sm:border-t-0 border-hairline">
             <Switch
               checked={!rekening.exclude_total}
               onCheckedChange={handleToggleExclude}
@@ -345,55 +372,110 @@ export function RekeningDetailClient({
       <div className="space-y-4 pt-2" ref={listTopRef}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold text-foreground">
-              Histori Transaksi
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              Menampilkan {tipeFiltered.length} transaksi di rekening ini
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-foreground">
+                Histori Transaksi
+              </h2>
+              <Badge
+                variant="secondary"
+                className="text-xs px-2.5 py-0.5 rounded-full bg-surface-strong text-muted-foreground border-none font-mono"
+              >
+                {tipeFiltered.length} Data
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Catatan transaksi terkait rekening ini
             </p>
           </div>
 
-          {/* Date Preset Selector */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {(["semua", "bulan", "minggu", "hari"] as const).map((p) => (
-              <Button
-                key={p}
-                variant="ghost"
-                size="sm"
-                onClick={() => setPreset(p)}
+          {/* Controls Periode & Navigasi Tanggal (Fungsi & Tampilan identik Index Transaksi) */}
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            {/* Dropdown Periode */}
+            <Select
+              value={preset}
+              onValueChange={(val) => {
+                setPreset(val);
+                setBaseDate(new Date());
+                setCustomStep("dari");
+                if (val !== "custom") {
+                  setDateFilter((f) => ({
+                    ...f,
+                    dari: undefined,
+                    sampai: undefined,
+                  }));
+                }
+              }}
+            >
+              <SelectTrigger
                 className={cn(
-                  "rounded-full h-8 px-3 text-xs capitalize transition-colors",
-                  preset === p
-                    ? "bg-primary text-white font-semibold hover:bg-primary hover:text-white"
-                    : "bg-surface-strong text-muted-foreground hover:text-foreground",
+                  "h-9 text-xs sm:text-sm bg-card border-hairline text-foreground rounded-full",
+                  preset !== "all" ? "w-32 sm:w-44 shrink-0" : "w-full sm:w-44",
                 )}
+                id="wallet-filter-periode"
               >
-                {p === "semua" ? "Semua Waktu" : p}
-              </Button>
-            ))}
+                <SelectValue placeholder="Periode" />
+              </SelectTrigger>
+              <SelectContent align="end" className="min-w-44">
+                <SelectItem value="all">Semua Waktu</SelectItem>
+                <SelectItem value="bulan">Bulan Ini</SelectItem>
+                <SelectItem value="minggu">Minggu Ini</SelectItem>
+                <SelectItem value="hari">Hari Ini</SelectItem>
+                <SelectItem value="tahun">Tahun Ini</SelectItem>
+                <SelectItem value="custom">Custom</SelectItem>
+              </SelectContent>
+            </Select>
 
-            {canNavigateDate && (
-              <div className="flex items-center gap-1 ml-1 bg-surface-strong rounded-full px-2 py-0.5 text-xs text-foreground">
+            {/* Date Navigator Bar jika periode bukan 'all' */}
+            {preset !== "all" && (
+              <div className="flex flex-1 sm:flex-initial items-center justify-between sm:justify-start gap-1 bg-surface-strong dark:bg-surface-dark-elevated border border-hairline rounded-full px-2 py-0.5 h-9 text-xs min-w-0">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={handlePrevDate}
-                  className="h-6 w-6 rounded-full hover:bg-surface-soft p-0"
+                  disabled={!canNavigateDate}
+                  className={cn(
+                    "h-7 w-7 rounded-full hover:bg-surface-soft p-0 shrink-0 cursor-pointer",
+                    !canNavigateDate && "opacity-30 cursor-not-allowed hover:bg-transparent",
+                  )}
                   aria-label="Periode sebelumnya"
                 >
-                  <ChevronLeft className="h-3.5 w-3.5" />
+                  <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <span className="px-1 text-[11px] font-medium whitespace-nowrap">
-                  {dateLabel}
-                </span>
+
+                {/* Clickable dateLabel with date input */}
+                <div className="relative inline-flex items-center justify-center px-1 min-w-0">
+                  <button
+                    type="button"
+                    className="text-xs font-medium text-foreground hover:underline cursor-pointer flex items-center gap-1 min-w-0"
+                    title="Klik untuk pilih tanggal"
+                  >
+                    <CalendarIcon className="h-3 w-3 text-muted-foreground shrink-0" />
+                    <span className="truncate max-w-27.5 sm:max-w-none">{dateLabel}</span>
+                  </button>
+                  <input
+                    type="date"
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                    value={currentDate}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        handleDateLabelPick(e.target.value);
+                      }
+                    }}
+                  />
+                </div>
+
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={handleNextDate}
-                  className="h-6 w-6 rounded-full hover:bg-surface-soft p-0"
+                  disabled={!canNavigateDate}
+                  className={cn(
+                    "h-7 w-7 rounded-full hover:bg-surface-soft p-0 shrink-0 cursor-pointer",
+                    !canNavigateDate && "opacity-30 cursor-not-allowed hover:bg-transparent",
+                  )}
                   aria-label="Periode berikutnya"
                 >
-                  <ChevronRight className="h-3.5 w-3.5" />
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
             )}
@@ -401,9 +483,9 @@ export function RekeningDetailClient({
         </div>
 
         {/* Filter Controls: Tabs & Search */}
-        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+        <div className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between pt-1">
           {/* Tipe Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none -mx-1 px-1">
             {TIPE_TABS.map((tab) => (
               <Button
                 key={tab.value}
@@ -411,7 +493,7 @@ export function RekeningDetailClient({
                 size="sm"
                 onClick={() => setSelectedTipe(tab.value)}
                 className={cn(
-                  "rounded-full h-8 px-3 text-xs whitespace-nowrap cursor-pointer transition-colors",
+                  "rounded-full h-8 px-3 text-xs whitespace-nowrap cursor-pointer transition-colors shrink-0",
                   selectedTipe === tab.value
                     ? "bg-foreground text-background font-medium hover:bg-foreground hover:text-background"
                     : "bg-surface-strong text-muted-foreground hover:text-foreground",
@@ -423,20 +505,20 @@ export function RekeningDetailClient({
           </div>
 
           {/* Search Box */}
-          <div className="relative min-w-55 sm:max-w-xs w-full">
+          <div className="relative w-full sm:w-64 shrink-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Cari transaksi..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-9 pl-9 pr-8 text-xs rounded-input bg-card border-hairline"
+              className="h-9 pl-9 pr-8 text-xs rounded-input bg-card border-hairline w-full"
             />
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
                 aria-label="Hapus pencarian"
               >
                 <X className="h-3.5 w-3.5" />
