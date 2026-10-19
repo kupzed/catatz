@@ -1,7 +1,9 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
 import { HutangCard } from "@/app/(dashboard)/debts/_components/hutang-card";
 import type { Hutang } from "@/types/hutang";
+
+afterEach(cleanup);
 
 // Mock useSystemPreferences
 vi.mock("@providers/system-preference-provider", () => ({

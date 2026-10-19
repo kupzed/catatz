@@ -304,6 +304,16 @@ Deskripsi: mengambil rekening user, urut berdasarkan `urutan`.
 
 Tabel: `rekening`.
 
+### `getRekeningById`
+
+Deskripsi: mengambil data rekening spesifik beserta rincian statistik pemakaian (`RekeningUsageCounts`) untuk halaman detail rekening (`/wallets/[id]`).
+
+Input: `id: string` (divalidasi dengan `rekeningIdParamSchema` format UUID).
+
+Output: `ActionResult<{ rekening: Rekening; usage: RekeningUsageCounts }>`.
+
+Tabel: `rekening`, `transaksi`, `hutang`, `hutang_cicilan`, `recurring_transaksi`.
+
 ### `getRekeningUsageCountsMap`
 
 Deskripsi: menghitung pemakaian setiap rekening di transaksi, rekening tujuan transfer, hutang/piutang, cicilan, dan template transaksi berulang. Query data riwayat (`transaksi`, `hutang`, `hutang_cicilan`) menggunakan pagination `.range()` (chunk 1.000) agar seluruh data dihitung akurat tanpa terpotong limit default PostgREST (1.000 baris) pada database produksi dengan ribuan data.

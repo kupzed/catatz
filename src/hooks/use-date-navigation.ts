@@ -40,9 +40,9 @@ export type UseDateNavigationReturn = {
 };
 
 /** Mengelola preset, label, dan perpindahan tanggal untuk halaman transaksi. */
-export function useDateNavigation(): UseDateNavigationReturn {
+export function useDateNavigation(initialPreset: string = "hari"): UseDateNavigationReturn {
   const { preferences } = useSystemPreferences();
-  const [preset, setPreset] = useState<string>("hari");
+  const [preset, setPreset] = useState<string>(initialPreset);
   const [baseDate, setBaseDate] = useState<Date>(new Date());
   const [dateFilter, setDateFilter] = useState<DateNavigationFilter>({});
   // Untuk custom range: track apakah sedang pilih 'dari' atau 'sampai'
@@ -105,13 +105,18 @@ export function useDateNavigation(): UseDateNavigationReturn {
       return format(baseDate, "yyyy", { locale });
     if (preset === "custom") {
       if (dateFilter.dari && dateFilter.sampai) {
-        return `${format(parseISO(dateFilter.dari), "dd MMM yy", { locale })} - ${format(parseISO(dateFilter.sampai), "dd MMM yyyy", { locale })}`;
+        const dDari = parseISO(dateFilter.dari);
+        const dSampai = parseISO(dateFilter.sampai);
+        if (dDari.getFullYear() === dSampai.getFullYear()) {
+          return `${format(dDari, "dd MMM", { locale })} - ${format(dSampai, "dd MMM yyyy", { locale })}`;
+        }
+        return `${format(dDari, "dd MMM yyyy", { locale })} - ${format(dSampai, "dd MMM yyyy", { locale })}`;
       } else if (dateFilter.dari) {
         if (customStep === "sampai")
           return `${format(parseISO(dateFilter.dari), "dd MMM", { locale })} \u2192 Pilih akhir`;
         return `Mulai ${format(parseISO(dateFilter.dari), "dd MMM yyyy", { locale })}`;
       }
-      return "Klik untuk pilih rentang";
+      return "Pilih Rentang";
     }
     return "Rentang Waktu";
   }, [

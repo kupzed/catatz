@@ -10,14 +10,19 @@ Fitur rekening digunakan untuk mengelola sumber dana seperti tunai, bank, e-wall
 
 ## Route
 
-- `/wallets`
+- Index: `/wallets`
+- Detail: `/wallets/[id]`
 
 ## Lokasi File
 
-- Page: `src/app/(dashboard)/wallets/page.tsx`
-- Loading: `src/app/(dashboard)/wallets/loading.tsx`
-- Client page: `src/app/(dashboard)/wallets/_components/rekening-page-client.tsx`
-- Dialog: `src/app/(dashboard)/wallets/_components/rekening-dialog.tsx`
+- Index Page: `src/app/(dashboard)/wallets/page.tsx`
+- Index Loading: `src/app/(dashboard)/wallets/loading.tsx`
+- Index Client page: `src/app/(dashboard)/wallets/_components/rekening-page-client.tsx`
+- Detail Page: `src/app/(dashboard)/wallets/[id]/page.tsx`
+- Detail Loading: `src/app/(dashboard)/wallets/[id]/loading.tsx`
+- Detail Client page: `src/app/(dashboard)/wallets/[id]/_components/rekening-detail-client.tsx`
+- Detail Stat Cards: `src/app/(dashboard)/wallets/[id]/_components/rekening-stat-cards.tsx`
+- Dialog Rekening: `src/app/(dashboard)/wallets/_components/rekening-dialog.tsx`
 - Actions: `src/actions/rekening-action.ts`
 - Validation: `src/validations/rekening-validation.ts`
 - Types: `src/types/rekening.d.ts`
@@ -25,10 +30,15 @@ Fitur rekening digunakan untuk mengelola sumber dana seperti tunai, bank, e-wall
 
 ## Data Source
 
-Initial data diambil dengan:
-
+Initial data index diambil dengan:
 - `getRekening()`
 - `getRekeningUsageCountsMap()`
+
+Initial data detail diambil dengan:
+- `getRekeningById(id)`
+- `getTransaksi({ rekening_id: [id] })`
+- `getRekening()`
+- `getKategori()`
 
 ## Tabel Database Terkait
 
@@ -41,6 +51,7 @@ Initial data diambil dengan:
 ## Server Action Terkait
 
 - `getRekening`
+- `getRekeningById`
 - `getRekeningUsageCountsMap`
 - `createRekening`
 - `updateRekening`
@@ -60,16 +71,25 @@ Initial data diambil dengan:
 
 ## UI Behavior
 
+### Index (`/wallets`)
 - Halaman menampilkan total saldo dari rekening yang tidak di-exclude.
 - User bisa tambah, edit, hapus rekening.
-- Rekening yang masih dipakai menampilkan badge jumlah data (`Dipakai {usage.total} data`). Badge dapat diklik untuk langsung membuka halaman `/transactions?rekening_id=...` yang memfilter seluruh transaksi terkait rekening tersebut (baik uang masuk, keluar, transfer masuk/keluar, hutang/piutang, maupun koreksi saldo).
+- Rekening card dan badge jumlah data (`Dipakai {usage.total} data`) dapat diklik untuk langsung membuka halaman detail `/wallets/[id]`.
 - Tombol hapus memberi rincian data pemakaian (transaksi keluar/masuk/koreksi, transfer masuk, hutang/piutang, cicilan, dan transaksi berulang) agar data terkait dihapus terlebih dahulu.
 - State rekening dan pemakaian data pada client otomatis tersinkronisasi saat initial props dari Server Component diperbarui.
 - User bisa toggle rekening untuk dihitung/tidak dihitung dalam total.
-- Dialog create memakai `rekeningCreateSchema`.
-- Dialog edit memakai `rekeningEditSchema`.
-- Saldo awal readonly saat edit; perubahan saldo saat ini ditandai sebagai koreksi saldo.
-- Logo bank/e-wallet dipilih dari constants berdasarkan jenis rekening.
+
+### Detail (`/wallets/[id]`)
+- Menampilkan breadcrumb topnav dinamis dengan nama rekening (misal `Rekening > SeaBank`), menggantikan UUID raw URL.
+- Menampilkan header dengan tombol kembali ke `/wallets`, nama rekening, badge jenis rekening, dan badge status keikutsertaan saldo.
+- Tombol aksi pada mobile tersusun seimbang (grid 2 kolom pill `rounded-full` 50/50).
+- Kartu Saldo Utama menampilkan nominal saldo saat ini dalam `font-mono` besar beserta switch toggle keikutsertaan dalam total saldo.
+- Tiga kartu statistik: Total Masuk (inflow), Total Keluar (outflow), dan Arus Kas Bersih (net flow).
+- Pill ringkasan distribusi data pemakaian (Pemasukan, Pengeluaran, Transfer Keluar, Transfer Masuk, Koreksi Saldo, dan Hutang/Cicilan).
+- Feed histori transaksi lengkap dengan fungsionalitas serupa halaman Index Transaksi: dropdown periode (`Semua Waktu`, `Bulan Ini`, `Minggu Ini`, `Hari Ini`, `Tahun Ini`, `Custom`), navigasi tanggal interaktif dengan pemilih tanggal bawaan, tab tipe transaksi horizontal scrollable, serta pencarian instan.
+- Klik transaksi membuka `TransaksiDetailSheet` (bisa melihat detail, copy transaksi, edit transaksi, hapus transaksi).
+- Tombol "Tambah Transaksi" membuka `TransaksiDialog` dengan default rekening terpilih otomatis ke rekening yang sedang dibuka.
+- Tombol "Edit Rekening" membuka `RekeningDialog` untuk memperbarui informasi atau koreksi saldo rekening.
 
 ## TODO / Improvement
 
