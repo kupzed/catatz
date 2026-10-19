@@ -407,15 +407,18 @@ export function RekeningDetailClient({
               }}
             >
               <SelectTrigger
+                size="sm"
                 className={cn(
-                  "h-9 text-xs sm:text-sm bg-card border-hairline text-foreground rounded-full",
-                  preset !== "all" ? "w-32 sm:w-44 shrink-0" : "w-full sm:w-44",
+                  "h-9! rounded-full! border border-hairline bg-surface-strong dark:bg-surface-dark-elevated text-foreground hover:bg-surface-soft dark:hover:bg-surface-dark text-xs sm:text-sm font-medium transition-colors shadow-none cursor-pointer",
+                  preset !== "all"
+                    ? "w-32 sm:w-36 shrink-0 px-3"
+                    : "w-full sm:w-40 px-3.5",
                 )}
                 id="wallet-filter-periode"
               >
                 <SelectValue placeholder="Periode" />
               </SelectTrigger>
-              <SelectContent align="end" className="min-w-44">
+              <SelectContent align="end" className="min-w-44 rounded-2xl">
                 <SelectItem value="all">Semua Waktu</SelectItem>
                 <SelectItem value="bulan">Bulan Ini</SelectItem>
                 <SelectItem value="minggu">Minggu Ini</SelectItem>
@@ -427,30 +430,28 @@ export function RekeningDetailClient({
 
             {/* Date Navigator Bar jika periode bukan 'all' */}
             {preset !== "all" && (
-              <div className="flex flex-1 sm:flex-initial items-center justify-between sm:justify-start gap-1 bg-surface-strong dark:bg-surface-dark-elevated border border-hairline rounded-full px-2 py-0.5 h-9 text-xs min-w-0">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handlePrevDate}
-                  disabled={!canNavigateDate}
-                  className={cn(
-                    "h-7 w-7 rounded-full hover:bg-surface-soft p-0 shrink-0 cursor-pointer",
-                    !canNavigateDate && "opacity-30 cursor-not-allowed hover:bg-transparent",
-                  )}
-                  aria-label="Periode sebelumnya"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
+              <div className="flex flex-1 sm:flex-initial items-center justify-between sm:justify-start gap-1 bg-surface-strong dark:bg-surface-dark-elevated border border-hairline rounded-full px-2 py-0.5 h-9! text-xs min-w-0">
+                {canNavigateDate && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handlePrevDate}
+                    className="h-6 w-6 rounded-full hover:bg-surface-soft dark:hover:bg-surface-dark p-0 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+                    aria-label="Periode sebelumnya"
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                  </Button>
+                )}
 
                 {/* Clickable dateLabel with date input */}
-                <div className="relative inline-flex items-center justify-center px-1 min-w-0">
+                <div className="relative inline-flex items-center justify-center px-1.5 min-w-0">
                   <button
                     type="button"
-                    className="text-xs font-medium text-foreground hover:underline cursor-pointer flex items-center gap-1 min-w-0"
+                    className="text-xs font-medium text-foreground hover:underline cursor-pointer flex items-center gap-1.5 min-w-0"
                     title="Klik untuk pilih tanggal"
                   >
-                    <CalendarIcon className="h-3 w-3 text-muted-foreground shrink-0" />
-                    <span className="truncate max-w-27.5 sm:max-w-none">{dateLabel}</span>
+                    <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <span className="truncate max-w-32.5 sm:max-w-none">{dateLabel}</span>
                   </button>
                   <input
                     type="date"
@@ -464,19 +465,17 @@ export function RekeningDetailClient({
                   />
                 </div>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleNextDate}
-                  disabled={!canNavigateDate}
-                  className={cn(
-                    "h-7 w-7 rounded-full hover:bg-surface-soft p-0 shrink-0 cursor-pointer",
-                    !canNavigateDate && "opacity-30 cursor-not-allowed hover:bg-transparent",
-                  )}
-                  aria-label="Periode berikutnya"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+                {canNavigateDate && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleNextDate}
+                    className="h-6 w-6 rounded-full hover:bg-surface-soft dark:hover:bg-surface-dark p-0 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+                    aria-label="Periode berikutnya"
+                  >
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </Button>
+                )}
               </div>
             )}
           </div>

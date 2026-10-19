@@ -105,13 +105,18 @@ export function useDateNavigation(initialPreset: string = "hari"): UseDateNaviga
       return format(baseDate, "yyyy", { locale });
     if (preset === "custom") {
       if (dateFilter.dari && dateFilter.sampai) {
-        return `${format(parseISO(dateFilter.dari), "dd MMM yy", { locale })} - ${format(parseISO(dateFilter.sampai), "dd MMM yyyy", { locale })}`;
+        const dDari = parseISO(dateFilter.dari);
+        const dSampai = parseISO(dateFilter.sampai);
+        if (dDari.getFullYear() === dSampai.getFullYear()) {
+          return `${format(dDari, "dd MMM", { locale })} - ${format(dSampai, "dd MMM yyyy", { locale })}`;
+        }
+        return `${format(dDari, "dd MMM yyyy", { locale })} - ${format(dSampai, "dd MMM yyyy", { locale })}`;
       } else if (dateFilter.dari) {
         if (customStep === "sampai")
           return `${format(parseISO(dateFilter.dari), "dd MMM", { locale })} \u2192 Pilih akhir`;
         return `Mulai ${format(parseISO(dateFilter.dari), "dd MMM yyyy", { locale })}`;
       }
-      return "Klik untuk pilih rentang";
+      return "Pilih Rentang";
     }
     return "Rentang Waktu";
   }, [
