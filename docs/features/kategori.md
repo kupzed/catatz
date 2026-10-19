@@ -6,56 +6,72 @@ Status: **Production (Aktif)**.
 
 ## Deskripsi
 
-Fitur kategori digunakan untuk mengelola kategori transaksi. Project membedakan kategori system dan kategori custom user.
+Fitur kategori digunakan untuk mengelola kategori pemasukan dan pengeluaran transaksi finansial. Seluruh kategori bersifat **user-owned (milik masing-masing pengguna)** dengan seeded default categories saat registrasi, sehingga pengguna bebas mengedit atau menghapus kategori apa pun yang tidak diinginkan.
 
 ## Route
 
-- `/categories`
+- `/categories` - Daftar kategori (grid card & ringkasan)
+- `/categories/[id]` - Detail kategori & histori transaksi
 
 ## Lokasi File
 
-- Page: `src/app/(dashboard)/categories/page.tsx`
-- Client page: `src/app/(dashboard)/categories/_components/kategori-page-client.tsx`
+- Index Page: `src/app/(dashboard)/categories/page.tsx`
+- Index Client: `src/app/(dashboard)/categories/_components/kategori-page-client.tsx`
 - Dialog: `src/app/(dashboard)/categories/_components/kategori-dialog.tsx`
+- Detail Page: `src/app/(dashboard)/categories/[id]/page.tsx`
+- Detail Loading: `src/app/(dashboard)/categories/[id]/loading.tsx`
+- Detail Client: `src/app/(dashboard)/categories/[id]/_components/kategori-detail-client.tsx`
+- Detail Stat Cards: `src/app/(dashboard)/categories/[id]/_components/kategori-stat-cards.tsx`
 - Actions: `src/actions/kategori-action.ts`
 - Validation: `src/validations/kategori-validation.ts`
 - Types: `src/types/transaksi.d.ts`
+- Migration: `src/migrations/016-user-owned-categories.sql`
 
 ## Data Source
 
-Initial data diambil dengan `getKategori()`.
+- Index: `getKategori()` dan `getKategoriUsageCountsMap()`.
+- Detail: `getKategoriById(id)` dan `getTransaksi({ kategori_id: [id] })`.
 
 ## Tabel Database Terkait
 
 - `kategori`
-- `transaksi` menggunakan `kategori_id`
+- `transaksi` (`kategori_id`)
+- `budget` (`kategori_id`)
+- `recurring_transaksi` (`kategori_id`)
 
 ## Server Action Terkait
 
-- `getKategori`
-- `createKategori`
-- `updateKategori`
-- `deleteKategori`
+- `getKategori()`: Mengambil seluruh kategori milik user yang aktif.
+- `getKategoriById(id)`: Mengambil data 1 kategori beserta detail `KategoriUsageCounts`.
+- `getKategoriUsageCountsMap()`: Mengambil ringkasan jumlah pemakaian data keuangan seluruh kategori.
+- `createKategori(values)`: Membuat kategori baru.
+- `updateKategori(id, values)`: Mengubah informasi kategori (dengan proteksi perubahan tipe jika ada histori transaksi).
+- `deleteKategori(id)`: Menghapus kategori (dilindungi pengecekan integritas data transaksi, budget, dan transaksi berulang).
 
 ## Business Rules
 
-- Kategori system memiliki `is_system = true` dan `user_id = null`.
-- User bisa membaca kategori system dan kategori miliknya.
-- User hanya bisa membuat, mengubah, dan menghapus kategori custom miliknya.
-- Server Action update/delete menambahkan filter `user_id = user.id` dan `is_system = false`.
+- Semua kategori 100% milik user (`user_id = auth.uid()`).
+- Saat user baru mendaftar, trigger `handle_new_user()` otomatis men-seed 6 kategori awal default.
+- Pengguna berhak mengubah nama, ikon, warna, tipe, atau menghapus kategori awal tersebut.
+- Proteksi integritas finansial: Kategori tidak dapat dihapus jika masih digunakan oleh transaksi, alokasi budget, atau template transaksi berulang. Pengguna wajib memindahkan atau menghapus data terkait terlebih dahulu.
 - Tipe kategori harus `income`, `expense`, atau `all`.
-- Warna wajib format hex.
+- Warna wajib berupa format hex (`#rrggbb`).
 
 ## UI Behavior
 
-- Halaman memisahkan kategori custom dan kategori system.
-- Kategori system tampil read-only.
-- User dapat search kategori dan filter berdasarkan tipe kategori.
-- Saat filter Pemasukan atau Pengeluaran, kategori bertipe `all` tetap ikut tampil karena dapat digunakan untuk kedua tipe transaksi.
-- Search dan filter ditampilkan sebagai filter bar responsif.
-- Dialog kategori memakai Zod schema `kategoriSchema`.
-- Delete kategori menggunakan confirm dialog.
-
-## TODO / Improvement
-
-- Jika kategori dipakai banyak transaksi, pertimbangkan warning dampak sebelum delete.
+- **Index `/categories`**:
+  - Hero card ringkasan total kategori aktif dan breakdown tipe (Pengeluaran, Pemasukan, Semua Tipe).
+  - Filter bar responsif: input pencarian dengan clear button + pill filter tipe (Semua, Pengeluaran, Pemasukan).
+  - Grid card modern seragam dengan halaman Rekening (`/wallets`), beraksen border atas sesuai warna kategori.
+  - Kartu menampilkan ikon plate transparan, nama, tipe badge, dan badge penggunaan "Dipakai X data".
+  - Klik pada kartu kategori bernavigasi langsung ke `/categories/[id]`.
+  - Tombol edit membuka dialog, sedangkan tombol hapus memunculkan dialog konfirmasi atau toast warning jika masih memiliki keterkaitan data keuangan.
+- **Detail `/categories/[id]`**:
+  - Tombol kembali ke `/categories`.
+  - Header interaktif: ikon, nama kategori, tipe badge, tombol Edit, tombol Hapus, dan CTA Tambah Transaksi (otomatis memilih kategori ini).
+  - Kartu aksen ringkasan kategori dengan kode warna hex.
+  - 3 kartu statistik metrik finansial: Total nominal (pengeluaran/pemasukan/net flow), frekuensi transaksi, dan rata-rata per transaksi, dilengkapi badge rincian pemakaian.
+  - Navigasi tanggal/periode (Bulan Ini, 30 Hari Terakhir, Tahun Ini, dsb.) dan pencarian transaksi.
+  - Tab tipe transaksi jika kategori bertipe `all`.
+  - Daftar histori transaksi dengan pagination dan detail sheet.
+  - Breadcrumb dinamis terintegrasi (`Kategori > [Nama Kategori]`).
