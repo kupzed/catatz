@@ -87,9 +87,11 @@ Route aktual:
 /auth/callback         -> Supabase auth callback
 /transactions          -> transaksi
 /wallets               -> rekening
+/wallets/[id]          -> detail rekening & riwayat transaksi
 /reports               -> laporan/rekap
 /reports/detail        -> detail rekap periode (?dari=...&sampai=...&jenis=...)
 /debts                 -> hutang/piutang
+/debts/[id]            -> detail hutang/piutang entitas
 /categories            -> kategori
 /settings              -> pengaturan
 /robots.txt            -> MetadataRoute robots

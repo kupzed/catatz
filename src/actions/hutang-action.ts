@@ -8,15 +8,26 @@ import type {
   CicilanFormValues,
   CicilanUpdateValues,
   Hutang,
+  HutangContactFormValues,
   HutangFormValues,
+  HutangTransactionFormValues,
 } from '@/types/hutang';
 import { fetchAllRows } from '@/lib/supabase-fetch';
-import { hutangSchema, cicilanSchema } from '@/validations/hutang-validation';
+import {
+  hutangSchema,
+  cicilanSchema,
+  hutangContactSchema,
+  hutangTransactionSchema,
+  hutangToggleStatusSchema,
+} from '@/validations/hutang-validation';
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
-function revalidateHutangSaldoPaths() {
+function revalidateHutangSaldoPaths(id?: string) {
   revalidatePath('/debts');
+  if (id) {
+    revalidatePath(`/debts/${id}`);
+  }
   revalidatePath('/wallets');
   revalidatePath('/reports');
 }
@@ -55,6 +66,180 @@ export async function getHutang(): Promise<Hutang[]> {
   return await fetchAllRows<Hutang>(query);
 }
 
+export async function getHutangDetail(id: string): Promise<ActionResult<Hutang>> {
+  const supabase = await createClient();
+  return await getHutangById(supabase, id);
+}
+
+export async function createHutangContact(
+  values: HutangContactFormValues,
+): Promise<ActionResult<Hutang>> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { success: false, error: 'Tidak terautentikasi' };
+
+  const parsed = hutangContactSchema.safeParse(values);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? 'Data nama pihak tidak valid',
+    };
+  }
+
+  const { data, error } = await supabase
+    .from('hutang')
+    .insert({
+      user_id: user.id,
+      nama_entitas: parsed.data.nama_entitas,
+      catatan: parsed.data.catatan === '' ? null : parsed.data.catatan,
+      total_pinjaman: 0,
+      sisa_tagihan: 0,
+      tipe: 'memberi',
+      status: 'aktif',
+      is_lunas_manual: false,
+    })
+    .select('*, cicilan:hutang_cicilan(*)')
+    .single();
+
+  if (error) return { success: false, error: error.message };
+
+  revalidateHutangSaldoPaths();
+  return { success: true, data: data as Hutang };
+}
+
+export async function updateHutangContact(
+  id: string,
+  values: HutangContactFormValues,
+): Promise<ActionResult<Hutang>> {
+  const supabase = await createClient();
+  const parsed = hutangContactSchema.safeParse(values);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? 'Data nama pihak tidak valid',
+    };
+  }
+
+  const { error } = await supabase
+    .from('hutang')
+    .update({
+      nama_entitas: parsed.data.nama_entitas,
+      catatan: parsed.data.catatan === '' ? null : parsed.data.catatan,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id);
+
+  if (error) return { success: false, error: error.message };
+
+  const refreshed = await getHutangById(supabase, id);
+  if (!refreshed.success) return refreshed;
+
+  revalidateHutangSaldoPaths(id);
+  return refreshed;
+}
+
+export async function toggleHutangStatus(
+  id: string,
+  isLunas: boolean,
+): Promise<ActionResult<Hutang>> {
+  const supabase = await createClient();
+  const parsed = hutangToggleStatusSchema.safeParse({ id, is_lunas: isLunas });
+  if (!parsed.success) {
+    return { success: false, error: 'Data status tidak valid' };
+  }
+
+  const { error } = await supabase
+    .from('hutang')
+    .update({
+      is_lunas_manual: isLunas,
+      status: isLunas ? 'lunas' : 'aktif',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id);
+
+  if (error) return { success: false, error: error.message };
+
+  const refreshed = await getHutangById(supabase, id);
+  if (!refreshed.success) return refreshed;
+
+  revalidateHutangSaldoPaths(id);
+  return refreshed;
+}
+
+export async function updateHutangTipe(
+  id: string,
+  tipe: 'memberi' | 'menerima',
+): Promise<ActionResult<Hutang>> {
+  const supabase = await createClient();
+  const { data: cicilan } = await supabase
+    .from('hutang_cicilan')
+    .select('id')
+    .eq('hutang_id', id);
+
+  if ((cicilan ?? []).length > 0) {
+    return {
+      success: false,
+      error: 'Tipe tidak dapat diubah setelah memiliki riwayat transaksi',
+    };
+  }
+
+  const { error } = await supabase
+    .from('hutang')
+    .update({ tipe, updated_at: new Date().toISOString() })
+    .eq('id', id);
+
+  if (error) return { success: false, error: error.message };
+
+  const refreshed = await getHutangById(supabase, id);
+  revalidateHutangSaldoPaths(id);
+  return refreshed;
+}
+
+export async function createHutangTransaction(
+  values: HutangTransactionFormValues,
+): Promise<ActionResult<Hutang>> {
+  const supabase = await createClient();
+  const parsed = hutangTransactionSchema.safeParse(values);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? 'Data transaksi tidak valid',
+    };
+  }
+
+  const { data: parentHutang, error: parentError } = await supabase
+    .from('hutang')
+    .select('tipe')
+    .eq('id', parsed.data.hutang_id)
+    .single();
+
+  if (parentError || !parentHutang) {
+    return { success: false, error: 'Pihak hutang/piutang tidak ditemukan' };
+  }
+
+  const { error } = await supabase.from('hutang_cicilan').insert({
+    hutang_id: parsed.data.hutang_id,
+    jenis_transaksi: parsed.data.jenis_transaksi,
+    nominal: parsed.data.nominal,
+    tanggal: parsed.data.tanggal,
+    waktu: parsed.data.waktu === '' ? null : parsed.data.waktu,
+    rekening_id: normalizeOptionalId(parsed.data.rekening_id),
+    catatan: parsed.data.catatan === '' ? null : parsed.data.catatan,
+    tipe_hutang_snapshot: parentHutang.tipe,
+  });
+
+  if (error) return { success: false, error: error.message };
+
+  const refreshed = await getHutangById(supabase, parsed.data.hutang_id);
+  if (!refreshed.success) return refreshed;
+
+  revalidateHutangSaldoPaths(parsed.data.hutang_id);
+  return refreshed;
+}
+
 export async function createHutang(
   values: HutangFormValues,
 ): Promise<ActionResult<Hutang>> {
@@ -88,7 +273,7 @@ export async function createHutang(
 
   if (error) return { success: false, error: error.message };
 
-  revalidateHutangSaldoPaths();
+  revalidateHutangSaldoPaths(data?.id);
   return { success: true, data: data as Hutang };
 }
 
@@ -178,7 +363,7 @@ export async function updateHutang(
 
   if (error) return { success: false, error: error.message };
 
-  revalidateHutangSaldoPaths();
+  revalidateHutangSaldoPaths(id);
   return { success: true, data: data as Hutang };
 }
 
@@ -188,7 +373,7 @@ export async function deleteHutang(id: string): Promise<ActionResult> {
 
   if (error) return { success: false, error: error.message };
 
-  revalidateHutangSaldoPaths();
+  revalidateHutangSaldoPaths(id);
   return { success: true };
 }
 
@@ -205,6 +390,7 @@ export async function createCicilan(
 
   const { error } = await supabase.from('hutang_cicilan').insert({
     ...parsed.data,
+    jenis_transaksi: parsed.data.jenis_transaksi ?? 'pembayaran',
     rekening_id: normalizeOptionalId(parsed.data.rekening_id),
     waktu: parsed.data.waktu === '' ? null : parsed.data.waktu,
     catatan: parsed.data.catatan === '' ? null : parsed.data.catatan,
@@ -215,7 +401,7 @@ export async function createCicilan(
   const refreshed = await getHutangById(supabase, parsed.data.hutang_id);
   if (!refreshed.success) return refreshed;
 
-  revalidateHutangSaldoPaths();
+  revalidateHutangSaldoPaths(parsed.data.hutang_id);
   return refreshed;
 }
 
@@ -235,6 +421,7 @@ export async function updateCicilan(
 
   const updatePayload = {
     ...(values.nominal !== undefined ? { nominal: values.nominal } : {}),
+    ...(values.jenis_transaksi !== undefined ? { jenis_transaksi: values.jenis_transaksi } : {}),
     ...(values.tanggal !== undefined ? { tanggal: values.tanggal } : {}),
     ...(values.waktu !== undefined
       ? { waktu: values.waktu === '' ? null : values.waktu }
@@ -257,7 +444,7 @@ export async function updateCicilan(
   const refreshed = await getHutangById(supabase, existing.hutang_id);
   if (!refreshed.success) return refreshed;
 
-  revalidateHutangSaldoPaths();
+  revalidateHutangSaldoPaths(existing.hutang_id);
   return refreshed;
 }
 
@@ -282,7 +469,7 @@ export async function deleteCicilan(id: string): Promise<ActionResult<Hutang>> {
   const refreshed = await getHutangById(supabase, existing.hutang_id);
   if (!refreshed.success) return refreshed;
 
-  revalidateHutangSaldoPaths();
+  revalidateHutangSaldoPaths(existing.hutang_id);
   return refreshed;
 }
 
@@ -294,13 +481,23 @@ export async function markHutangLunas(
   const current = await getHutangById(supabase, id);
 
   if (!current.success || !current.data) return current;
-  if (Number(current.data.sisa_tagihan) <= 0) return current;
+  if (Number(current.data.sisa_tagihan) <= 0) {
+    return toggleHutangStatus(id, true);
+  }
 
-  return createCicilan({
+  const cicilanRes = await createCicilan({
     hutang_id: id,
+    jenis_transaksi: 'pembayaran',
     nominal: Number(current.data.sisa_tagihan),
     rekening_id: rekeningId,
     tanggal: todayISODate(),
     waktu: currentTime(),
+    catatan: 'Pelunasan',
   });
+
+  if (cicilanRes.success) {
+    await toggleHutangStatus(id, true);
+  }
+
+  return cicilanRes;
 }

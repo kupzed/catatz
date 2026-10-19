@@ -1,19 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  hutangSchema,
-  type HutangSchema,
+  hutangContactSchema,
+  type HutangContactSchema,
 } from "@/validations/hutang-validation";
-import { createHutang, updateHutang } from "@/actions/hutang-action";
+import { createHutangContact, updateHutangContact } from "@/actions/hutang-action";
 import { toast } from "sonner";
 import type { Hutang } from "@/types/hutang";
-import type { Rekening } from "@/types/rekening";
-import { todayISODate, currentTime } from "@/lib/utils";
-import { RekeningSelect } from "@/components/common/rekening-select";
-import { NominalInput } from "@/components/common/nominal-input";
 import {
   Dialog,
   DialogContent,
@@ -23,17 +19,14 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ClearableInput } from "@/components/common/clearable-input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
 
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   editData?: Hutang | null;
-  rekening: Rekening[];
   onCreated: (h: Hutang) => void;
   onUpdated: (h: Hutang) => void;
 };
@@ -42,71 +35,60 @@ export default function HutangDialog({
   open,
   onOpenChange,
   editData,
-  rekening,
   onCreated,
   onUpdated,
 }: Props) {
   const isEdit = !!editData;
-  const hasCicilan = (editData?.cicilan?.length ?? 0) > 0;
   const [submitting, setSubmitting] = useState(false);
 
   const {
-    control,
     register,
     handleSubmit,
     setValue,
     reset,
     formState: { errors },
-  } = useForm<HutangSchema>({
-    resolver: zodResolver(hutangSchema),
+  } = useForm<HutangContactSchema>({
+    resolver: zodResolver(hutangContactSchema),
     defaultValues: {
-      tipe: "menerima",
-      tanggal_mulai: todayISODate(),
-      waktu: currentTime(),
+      nama_entitas: "",
+      catatan: "",
     },
   });
-
-  const tipe = useWatch({ control, name: "tipe" });
 
   useEffect(() => {
     if (editData) {
       reset({
-        tipe: editData.tipe,
         nama_entitas: editData.nama_entitas,
-        total_pinjaman: Number(editData.total_pinjaman),
-        tanggal_mulai: editData.tanggal_mulai,
-        tanggal_jatuh_tempo: editData.tanggal_jatuh_tempo ?? undefined,
-        waktu: editData.waktu?.substring(0, 5) ?? currentTime(),
-        rekening_id: editData.rekening_id ?? undefined,
         catatan: editData.catatan ?? "",
       });
     } else {
       reset({
-        tipe: "menerima",
-        tanggal_mulai: todayISODate(),
-        waktu: currentTime(),
+        nama_entitas: "",
+        catatan: "",
       });
     }
   }, [editData, reset, open]);
 
-  async function onSubmit(values: HutangSchema) {
+  async function onSubmit(values: HutangContactSchema) {
     setSubmitting(true);
     try {
-      if (isEdit) {
-        const res = await updateHutang(editData!.id, values);
+      if (isEdit && editData) {
+        const res = await updateHutangContact(editData.id, values);
         if (res.success && res.data) {
-          toast.success("Hutang diperbarui");
+          toast.success("Informasi pihak diperbarui");
           onUpdated(res.data);
+          onOpenChange(false);
         } else {
-          toast.error(res.error ?? "Gagal");
+          toast.error(res.error ?? "Gagal memperbarui informasi pihak");
         }
       } else {
-        const res = await createHutang(values);
+        const res = await createHutangContact(values);
         if (res.success && res.data) {
-          toast.success("Hutang dicatat");
+          toast.success("Pihak baru berhasil ditambahkan");
           onCreated(res.data);
+          onOpenChange(false);
         } else {
-          toast.error(res.error ?? "Gagal");
+          toast.error(res.error ?? "Gagal menambahkan pihak");
         }
       }
     } finally {
@@ -116,162 +98,38 @@ export default function HutangDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm sm:max-w-lg">
+      <DialogContent className="max-w-sm sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {isEdit ? "Edit Hutang" : "Catat Hutang/Piutang"}
+            {isEdit ? "Edit Informasi Pihak" : "Tambah Pihak Hutang & Piutang"}
           </DialogTitle>
           <DialogDescription>
             {isEdit
-              ? "Perbarui detail hutang atau piutang Anda."
-              : "Masukkan detail hutang atau piutang baru."}
+              ? "Perbarui nama atau catatan pihak ini."
+              : "Masukkan nama pihak dan catatan. Rincian transaksi dapat Anda kelola di halaman detail."}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Tipe */}
-          <Tabs
-            value={tipe}
-            onValueChange={(v) => {
-              if (!hasCicilan) setValue("tipe", v as HutangSchema["tipe"]);
-            }}
-          >
-            <TabsList className="w-full grid grid-cols-2">
-              <TabsTrigger value="menerima" disabled={hasCicilan}>
-                📥 Saya Berhutang
-              </TabsTrigger>
-              <TabsTrigger value="memberi" disabled={hasCicilan}>
-                📤 Saya Meminjamkan
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-          {isEdit && hasCicilan && (
-            <p className="text-xs text-muted-foreground">
-              Tipe hutang/piutang tidak bisa diubah setelah memiliki cicilan.
-            </p>
-          )}
-
-          {/* Nama Entitas */}
           <div className="space-y-1.5">
-            <Label htmlFor="nama-entitas">
-              {tipe === "menerima" ? "Nama Pemberi Pinjaman" : "Nama Peminjam"}
-            </Label>
+            <Label htmlFor="nama-entitas">Nama Pihak / Kontak</Label>
             <ClearableInput
               id="nama-entitas"
-              placeholder="Nama orang/lembaga"
+              placeholder="Contoh: Budi, Toko Makmur, Bank BCA"
               {...register("nama_entitas")}
               onClear={() => setValue("nama_entitas", "")}
               className={errors.nama_entitas ? "border-rose-500" : ""}
             />
             {errors.nama_entitas && (
-              <p className="text-xs text-rose-500">
-                {errors.nama_entitas.message}
-              </p>
+              <p className="text-xs text-rose-500">{errors.nama_entitas.message}</p>
             )}
           </div>
 
-          {/* Total */}
           <div className="space-y-1.5">
-            <Label htmlFor="total-pinjaman">Total Pinjaman (Rp)</Label>
-            <Controller
-              control={control}
-              name="total_pinjaman"
-              render={({ field }) => (
-                <NominalInput
-                  id="total-pinjaman"
-                  placeholder="0"
-                  value={field.value || ""}
-                  onValueChange={field.onChange}
-                  className={errors.total_pinjaman ? "border-rose-500" : ""}
-                />
-              )}
-            />
-            {errors.total_pinjaman && (
-              <p className="text-xs text-rose-500">
-                {errors.total_pinjaman.message}
-              </p>
-            )}
-          </div>
-
-          {/* Dates & Waktu */}
-          <div className="flex flex-col gap-3">
-            <div className="grid grid-cols-[3fr_1fr] gap-3">
-              <div className="flex-1 space-y-1.5 min-w-0">
-                <Label htmlFor="tgl-mulai">Tanggal Mulai</Label>
-                <Input
-                  id="tgl-mulai"
-                  type="date"
-                  {...register("tanggal_mulai")}
-                  className="w-full appearance-none bg-background border-input"
-                />
-                {errors.tanggal_mulai && (
-                  <p className="text-xs text-rose-500 mt-1">
-                    {errors.tanggal_mulai.message}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="waktu">Waktu</Label>
-                <Controller
-                  control={control}
-                  name="waktu"
-                  render={({ field }) => (
-                    <Input
-                      id="waktu"
-                      type="time"
-                      value={field.value ?? ""}
-                      onChange={field.onChange}
-                      className="w-full appearance-none bg-background border-input px-2 sm:px-4"
-                    />
-                  )}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="tgl-jatuh">Jatuh Tempo (Opsional)</Label>
-              <Input
-                id="tgl-jatuh"
-                type="date"
-                {...register("tanggal_jatuh_tempo")}
-                className="w-full appearance-none bg-background border-input"
-              />
-              {errors.tanggal_jatuh_tempo && (
-                <p className="text-xs text-rose-500 mt-1">
-                  {errors.tanggal_jatuh_tempo.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Rekening */}
-          <div className="space-y-1.5">
-            <Label htmlFor="rekening-id">Dari / Ke Rekening</Label>
-            <Controller
-              control={control}
-              name="rekening_id"
-              render={({ field }) => (
-                <RekeningSelect
-                  rekening={rekening}
-                  value={field.value || "none"}
-                  onValueChange={(val) =>
-                    field.onChange(val === "none" ? "" : val)
-                  }
-                  placeholder="(Tanpa Rekening)"
-                  includeNone={true}
-                  noneLabel="(Tanpa Rekening)"
-                  className="h-10 text-sm"
-                />
-              )}
-            />
-          </div>
-
-          {/* Catatan */}
-          <div className="space-y-1.5">
-            <Label htmlFor="catatan-hutang">Catatan</Label>
+            <Label htmlFor="catatan-entitas">Catatan</Label>
             <ClearableInput
-              id="catatan-hutang"
-              placeholder="Keterangan opsional"
+              id="catatan-entitas"
+              placeholder="Keterangan opsional (misal: Teman kantor, Usaha)"
               {...register("catatan")}
               onClear={() => setValue("catatan", "")}
             />

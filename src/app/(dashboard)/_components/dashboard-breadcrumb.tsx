@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import Link from "next/link";
 import { Fragment } from "react";
+import { useBreadcrumbTitle } from "@/providers/breadcrumb-title-provider";
 
 const ROUTE_NAMES: Record<string, string> = {
   transactions: "Transaksi",
@@ -23,6 +24,7 @@ const ROUTE_NAMES: Record<string, string> = {
 
 export default function DashboardBreadcrumb() {
   const pathname = usePathname();
+  const { title: customTitle } = useBreadcrumbTitle();
   const segments = pathname.split("/").filter(Boolean);
 
   return (
@@ -35,23 +37,35 @@ export default function DashboardBreadcrumb() {
               segment,
             );
           const prevSegment = index > 0 ? segments[index - 1] : "";
-          const label =
-            ROUTE_NAMES[segment] ??
-            (isUuid && prevSegment === "transactions"
-              ? "Detail Transaksi"
-              : segment.charAt(0).toUpperCase() + segment.slice(1));
           const isLast = index === segments.length - 1;
+
+          let label = ROUTE_NAMES[segment];
+          if (!label) {
+            if (isLast && customTitle) {
+              label = customTitle;
+            } else if (isUuid && prevSegment === "wallets") {
+              label = "Detail Rekening";
+            } else if (isUuid && prevSegment === "transactions") {
+              label = "Detail Transaksi";
+            } else if (isUuid && prevSegment === "debts") {
+              label = "Detail Hutang & Piutang";
+            } else {
+              label = segment.charAt(0).toUpperCase() + segment.slice(1);
+            }
+          }
 
           return (
             <Fragment key={href}>
               {index > 0 && <BreadcrumbSeparator />}
               <BreadcrumbItem>
                 {isLast ? (
-                  <BreadcrumbPage className="text-sm font-semibold text-foreground">{label}</BreadcrumbPage>
+                  <BreadcrumbPage className="text-sm font-semibold text-foreground truncate max-w-32.5 sm:max-w-xs inline-block">
+                    {label}
+                  </BreadcrumbPage>
                 ) : (
                   <Link
                     href={href}
-                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors truncate max-w-25 sm:max-w-xs inline-block"
                   >
                     {label}
                   </Link>

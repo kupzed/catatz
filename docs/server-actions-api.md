@@ -304,6 +304,16 @@ Deskripsi: mengambil rekening user, urut berdasarkan `urutan`.
 
 Tabel: `rekening`.
 
+### `getRekeningById`
+
+Deskripsi: mengambil data rekening spesifik beserta rincian statistik pemakaian (`RekeningUsageCounts`) untuk halaman detail rekening (`/wallets/[id]`).
+
+Input: `id: string` (divalidasi dengan `rekeningIdParamSchema` format UUID).
+
+Output: `ActionResult<{ rekening: Rekening; usage: RekeningUsageCounts }>`.
+
+Tabel: `rekening`, `transaksi`, `hutang`, `hutang_cicilan`, `recurring_transaksi`.
+
 ### `getRekeningUsageCountsMap`
 
 Deskripsi: menghitung pemakaian setiap rekening di transaksi, rekening tujuan transfer, hutang/piutang, cicilan, dan template transaksi berulang. Query data riwayat (`transaksi`, `hutang`, `hutang_cicilan`) menggunakan pagination `.range()` (chunk 1.000) agar seluruh data dihitung akurat tanpa terpotong limit default PostgREST (1.000 baris) pada database produksi dengan ribuan data.
@@ -381,23 +391,32 @@ Proteksi tambahan:
 
 Lokasi: `src/actions/hutang-action.ts`
 
-| Action            | Tujuan                                                                                                                                                           | Tabel                      |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| `getHutang`       | Mengambil hutang/piutang dengan relasi cicilan.                                                                                                                  | `hutang`, `hutang_cicilan` |
-| `createHutang`    | Membuat hutang/piutang. Validasi `hutangSchema` server-side.                                                                                                     | `hutang`                   |
-| `updateHutang`    | Mengubah hutang/piutang. Validasi `hutangSchema.partial()` server-side. Menghitung ulang sisa jika total berubah. Menolak perubahan tipe jika sudah ada cicilan. | `hutang`, `hutang_cicilan` |
-| `deleteHutang`    | Menghapus hutang/piutang.                                                                                                                                        | `hutang`                   |
-| `createCicilan`   | Membuat cicilan. Validasi `cicilanSchema` server-side. Mengembalikan parent `Hutang` terbaru.                                                                    | `hutang_cicilan`, `hutang` |
-| `updateCicilan`   | Mengubah nominal, tanggal, waktu, rekening, atau catatan cicilan lalu mengembalikan parent `Hutang` terbaru.                                                     | `hutang_cicilan`, `hutang` |
-| `deleteCicilan`   | Menghapus cicilan lalu mengembalikan parent `Hutang` terbaru.                                                                                                    | `hutang_cicilan`, `hutang` |
-| `markHutangLunas` | Membuat cicilan sebesar sisa tagihan dengan rekening opsional.                                                                                                   | `hutang_cicilan`, `hutang` |
+| Action                   | Tujuan                                                                                                                                                           | Tabel                      |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `getHutang`              | Mengambil seluruh pihak hutang/piutang dengan relasi cicilan.                                                                                                    | `hutang`, `hutang_cicilan` |
+| `getHutangDetail`        | Mengambil satu pihak hutang/piutang beserta seluruh riwayat transaksi untuk halaman `/debts/[id]`.                                                              | `hutang`, `hutang_cicilan` |
+| `createHutangContact`    | Membuat pihak baru dari halaman index dengan validasi `hutangContactSchema` (hanya Nama dan Catatan).                                                            | `hutang`                   |
+| `updateHutangContact`    | Mengubah nama atau catatan pihak dengan validasi `hutangContactSchema`.                                                                                          | `hutang`                   |
+| `toggleHutangStatus`     | Mengubah tag label status Lunas/Belum Lunas tanpa mendistorsi perhitungan saldo nominal riil.                                                                    | `hutang`                   |
+| `updateHutangTipe`       | Mengubah tipe hubungan (`memberi`/`menerima`) sebelum catatan memiliki transaksi.                                                                                | `hutang`                   |
+| `createHutangTransaction`| Mencatat pinjaman baru atau pembayaran/cicilan dengan validasi `hutangTransactionSchema`.                                                                         | `hutang_cicilan`, `hutang` |
+| `createHutang`           | Membuat hutang/piutang langsung (legacy kompatibel). Validasi `hutangSchema` server-side.                                                                        | `hutang`                   |
+| `updateHutang`           | Mengubah hutang/piutang. Validasi `hutangSchema.partial()` server-side. Menghitung ulang sisa jika total berubah. Menolak perubahan tipe jika sudah ada cicilan. | `hutang`, `hutang_cicilan` |
+| `deleteHutang`           | Menghapus hutang/piutang beserta seluruh riwayat transaksinya dan mengembalikan saldo rekening.                                                                  | `hutang`                   |
+| `createCicilan`          | Membuat cicilan/pembayaran (legacy kompatibel). Validasi `cicilanSchema` server-side. Mengembalikan parent `Hutang` terbaru.                                     | `hutang_cicilan`, `hutang` |
+| `updateCicilan`          | Mengubah nominal, tanggal, waktu, rekening, jenis transaksi, atau catatan transaksi lalu mengembalikan parent `Hutang` terbaru.                                 | `hutang_cicilan`, `hutang` |
+| `deleteCicilan`          | Menghapus transaksi lalu mengembalikan parent `Hutang` terbaru dan mengembalikan saldo rekening.                                                                 | `hutang_cicilan`, `hutang` |
+| `markHutangLunas`        | Membuat cicilan sebesar sisa tagihan dengan rekening opsional dan menandai status lunas.                                                                         | `hutang_cicilan`, `hutang` |
 
 Validasi server-side:
 
-- `hutangSchema` (Zod) dijalankan di `createHutang` dan `hutangSchema.partial()` di `updateHutang` sebelum query apapun.
-- `cicilanSchema` (Zod) dijalankan di `createCicilan` sebelum insert.
+- `hutangContactSchema` (Zod) dijalankan di `createHutangContact` dan `updateHutangContact`.
+- `hutangTransactionSchema` (Zod) dijalankan di `createHutangTransaction`.
+- `hutangToggleStatusSchema` (Zod) dijalankan di `toggleHutangStatus`.
+- `hutangSchema` (Zod) dijalankan di `createHutang` dan `hutangSchema.partial()` di `updateHutang`.
+- `cicilanSchema` (Zod) dijalankan di `createCicilan`.
 
-Catatan: operasi cicilan mengandalkan trigger database untuk memperbarui `sisa_tagihan`, status, dan saldo rekening. UI pelunasan meminta user memilih rekening terlebih dahulu lalu mencatat cicilan sebesar sisa tagihan. Mutasi hutang/piutang dan cicilan merevalidate `/debts`, `/wallets`, dan `/reports`.
+Catatan: Operasi mutasi hutang/piutang dan transaksi cicilan/pinjaman mengandalkan trigger database (`015-hutang-piutang-revamp.sql`) untuk memperbarui `sisa_tagihan`, status, dan saldo rekening secara konsisten. Mutasi hutang/piutang merevalidate `/debts`, `/debts/[id]`, `/wallets`, dan `/reports`.
 
 ## Rekap Actions
 

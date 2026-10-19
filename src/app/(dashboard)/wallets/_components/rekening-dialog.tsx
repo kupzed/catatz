@@ -55,8 +55,8 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   editData?: Rekening | null;
-  onCreated: (r: Rekening) => void;
-  onUpdated: (r: Rekening) => void;
+  onCreated?: (r: Rekening) => void;
+  onUpdated?: (r: Rekening) => void;
 };
 
 // ─────────────────────────────────────────────
@@ -501,12 +501,12 @@ export default function RekeningDialog({
         {isEdit && editData ? (
           <EditForm
             editData={editData}
-            onUpdated={onUpdated}
+            onUpdated={(r) => onUpdated?.(r)}
             onClose={() => onOpenChange(false)}
           />
         ) : (
           <CreateForm
-            onCreated={onCreated}
+            onCreated={(r) => onCreated?.(r)}
             onClose={() => onOpenChange(false)}
           />
         )}

@@ -30,6 +30,7 @@ export type UseTransaksiDialogParams = {
   onQueued?: (action: QueuedAction) => void;
   copyFrom?: Transaksi | null;
   defaultTanggal?: string;
+  defaultRekeningId?: string;
 };
 
 export function useTransaksiDialog({
@@ -43,6 +44,7 @@ export function useTransaksiDialog({
   onQueued,
   copyFrom,
   defaultTanggal,
+  defaultRekeningId,
 }: UseTransaksiDialogParams) {
   const isEdit = !!editData;
   const isCorrection = editData?.tipe === "correction";
@@ -100,10 +102,11 @@ export function useTransaksiDialog({
         tipe: "expense",
         tanggal: defaultTanggal ?? todayISODate(),
         waktu: currentTime(),
+        rekening_id: defaultRekeningId ?? "",
         tags: [],
       });
     }
-  }, [editData, copyFrom, defaultTanggal, reset, open]);
+  }, [editData, copyFrom, defaultTanggal, defaultRekeningId, reset, open]);
 
   // Load recent judul saat dialog pertama dibuka (mode create)
   useEffect(() => {
