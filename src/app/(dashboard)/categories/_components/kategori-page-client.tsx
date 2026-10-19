@@ -155,67 +155,65 @@ export default function KategoriPageClient({
       />
 
       {/* Summary Card */}
-      <div className="rounded-card bg-surface-dark text-white ring-1 ring-white/5 p-5 sm:p-6 transition-colors">
+      <div className="rounded-card border border-hairline bg-card p-5 sm:p-6 transition-colors">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground/80 mb-1">
+            <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-1">
               Total Kategori
             </p>
-            <p className="font-mono text-3xl sm:text-4xl font-normal text-white">
+            <p className="font-mono text-3xl sm:text-4xl font-normal text-foreground">
               {summary.total}
             </p>
           </div>
-          <div className="flex flex-wrap gap-2 sm:gap-3 text-xs">
-            <div className="bg-surface-dark-elevated rounded-input px-3.5 py-2 border border-hairline/10">
-              <span className="text-muted-foreground">Pengeluaran:</span>{" "}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 text-xs">
+            <div className="bg-surface-strong dark:bg-surface-dark-elevated rounded-full px-3.5 py-1.5 border border-hairline flex items-center gap-1.5">
+              <span className="text-muted-foreground font-medium">Pengeluaran:</span>
               <span className="font-mono font-semibold text-semantic-down">{summary.expense}</span>
             </div>
-            <div className="bg-surface-dark-elevated rounded-input px-3.5 py-2 border border-hairline/10">
-              <span className="text-muted-foreground">Pemasukan:</span>{" "}
+            <div className="bg-surface-strong dark:bg-surface-dark-elevated rounded-full px-3.5 py-1.5 border border-hairline flex items-center gap-1.5">
+              <span className="text-muted-foreground font-medium">Pemasukan:</span>
               <span className="font-mono font-semibold text-semantic-up">{summary.income}</span>
             </div>
-            <div className="bg-surface-dark-elevated rounded-input px-3.5 py-2 border border-hairline/10">
-              <span className="text-muted-foreground">Semua Tipe:</span>{" "}
-              <span className="font-mono font-semibold text-foreground">{summary.all}</span>
+            <div className="bg-surface-strong dark:bg-surface-dark-elevated rounded-full px-3.5 py-1.5 border border-hairline flex items-center gap-1.5">
+              <span className="text-muted-foreground font-medium">Semua Tipe:</span>
+              <span className="font-mono font-semibold text-primary">{summary.all}</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Filter Bar */}
-      <div className="rounded-card border border-hairline bg-card p-3 sm:p-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="relative w-full lg:max-w-sm">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <ClearableInput
-              id="kategori-search"
-              placeholder="Cari kategori..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onClear={() => setSearch("")}
-              className="pl-9"
-            />
-          </div>
-          <div className="grid grid-cols-3 gap-1 rounded-full bg-surface-strong p-1 sm:inline-grid sm:w-auto">
-            {[
-              { id: "all", label: "Semua" },
-              { id: "expense", label: "Pengeluaran" },
-              { id: "income", label: "Pemasukan" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setFilterTipe(tab.id)}
-                className={cn(
-                  "inline-flex h-9 items-center justify-center rounded-full px-3 text-xs font-semibold transition-colors sm:px-4",
-                  filterTipe === tab.id
-                    ? "bg-primary text-white"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+        <div className="relative flex-1 sm:max-w-md">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <ClearableInput
+            id="kategori-search"
+            placeholder="Cari kategori..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onClear={() => setSearch("")}
+            className="pl-9 h-11 rounded-input bg-card border-hairline"
+          />
+        </div>
+        <div className="grid grid-cols-3 gap-1 rounded-full bg-surface-strong p-1 sm:inline-grid sm:w-auto h-11 items-center">
+          {[
+            { id: "all", label: "Semua" },
+            { id: "expense", label: "Pengeluaran" },
+            { id: "income", label: "Pemasukan" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setFilterTipe(tab.id)}
+              className={cn(
+                "inline-flex h-9 items-center justify-center rounded-full px-3 text-xs font-semibold transition-colors sm:px-4 cursor-pointer",
+                filterTipe === tab.id
+                  ? "bg-primary text-white"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -253,7 +251,7 @@ export default function KategoriPageClient({
               <div
                 key={k.id}
                 onClick={() => router.push(`/categories/${k.id}`)}
-                className="relative rounded-card border border-hairline bg-card p-5 transition-colors hover:bg-surface-soft group border-t-2 cursor-pointer flex flex-col justify-between"
+                className="relative rounded-card border border-hairline bg-card p-5 transition-colors hover:bg-surface-soft group border-t-4 cursor-pointer flex flex-col justify-between"
                 style={{ borderTopColor: k.warna ?? undefined }}
               >
                 <div>
