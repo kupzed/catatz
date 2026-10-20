@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ClearableInput } from "@/components/common/clearable-input";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
@@ -225,19 +226,24 @@ export default function KategoriDialog({
 
           {/* Ikon */}
           <div className="space-y-2">
-            <Label>Ikon</Label>
-            <div className="flex gap-2 items-center">
-              <ClearableInput
+            <Label htmlFor="kat-ikon">Ikon</Label>
+            <div className="flex gap-3 items-center">
+              <Input
+                id="kat-ikon"
                 {...register("ikon")}
-                onClear={() => setValue("ikon", "")}
+                value={ikon ?? ""}
+                onChange={(e) =>
+                  setValue("ikon", e.target.value, { shouldValidate: true })
+                }
                 className={cn(
-                  "w-16 text-center text-lg",
+                  "w-14 h-12 text-center text-2xl p-0 shrink-0 rounded-input",
                   errors.ikon ? "border-rose-500" : "",
                 )}
-                placeholder="🍔"
+                placeholder="💰"
                 maxLength={5}
+                aria-label="Ikon kategori"
               />
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground leading-relaxed">
                 Ketik emoji manual atau pilih di bawah
               </span>
             </div>
@@ -245,16 +251,17 @@ export default function KategoriDialog({
               <p className="text-xs text-rose-500">{errors.ikon.message}</p>
             )}
 
-            <div className="grid grid-cols-8 gap-1 p-2 bg-muted/30 rounded-lg border">
+            <div className="grid grid-cols-8 gap-1 p-2 bg-muted/30 rounded-lg border border-hairline">
               {EMOJI_PRESETS.map((e) => (
                 <button
                   key={e}
                   type="button"
-                  onClick={() => setValue("ikon", e)}
+                  onClick={() => setValue("ikon", e, { shouldValidate: true })}
                   className={cn(
                     "text-xl p-1.5 rounded hover:bg-accent transition-colors flex items-center justify-center",
                     ikon === e && "bg-accent border border-border",
                   )}
+                  aria-label={`Pilih emoji ${e}`}
                 >
                   {e}
                 </button>

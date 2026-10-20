@@ -210,4 +210,40 @@ describe("KategoriDialog component", () => {
 
     expect(handleOpenChange).toHaveBeenCalledWith(false);
   });
+
+  it("merender icon input dengan nilai default dan memperbarui saat preset emoji diklik", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <KategoriDialog
+        open={true}
+        onOpenChange={vi.fn()}
+      />
+    );
+
+    const iconInput = screen.getByLabelText("Ikon kategori");
+    expect(iconInput).toHaveValue("💰");
+
+    const carEmojiBtn = screen.getByLabelText("Pilih emoji 🚗");
+    await user.click(carEmojiBtn);
+
+    expect(iconInput).toHaveValue("🚗");
+  });
+
+  it("memungkinkan mengetik emoji kustom manual di input icon", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <KategoriDialog
+        open={true}
+        onOpenChange={vi.fn()}
+      />
+    );
+
+    const iconInput = screen.getByLabelText("Ikon kategori");
+    await user.clear(iconInput);
+    await user.type(iconInput, "✈️");
+
+    expect(iconInput).toHaveValue("✈️");
+  });
 });
