@@ -136,6 +136,7 @@ export default function KategoriDialog({
         if (res.success && res.data) {
           toast.success("Kategori diperbarui");
           onUpdated?.(res.data);
+          onOpenChange(false);
         } else {
           toast.error(res.error ?? "Gagal memperbarui");
         }
@@ -144,6 +145,7 @@ export default function KategoriDialog({
         if (res.success && res.data) {
           toast.success("Kategori ditambahkan");
           onCreated?.(res.data);
+          onOpenChange(false);
         } else {
           toast.error(res.error ?? "Gagal menambahkan");
         }
