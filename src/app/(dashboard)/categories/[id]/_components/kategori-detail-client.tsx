@@ -588,7 +588,6 @@ export function KategoriDetailClient({
         editData={kategori}
         onUpdated={(updated) => {
           setKategori(updated);
-          toast.success("Kategori berhasil diperbarui");
           router.refresh();
         }}
       />
