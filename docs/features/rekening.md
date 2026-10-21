@@ -92,7 +92,7 @@ Initial data detail diambil dengan:
 - Klik transaksi membuka `TransaksiDetailSheet` (bisa melihat detail, copy transaksi, edit transaksi, hapus transaksi).
 - Tombol "Tambah Transaksi" & Edit Transaksi di detail rekening terkunci ke rekening ini (`lockRekening={true}`):
   - Pada mode create dan edit expense/income: dropdown Rekening Asal ter-disable dan terkunci ke rekening yang sedang dibuka, dengan label penanda "Terkunci di rekening ini".
-  - Pada mode create transfer: Rekening Asal terkunci ke rekening saat ini, sementara Rekening Tujuan bebas dipilih.
+  - Pada mode create transfer: Rekening Asal terkunci ke rekening saat ini, sementara Rekening Tujuan menonaktifkan rekening asal tersebut dengan proteksi label "(Rekening asal)". Tombol tukar rekening disembunyikan karena posisi rekening asal terkunci.
   - Pada mode edit transfer-in (di mana rekening tujuan adalah rekening detail saat ini): Rekening Tujuan ter-disable dan terkunci, sementara Rekening Asal dapat diubah.
   - Saran judul transaksi (`getRecentJudul` & `getJudulSuggestions`) difilter secara spesifik berdasarkan riwayat `rekening_id` yang sedang dibuka.
   - Pemilihan saran judul atau AI autofill memproteksi rekening terkunci agar tidak tertimpa.

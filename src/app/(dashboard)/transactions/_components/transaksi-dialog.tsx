@@ -69,6 +69,12 @@ export default function TransaksiDialog(props: TransaksiDialogProps) {
     lockKategori,
     disabledRekeningId,
     disabledRekeningTujuan,
+    rekeningId,
+    rekeningTujuan,
+    canSwap,
+    handleRekeningAsalChange,
+    handleRekeningTujuanChange,
+    handleSwapRekening,
     handleSelectSuggestion,
     handleParsedResult,
     onSubmit,
@@ -129,6 +135,12 @@ export default function TransaksiDialog(props: TransaksiDialogProps) {
             correctionRekening={correctionRekening}
             disabledRekeningId={disabledRekeningId}
             disabledRekeningTujuan={disabledRekeningTujuan}
+            rekeningId={rekeningId}
+            rekeningTujuan={rekeningTujuan}
+            canSwap={canSwap}
+            onRekeningAsalChange={handleRekeningAsalChange}
+            onRekeningTujuanChange={handleRekeningTujuanChange}
+            onSwapRekening={handleSwapRekening}
           />
 
           {/* Nominal */}

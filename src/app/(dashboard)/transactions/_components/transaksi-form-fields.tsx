@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Controller } from "react-hook-form";
 import type {
   Control,
@@ -21,6 +22,7 @@ import {
 import { NominalInput } from "@/components/common/nominal-input";
 import { RekeningSelect } from "@/components/common/rekening-select";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // ─────────────────────────────────────────────
@@ -83,6 +85,12 @@ type RekeningFieldsProps = {
   correctionRekening: Rekening | null;
   disabledRekeningId?: boolean;
   disabledRekeningTujuan?: boolean;
+  rekeningId?: string;
+  rekeningTujuan?: string;
+  canSwap?: boolean;
+  onRekeningAsalChange?: (value: string) => void;
+  onRekeningTujuanChange?: (value: string) => void;
+  onSwapRekening?: () => void;
 };
 
 export function TransaksiRekeningFields({
@@ -94,8 +102,33 @@ export function TransaksiRekeningFields({
   correctionRekening,
   disabledRekeningId = false,
   disabledRekeningTujuan = false,
+  rekeningId,
+  rekeningTujuan,
+  canSwap = false,
+  onRekeningAsalChange,
+  onRekeningTujuanChange,
+  onSwapRekening,
 }: RekeningFieldsProps) {
   const { formatRupiah } = useSystemPreferences();
+
+  const disabledAsalValues = useMemo(() => {
+    if (tipe !== "transfer") return undefined;
+    if (disabledRekeningTujuan && rekeningTujuan) {
+      return [rekeningTujuan];
+    }
+    return undefined;
+  }, [tipe, disabledRekeningTujuan, rekeningTujuan]);
+
+  const disabledTujuanValues = useMemo(() => {
+    if (tipe !== "transfer") return undefined;
+    if (!rekeningId) return undefined;
+    // Jika rekening asal terkunci atau rekening tujuan belum dipilih,
+    // jangan izinkan memilih rekening yang sama dengan rekening asal.
+    if (disabledRekeningId || !rekeningTujuan) {
+      return [rekeningId];
+    }
+    return undefined;
+  }, [tipe, disabledRekeningId, rekeningId, rekeningTujuan]);
 
   return (
     <>
@@ -136,10 +169,18 @@ export function TransaksiRekeningFields({
               <RekeningSelect
                 rekening={rekening}
                 value={field.value || ""}
-                onValueChange={field.onChange}
+                onValueChange={(val) => {
+                  if (onRekeningAsalChange) {
+                    onRekeningAsalChange(val);
+                  } else {
+                    field.onChange(val);
+                  }
+                }}
                 placeholder="Pilih rekening"
                 id="rekening-select"
                 disabled={disabledRekeningId}
+                disabledValues={disabledAsalValues}
+                disabledReason="(Rekening tujuan)"
                 className={cn(
                   errors.rekening_id && "border-rose-500",
                   disabledRekeningId &&
@@ -158,11 +199,24 @@ export function TransaksiRekeningFields({
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <Label htmlFor="rekening-tujuan-select">Rekening Tujuan</Label>
-            {disabledRekeningTujuan && (
-              <span className="text-[11px] text-muted-foreground">
-                Terkunci di rekening ini
-              </span>
-            )}
+            <div className="flex items-center gap-2">
+              {canSwap && (
+                <button
+                  type="button"
+                  onClick={onSwapRekening}
+                  className="inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:underline cursor-pointer transition-colors"
+                  title="Tukar posisi rekening asal dan tujuan"
+                >
+                  <ArrowUpDown className="h-3 w-3" />
+                  <span>Tukar Rekening</span>
+                </button>
+              )}
+              {disabledRekeningTujuan && (
+                <span className="text-[11px] text-muted-foreground">
+                  Terkunci di rekening ini
+                </span>
+              )}
+            </div>
           </div>
           <Controller
             control={control}
@@ -171,10 +225,18 @@ export function TransaksiRekeningFields({
               <RekeningSelect
                 rekening={rekening}
                 value={field.value || ""}
-                onValueChange={field.onChange}
+                onValueChange={(val) => {
+                  if (onRekeningTujuanChange) {
+                    onRekeningTujuanChange(val);
+                  } else {
+                    field.onChange(val);
+                  }
+                }}
                 placeholder="Pilih rekening tujuan"
                 id="rekening-tujuan-select"
                 disabled={disabledRekeningTujuan}
+                disabledValues={disabledTujuanValues}
+                disabledReason="(Rekening asal)"
                 className={cn(
                   errors.rekening_tujuan && "border-rose-500",
                   disabledRekeningTujuan &&

@@ -1011,5 +1011,124 @@ describe("TransaksiDialog", () => {
       });
     });
   });
+
+  describe("Transfer Rekening Asal & Tujuan Mutual Protection & Auto-Switch", () => {
+    it("swaps Rekening Asal and Tujuan when Tukar Rekening button is clicked", async () => {
+      const user = userEvent.setup();
+      const transferTx = createDummyTransaksi({
+        id: "tx-transfer-swap",
+        tipe: "transfer",
+        nominal: 50000,
+        tanggal: "2026-10-15",
+        waktu: "12:00:00",
+        judul: null,
+        kategori_id: null,
+        rekening_id: dummyRekening[0].id, // Asal: BCA
+        rekening_tujuan: dummyRekening[1].id, // Tujuan: Dompet Tunai
+      });
+
+      render(
+        <TransaksiDialog
+          open={true}
+          onOpenChange={onOpenChange}
+          rekening={dummyRekening}
+          kategori={dummyKategori}
+          editData={transferTx}
+          onCreated={onCreated}
+          onUpdated={onUpdated}
+          onQueued={onQueued}
+        />,
+      );
+
+      // Check initial values in comboboxes
+      const asalTrigger = screen.getByRole("combobox", { name: /Rekening Asal/i });
+      const tujuanTrigger = screen.getByRole("combobox", { name: /Rekening Tujuan/i });
+      expect(asalTrigger).toHaveTextContent(dummyRekening[0].nama);
+      expect(tujuanTrigger).toHaveTextContent(dummyRekening[1].nama);
+
+      // Click Tukar Rekening button
+      const swapBtn = screen.getByRole("button", { name: /Tukar Rekening/i });
+      await user.click(swapBtn);
+
+      // Now Asal should be Dompet Tunai and Tujuan should be BCA
+      expect(asalTrigger).toHaveTextContent(dummyRekening[1].nama);
+      expect(tujuanTrigger).toHaveTextContent(dummyRekening[0].nama);
+    });
+
+    it("automatically switches Asal and Tujuan when user selects destination account in Asal dropdown", async () => {
+      const user = userEvent.setup();
+      const transferTx = createDummyTransaksi({
+        id: "tx-transfer-autoswitch",
+        tipe: "transfer",
+        nominal: 75000,
+        tanggal: "2026-10-15",
+        waktu: "12:00:00",
+        judul: null,
+        kategori_id: null,
+        rekening_id: dummyRekening[0].id, // Asal: BCA (X)
+        rekening_tujuan: dummyRekening[1].id, // Tujuan: Dompet Tunai (Y)
+      });
+
+      render(
+        <TransaksiDialog
+          open={true}
+          onOpenChange={onOpenChange}
+          rekening={dummyRekening}
+          kategori={dummyKategori}
+          editData={transferTx}
+          onCreated={onCreated}
+          onUpdated={onUpdated}
+          onQueued={onQueued}
+        />,
+      );
+
+      const asalTrigger = screen.getByRole("combobox", { name: /Rekening Asal/i });
+      const tujuanTrigger = screen.getByRole("combobox", { name: /Rekening Tujuan/i });
+
+      // Open Rekening Asal select
+      await user.click(asalTrigger);
+
+      // Select Dompet Tunai (Y) in Rekening Asal
+      const dompetOption = await screen.findByRole("option", {
+        name: new RegExp(dummyRekening[1].nama, "i"),
+      });
+      await user.click(dompetOption);
+
+      // Rekening Asal should become Dompet Tunai (Y), and Rekening Tujuan should become BCA (X)
+      expect(asalTrigger).toHaveTextContent(dummyRekening[1].nama);
+      expect(tujuanTrigger).toHaveTextContent(dummyRekening[0].nama);
+    });
+
+    it("disables the source account in destination dropdown when destination is not yet chosen", async () => {
+      const user = userEvent.setup();
+
+      render(
+        <TransaksiDialog
+          open={true}
+          onOpenChange={onOpenChange}
+          rekening={dummyRekening}
+          kategori={dummyKategori}
+          defaultRekeningId={dummyRekening[0].id}
+          onCreated={onCreated}
+          onUpdated={onUpdated}
+          onQueued={onQueued}
+        />,
+      );
+
+      // Switch to Transfer tab
+      const transferTab = screen.getByRole("tab", { name: /Transfer/ });
+      await user.click(transferTab);
+
+      // Open Rekening Tujuan select
+      const tujuanTrigger = screen.getByRole("combobox", { name: /Rekening Tujuan/i });
+      await user.click(tujuanTrigger);
+
+      // In Rekening Tujuan options, BCA (current source) should be disabled
+      const bcaOption = await screen.findByRole("option", {
+        name: new RegExp(dummyRekening[0].nama, "i"),
+      });
+      expect(bcaOption).toHaveAttribute("data-disabled");
+    });
+  });
 });
 
