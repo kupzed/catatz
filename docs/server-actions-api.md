@@ -290,8 +290,8 @@ Lokasi: `src/actions/transaksi-action.ts`
 
 | Action                                    | Tujuan                                                                                                         | Tabel       |
 | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ----------- |
-| `getJudulSuggestions(query, kategoriId?)` | Suggest judul berdasarkan riwayat transaksi dan kategori yang sering dipakai (opsional filter by kategori).   | `transaksi` |
-| `getRecentJudul(kategoriId?)`             | Mengambil judul transaksi terbaru untuk initial suggestion (opsional filter by kategori).                     | `transaksi` |
+| `getJudulSuggestions(query, kategoriId?, rekeningId?)` | Suggest judul berdasarkan riwayat transaksi dan kategori yang sering dipakai (opsional filter by kategori dan/atau rekening). | `transaksi` |
+| `getRecentJudul(kategoriId?, rekeningId?)`             | Mengambil judul transaksi terbaru untuk initial suggestion (opsional filter by kategori dan/atau rekening).                     | `transaksi` |
 | `suggestKategori(catatan)`                | Legacy auto-kategorisasi berbasis catatan.                                                                     | `transaksi` |
 
 ## Rekening Actions

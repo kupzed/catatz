@@ -108,6 +108,7 @@ function CreateForm({
       if (res.success && res.data) {
         toast.success("Rekening ditambahkan");
         onCreated(res.data);
+        onClose();
       } else toast.error(res.error ?? "Gagal menambahkan");
     } finally {
       setSubmitting(false);
@@ -136,20 +137,21 @@ function CreateForm({
                     type="button"
                     onClick={() => handleBankSelect(bank.slug)}
                     className={cn(
-                      "rounded-[8px] border p-2 text-center text-xs font-medium hover:border-primary transition-all",
+                      "flex flex-col items-center justify-center rounded-[8px] border p-2 text-center text-xs font-medium hover:border-primary transition-all min-h-16",
                       logo === bank.slug
                         ? "border-primary bg-primary/5 dark:bg-primary/10"
                         : "border-border",
                     )}
                   >
                     <div
-                      className="w-6 h-6 rounded-full mx-auto mb-1"
+                      className="w-6 h-6 rounded-full flex items-center justify-center mb-1 text-xs shrink-0"
                       style={{ background: bank.warna }}
-                    />
-                    {bank.emoji && (
-                      <span className="text-base">{bank.emoji}</span>
-                    )}
-                    <p className="truncate">{bank.nama}</p>
+                    >
+                      {bank.emoji ? (
+                        <span className="text-xs leading-none">{bank.emoji}</span>
+                      ) : null}
+                    </div>
+                    <p className="truncate w-full">{bank.nama}</p>
                   </button>
                 ))}
               </div>
@@ -327,6 +329,7 @@ function EditForm({
       if (res.success && res.data) {
         toast.success("Rekening diperbarui");
         onUpdated(res.data);
+        onClose();
       } else toast.error(res.error ?? "Gagal memperbarui");
     } finally {
       setSubmitting(false);

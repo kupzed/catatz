@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -33,6 +33,7 @@ export type UseTransaksiDialogParams = {
   defaultRekeningId?: string;
   defaultKategoriId?: string;
   lockKategori?: boolean;
+  lockRekening?: boolean;
 };
 
 export function useTransaksiDialog({
@@ -49,6 +50,7 @@ export function useTransaksiDialog({
   defaultRekeningId,
   defaultKategoriId,
   lockKategori,
+  lockRekening,
 }: UseTransaksiDialogParams) {
   const isEdit = !!editData;
   const isCorrection = editData?.tipe === "correction";
@@ -70,19 +72,58 @@ export function useTransaksiDialog({
     return ["expense", "income"];
   }, [lockKategori, lockedKategori]);
 
+  const isInitialTransferIn = useMemo(() => {
+    if (!lockRekening || !defaultRekeningId) return false;
+    const sourceTx = editData ?? copyFrom;
+    return (
+      sourceTx?.tipe === "transfer" &&
+      sourceTx.rekening_tujuan === defaultRekeningId &&
+      sourceTx.rekening_id !== defaultRekeningId
+    );
+  }, [lockRekening, defaultRekeningId, editData, copyFrom]);
+
+  const initialFormTipe: TransaksiSchema["tipe"] =
+    (editData?.tipe as TransaksiSchema["tipe"]) ??
+    (copyFrom?.tipe as TransaksiSchema["tipe"]) ??
+    (lockedKategori?.tipe === "income"
+      ? "income"
+      : lockedKategori?.tipe === "expense"
+        ? "expense"
+        : "expense");
+
+  const initialRekeningId =
+    lockRekening && defaultRekeningId
+      ? isInitialTransferIn
+        ? (editData?.rekening_id ?? copyFrom?.rekening_id ?? "")
+        : defaultRekeningId
+      : (editData?.rekening_id ?? defaultRekeningId ?? "");
+
+  const initialRekeningTujuan =
+    lockRekening && defaultRekeningId
+      ? isInitialTransferIn
+        ? defaultRekeningId
+        : (editData?.rekening_tujuan ?? copyFrom?.rekening_tujuan ?? undefined)
+      : (editData?.rekening_tujuan ?? copyFrom?.rekening_tujuan ?? undefined);
+
   const form = useForm<TransaksiSchema>({
     resolver: zodResolver(transaksiSchema),
     defaultValues: {
-      tipe: "expense",
-      tanggal: todayISODate(),
-      waktu: currentTime(),
-      tags: [],
+      tipe: initialFormTipe,
+      tanggal: editData?.tanggal ?? todayISODate(),
+      waktu: editData?.waktu?.substring(0, 5) ?? currentTime(),
+      rekening_id: initialRekeningId,
+      rekening_tujuan: initialRekeningTujuan,
+      tags: editData?.tags ?? [],
     },
   });
 
-  const { control, setValue, reset } = form;
+  const { control, setValue, reset, getValues } = form;
   const tipe = useWatch({ control, name: "tipe" });
   const judul = useWatch({ control, name: "judul" });
+  const rekeningId = useWatch({ control, name: "rekening_id" });
+  const rekeningTujuan = useWatch({ control, name: "rekening_tujuan" });
+
+  const prevTipeRef = useRef<TransaksiSchema["tipe"]>(initialFormTipe);
 
   // Reset form saat dialog dibuka/ditutup atau editData berubah
   useEffect(() => {
@@ -92,6 +133,21 @@ export function useTransaksiDialog({
         nextTipe = allowedTipe[0];
       }
 
+      const nextRekeningId =
+        lockRekening && defaultRekeningId
+          ? isInitialTransferIn
+            ? (editData.rekening_id ?? "")
+            : defaultRekeningId
+          : (editData.rekening_id ?? "");
+
+      const nextRekeningTujuan =
+        lockRekening && defaultRekeningId
+          ? isInitialTransferIn
+            ? defaultRekeningId
+            : (editData.rekening_tujuan ?? undefined)
+          : (editData.rekening_tujuan ?? undefined);
+
+      prevTipeRef.current = nextTipe;
       reset({
         tipe: nextTipe,
         judul: editData.judul ?? undefined,
@@ -102,8 +158,8 @@ export function useTransaksiDialog({
           lockKategori && defaultKategoriId
             ? defaultKategoriId
             : (editData.kategori_id ?? undefined),
-        rekening_id: editData.rekening_id ?? "",
-        rekening_tujuan: editData.rekening_tujuan ?? undefined,
+        rekening_id: nextRekeningId,
+        rekening_tujuan: nextRekeningTujuan,
         catatan: editData.catatan ?? "",
         tags: editData.tags ?? [],
       });
@@ -114,6 +170,21 @@ export function useTransaksiDialog({
         nextTipe = allowedTipe[0];
       }
 
+      const nextRekeningId =
+        lockRekening && defaultRekeningId
+          ? isInitialTransferIn
+            ? (copyFrom.rekening_id ?? "")
+            : defaultRekeningId
+          : (copyFrom.rekening_id ?? "");
+
+      const nextRekeningTujuan =
+        lockRekening && defaultRekeningId
+          ? isInitialTransferIn
+            ? defaultRekeningId
+            : (copyFrom.rekening_tujuan ?? undefined)
+          : (copyFrom.rekening_tujuan ?? undefined);
+
+      prevTipeRef.current = nextTipe;
       reset({
         tipe: nextTipe,
         judul: copyFrom.judul ?? undefined,
@@ -124,8 +195,8 @@ export function useTransaksiDialog({
           lockKategori && defaultKategoriId
             ? defaultKategoriId
             : (copyFrom.kategori_id ?? undefined),
-        rekening_id: copyFrom.rekening_id ?? "",
-        rekening_tujuan: copyFrom.rekening_tujuan ?? undefined,
+        rekening_id: nextRekeningId,
+        rekening_tujuan: nextRekeningTujuan,
         catatan: copyFrom.catatan ?? "",
         tags: copyFrom.tags ?? [],
       });
@@ -144,6 +215,7 @@ export function useTransaksiDialog({
         initialTipe = allowedTipe[0];
       }
 
+      prevTipeRef.current = initialTipe;
       reset({
         tipe: initialTipe,
         tanggal: defaultTanggal ?? todayISODate(),
@@ -161,22 +233,45 @@ export function useTransaksiDialog({
     defaultKategoriId,
     lockKategori,
     lockedKategori,
+    lockRekening,
+    isInitialTransferIn,
     allowedTipe,
     kategori,
     reset,
     open,
   ]);
 
+  const disabledRekeningId = useMemo(() => {
+    if (!lockRekening || !defaultRekeningId) return false;
+    if (tipe === "transfer") {
+      // Pada transfer di detail rekening: jika rekening tujuan adalah defaultRekeningId,
+      // maka rekening asal bebas dipilih.
+      return rekeningTujuan !== defaultRekeningId;
+    }
+    return true;
+  }, [lockRekening, defaultRekeningId, tipe, rekeningTujuan]);
+
+  const disabledRekeningTujuan = useMemo(() => {
+    if (!lockRekening || !defaultRekeningId) return false;
+    if (tipe === "transfer") {
+      // Pada transfer di detail rekening: terkunci jika rekening tujuan adalah defaultRekeningId.
+      return rekeningTujuan === defaultRekeningId;
+    }
+    return false;
+  }, [lockRekening, defaultRekeningId, tipe, rekeningTujuan]);
+
   // Load suggestions (recent judul jika judul kosong, atau search query jika judul diisi)
   useEffect(() => {
     if (!open) return;
 
     const filterCatId = lockKategori ? defaultKategoriId : undefined;
+    const filterRekeningId = lockRekening ? defaultRekeningId : undefined;
     if (!judul || judul.length < 1) {
-      if (!isEdit || lockKategori) {
-        getRecentJudul(filterCatId)
-          .then(setSuggestions)
-          .catch(() => {});
+      if (!isEdit || lockKategori || lockRekening) {
+        const fetchRecent = filterRekeningId
+          ? getRecentJudul(filterCatId, filterRekeningId)
+          : getRecentJudul(filterCatId);
+        fetchRecent.then(setSuggestions).catch(() => {});
       } else {
         setTimeout(() => setSuggestions([]), 0);
       }
@@ -184,15 +279,159 @@ export function useTransaksiDialog({
     }
 
     const timeout = setTimeout(async () => {
-      const sugg = await getJudulSuggestions(judul, filterCatId);
+      const sugg = filterRekeningId
+        ? await getJudulSuggestions(judul, filterCatId, filterRekeningId)
+        : await getJudulSuggestions(judul, filterCatId);
       setSuggestions(sugg);
     }, 400);
 
     return () => clearTimeout(timeout);
-  }, [open, judul, isEdit, lockKategori, defaultKategoriId]);
+  }, [
+    open,
+    judul,
+    isEdit,
+    lockKategori,
+    defaultKategoriId,
+    lockRekening,
+    defaultRekeningId,
+  ]);
 
-  // Bersihkan field yang tidak relevan agar payload tetap sesuai tipe transaksi.
+  const canSwap = useMemo(() => {
+    if (tipe !== "transfer") return false;
+    if (lockRekening && defaultRekeningId) {
+      // Di detail rekening: bisa swap jika salah satu memegang defaultRekeningId
+      const hasDefault =
+        rekeningId === defaultRekeningId || rekeningTujuan === defaultRekeningId;
+      if (!hasDefault) return false;
+      if (rekeningId && rekeningTujuan) {
+        return rekeningId !== rekeningTujuan;
+      }
+      return true;
+    }
+    if (disabledRekeningId || disabledRekeningTujuan) return false;
+    return !!(rekeningId && rekeningTujuan && rekeningId !== rekeningTujuan);
+  }, [
+    tipe,
+    lockRekening,
+    defaultRekeningId,
+    disabledRekeningId,
+    disabledRekeningTujuan,
+    rekeningId,
+    rekeningTujuan,
+  ]);
+
+  function handleRekeningAsalChange(val: string) {
+    if (disabledRekeningId) return;
+
+    if (tipe === "transfer") {
+      const currentTujuan = getValues("rekening_tujuan");
+      const currentAsal = getValues("rekening_id");
+
+      // Jika user memilih rekening yang saat ini merupakan rekening tujuan, otomatis swap
+      if (currentTujuan && val === currentTujuan) {
+        setValue("rekening_id", val, {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+        setValue("rekening_tujuan", currentAsal, {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+        return;
+      }
+
+      if (currentTujuan === val) {
+        setValue("rekening_tujuan", undefined, {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+      }
+    }
+
+    setValue("rekening_id", val, { shouldDirty: true, shouldValidate: true });
+  }
+
+  function handleRekeningTujuanChange(val: string) {
+    if (disabledRekeningTujuan) return;
+
+    const currentAsal = getValues("rekening_id");
+    const currentTujuan = getValues("rekening_tujuan");
+
+    // Jika user memilih rekening yang saat ini merupakan rekening asal:
+    if (currentAsal && val === currentAsal) {
+      if (
+        !disabledRekeningId &&
+        currentTujuan &&
+        currentTujuan !== currentAsal
+      ) {
+        // Otomatis swap posisi rekening tujuan dan rekening asal
+        setValue("rekening_tujuan", val, {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+        setValue("rekening_id", currentTujuan, {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+        return;
+      }
+
+      // Proteksi: jangan izinkan rekening tujuan sama dengan rekening asal jika tidak swap
+      return;
+    }
+
+    setValue("rekening_tujuan", val, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  }
+
+  function handleSwapRekening() {
+    if (tipe !== "transfer") return;
+    const currentAsal = getValues("rekening_id") || "";
+    const currentTujuan = getValues("rekening_tujuan") || "";
+
+    if (lockRekening && defaultRekeningId) {
+      if (
+        currentAsal !== defaultRekeningId &&
+        currentTujuan !== defaultRekeningId
+      ) {
+        return;
+      }
+      if (currentAsal && currentTujuan && currentAsal === currentTujuan) {
+        return;
+      }
+      setValue("rekening_id", currentTujuan || "", {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      setValue("rekening_tujuan", currentAsal || undefined, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      return;
+    }
+
+    if (disabledRekeningId || disabledRekeningTujuan) return;
+    if (!currentAsal || !currentTujuan || currentAsal === currentTujuan) return;
+
+    setValue("rekening_id", currentTujuan, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    setValue("rekening_tujuan", currentAsal, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  }
+
+  // Bersihkan field yang tidak relevan agar payload tetap sesuai tipe transaksi saat tipe berubah.
   useEffect(() => {
+    if (prevTipeRef.current === tipe) {
+      return;
+    }
+    prevTipeRef.current = tipe;
+
     if (tipe === "transfer" || tipe === "correction") {
       setValue("judul", null);
       setValue("kategori_id", undefined);
@@ -200,8 +439,17 @@ export function useTransaksiDialog({
 
     if (tipe !== "transfer") {
       setValue("rekening_tujuan", undefined);
+      if (lockRekening && defaultRekeningId) {
+        setValue("rekening_id", defaultRekeningId);
+      }
+    } else {
+      const asal = getValues("rekening_id");
+      const tujuan = getValues("rekening_tujuan");
+      if (tujuan && asal && tujuan === asal) {
+        setValue("rekening_tujuan", undefined);
+      }
     }
-  }, [tipe, setValue]);
+  }, [tipe, setValue, getValues, lockRekening, defaultRekeningId]);
 
   function handleSelectSuggestion(s: JudulSuggestion) {
     setValue("judul", s.judul, { shouldDirty: true, shouldValidate: true });
@@ -279,7 +527,7 @@ export function useTransaksiDialog({
     if (resolved.catatan) {
       setValue("catatan", resolved.catatan, dirtyOptions);
     }
-    if (resolved.rekeningId) {
+    if (resolved.rekeningId && !disabledRekeningId) {
       setValue("rekening_id", resolved.rekeningId, dirtyOptions);
     }
 
@@ -287,8 +535,18 @@ export function useTransaksiDialog({
       if (!lockKategori && nextTipe !== "transfer" && resolved.kategoriId) {
         setValue("kategori_id", resolved.kategoriId, dirtyOptions);
       }
-      if (nextTipe === "transfer" && resolved.rekeningTujuanId) {
-        setValue("rekening_tujuan", resolved.rekeningTujuanId, dirtyOptions);
+      if (
+        nextTipe === "transfer" &&
+        resolved.rekeningTujuanId &&
+        !disabledRekeningTujuan
+      ) {
+        const finalAsal =
+          !disabledRekeningId && resolved.rekeningId
+            ? resolved.rekeningId
+            : getValues("rekening_id");
+        if (resolved.rekeningTujuanId !== finalAsal) {
+          setValue("rekening_tujuan", resolved.rekeningTujuanId, dirtyOptions);
+        }
       }
     }, 0);
 
@@ -347,12 +605,41 @@ export function useTransaksiDialog({
           ? undefined
           : values.kategori_id;
 
+      let finalRekeningId = values.rekening_id;
+      let finalRekeningTujuan =
+        values.tipe === "transfer" ? values.rekening_tujuan : undefined;
+
+      if (lockRekening && defaultRekeningId) {
+        if (values.tipe === "transfer") {
+          // Pada transfer di detail rekening: jika rekening tujuan adalah defaultRekeningId (transfer masuk),
+          // tegakkan defaultRekeningId di rekening tujuan. Selain itu, tegakkan di rekening asal (transfer keluar).
+          if (values.rekening_tujuan === defaultRekeningId) {
+            finalRekeningTujuan = defaultRekeningId;
+            finalRekeningId = values.rekening_id;
+          } else {
+            finalRekeningId = defaultRekeningId;
+            finalRekeningTujuan = values.rekening_tujuan;
+          }
+        } else {
+          finalRekeningId = defaultRekeningId;
+        }
+      }
+
       const sanitizedValues: TransaksiSchema = {
         ...values,
         judul: isTransferOrCorrection ? null : (values.judul ?? null),
         kategori_id: finalKategoriId,
-        rekening_tujuan: values.tipe === "transfer" ? values.rekening_tujuan : undefined,
+        rekening_id: finalRekeningId,
+        rekening_tujuan: finalRekeningTujuan,
       };
+
+      if (
+        sanitizedValues.tipe === "transfer" &&
+        sanitizedValues.rekening_id === sanitizedValues.rekening_tujuan
+      ) {
+        toast.error("Rekening asal dan tujuan tidak boleh sama");
+        return;
+      }
 
       if (!navigator.onLine) {
         const queuedAction = await addToQueue({
@@ -445,6 +732,15 @@ export function useTransaksiDialog({
     correctionRekening,
     allowedTipe,
     lockKategori: !!lockKategori,
+    lockRekening: !!lockRekening,
+    disabledRekeningId,
+    disabledRekeningTujuan,
+    rekeningId,
+    rekeningTujuan,
+    canSwap,
+    handleRekeningAsalChange,
+    handleRekeningTujuanChange,
+    handleSwapRekening,
     handleSelectSuggestion,
     handleParsedResult,
     onSubmit,

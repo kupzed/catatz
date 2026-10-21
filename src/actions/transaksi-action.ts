@@ -336,11 +336,12 @@ export async function deleteTransaksi(id: string): Promise<ActionResult> {
 
 /**
  * Mengembalikan suggestion judul berdasarkan query (debounced dari UI).
- * Opsional: filter berdasarkan kategori_id tertentu (misal saat di detail kategori).
+ * Opsional: filter berdasarkan kategori_id atau rekening_id tertentu.
  */
 export async function getJudulSuggestions(
   query: string,
   kategoriId?: string,
+  rekeningId?: string,
 ): Promise<JudulSuggestion[]> {
   if (!query || query.length < 1) return [];
 
@@ -348,12 +349,15 @@ export async function getJudulSuggestions(
 
   let req = supabase
     .from('transaksi')
-    .select('judul, kategori_id')
+    .select('judul, kategori_id, rekening_id')
     .not('judul', 'is', null)
     .ilike('judul', `%${query}%`);
 
   if (kategoriId) {
     req = req.eq('kategori_id', kategoriId);
+  }
+  if (rekeningId) {
+    req = req.eq('rekening_id', rekeningId);
   }
 
   const { data } = await req
@@ -388,18 +392,24 @@ export async function getJudulSuggestions(
 
 /**
  * Mengembalikan judul-judul transaksi terbaru (tanpa query) untuk initial suggestion.
- * Opsional: filter berdasarkan kategori_id tertentu (misal saat di detail kategori).
+ * Opsional: filter berdasarkan kategori_id atau rekening_id tertentu.
  */
-export async function getRecentJudul(kategoriId?: string): Promise<JudulSuggestion[]> {
+export async function getRecentJudul(
+  kategoriId?: string,
+  rekeningId?: string,
+): Promise<JudulSuggestion[]> {
   const supabase = await createClient();
 
   let req = supabase
     .from('transaksi')
-    .select('judul, kategori_id')
+    .select('judul, kategori_id, rekening_id')
     .not('judul', 'is', null);
 
   if (kategoriId) {
     req = req.eq('kategori_id', kategoriId);
+  }
+  if (rekeningId) {
+    req = req.eq('rekening_id', rekeningId);
   }
 
   const { data } = await req

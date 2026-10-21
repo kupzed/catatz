@@ -74,6 +74,8 @@ Initial data detail diambil dengan:
 ### Index (`/wallets`)
 - Halaman menampilkan total saldo dari rekening yang tidak di-exclude.
 - User bisa tambah, edit, hapus rekening.
+- Form dialog Tambah & Edit Rekening (`RekeningDialog`) otomatis menutup modal dialog (`onClose`) setelah submit berhasil.
+- Selector Bank / E-Wallet pada form Tambah Rekening menyajikan grid bank/e-wallet dengan tata letak rapi, seragam, dan emoji terpusat di dalam lingkaran ikon.
 - Rekening card dan badge jumlah data (`Dipakai {usage.total} data`) dapat diklik untuk langsung membuka halaman detail `/wallets/[id]`.
 - Tombol hapus memberi rincian data pemakaian (transaksi keluar/masuk/koreksi, transfer masuk, hutang/piutang, cicilan, dan transaksi berulang) agar data terkait dihapus terlebih dahulu.
 - State rekening dan pemakaian data pada client otomatis tersinkronisasi saat initial props dari Server Component diperbarui.
@@ -88,8 +90,15 @@ Initial data detail diambil dengan:
 - Pill ringkasan distribusi data pemakaian (Pemasukan, Pengeluaran, Transfer Keluar, Transfer Masuk, Koreksi Saldo, dan Hutang/Cicilan).
 - Feed histori transaksi lengkap dengan fungsionalitas serupa halaman Index Transaksi: dropdown periode (`Semua Waktu`, `Bulan Ini`, `Minggu Ini`, `Hari Ini`, `Tahun Ini`, `Custom`), navigasi tanggal interaktif dengan pemilih tanggal bawaan, tab tipe transaksi horizontal scrollable, serta pencarian instan.
 - Klik transaksi membuka `TransaksiDetailSheet` (bisa melihat detail, copy transaksi, edit transaksi, hapus transaksi).
-- Tombol "Tambah Transaksi" membuka `TransaksiDialog` dengan default rekening terpilih otomatis ke rekening yang sedang dibuka.
-- Tombol "Edit Rekening" membuka `RekeningDialog` untuk memperbarui informasi atau koreksi saldo rekening.
+- Tombol "Tambah Transaksi" & Edit Transaksi di detail rekening terkunci ke rekening ini (`lockRekening={true}`):
+  - Pada mode create dan edit expense/income: dropdown Rekening Asal ter-disable dan terkunci ke rekening yang sedang dibuka, dengan label penanda "Terkunci di rekening ini".
+  - Pada transaksi transfer di detail rekening: rekening detail dapat beralih peran secara dinamis antara **Transfer Keluar** (rekening saat ini sebagai rekening asal) dan **Transfer Masuk** (rekening saat ini sebagai rekening tujuan) menggunakan tombol "Tukar Rekening" (*swap*).
+  - Posisi yang memegang rekening detail otomatis menampilkan label "Terkunci di rekening ini" dan ter-disable, sementara posisi rekening pasangan terbuka untuk memilih rekening mitra transfer. Opsi rekening detail dinonaktifkan di dropdown pasangan dengan label proteksi "(Rekening asal)" / "(Rekening tujuan)".
+  - Saran judul transaksi (`getRecentJudul` & `getJudulSuggestions`) difilter secara spesifik berdasarkan riwayat `rekening_id` yang sedang dibuka.
+  - Pemilihan saran judul atau AI autofill memproteksi rekening terkunci agar tidak tertimpa.
+  - Submit form menegakkan rekening yang terkunci ke database.
+  - Copy transaksi (`_isCopySignal`) dari detail rekening terintegrasi mulus.
+- Tombol "Edit Rekening" membuka `RekeningDialog` untuk memperbarui informasi atau koreksi saldo rekening, dan dialog otomatis tertutup setelah berhasil disimpan.
 
 ## TODO / Improvement
 
