@@ -2,6 +2,44 @@
 
 Format mengikuti Keep a Changelog sederhana.
 
+## [1.3.0] — 2026-10-22
+
+### Added
+
+- **Perombakan Kategori & Workspace Detail Kategori (`/categories` & `/categories/[id]`)**:
+  - Migrasi database `016-user-owned-categories.sql`: mengalihkan kategori sistem global menjadi milik masing-masing pengguna dengan RLS terisolasi.
+  - Pemetaan ulang aman data transaksi, budget, dan recurring transactions ke kategori milik pengguna.
+  - Halaman workspace `/categories/[id]` dengan metrik finansial terpadu (total transaksi, total nominal, rata-rata nominal, filter tanggal, dan paginasi).
+  - Fitur penguncian kategori otomatis (*locked category*) dan validasi tipe transaksi pada dialog transaksi yang dibuka dari detail kategori.
+- **Perombakan Total Sistem Hutang & Piutang (`/debts` & `/debts/[id]`)**:
+  - Migrasi database `015-hutang-piutang-revamp.sql`: mendukung pencairan pinjaman bertahap (*multi-disbursement*) dan pembayaran lebih (*overpayment*).
+  - Penambahan status lunas manual (`is_lunas_manual`) dan pembaruan trigger dinamis perhitungan sisa hutang `update_sisa_hutang()`.
+  - Halaman workspace kontak `/debts/[id]` dengan riwayat kronologis pembayaran/pinjaman serta kartu ringkasan kekayaan bersih (*net worth*) pada indeks `/debts`.
+- **Halaman Workspace Detail Rekening (`/wallets/[id]`)**:
+  - Metrik arus kas rekening (saldo riil, pemasukan, pengeluaran, net flow, dan proporsi terhadap total saldo).
+  - Fitur penguncian konteks rekening dan tombol tukar arah transfer (*switch transfer direction*) pada dialog transfer.
+  - Paginasi query agregasi pemakaian rekening di `rekening-action.ts` untuk melewati limit 1.000 baris PostgREST.
+- **Drawer Detail Transaksi & Paginasi Server (`/transactions`)**:
+  - Paginasi server berbasis offset/limit untuk menangani puluhan ribu baris transaksi tanpa batasan PostgREST.
+  - Komponen `TransaksiDetailSheet` dengan drawer interaktif, tombol salin ringkasan ke clipboard, serta shortcut edit dan hapus.
+  - Perlindungan transfer timbal-balik (*mutual protection & auto-switch*) untuk mencegah pemilihan rekening asal dan tujuan yang sama.
+  - Toolbar filter satu baris dan sheet filter layar penuh pada perangkat mobile.
+
+### Changed
+
+- Pembaruan paket inti aplikasi: Next.js `16.4.2`, React `19.3.1`, React DOM `19.3.1`, Serwist `9.5.13`, Supabase JS `2.118.0`, Supabase SSR `0.12.7`, dan TanStack Query `5.104.5`.
+- Upgrade framework pengujian ke Vitest `5.0.5`, `@testing-library/jest-dom` `7.0.1`, dan `jsdom` `30.1.3`.
+- Ekspansi test suite dari 190 tests (15 file) menjadi 293 tests (28 file) dengan line coverage 97.2%.
+- Regenerasi file bundle service worker `public/sw.js`.
+
+### Fixed
+
+- Mengatasi kendala truncate teks transaksi pada perangkat layar kecil.
+- Perbaikan layout toolbar filter dan pill rentang tanggal kustom.
+- Perbaikan auto-close dialog dan sinkronisasi state saat create/edit kategori dan rekening.
+
+---
+
 ## [1.2.0] — 2026-10-15
 
 ### Added
