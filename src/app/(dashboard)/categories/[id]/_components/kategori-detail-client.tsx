@@ -111,6 +111,32 @@ export function KategoriDetailClient({
   const [usage, setUsage] = useState<KategoriUsageCounts>(initialUsage);
   const [transaksi, setTransaksi] = useState<Transaksi[]>(initialTransaksi);
 
+  // Sync state if props update from server revalidation
+  const [prevKategori, setPrevKategori] = useState(initialKategori);
+  if (initialKategori !== prevKategori) {
+    setPrevKategori(initialKategori);
+    setKategori(initialKategori);
+  }
+
+  const [prevUsage, setPrevUsage] = useState(initialUsage);
+  if (initialUsage !== prevUsage) {
+    setPrevUsage(initialUsage);
+    setUsage(initialUsage);
+  }
+
+  const [prevTransaksi, setPrevTransaksi] = useState(initialTransaksi);
+  if (initialTransaksi !== prevTransaksi) {
+    setPrevTransaksi(initialTransaksi);
+    setTransaksi(initialTransaksi);
+  }
+
+  const mergedAllKategori = useMemo(() => {
+    const exists = allKategori.some((k) => k.id === kategori.id);
+    return exists
+      ? allKategori.map((k) => (k.id === kategori.id ? kategori : k))
+      : [kategori, ...allKategori];
+  }, [allKategori, kategori]);
+
   // Set topnav breadcrumb title to nama kategori
   useSetBreadcrumbTitle(kategori.nama);
 
@@ -595,33 +621,48 @@ export function KategoriDetailClient({
       {/* Transaksi Dialog (Tambah / Edit / Copy) */}
       <TransaksiDialog
         open={txDialogOpen}
-        onOpenChange={setTxDialogOpen}
+        onOpenChange={(open) => {
+          setTxDialogOpen(open);
+          if (!open) {
+            setEditTxData(null);
+            setCopyTxData(null);
+          }
+        }}
         rekening={allRekening}
-        kategori={allKategori}
+        kategori={mergedAllKategori}
         editData={editTxData}
         copyFrom={copyTxData}
         defaultKategoriId={kategori.id}
         onCreated={(newTx) => {
-          setTransaksi((prev) => [newTx, ...prev]);
-          setUsage((prev) => ({
-            ...prev,
-            total: prev.total + 1,
-            transaksi: prev.transaksi + 1,
-            transaksi_masuk:
-              newTx.tipe === "income"
-                ? prev.transaksi_masuk + 1
-                : prev.transaksi_masuk,
-            transaksi_keluar:
-              newTx.tipe === "expense"
-                ? prev.transaksi_keluar + 1
-                : prev.transaksi_keluar,
-          }));
+          if (newTx.kategori_id === kategori.id) {
+            setTransaksi((prev) => [newTx, ...prev]);
+            setUsage((prev) => ({
+              ...prev,
+              total: prev.total + 1,
+              transaksi: prev.transaksi + 1,
+              transaksi_masuk:
+                newTx.tipe === "income"
+                  ? prev.transaksi_masuk + 1
+                  : prev.transaksi_masuk,
+              transaksi_keluar:
+                newTx.tipe === "expense"
+                  ? prev.transaksi_keluar + 1
+                  : prev.transaksi_keluar,
+            }));
+          }
           router.refresh();
         }}
         onUpdated={(updatedTx) => {
-          setTransaksi((prev) =>
-            prev.map((t) => (t.id === updatedTx.id ? updatedTx : t)),
-          );
+          setTransaksi((prev) => {
+            const exists = prev.some((t) => t.id === updatedTx.id);
+            if (updatedTx.kategori_id === kategori.id) {
+              return exists
+                ? prev.map((t) => (t.id === updatedTx.id ? updatedTx : t))
+                : [updatedTx, ...prev];
+            } else {
+              return prev.filter((t) => t.id !== updatedTx.id);
+            }
+          });
           router.refresh();
         }}
         onQueued={handleQueued}

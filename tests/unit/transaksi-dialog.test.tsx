@@ -313,6 +313,7 @@ describe("TransaksiDialog", () => {
         }),
       );
       expect(onUpdated).toHaveBeenCalledWith({ id: "edit-tx-id", nominal: 75000 });
+      expect(onOpenChange).toHaveBeenCalledWith(false);
     });
   });
 

@@ -317,6 +317,7 @@ export function useTransaksiDialog({
         if (res.success && res.data) {
           toast.success("Transaksi diperbarui");
           onUpdated(res.data);
+          onOpenChange(false);
         } else {
           toast.error(res.error ?? "Gagal memperbarui");
         }
@@ -327,6 +328,7 @@ export function useTransaksiDialog({
             copyFrom ? "Transaksi berhasil di-copy!" : "Transaksi disimpan",
           );
           onCreated(res.data);
+          onOpenChange(false);
         } else {
           toast.error(res.error ?? "Gagal menyimpan");
         }
