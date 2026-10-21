@@ -81,6 +81,8 @@ type RekeningFieldsProps = {
   isCorrection: boolean;
   rekening: Rekening[];
   correctionRekening: Rekening | null;
+  disabledRekeningId?: boolean;
+  disabledRekeningTujuan?: boolean;
 };
 
 export function TransaksiRekeningFields({
@@ -90,13 +92,24 @@ export function TransaksiRekeningFields({
   isCorrection,
   rekening,
   correctionRekening,
+  disabledRekeningId = false,
+  disabledRekeningTujuan = false,
 }: RekeningFieldsProps) {
   const { formatRupiah } = useSystemPreferences();
 
   return (
     <>
       <div className="space-y-1.5">
-        <Label>Rekening {tipe === "transfer" ? "Asal" : ""}</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="rekening-select">
+            Rekening {tipe === "transfer" ? "Asal" : ""}
+          </Label>
+          {disabledRekeningId && (
+            <span className="text-[11px] text-muted-foreground">
+              Terkunci di rekening ini
+            </span>
+          )}
+        </div>
         {isCorrection ? (
           <div className="flex items-center gap-2 h-10 px-3 rounded-md border bg-muted/50 text-sm">
             {correctionRekening && (
@@ -126,7 +139,12 @@ export function TransaksiRekeningFields({
                 onValueChange={field.onChange}
                 placeholder="Pilih rekening"
                 id="rekening-select"
-                className={errors.rekening_id ? "border-rose-500" : ""}
+                disabled={disabledRekeningId}
+                className={cn(
+                  errors.rekening_id && "border-rose-500",
+                  disabledRekeningId &&
+                    "opacity-80 cursor-not-allowed bg-muted/40",
+                )}
               />
             )}
           />
@@ -138,7 +156,14 @@ export function TransaksiRekeningFields({
 
       {tipe === "transfer" && (
         <div className="space-y-1.5">
-          <Label>Rekening Tujuan</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="rekening-tujuan-select">Rekening Tujuan</Label>
+            {disabledRekeningTujuan && (
+              <span className="text-[11px] text-muted-foreground">
+                Terkunci di rekening ini
+              </span>
+            )}
+          </div>
           <Controller
             control={control}
             name="rekening_tujuan"
@@ -149,7 +174,12 @@ export function TransaksiRekeningFields({
                 onValueChange={field.onChange}
                 placeholder="Pilih rekening tujuan"
                 id="rekening-tujuan-select"
-                className={errors.rekening_tujuan ? "border-rose-500" : ""}
+                disabled={disabledRekeningTujuan}
+                className={cn(
+                  errors.rekening_tujuan && "border-rose-500",
+                  disabledRekeningTujuan &&
+                    "opacity-80 cursor-not-allowed bg-muted/40",
+                )}
               />
             )}
           />

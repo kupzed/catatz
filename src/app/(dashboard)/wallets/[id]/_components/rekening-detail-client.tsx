@@ -94,6 +94,25 @@ export function RekeningDetailClient({
   const [usage, setUsage] = useState<RekeningUsageCounts>(initialUsage);
   const [transaksi, setTransaksi] = useState<Transaksi[]>(initialTransaksi);
 
+  // Sync state if props update from server revalidation
+  const [prevRekening, setPrevRekening] = useState(initialRekening);
+  if (initialRekening !== prevRekening) {
+    setPrevRekening(initialRekening);
+    setRekening(initialRekening);
+  }
+
+  const [prevUsage, setPrevUsage] = useState(initialUsage);
+  if (initialUsage !== prevUsage) {
+    setPrevUsage(initialUsage);
+    setUsage(initialUsage);
+  }
+
+  const [prevTransaksi, setPrevTransaksi] = useState(initialTransaksi);
+  if (initialTransaksi !== prevTransaksi) {
+    setPrevTransaksi(initialTransaksi);
+    setTransaksi(initialTransaksi);
+  }
+
   // Set topnav breadcrumb title to nama rekening (via Zustand store)
   useSetBreadcrumbTitle(rekening.nama);
 
@@ -573,13 +592,33 @@ export function RekeningDetailClient({
         editData={editTxData}
         copyFrom={copyTxData}
         defaultRekeningId={rekening.id}
+        lockRekening
+        defaultTanggal={currentDate}
         onCreated={(t) => {
           setTransaksi((prev) => [t, ...prev]);
           setUsage((prev) => ({ ...prev, total: prev.total + 1 }));
           router.refresh();
         }}
-        onUpdated={(t) => {
-          setTransaksi((prev) => prev.map((item) => (item.id === t.id ? t : item)));
+        onUpdated={(updatedTx: Transaksi & { _isCopySignal?: boolean }) => {
+          if (updatedTx._isCopySignal) {
+            setEditTxData(null);
+            setCopyTxData(updatedTx);
+            setTxDialogOpen(true);
+            return;
+          }
+          setTransaksi((prev) => {
+            const exists = prev.some((t) => t.id === updatedTx.id);
+            const isRelevant =
+              updatedTx.rekening_id === rekening.id ||
+              updatedTx.rekening_tujuan === rekening.id;
+            if (isRelevant) {
+              return exists
+                ? prev.map((t) => (t.id === updatedTx.id ? updatedTx : t))
+                : [updatedTx, ...prev];
+            } else {
+              return prev.filter((t) => t.id !== updatedTx.id);
+            }
+          });
           router.refresh();
         }}
         onQueued={handleQueued}

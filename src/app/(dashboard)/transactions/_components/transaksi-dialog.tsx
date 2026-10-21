@@ -37,6 +37,8 @@ export type TransaksiDialogProps = {
   defaultKategoriId?: string;
   /** Kunci kategori dan sesuaikan opsi tipe serta suggestions (misal di detail kategori) */
   lockKategori?: boolean;
+  /** Kunci rekening dan sesuaikan suggestions (misal di detail rekening) */
+  lockRekening?: boolean;
 };
 
 export default function TransaksiDialog(props: TransaksiDialogProps) {
@@ -65,6 +67,8 @@ export default function TransaksiDialog(props: TransaksiDialogProps) {
     correctionRekening,
     allowedTipe,
     lockKategori,
+    disabledRekeningId,
+    disabledRekeningTujuan,
     handleSelectSuggestion,
     handleParsedResult,
     onSubmit,
@@ -123,6 +127,8 @@ export default function TransaksiDialog(props: TransaksiDialogProps) {
             isCorrection={isCorrection}
             rekening={rekening}
             correctionRekening={correctionRekening}
+            disabledRekeningId={disabledRekeningId}
+            disabledRekeningTujuan={disabledRekeningTujuan}
           />
 
           {/* Nominal */}

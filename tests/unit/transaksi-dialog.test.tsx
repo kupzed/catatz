@@ -829,5 +829,187 @@ describe("TransaksiDialog", () => {
       });
     });
   });
+
+  describe("TransaksiDialog - lockRekening mode (Wallet Detail)", () => {
+    it("locks Rekening Asal select in create mode and displays indicator badge", () => {
+      render(
+        <TransaksiDialog
+          open={true}
+          onOpenChange={onOpenChange}
+          rekening={dummyRekening}
+          kategori={dummyKategori}
+          defaultRekeningId={dummyRekening[0].id}
+          lockRekening={true}
+          onCreated={onCreated}
+          onUpdated={onUpdated}
+          onQueued={onQueued}
+        />,
+      );
+
+      expect(screen.getByText("Terkunci di rekening ini")).toBeInTheDocument();
+      const rekeningTrigger = screen.getByRole("combobox", {
+        name: /^rekening$/i,
+      });
+      expect(rekeningTrigger).toBeDisabled();
+    });
+
+    it("locks Rekening Asal and keeps Rekening Tujuan open when switching to transfer in create mode", async () => {
+      const user = userEvent.setup();
+      render(
+        <TransaksiDialog
+          open={true}
+          onOpenChange={onOpenChange}
+          rekening={dummyRekening}
+          kategori={dummyKategori}
+          defaultRekeningId={dummyRekening[0].id}
+          lockRekening={true}
+          onCreated={onCreated}
+          onUpdated={onUpdated}
+          onQueued={onQueued}
+        />,
+      );
+
+      // Switch to Transfer tab
+      const transferTab = screen.getByRole("tab", { name: /Transfer/ });
+      await user.click(transferTab);
+
+      // Rekening Asal is locked and disabled
+      const rekeningAsalTrigger = screen.getByRole("combobox", {
+        name: /Rekening Asal/i,
+      });
+      expect(rekeningAsalTrigger).toBeDisabled();
+
+      // Rekening Tujuan is enabled
+      const rekeningTujuanTrigger = screen.getByRole("combobox", {
+        name: /Rekening Tujuan/i,
+      });
+      expect(rekeningTujuanTrigger).not.toBeDisabled();
+    });
+
+    it("locks destination rekening when editing a transfer-in transaction", () => {
+      const transferInTx = createDummyTransaksi({
+        id: "tx-transfer-in",
+        tipe: "transfer",
+        nominal: 100000,
+        tanggal: "2026-10-15",
+        waktu: "12:00:00",
+        judul: null,
+        kategori_id: null,
+        rekening_id: dummyRekening[1].id, // Asal: Dompet Tunai
+        rekening_tujuan: dummyRekening[0].id, // Tujuan: BCA (current wallet)
+        catatan: "Transfer masuk",
+        is_recurring: false,
+      });
+
+      render(
+        <TransaksiDialog
+          open={true}
+          onOpenChange={onOpenChange}
+          rekening={dummyRekening}
+          kategori={dummyKategori}
+          editData={transferInTx}
+          defaultRekeningId={dummyRekening[0].id}
+          lockRekening={true}
+          onCreated={onCreated}
+          onUpdated={onUpdated}
+          onQueued={onQueued}
+        />,
+      );
+
+      // Rekening Asal should be enabled (can change source)
+      const rekeningAsalTrigger = screen.getByRole("combobox", {
+        name: /Rekening Asal/i,
+      });
+      expect(rekeningAsalTrigger).not.toBeDisabled();
+
+      // Rekening Tujuan should be disabled (locked to current wallet)
+      const rekeningTujuanTrigger = screen.getByRole("combobox", {
+        name: /Rekening Tujuan/i,
+      });
+      expect(rekeningTujuanTrigger).toBeDisabled();
+    });
+
+    it("fetches recent and search suggestions filtered by rekeningId", async () => {
+      mockGetRecentJudul.mockResolvedValue([
+        { judul: "Kopi Kenangan", rekening_id: dummyRekening[0].id },
+      ]);
+      mockGetJudulSuggestions.mockResolvedValue([
+        { judul: "Kopi Susu", rekening_id: dummyRekening[0].id },
+      ]);
+
+      render(
+        <TransaksiDialog
+          open={true}
+          onOpenChange={onOpenChange}
+          rekening={dummyRekening}
+          kategori={dummyKategori}
+          defaultRekeningId={dummyRekening[0].id}
+          lockRekening={true}
+          onCreated={onCreated}
+          onUpdated={onUpdated}
+          onQueued={onQueued}
+        />,
+      );
+
+      // Recent suggestions called with filterRekeningId
+      await waitFor(() => {
+        expect(mockGetRecentJudul).toHaveBeenCalledWith(
+          undefined,
+          dummyRekening[0].id,
+        );
+      });
+
+      // Search suggestions called with filterRekeningId
+      const judulInput = screen.getByPlaceholderText(/Nama transaksi/i);
+      fireEvent.change(judulInput, { target: { value: "Kopi" } });
+
+      await waitFor(
+        () => {
+          expect(mockGetJudulSuggestions).toHaveBeenCalledWith(
+            "Kopi",
+            undefined,
+            dummyRekening[0].id,
+          );
+        },
+        { timeout: 1000 },
+      );
+    });
+
+    it("enforces locked rekening on submit even if payload was manipulated", async () => {
+      render(
+        <TransaksiDialog
+          open={true}
+          onOpenChange={onOpenChange}
+          rekening={dummyRekening}
+          kategori={dummyKategori}
+          defaultRekeningId={dummyRekening[0].id}
+          defaultKategoriId={dummyKategori[0].id}
+          lockRekening={true}
+          onCreated={onCreated}
+          onUpdated={onUpdated}
+          onQueued={onQueued}
+        />,
+      );
+
+      const judulInput = screen.getByPlaceholderText(/Nama transaksi/i);
+      fireEvent.change(judulInput, { target: { value: "Beli Token" } });
+
+      const nominalInput = screen.getByLabelText(/Nominal \(Rp\)/i);
+      fireEvent.change(nominalInput, { target: { value: "50000" } });
+
+      const submitBtn = screen.getByRole("button", { name: /^simpan$/i });
+      fireEvent.click(submitBtn);
+
+      await waitFor(() => {
+        expect(mockCreateTransaksi).toHaveBeenCalledWith(
+          expect.objectContaining({
+            judul: "Beli Token",
+            nominal: 50000,
+            rekening_id: dummyRekening[0].id,
+          }),
+        );
+      });
+    });
+  });
 });
 
