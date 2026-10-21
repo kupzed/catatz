@@ -1129,6 +1129,111 @@ describe("TransaksiDialog", () => {
       });
       expect(bcaOption).toHaveAttribute("data-disabled");
     });
+
+    it("allows switching Asal and Tujuan in wallet detail (lockRekening) mode", async () => {
+      const user = userEvent.setup();
+
+      render(
+        <TransaksiDialog
+          open={true}
+          onOpenChange={onOpenChange}
+          rekening={dummyRekening}
+          kategori={dummyKategori}
+          defaultRekeningId={dummyRekening[0].id} // BCA
+          lockRekening={true}
+          onCreated={onCreated}
+          onUpdated={onUpdated}
+          onQueued={onQueued}
+        />,
+      );
+
+      // Switch to Transfer tab
+      const transferTab = screen.getByRole("tab", { name: /Transfer/ });
+      await user.click(transferTab);
+
+      const asalTrigger = screen.getByRole("combobox", { name: /Rekening Asal/i });
+      const tujuanTrigger = screen.getByRole("combobox", { name: /Rekening Tujuan/i });
+
+      // Initially: Rekening Asal is locked to BCA, Rekening Tujuan is enabled
+      expect(asalTrigger).toBeDisabled();
+      expect(asalTrigger).toHaveTextContent(dummyRekening[0].nama);
+      expect(tujuanTrigger).not.toBeDisabled();
+
+      // Open Rekening Tujuan select and pick Dompet Tunai
+      await user.click(tujuanTrigger);
+      const dompetOption = await screen.findByRole("option", {
+        name: new RegExp(dummyRekening[1].nama, "i"),
+      });
+      await user.click(dompetOption);
+      expect(tujuanTrigger).toHaveTextContent(dummyRekening[1].nama);
+
+      // Tukar Rekening button should be present
+      const swapBtn = screen.getByRole("button", { name: /Tukar Rekening/i });
+      await user.click(swapBtn);
+
+      // After swap: Asal becomes Dompet Tunai (enabled), Tujuan becomes BCA (disabled/locked)
+      expect(asalTrigger).not.toBeDisabled();
+      expect(asalTrigger).toHaveTextContent(dummyRekening[1].nama);
+      expect(tujuanTrigger).toBeDisabled();
+      expect(tujuanTrigger).toHaveTextContent(dummyRekening[0].nama);
+
+      // Fill nominal and submit
+      const nominalInput = screen.getByLabelText(/Nominal \(Rp\)/i);
+      fireEvent.change(nominalInput, { target: { value: "35000" } });
+
+      const submitBtn = screen.getByRole("button", { name: /^simpan$/i });
+      fireEvent.click(submitBtn);
+
+      // Submit should enforce transfer masuk to defaultRekeningId
+      await waitFor(() => {
+        expect(mockCreateTransaksi).toHaveBeenCalledWith(
+          expect.objectContaining({
+            tipe: "transfer",
+            nominal: 35000,
+            rekening_id: dummyRekening[1].id,
+            rekening_tujuan: dummyRekening[0].id,
+          }),
+        );
+      });
+    });
+
+    it("allows swapping when destination is not yet chosen in wallet detail mode", async () => {
+      const user = userEvent.setup();
+
+      render(
+        <TransaksiDialog
+          open={true}
+          onOpenChange={onOpenChange}
+          rekening={dummyRekening}
+          kategori={dummyKategori}
+          defaultRekeningId={dummyRekening[0].id} // BCA
+          lockRekening={true}
+          onCreated={onCreated}
+          onUpdated={onUpdated}
+          onQueued={onQueued}
+        />,
+      );
+
+      // Switch to Transfer tab
+      const transferTab = screen.getByRole("tab", { name: /Transfer/ });
+      await user.click(transferTab);
+
+      const asalTrigger = screen.getByRole("combobox", { name: /Rekening Asal/i });
+      const tujuanTrigger = screen.getByRole("combobox", { name: /Rekening Tujuan/i });
+
+      // Initially: Asal is BCA (disabled), Tujuan is placeholder (enabled)
+      expect(asalTrigger).toBeDisabled();
+      expect(asalTrigger).toHaveTextContent(dummyRekening[0].nama);
+
+      // Click Tukar Rekening button directly
+      const swapBtn = screen.getByRole("button", { name: /Tukar Rekening/i });
+      await user.click(swapBtn);
+
+      // Now Tujuan should be BCA (disabled/locked), and Asal should be enabled
+      expect(tujuanTrigger).toBeDisabled();
+      expect(tujuanTrigger).toHaveTextContent(dummyRekening[0].nama);
+      expect(asalTrigger).not.toBeDisabled();
+    });
   });
 });
 
