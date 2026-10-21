@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -32,6 +32,7 @@ export type UseTransaksiDialogParams = {
   defaultTanggal?: string;
   defaultRekeningId?: string;
   defaultKategoriId?: string;
+  lockKategori?: boolean;
 };
 
 export function useTransaksiDialog({
@@ -47,6 +48,7 @@ export function useTransaksiDialog({
   defaultTanggal,
   defaultRekeningId,
   defaultKategoriId,
+  lockKategori,
 }: UseTransaksiDialogParams) {
   const isEdit = !!editData;
   const isCorrection = editData?.tipe === "correction";
@@ -55,6 +57,18 @@ export function useTransaksiDialog({
   const [voiceBusy, setVoiceBusy] = useState(false);
   const [fileBusy, setFileBusy] = useState(false);
   const [suggestions, setSuggestions] = useState<JudulSuggestion[]>([]);
+
+  const lockedKategori =
+    lockKategori && defaultKategoriId
+      ? kategori.find((k) => k.id === defaultKategoriId) ?? null
+      : null;
+
+  const allowedTipe: TransaksiSchema["tipe"][] | undefined = useMemo(() => {
+    if (!lockKategori) return undefined;
+    if (lockedKategori?.tipe === "income") return ["income"];
+    if (lockedKategori?.tipe === "expense") return ["expense"];
+    return ["expense", "income"];
+  }, [lockKategori, lockedKategori]);
 
   const form = useForm<TransaksiSchema>({
     resolver: zodResolver(transaksiSchema),
@@ -73,13 +87,21 @@ export function useTransaksiDialog({
   // Reset form saat dialog dibuka/ditutup atau editData berubah
   useEffect(() => {
     if (editData) {
+      let nextTipe = editData.tipe as TransaksiSchema["tipe"];
+      if (allowedTipe && !allowedTipe.includes(nextTipe)) {
+        nextTipe = allowedTipe[0];
+      }
+
       reset({
-        tipe: editData.tipe,
+        tipe: nextTipe,
         judul: editData.judul ?? undefined,
         nominal: Number(editData.nominal),
         tanggal: editData.tanggal,
         waktu: editData.waktu?.substring(0, 5) ?? currentTime(),
-        kategori_id: editData.kategori_id ?? undefined,
+        kategori_id:
+          lockKategori && defaultKategoriId
+            ? defaultKategoriId
+            : (editData.kategori_id ?? undefined),
         rekening_id: editData.rekening_id ?? "",
         rekening_tujuan: editData.rekening_tujuan ?? undefined,
         catatan: editData.catatan ?? "",
@@ -87,21 +109,40 @@ export function useTransaksiDialog({
       });
     } else if (copyFrom) {
       // Mode copy: pre-fill dengan data transaksi asal, tanggal reset ke hari ini
+      let nextTipe = copyFrom.tipe as TransaksiSchema["tipe"];
+      if (allowedTipe && !allowedTipe.includes(nextTipe)) {
+        nextTipe = allowedTipe[0];
+      }
+
       reset({
-        tipe: copyFrom.tipe as TransaksiSchema["tipe"],
+        tipe: nextTipe,
         judul: copyFrom.judul ?? undefined,
         nominal: Number(copyFrom.nominal),
         tanggal: todayISODate(),
         waktu: currentTime(),
-        kategori_id: copyFrom.kategori_id ?? undefined,
+        kategori_id:
+          lockKategori && defaultKategoriId
+            ? defaultKategoriId
+            : (copyFrom.kategori_id ?? undefined),
         rekening_id: copyFrom.rekening_id ?? "",
         rekening_tujuan: copyFrom.rekening_tujuan ?? undefined,
         catatan: copyFrom.catatan ?? "",
         tags: copyFrom.tags ?? [],
       });
     } else {
-      const targetKat = defaultKategoriId ? kategori.find((k) => k.id === defaultKategoriId) : null;
-      const initialTipe = targetKat?.tipe === "income" ? "income" : "expense";
+      let initialTipe: TransaksiSchema["tipe"] = "expense";
+      if (lockedKategori?.tipe === "income") {
+        initialTipe = "income";
+      } else if (lockedKategori?.tipe === "expense") {
+        initialTipe = "expense";
+      } else if (defaultKategoriId) {
+        const targetKat = kategori.find((k) => k.id === defaultKategoriId);
+        initialTipe = targetKat?.tipe === "income" ? "income" : "expense";
+      }
+
+      if (allowedTipe && !allowedTipe.includes(initialTipe)) {
+        initialTipe = allowedTipe[0];
+      }
 
       reset({
         tipe: initialTipe,
@@ -112,35 +153,43 @@ export function useTransaksiDialog({
         tags: [],
       });
     }
-  }, [editData, copyFrom, defaultTanggal, defaultRekeningId, defaultKategoriId, kategori, reset, open]);
+  }, [
+    editData,
+    copyFrom,
+    defaultTanggal,
+    defaultRekeningId,
+    defaultKategoriId,
+    lockKategori,
+    lockedKategori,
+    allowedTipe,
+    kategori,
+    reset,
+    open,
+  ]);
 
-  // Load recent judul saat dialog pertama dibuka (mode create)
+  // Load suggestions (recent judul jika judul kosong, atau search query jika judul diisi)
   useEffect(() => {
-    if (open && !isEdit) {
-      getRecentJudul()
-        .then(setSuggestions)
-        .catch(() => {});
-    }
-  }, [open, isEdit]);
+    if (!open) return;
 
-  // Debounced suggestion fetch saat judul berubah
-  useEffect(() => {
+    const filterCatId = lockKategori ? defaultKategoriId : undefined;
     if (!judul || judul.length < 1) {
-      if (!isEdit) {
-        getRecentJudul()
+      if (!isEdit || lockKategori) {
+        getRecentJudul(filterCatId)
           .then(setSuggestions)
           .catch(() => {});
+      } else {
+        setTimeout(() => setSuggestions([]), 0);
       }
       return;
     }
 
     const timeout = setTimeout(async () => {
-      const sugg = await getJudulSuggestions(judul);
+      const sugg = await getJudulSuggestions(judul, filterCatId);
       setSuggestions(sugg);
     }, 400);
 
     return () => clearTimeout(timeout);
-  }, [judul, isEdit]);
+  }, [open, judul, isEdit, lockKategori, defaultKategoriId]);
 
   // Bersihkan field yang tidak relevan agar payload tetap sesuai tipe transaksi.
   useEffect(() => {
@@ -156,6 +205,9 @@ export function useTransaksiDialog({
 
   function handleSelectSuggestion(s: JudulSuggestion) {
     setValue("judul", s.judul, { shouldDirty: true, shouldValidate: true });
+    if (lockKategori) {
+      return;
+    }
     if (s.kategori_id) {
       const kat = kategori.find((k) => k.id === s.kategori_id);
       if (kat && kat.tipe !== "all" && kat.tipe !== tipe) {
@@ -194,7 +246,9 @@ export function useTransaksiDialog({
     const dirtyOptions = { shouldDirty: true };
 
     if (resolved.tipe) {
-      setValue("tipe", resolved.tipe, dirtyOptions);
+      if (!allowedTipe || allowedTipe.includes(resolved.tipe)) {
+        setValue("tipe", resolved.tipe, dirtyOptions);
+      }
     } else if (
       first.tipe === "hutang_baru" ||
       first.tipe === "piutang_baru" ||
@@ -230,7 +284,7 @@ export function useTransaksiDialog({
     }
 
     window.setTimeout(() => {
-      if (nextTipe !== "transfer" && resolved.kategoriId) {
+      if (!lockKategori && nextTipe !== "transfer" && resolved.kategoriId) {
         setValue("kategori_id", resolved.kategoriId, dirtyOptions);
       }
       if (nextTipe === "transfer" && resolved.rekeningTujuanId) {
@@ -286,10 +340,17 @@ export function useTransaksiDialog({
     try {
       const isTransferOrCorrection =
         values.tipe === "transfer" || values.tipe === "correction";
+      const finalKategoriId =
+        lockKategori && defaultKategoriId
+          ? defaultKategoriId
+          : isTransferOrCorrection
+          ? undefined
+          : values.kategori_id;
+
       const sanitizedValues: TransaksiSchema = {
         ...values,
         judul: isTransferOrCorrection ? null : (values.judul ?? null),
-        kategori_id: isTransferOrCorrection ? undefined : values.kategori_id,
+        kategori_id: finalKategoriId,
         rekening_tujuan: values.tipe === "transfer" ? values.rekening_tujuan : undefined,
       };
 
@@ -317,6 +378,7 @@ export function useTransaksiDialog({
         if (res.success && res.data) {
           toast.success("Transaksi diperbarui");
           onUpdated(res.data);
+          onOpenChange(false);
         } else {
           toast.error(res.error ?? "Gagal memperbarui");
         }
@@ -327,6 +389,7 @@ export function useTransaksiDialog({
             copyFrom ? "Transaksi berhasil di-copy!" : "Transaksi disimpan",
           );
           onCreated(res.data);
+          onOpenChange(false);
         } else {
           toast.error(res.error ?? "Gagal menyimpan");
         }
@@ -354,7 +417,12 @@ export function useTransaksiDialog({
   const incomeKategori = kategori.filter(
     (k) => k.tipe === "income" || k.tipe === "all",
   );
-  const shownKategori = tipe === "income" ? incomeKategori : expenseKategori;
+  let shownKategori = tipe === "income" ? incomeKategori : expenseKategori;
+  if (lockKategori && lockedKategori) {
+    if (!shownKategori.some((k) => k.id === lockedKategori.id)) {
+      shownKategori = [lockedKategori, ...shownKategori];
+    }
+  }
 
   const correctionRekening = isCorrection
     ? rekening.find((r) => r.id === editData?.rekening_id) ?? null
@@ -375,6 +443,8 @@ export function useTransaksiDialog({
     suggestions,
     shownKategori,
     correctionRekening,
+    allowedTipe,
+    lockKategori: !!lockKategori,
     handleSelectSuggestion,
     handleParsedResult,
     onSubmit,

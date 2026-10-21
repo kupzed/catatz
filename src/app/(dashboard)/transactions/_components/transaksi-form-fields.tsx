@@ -280,24 +280,40 @@ type KategoriFieldProps = {
   control: Control<TransaksiSchema>;
   errors: FieldErrors<TransaksiSchema>;
   kategoriList: Kategori[];
+  disabled?: boolean;
 };
 
 export function TransaksiKategoriField({
   control,
   errors,
   kategoriList,
+  disabled = false,
 }: KategoriFieldProps) {
   return (
     <div className="space-y-1.5">
-      <Label>Kategori</Label>
+      <div className="flex items-center justify-between">
+        <Label htmlFor="kategori-select">Kategori</Label>
+        {disabled && (
+          <span className="text-[11px] text-muted-foreground">
+            Terkunci di kategori ini
+          </span>
+        )}
+      </div>
       <Controller
         control={control}
         name="kategori_id"
         render={({ field }) => (
-          <Select value={field.value || ""} onValueChange={field.onChange}>
+          <Select
+            value={field.value || ""}
+            onValueChange={field.onChange}
+            disabled={disabled}
+          >
             <SelectTrigger
               id="kategori-select"
-              className={errors.kategori_id ? "border-rose-500" : ""}
+              className={cn(
+                errors.kategori_id && "border-rose-500",
+                disabled && "opacity-80 cursor-not-allowed bg-muted/40",
+              )}
             >
               <SelectValue placeholder="Pilih kategori" />
             </SelectTrigger>
