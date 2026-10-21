@@ -153,6 +153,16 @@ const dummyKategori: Kategori[] = [
     is_system: true,
     created_at: "2026-01-01",
   },
+  {
+    id: "b0000000-0000-4000-8000-000000000003",
+    user_id: null,
+    nama: "Umum",
+    ikon: "📦",
+    warna: "#0052ff",
+    tipe: "all",
+    is_system: true,
+    created_at: "2026-01-01",
+  },
 ];
 
 function createDummyTransaksi(overrides: Partial<Transaksi> = {}): Transaksi {
@@ -641,6 +651,182 @@ describe("TransaksiDialog", () => {
 
       const result = transaksiSchema.safeParse(validTransfer);
       expect(result.success).toBe(true);
+    });
+  });
+
+  describe("lockKategori mode in category detail", () => {
+    it("disables category select and filters recent judul by category on create", async () => {
+      render(
+        <TransaksiDialog
+          open={true}
+          onOpenChange={onOpenChange}
+          rekening={dummyRekening}
+          kategori={dummyKategori}
+          defaultKategoriId="b0000000-0000-4000-8000-000000000001"
+          lockKategori={true}
+          onCreated={onCreated}
+          onUpdated={onUpdated}
+          onQueued={onQueued}
+        />,
+      );
+
+      // getRecentJudul should be called with defaultKategoriId
+      expect(mockGetRecentJudul).toHaveBeenCalledWith(
+        "b0000000-0000-4000-8000-000000000001",
+      );
+
+      // Category trigger should be disabled
+      const kategoriTrigger = document.getElementById("kategori-select");
+      expect(kategoriTrigger).toBeInTheDocument();
+      expect(kategoriTrigger).toBeDisabled();
+      expect(screen.getByText("Terkunci di kategori ini")).toBeInTheDocument();
+
+      // Only 'Keluar' tab exists since category is expense-only
+      expect(screen.getByRole("tab", { name: /Keluar/i })).toBeInTheDocument();
+      expect(screen.queryByRole("tab", { name: /Masuk/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole("tab", { name: /Transfer/i })).not.toBeInTheDocument();
+    });
+
+    it("renders expense and income tabs for all-type category, excluding transfer", () => {
+      render(
+        <TransaksiDialog
+          open={true}
+          onOpenChange={onOpenChange}
+          rekening={dummyRekening}
+          kategori={dummyKategori}
+          defaultKategoriId="b0000000-0000-4000-8000-000000000003"
+          lockKategori={true}
+          onCreated={onCreated}
+          onUpdated={onUpdated}
+          onQueued={onQueued}
+        />,
+      );
+
+      expect(screen.getByRole("tab", { name: /Keluar/i })).toBeInTheDocument();
+      expect(screen.getByRole("tab", { name: /Masuk/i })).toBeInTheDocument();
+      expect(screen.queryByRole("tab", { name: /Transfer/i })).not.toBeInTheDocument();
+    });
+
+    it("locks category in edit mode and forces submit with category id", async () => {
+      const tx = createDummyTransaksi({
+        id: "tx-edit-cat",
+        kategori_id: "b0000000-0000-4000-8000-000000000001",
+        nominal: 25000,
+        judul: "Bakso",
+        rekening_id: dummyRekening[0].id,
+      });
+
+      render(
+        <TransaksiDialog
+          open={true}
+          onOpenChange={onOpenChange}
+          rekening={dummyRekening}
+          kategori={dummyKategori}
+          editData={tx}
+          defaultKategoriId="b0000000-0000-4000-8000-000000000001"
+          lockKategori={true}
+          onCreated={onCreated}
+          onUpdated={onUpdated}
+          onQueued={onQueued}
+        />,
+      );
+
+      const kategoriTrigger = document.getElementById("kategori-select");
+      expect(kategoriTrigger).toBeDisabled();
+
+      const submitBtn = screen.getByRole("button", {
+        name: "Perbarui",
+      });
+      fireEvent.click(submitBtn);
+
+      await waitFor(() => {
+        expect(mockUpdateTransaksi).toHaveBeenCalledWith(
+          "tx-edit-cat",
+          expect.objectContaining({
+            kategori_id: "b0000000-0000-4000-8000-000000000001",
+          }),
+        );
+      });
+    });
+
+    it("fetches debounced suggestions filtered by category when typing judul", async () => {
+      mockGetJudulSuggestions.mockResolvedValue([
+        { judul: "Ayam Geprek", kategori_id: "b0000000-0000-4000-8000-000000000001" },
+      ]);
+
+      render(
+        <TransaksiDialog
+          open={true}
+          onOpenChange={onOpenChange}
+          rekening={dummyRekening}
+          kategori={dummyKategori}
+          defaultKategoriId="b0000000-0000-4000-8000-000000000001"
+          lockKategori={true}
+          onCreated={onCreated}
+          onUpdated={onUpdated}
+          onQueued={onQueued}
+        />,
+      );
+
+      const judulInput = screen.getByPlaceholderText(/Nama transaksi/i);
+      fireEvent.change(judulInput, { target: { value: "Ayam" } });
+
+      await waitFor(
+        () => {
+          expect(mockGetJudulSuggestions).toHaveBeenCalledWith(
+            "Ayam",
+            "b0000000-0000-4000-8000-000000000001",
+          );
+        },
+        { timeout: 1000 },
+      );
+    });
+
+    it("does not change locked category when user selects a suggestion", async () => {
+      mockGetRecentJudul.mockResolvedValue([
+        { judul: "Sate Ayam", kategori_id: "b0000000-0000-4000-8000-000000000002" },
+      ]);
+
+      render(
+        <TransaksiDialog
+          open={true}
+          onOpenChange={onOpenChange}
+          rekening={dummyRekening}
+          kategori={dummyKategori}
+          defaultRekeningId={dummyRekening[0].id}
+          defaultKategoriId="b0000000-0000-4000-8000-000000000001"
+          lockKategori={true}
+          onCreated={onCreated}
+          onUpdated={onUpdated}
+          onQueued={onQueued}
+        />,
+      );
+
+      // Wait for suggestion badge
+      const suggestionBadge = await screen.findByRole("button", {
+        name: /Sate Ayam/i,
+      });
+      fireEvent.click(suggestionBadge);
+
+      // Judul is updated
+      const judulInput = screen.getByPlaceholderText(/Nama transaksi/i) as HTMLInputElement;
+      expect(judulInput.value).toBe("Sate Ayam");
+
+      // Fill nominal and submit
+      const nominalInput = screen.getByLabelText(/Nominal \(Rp\)/i);
+      fireEvent.change(nominalInput, { target: { value: "35000" } });
+
+      const submitBtn = screen.getByRole("button", { name: /^simpan$/i });
+      fireEvent.click(submitBtn);
+
+      await waitFor(() => {
+        expect(mockCreateTransaksi).toHaveBeenCalledWith(
+          expect.objectContaining({
+            judul: "Sate Ayam",
+            kategori_id: "b0000000-0000-4000-8000-000000000001",
+          }),
+        );
+      });
     });
   });
 });

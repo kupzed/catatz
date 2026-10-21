@@ -288,11 +288,11 @@ Tabel: `transaksi`, `rekening`.
 
 Lokasi: `src/actions/transaksi-action.ts`
 
-| Action                       | Tujuan                                                                        | Tabel       |
-| ---------------------------- | ----------------------------------------------------------------------------- | ----------- |
-| `getJudulSuggestions(query)` | Suggest judul berdasarkan riwayat transaksi dan kategori yang sering dipakai. | `transaksi` |
-| `getRecentJudul()`           | Mengambil judul transaksi terbaru untuk initial suggestion.                   | `transaksi` |
-| `suggestKategori(catatan)`   | Legacy auto-kategorisasi berbasis catatan.                                    | `transaksi` |
+| Action                                    | Tujuan                                                                                                         | Tabel       |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ----------- |
+| `getJudulSuggestions(query, kategoriId?)` | Suggest judul berdasarkan riwayat transaksi dan kategori yang sering dipakai (opsional filter by kategori).   | `transaksi` |
+| `getRecentJudul(kategoriId?)`             | Mengambil judul transaksi terbaru untuk initial suggestion (opsional filter by kategori).                     | `transaksi` |
+| `suggestKategori(catatan)`                | Legacy auto-kategorisasi berbasis catatan.                                                                     | `transaksi` |
 
 ## Rekening Actions
 

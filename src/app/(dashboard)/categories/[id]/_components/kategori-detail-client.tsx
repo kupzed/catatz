@@ -633,6 +633,8 @@ export function KategoriDetailClient({
         editData={editTxData}
         copyFrom={copyTxData}
         defaultKategoriId={kategori.id}
+        lockKategori={true}
+        defaultTanggal={currentDate}
         onCreated={(newTx) => {
           if (newTx.kategori_id === kategori.id) {
             setTransaksi((prev) => [newTx, ...prev]);
