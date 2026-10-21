@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 interface RekeningSelectProps {
   rekening: Rekening[];
@@ -18,6 +19,8 @@ interface RekeningSelectProps {
   includeNone?: boolean;
   noneLabel?: string;
   disabled?: boolean;
+  disabledValues?: string[];
+  disabledReason?: string;
   id?: string;
 }
 
@@ -31,6 +34,8 @@ export function RekeningSelect({
   includeNone = false,
   noneLabel = "Tanpa rekening",
   disabled = false,
+  disabledValues,
+  disabledReason,
   id,
 }: RekeningSelectProps) {
   return (
@@ -55,20 +60,34 @@ export function RekeningSelect({
             </span>
           </SelectItem>
         )}
-        {rekening.map((r) => (
-          <SelectItem key={r.id} value={r.id}>
-            <span className="flex items-center gap-2">
-              <span
-                className="w-2.5 h-2.5 rounded-full shrink-0"
-                style={{ background: r.warna }}
-              />
-              {r.nama}{" "}
-              <span className="text-muted-foreground text-xs ml-1 font-normal">
-                ({r.jenis})
+        {rekening.map((r) => {
+          const isDisabledItem = disabledValues?.includes(r.id);
+          return (
+            <SelectItem
+              key={r.id}
+              value={r.id}
+              disabled={isDisabledItem}
+            >
+              <span className="flex items-center gap-2 w-full">
+                <span
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ background: r.warna }}
+                />
+                <span className={cn(isDisabledItem && "opacity-50")}>
+                  {r.nama}
+                </span>{" "}
+                <span className="text-muted-foreground text-xs ml-1 font-normal">
+                  ({r.jenis})
+                </span>
+                {isDisabledItem && disabledReason && (
+                  <span className="text-[10px] text-muted-foreground ml-auto italic">
+                    {disabledReason}
+                  </span>
+                )}
               </span>
-            </span>
-          </SelectItem>
-        ))}
+            </SelectItem>
+          );
+        })}
       </SelectContent>
     </Select>
   );

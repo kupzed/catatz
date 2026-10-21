@@ -75,4 +75,5 @@ Fitur kategori digunakan untuk mengelola kategori pemasukan dan pengeluaran tran
   - Kontrol periode & navigasi tanggal identik dengan Detail Rekening dan Index Transaksi (`Semua Waktu`, `Bulan Ini`, `Minggu Ini`, `Hari Ini`, `Tahun Ini`, `Custom`) dengan kapsul tanggal interaktif.
   - Tab tipe transaksi horizontal scrollable jika kategori bertipe `all`, serta pencarian transaksi instan.
   - Daftar histori transaksi dengan pagination dan detail sheet.
+  - Form dialog Tambah & Edit Transaksi di detail kategori terkunci ke kategori ini (`lockKategori`), dropdown kategori ter-disable, tab jenis transaksi disesuaikan dengan tipe kategori (hanya Keluar/Masuk, tanpa opsi Transfer), dan saran judul (`getRecentJudul` & `getJudulSuggestions`) difilter khusus untuk kategori tersebut.
   - Breadcrumb dinamis terintegrasi (`Kategori > [Nama Kategori]`).

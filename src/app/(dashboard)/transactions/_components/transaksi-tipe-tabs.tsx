@@ -8,12 +8,14 @@ type TransaksiTipeTabsProps = {
   isCorrection: boolean;
   tipe: TransaksiSchema["tipe"];
   onTipeChange: (tipe: TransaksiSchema["tipe"]) => void;
+  allowedTipe?: TransaksiSchema["tipe"][];
 };
 
 export function TransaksiTipeTabs({
   isCorrection,
   tipe,
   onTipeChange,
+  allowedTipe,
 }: TransaksiTipeTabsProps) {
   if (isCorrection) {
     return (
@@ -29,13 +31,26 @@ export function TransaksiTipeTabs({
     );
   }
 
+  const tabs = allowedTipe
+    ? TIPE_TABS.filter((t) =>
+        allowedTipe.includes(t.value as TransaksiSchema["tipe"]),
+      )
+    : TIPE_TABS;
+
+  const gridColsClass =
+    tabs.length === 1
+      ? "grid-cols-1"
+      : tabs.length === 2
+      ? "grid-cols-2"
+      : "grid-cols-3";
+
   return (
     <Tabs
       value={tipe}
       onValueChange={(v) => onTipeChange(v as TransaksiSchema["tipe"])}
     >
-      <TabsList className="w-full grid grid-cols-3">
-        {TIPE_TABS.map((t) => (
+      <TabsList className={cn("w-full grid", gridColsClass)}>
+        {tabs.map((t) => (
           <TabsTrigger
             key={t.value}
             value={t.value}

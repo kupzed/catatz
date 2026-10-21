@@ -102,6 +102,12 @@ Initial data diambil di Server Component dengan:
 - Tanggal default dialog create normal mengikuti tanggal/periode yang sedang dipilih di halaman transaksi; waktu tetap memakai waktu saat dialog dibuka.
 - Field kategori hanya tampil untuk income/expense.
 - Field rekening tujuan hanya tampil untuk transfer.
+- **Proteksi & Auto-Switch Rekening Transfer (`rekening_id` & `rekening_tujuan`)**:
+  - Pada transaksi bertipe Transfer, Rekening Asal dan Rekening Tujuan diproteksi agar tidak dapat bernilai sama.
+  - Dropdown Rekening Tujuan menonaktifkan opsi rekening asal yang sedang dipilih (`disabledValues`) dengan label `(Rekening asal)` ketika tujuan belum dipilih atau ketika rekening asal terkunci.
+  - Mekanisme *Auto-Switch*: jika Rekening Asal adalah X dan Rekening Tujuan adalah Y, lalu pengguna memilih opsi Y pada Rekening Asal, sistem otomatis menukar posisi (*swap*) sehingga Rekening Asal menjadi Y dan Rekening Tujuan menjadi X (berlaku simetris pada Rekening Tujuan jika tidak terkunci).
+  - Tombol interaktif "Tukar Rekening" dengan ikon panah bolak-balik (`ArrowUpDown`) tersedia di sebelah label Rekening Tujuan saat kedua rekening telah terisi, atau di halaman detail rekening (`lockRekening`) untuk beralih secara instan antara mode Transfer Keluar dan Transfer Masuk.
+  - Pada level form validation dan Server Action, transaksi transfer dengan rekening asal dan tujuan yang sama akan ditolak secara ketat.
 - Dialog membersihkan field yang tidak relevan saat tipe transaksi berubah, misalnya kategori untuk transfer dan rekening tujuan untuk non-transfer.
 - Judul suggestion diambil dari histori transaksi.
 - Input suara memakai browser Speech Recognition dan Gemini parser server-side.

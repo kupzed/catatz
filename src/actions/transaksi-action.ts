@@ -179,6 +179,7 @@ export async function createTransaksi(values: TransaksiFormValues): Promise<Acti
   if (error) return { success: false, error: error.message };
   revalidatePath('/transactions');
   revalidatePath('/wallets');
+  revalidatePath('/categories');
   revalidatePath('/reports');
   return { success: true, data: data as Transaksi };
 }
@@ -283,6 +284,7 @@ export async function updateTransaksi(
   if (error) return { success: false, error: error.message };
   revalidatePath('/transactions');
   revalidatePath('/wallets');
+  revalidatePath('/categories');
   revalidatePath('/reports');
   return { success: true, data: data as Transaksi };
 }
@@ -327,23 +329,38 @@ export async function deleteTransaksi(id: string): Promise<ActionResult> {
   if (error) return { success: false, error: error.message };
   revalidatePath('/transactions');
   revalidatePath('/wallets');
+  revalidatePath('/categories');
   revalidatePath('/reports');
   return { success: true };
 }
 
 /**
  * Mengembalikan suggestion judul berdasarkan query (debounced dari UI).
+ * Opsional: filter berdasarkan kategori_id atau rekening_id tertentu.
  */
-export async function getJudulSuggestions(query: string): Promise<JudulSuggestion[]> {
+export async function getJudulSuggestions(
+  query: string,
+  kategoriId?: string,
+  rekeningId?: string,
+): Promise<JudulSuggestion[]> {
   if (!query || query.length < 1) return [];
 
   const supabase = await createClient();
 
-  const { data } = await supabase
+  let req = supabase
     .from('transaksi')
-    .select('judul, kategori_id')
+    .select('judul, kategori_id, rekening_id')
     .not('judul', 'is', null)
-    .ilike('judul', `%${query}%`)
+    .ilike('judul', `%${query}%`);
+
+  if (kategoriId) {
+    req = req.eq('kategori_id', kategoriId);
+  }
+  if (rekeningId) {
+    req = req.eq('rekening_id', rekeningId);
+  }
+
+  const { data } = await req
     .order('created_at', { ascending: false })
     .limit(50);
 
@@ -364,7 +381,7 @@ export async function getJudulSuggestions(query: string): Promise<JudulSuggestio
     const cats = grouped[judul];
     const topCatId = Object.keys(cats).length > 0
       ? Object.entries(cats).sort((a, b) => b[1] - a[1])[0][0]
-      : null;
+      : (kategoriId ?? null);
     return { judul, kategori_id: topCatId };
   });
 
@@ -375,14 +392,27 @@ export async function getJudulSuggestions(query: string): Promise<JudulSuggestio
 
 /**
  * Mengembalikan judul-judul transaksi terbaru (tanpa query) untuk initial suggestion.
+ * Opsional: filter berdasarkan kategori_id atau rekening_id tertentu.
  */
-export async function getRecentJudul(): Promise<JudulSuggestion[]> {
+export async function getRecentJudul(
+  kategoriId?: string,
+  rekeningId?: string,
+): Promise<JudulSuggestion[]> {
   const supabase = await createClient();
 
-  const { data } = await supabase
+  let req = supabase
     .from('transaksi')
-    .select('judul, kategori_id')
-    .not('judul', 'is', null)
+    .select('judul, kategori_id, rekening_id')
+    .not('judul', 'is', null);
+
+  if (kategoriId) {
+    req = req.eq('kategori_id', kategoriId);
+  }
+  if (rekeningId) {
+    req = req.eq('rekening_id', rekeningId);
+  }
+
+  const { data } = await req
     .order('created_at', { ascending: false })
     .limit(100);
 
@@ -394,13 +424,13 @@ export async function getRecentJudul(): Promise<JudulSuggestion[]> {
     if (!t.judul) continue;
     const j = t.judul.trim();
     if (!seen.has(j)) {
-      seen.set(j, t.kategori_id ?? null);
+      seen.set(j, t.kategori_id ?? kategoriId ?? null);
     }
   }
 
   const result: JudulSuggestion[] = [];
-  seen.forEach((kategori_id, judul) => {
-    result.push({ judul, kategori_id });
+  seen.forEach((catId, judul) => {
+    result.push({ judul, kategori_id: catId });
   });
 
   return result.slice(0, 8);

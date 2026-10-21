@@ -35,6 +35,10 @@ export type TransaksiDialogProps = {
   defaultRekeningId?: string;
   /** Kategori default untuk mode create normal */
   defaultKategoriId?: string;
+  /** Kunci kategori dan sesuaikan opsi tipe serta suggestions (misal di detail kategori) */
+  lockKategori?: boolean;
+  /** Kunci rekening dan sesuaikan suggestions (misal di detail rekening) */
+  lockRekening?: boolean;
 };
 
 export default function TransaksiDialog(props: TransaksiDialogProps) {
@@ -61,6 +65,16 @@ export default function TransaksiDialog(props: TransaksiDialogProps) {
     suggestions,
     shownKategori,
     correctionRekening,
+    allowedTipe,
+    lockKategori,
+    disabledRekeningId,
+    disabledRekeningTujuan,
+    rekeningId,
+    rekeningTujuan,
+    canSwap,
+    handleRekeningAsalChange,
+    handleRekeningTujuanChange,
+    handleSwapRekening,
     handleSelectSuggestion,
     handleParsedResult,
     onSubmit,
@@ -100,6 +114,7 @@ export default function TransaksiDialog(props: TransaksiDialogProps) {
           <TransaksiTipeTabs
             isCorrection={isCorrection}
             tipe={tipe}
+            allowedTipe={allowedTipe}
             onTipeChange={(v) => setValue("tipe", v)}
           />
 
@@ -118,6 +133,14 @@ export default function TransaksiDialog(props: TransaksiDialogProps) {
             isCorrection={isCorrection}
             rekening={rekening}
             correctionRekening={correctionRekening}
+            disabledRekeningId={disabledRekeningId}
+            disabledRekeningTujuan={disabledRekeningTujuan}
+            rekeningId={rekeningId}
+            rekeningTujuan={rekeningTujuan}
+            canSwap={canSwap}
+            onRekeningAsalChange={handleRekeningAsalChange}
+            onRekeningTujuanChange={handleRekeningTujuanChange}
+            onSwapRekening={handleSwapRekening}
           />
 
           {/* Nominal */}
@@ -142,6 +165,7 @@ export default function TransaksiDialog(props: TransaksiDialogProps) {
               control={control}
               errors={errors}
               kategoriList={shownKategori}
+              disabled={lockKategori}
             />
           )}
 
