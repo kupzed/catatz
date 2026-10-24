@@ -162,7 +162,7 @@ Input query:
 
 Output:
 
-- Redirect ke `next` jika sukses.
+- Redirect ke `next` jika sukses memakai origin request yang telah divalidasi (`x-forwarded-host` dalam `ALLOWED_DEV_ORIGINS` / `NEXT_PUBLIC_APP_URL`) agar tidak terlempar ke `localhost` saat diakses via reverse proxy atau tunnel (Cloudflare Tunnel/ngrok).
 - Untuk `flow=link_google`, callback memvalidasi email identity Google sama dengan email utama user. Jika cocok, redirect ke `/settings?message=google-linked`; jika berbeda, callback mencoba `unlinkIdentity` dan redirect dengan message error.
 - Redirect ke `/login?message=auth-callback-failed` jika gagal.
 - Middleware memperlakukan route ini sebagai public dan memindahkan `/login?code=...` atau `/register?code=...` ke route ini sebagai recovery fallback.

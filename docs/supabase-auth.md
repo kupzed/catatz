@@ -159,11 +159,14 @@ http://localhost:3000/auth/callback?next=/transactions
 http://localhost:3000/auth/callback?next=/settings&flow=link_google
 ```
 
-Development dengan ngrok:
+Development dengan ngrok / Cloudflare Tunnel:
 
 ```txt
 https://morphing-easeful-starry.ngrok-free.dev/auth/callback?next=/transactions
 https://morphing-easeful-starry.ngrok-free.dev/auth/callback?next=/settings&flow=link_google
+# atau custom domain Cloudflare Tunnel
+https://catatz-dev.zed.ai.id/auth/callback?next=/transactions
+https://catatz-dev.zed.ai.id/auth/callback?next=/settings&flow=link_google
 ```
 
 Production:
