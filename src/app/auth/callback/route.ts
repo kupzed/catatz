@@ -2,6 +2,7 @@ import { createClient } from "@/configs/supabase/server";
 import { NextResponse, type NextRequest } from "next/server";
 import { createSessionRecord } from "@/actions/session-action";
 import type { UserIdentity } from "@supabase/supabase-js";
+import { getCallbackOrigin } from "@/lib/auth-callback";
 
 function safeNextPath(value: string | null): string {
   if (!value || !value.startsWith("/") || value.startsWith("//")) {
@@ -30,6 +31,7 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get("code");
   const next = safeNextPath(requestUrl.searchParams.get("next"));
   const isGoogleLinkFlow = requestUrl.searchParams.get("flow") === "link_google";
+  const redirectOrigin = getCallbackOrigin(request);
 
   if (code) {
     const supabase = await createClient();
@@ -43,7 +45,7 @@ export async function GET(request: NextRequest) {
           await supabase.auth.getUserIdentities();
 
         if (identitiesError) {
-          return redirectWithMessage(next, requestUrl.origin, "google-link-failed");
+          return redirectWithMessage(next, redirectOrigin, "google-link-failed");
         }
 
         const googleIdentity = identitiesData.identities.find(
@@ -55,7 +57,7 @@ export async function GET(request: NextRequest) {
           : null;
 
         if (!googleIdentity || !userEmail || !googleEmail) {
-          return redirectWithMessage(next, requestUrl.origin, "google-link-failed");
+          return redirectWithMessage(next, redirectOrigin, "google-link-failed");
         }
 
         if (googleEmail !== userEmail) {
@@ -65,7 +67,7 @@ export async function GET(request: NextRequest) {
             ? "google-link-cleanup-failed"
             : "google-link-email-mismatch";
 
-          return redirectWithMessage(next, requestUrl.origin, message);
+          return redirectWithMessage(next, redirectOrigin, message);
         }
       }
 
@@ -103,18 +105,18 @@ export async function GET(request: NextRequest) {
       await createSessionRecord(user.id);
 
       if (isGoogleLinkFlow) {
-        return redirectWithMessage(next, requestUrl.origin, "google-linked");
+        return redirectWithMessage(next, redirectOrigin, "google-linked");
       }
       
-      return NextResponse.redirect(new URL(next, requestUrl.origin));
+      return NextResponse.redirect(new URL(next, redirectOrigin));
     }
   }
 
   if (isGoogleLinkFlow) {
-    return redirectWithMessage(next, requestUrl.origin, "google-link-failed");
+    return redirectWithMessage(next, redirectOrigin, "google-link-failed");
   }
 
   return NextResponse.redirect(
-    new URL("/login?message=auth-callback-failed", requestUrl.origin),
+    new URL("/login?message=auth-callback-failed", redirectOrigin),
   );
 }
