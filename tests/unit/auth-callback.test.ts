@@ -49,4 +49,26 @@ describe("getCallbackOrigin", () => {
     const origin = getCallbackOrigin(request, ["localhost:3000"]);
     expect(origin).toBe("http://localhost:3000");
   });
+
+  it("resolves http://127.0.0.1:3000 when accessing locally via 127.0.0.1", () => {
+    const request = new NextRequest("http://127.0.0.1:3000/auth/callback?code=xyz", {
+      headers: {
+        host: "127.0.0.1:3000",
+      },
+    });
+
+    const origin = getCallbackOrigin(request, ["127.0.0.1:3000"]);
+    expect(origin).toBe("http://127.0.0.1:3000");
+  });
+
+  it("resolves http://[::1]:3000 when accessing locally via IPv6 loopback", () => {
+    const request = new NextRequest("http://[::1]:3000/auth/callback?code=xyz", {
+      headers: {
+        host: "[::1]:3000",
+      },
+    });
+
+    const origin = getCallbackOrigin(request, ["[::1]:3000"]);
+    expect(origin).toBe("http://[::1]:3000");
+  });
 });
