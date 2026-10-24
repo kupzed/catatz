@@ -1,22 +1,6 @@
 import { type NextRequest } from "next/server";
 import { environment } from "@/configs/environment";
 
-function isLocalhost(host: string): boolean {
-  const cleanHost = host.toLowerCase().trim();
-  const hostname = cleanHost.startsWith("[")
-    ? cleanHost.slice(1, cleanHost.indexOf("]"))
-    : cleanHost.split(":")[0];
-
-  return (
-    hostname === "localhost" ||
-    hostname.endsWith(".localhost") ||
-    hostname === "127.0.0.1" ||
-    hostname.startsWith("127.") ||
-    hostname === "::1" ||
-    hostname === "0.0.0.0"
-  );
-}
-
 export function getCallbackOrigin(
   request: NextRequest,
   allowedOrigins: string[] = environment.allowedDevOrigins,
@@ -49,15 +33,20 @@ export function getCallbackOrigin(
     );
 
     if (allowedHosts.has(host.toLowerCase())) {
-      const isLocal = isLocalhost(host);
-      const proto = isLocal ? "http" : forwardedProto;
+      const isLocalhost = host.toLowerCase().startsWith("localhost");
+      const proto = isLocalhost ? "http" : forwardedProto;
       return `${proto}://${host}`;
     }
   }
 
   try {
-    return new URL(request.url).origin;
+    const appUrlHost = new URL(environment.appUrl).host;
+    if (appUrlHost && !appUrlHost.startsWith("localhost")) {
+      return environment.appUrl;
+    }
   } catch {
-    return environment.appUrl;
+    // ignore
   }
+
+  return new URL(request.url).origin;
 }
