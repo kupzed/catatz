@@ -39,7 +39,7 @@ Jika dokumentasi dan source code berbeda, percaya source code dulu, lalu update 
 CatatZ memakai subset Everything Claude Code (ECC) secara project-local untuk Codex dan Claude Code.
 
 - `.agents/skills/` adalah canonical skill surface. `.claude/skills/` hanya berisi wrapper kompatibilitas yang menunjuk ke canonical skill.
-- Gunakan skills `coding-standards`, `frontend-patterns`, `security-review`, `verification-loop`, `documentation-lookup`, `strategic-compact`, `agent-introspection-debugging`, `product-capability`, `tdd-workflow`, dan `e2e-testing` sesuai task.
+- Gunakan skills `coding-standards`, `frontend-patterns`, `security-review`, `security-audit`, `verification-loop`, `documentation-lookup`, `strategic-compact`, `agent-introspection-debugging`, `product-capability`, `tdd-workflow`, dan `e2e-testing` sesuai task.
 - `nextjs-turbopack` adalah library reference, bukan aturan production build. Production CatatZ tetap memakai `next build --webpack` untuk Serwist.
 - Specialized agents di `.codex/agents/` dan `.claude/agents/` bersifat read-only. Main agent adalah satu-satunya pihak yang boleh mengedit file.
 - Hooks project memblokir command destruktif dan perubahan secret file, tetapi quality check hanya warning. CI tetap menjadi enforcement utama.

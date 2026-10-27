@@ -2,15 +2,7 @@ import { createClient } from "@/configs/supabase/server";
 import { NextResponse, type NextRequest } from "next/server";
 import { createSessionRecord } from "@/actions/session-action";
 import type { UserIdentity } from "@supabase/supabase-js";
-import { getCallbackOrigin } from "@/lib/auth-callback";
-
-function safeNextPath(value: string | null): string {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return "/transactions";
-  }
-
-  return value;
-}
+import { getCallbackOrigin, safeNextPath } from "@/lib/auth-callback";
 
 function redirectWithMessage(path: string, origin: string, message: string) {
   const url = new URL(path, origin);

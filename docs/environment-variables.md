@@ -52,7 +52,7 @@ Server-only variable:
 ## Catatan Keamanan
 
 - Jangan commit `.env`, `.env.local`, key production, service role key, token OAuth, atau credential lain.
-- `SUPABASE_SERVICE_ROLE_KEY` tidak digunakan di codebase saat ini dan tidak perlu ditambahkan kecuali ada kebutuhan server-only yang jelas.
-- Jika suatu hari service role key diperlukan, jangan pernah memakai prefix `NEXT_PUBLIC_` dan jangan import module tersebut dari Client Component.
+- `SUPABASE_SERVICE_ROLE_KEY` dimuat secara eksklusif melalui `src/configs/server-environment.ts` (diproteksi `import "server-only"`) dan hanya digunakan oleh `src/configs/supabase/admin.ts` untuk operasi administratif server seperti `deleteAccount`.
+- Modul publik `src/configs/environment.ts` tidak mengekspor `supabaseServiceRoleKey` untuk menjamin batasan modul yang aman dan mencegah kebocoran kredensial ke bundle browser.
 - Untuk production, `NEXT_PUBLIC_APP_URL` harus memakai domain production agar email verification/callback Supabase benar.
 - Untuk development dengan ngrok, `NEXT_PUBLIC_APP_URL` boleh tetap `http://localhost:3000` selama host ngrok ada di `ALLOWED_DEV_ORIGINS`; Server Action auth akan memakai origin request yang sudah allowlisted untuk callback.
