@@ -35,7 +35,7 @@ Security headers saat ini:
 - [ ] `AI_API_KEY` hanya server-side.
 - [ ] File Auto Fill divalidasi ukuran, MIME, dan signature sebelum dikirim ke Gemini.
 - [ ] File Auto Fill tidak disimpan ke Storage, database, cache, atau log produksi.
-- [ ] Service role key tidak digunakan di client.
+- [ ] Service role key terisolasi di serverEnvironment ('server-only') dan tidak diexport dari module publik environment.ts.
 - [ ] Production env di Vercel lengkap.
 - [ ] `NEXT_PUBLIC_APP_URL` sesuai domain production.
 
@@ -46,7 +46,9 @@ Security headers saat ini:
 - [ ] Origin development tambahan untuk OAuth hanya diizinkan lewat `ALLOWED_DEV_ORIGINS` dan tidak diset di production.
 - [ ] Login/register flow sudah dites.
 - [ ] Logout membersihkan session dan redirect ke `/login`.
-- [ ] Password update hanya untuk user login.
+- [ ] Session revocation dicek di middleware dan mewajibkan cookie `device_id` pada protected routes (mencegah bypass revocation via omission).
+- [ ] Password update mewajibkan verifikasi password lama (`currentPassword` mandatory re-authentication).
+- [ ] Action AI (voice input & file parsing) memvalidasi session user aktif sebelum memanggil API eksternal.
 - [ ] Reset password email memakai callback Supabase dan Redirect URLs yang valid.
 - [ ] Google OAuth provider aktif di Supabase Dashboard sebelum flow Google dipakai.
 - [ ] Manual Linking aktif di Supabase Dashboard sebelum fitur Link Identity Google dipakai.
@@ -55,7 +57,7 @@ Security headers saat ini:
 ## Storage
 
 - [ ] Bucket `avatars` hanya menyimpan avatar publik.
-- [ ] Upload avatar dibatasi ukuran dan tipe file.
+- [ ] Upload avatar dibatasi ukuran (maks 2MB) dan tipe file strict whitelist (JPG, PNG, WebP; SVG diblokir untuk mencegah Stored XSS).
 - [ ] Policy write bucket membatasi folder berdasarkan `auth.uid()`.
 - [ ] Jangan menyimpan file privat di bucket public.
 

@@ -127,6 +127,7 @@ Protected route rule:
 Behavior:
 
 - Protected route tanpa user -> redirect `/login`.
+- Protected route dengan user wajib menyertakan cookie `device_id`. Jika cookie tidak ada atau session di `user_sessions` memiliki `revoked_at` tidak null, session dianggap revoked, cookies auth dibersihkan, dan request dialihkan ke `/login?message=session-revoked`.
 - Auth page dengan user -> redirect `/`.
 - `/auth/callback` tetap public agar auth code Supabase bisa ditukar menjadi session.
 - Jika `/login` atau `/register` menerima query `code`, middleware mengalihkan request ke `/auth/callback` dengan query yang sama. Ini safety net untuk konfigurasi Supabase yang masih mengirim auth code ke halaman auth.
