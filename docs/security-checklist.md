@@ -56,7 +56,7 @@ Security headers saat ini:
 ## Storage
 
 - [ ] Bucket `avatars` hanya menyimpan avatar publik.
-- [ ] Upload avatar dibatasi ukuran dan tipe file.
+- [ ] Upload avatar dibatasi ukuran (maks 2MB) dan tipe file strict whitelist (JPG, PNG, WebP; SVG diblokir untuk mencegah Stored XSS).
 - [ ] Policy write bucket membatasi folder berdasarkan `auth.uid()`.
 - [ ] Jangan menyimpan file privat di bucket public.
 

@@ -50,3 +50,37 @@ export function getCallbackOrigin(
 
   return new URL(request.url).origin;
 }
+
+export function safeNextPath(value: string | null): string {
+  if (!value || typeof value !== "string") {
+    return "/transactions";
+  }
+
+  if (!value.startsWith("/") || value.startsWith("//") || value.includes("\\")) {
+    return "/transactions";
+  }
+
+  try {
+    const decoded = decodeURIComponent(value);
+    if (decoded.includes("\\") || decoded.startsWith("//")) {
+      return "/transactions";
+    }
+  } catch {
+    return "/transactions";
+  }
+
+  try {
+    const parsed = new URL(value, "http://localhost");
+    if (parsed.origin !== "http://localhost") {
+      return "/transactions";
+    }
+    const pathPart = value.split("?")[0];
+    if (parsed.pathname !== pathPart) {
+      return "/transactions";
+    }
+  } catch {
+    return "/transactions";
+  }
+
+  return value;
+}

@@ -44,15 +44,27 @@ export async function uploadAvatar(formData: FormData): Promise<ActionResult<{ a
     return { success: false, error: 'File tidak ditemukan' };
   }
 
-  if (!file.type.startsWith('image/')) {
-    return { success: false, error: 'Format file tidak valid' };
+  const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
+  type AllowedMimeType = (typeof ALLOWED_MIME_TYPES)[number];
+
+  if (!ALLOWED_MIME_TYPES.includes(file.type as AllowedMimeType)) {
+    return {
+      success: false,
+      error: 'Format file tidak didukung. Gunakan JPG, PNG, atau WebP.',
+    };
   }
 
   if (file.size > 2 * 1024 * 1024) {
     return { success: false, error: 'Ukuran file terlalu besar (maksimal 2MB)' };
   }
 
-  const ext = file.name.split('.').pop() || 'jpg';
+  const MIME_TO_EXT: Record<AllowedMimeType, string> = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+  };
+
+  const ext = MIME_TO_EXT[file.type as AllowedMimeType] || 'jpg';
   const path = `${user.id}/avatar.${ext}`;
 
   const { error: uploadError } = await supabase.storage

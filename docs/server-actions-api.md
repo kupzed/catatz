@@ -579,7 +579,7 @@ Lokasi: `src/actions/profile-action.ts`
 | Action           | Tujuan                                                              | Supabase Access               |
 | ---------------- | ------------------------------------------------------------------- | ----------------------------- |
 | `updateProfile`  | Mengubah nama profil user.                                          | `profiles`                    |
-| `uploadAvatar`   | Upload avatar image max 2 MB, update `profiles.avatar_url`.         | Storage `avatars`, `profiles` |
+| `uploadAvatar`   | Upload avatar image max 2 MB (JPG/PNG/WebP only), update `profiles.avatar_url`. | Storage `avatars`, `profiles` |
 | `removeAvatar`   | Hapus semua file avatar di folder user dan set `avatar_url = null`. | Storage `avatars`, `profiles` |
 | `changePassword` | Wajib verifikasi password lama (`currentPassword` mandatory) lalu update password baru. | Supabase Auth                 |
 
