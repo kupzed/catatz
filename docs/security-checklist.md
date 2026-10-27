@@ -46,6 +46,7 @@ Security headers saat ini:
 - [ ] Origin development tambahan untuk OAuth hanya diizinkan lewat `ALLOWED_DEV_ORIGINS` dan tidak diset di production.
 - [ ] Login/register flow sudah dites.
 - [ ] Logout membersihkan session dan redirect ke `/login`.
+- [ ] Session revocation dicek di middleware dan mewajibkan cookie `device_id` pada protected routes (mencegah bypass revocation via omission).
 - [ ] Password update mewajibkan verifikasi password lama (`currentPassword` mandatory re-authentication).
 - [ ] Action AI (voice input & file parsing) memvalidasi session user aktif sebelum memanggil API eksternal.
 - [ ] Reset password email memakai callback Supabase dan Redirect URLs yang valid.

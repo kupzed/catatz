@@ -2,6 +2,19 @@ import { createServerClient } from '@supabase/ssr';
 import { type NextRequest, NextResponse } from 'next/server';
 import { environment } from '../environment';
 
+function revokeSessionAndRedirect(request: NextRequest): NextResponse {
+  const response = NextResponse.redirect(
+    new URL("/login?message=session-revoked", request.url)
+  );
+  const allCookies = request.cookies.getAll();
+  allCookies.forEach(({ name }) => {
+    if (name.startsWith("sb-") || name === "device_id") {
+      response.cookies.delete(name);
+    }
+  });
+  return response;
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
   const pathname = request.nextUrl.pathname;
@@ -60,34 +73,29 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Cek apakah session saat ini telah di-revoke
+
+  // Cek apakah session saat ini valid dan tidak di-revoke
   if (isProtected && user) {
     const deviceId = request.cookies.get("device_id")?.value;
-    if (deviceId) {
-      const { data: sessionData } = await supabase
-        .from("user_sessions")
-        .select("revoked_at")
-        .eq("device_id", deviceId)
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-        
-      if (sessionData && sessionData.revoked_at !== null) {
-        // Hapus cookie sesi karena telah di-revoke
-        supabaseResponse = NextResponse.redirect(
-          new URL("/login?message=session-revoked", request.url)
-        );
-        // Supabase SSR uses name/value pairs
-        // We delete the auth token by clearing auth cookies
-        const allCookies = request.cookies.getAll();
-        allCookies.forEach(({ name }) => {
-          if (name.startsWith('sb-') || name === 'device_id') {
-            supabaseResponse.cookies.delete(name);
-          }
-        });
-        return supabaseResponse;
-      }
+
+    if (!deviceId) {
+      // Keamanan (Option A: Strict): Wajibkan keberadaan device_id cookie pada protected route.
+      // Menolak akses jika cookie device_id dihilangkan untuk menghindari bypass status revoke.
+      return revokeSessionAndRedirect(request);
+    }
+
+    const { data: sessionData } = await supabase
+      .from("user_sessions")
+      .select("revoked_at")
+      .eq("device_id", deviceId)
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (sessionData && sessionData.revoked_at !== null) {
+      // Hapus cookie sesi karena telah di-revoke
+      return revokeSessionAndRedirect(request);
     }
   }
 
