@@ -35,7 +35,7 @@ Security headers saat ini:
 - [ ] `AI_API_KEY` hanya server-side.
 - [ ] File Auto Fill divalidasi ukuran, MIME, dan signature sebelum dikirim ke Gemini.
 - [ ] File Auto Fill tidak disimpan ke Storage, database, cache, atau log produksi.
-- [ ] Service role key tidak digunakan di client.
+- [ ] Service role key terisolasi di serverEnvironment ('server-only') dan tidak diexport dari module publik environment.ts.
 - [ ] Production env di Vercel lengkap.
 - [ ] `NEXT_PUBLIC_APP_URL` sesuai domain production.
 
