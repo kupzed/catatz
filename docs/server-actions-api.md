@@ -581,7 +581,7 @@ Lokasi: `src/actions/profile-action.ts`
 | `updateProfile`  | Mengubah nama profil user.                                          | `profiles`                    |
 | `uploadAvatar`   | Upload avatar image max 2 MB, update `profiles.avatar_url`.         | Storage `avatars`, `profiles` |
 | `removeAvatar`   | Hapus semua file avatar di folder user dan set `avatar_url = null`. | Storage `avatars`, `profiles` |
-| `changePassword` | Verifikasi password lama lalu update password baru.                 | Supabase Auth                 |
+| `changePassword` | Wajib verifikasi password lama (`currentPassword` mandatory) lalu update password baru. | Supabase Auth                 |
 
 ## AI Input Actions
 
@@ -596,7 +596,7 @@ Lokasi:
 
 ### `processVoiceInput`
 
-Deskripsi: menerima transcript suara, memanggil parser AI server-side, lalu mengembalikan hasil parsing transaksi.
+Deskripsi: menerima transcript suara, memvalidasi sesi autentikasi user, memanggil parser AI server-side, lalu mengembalikan hasil parsing transaksi.
 
 Input:
 
@@ -612,6 +612,7 @@ ActionResult<VoiceParseResult>;
 
 Dependency:
 
+- User session terautentikasi (Supabase Auth).
 - Browser Speech Recognition di client.
 - Permission microphone dan audio stream client melalui `navigator.mediaDevices.getUserMedia`.
 - Gemini API melalui `@google/genai` di server.

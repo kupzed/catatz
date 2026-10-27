@@ -116,7 +116,7 @@ export async function removeAvatar(): Promise<ActionResult> {
   return { success: true };
 }
 
-export async function changePassword(values: { currentPassword?: string, newPassword: string }): Promise<ActionResult> {
+export async function changePassword(values: { currentPassword: string, newPassword: string }): Promise<ActionResult> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
@@ -124,16 +124,18 @@ export async function changePassword(values: { currentPassword?: string, newPass
     return { success: false, error: 'Tidak terautentikasi' };
   }
 
-  if (values.currentPassword) {
-    // Verifikasi password lama
-    const { error: verifyError } = await supabase.auth.signInWithPassword({
-      email: user.email,
-      password: values.currentPassword
-    });
+  if (!values.currentPassword) {
+    return { success: false, error: 'Password lama wajib diisi' };
+  }
 
-    if (verifyError) {
-      return { success: false, error: 'Password lama tidak sesuai' };
-    }
+  // Verifikasi password lama
+  const { error: verifyError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: values.currentPassword
+  });
+
+  if (verifyError) {
+    return { success: false, error: 'Password lama tidak sesuai' };
   }
 
   const { error } = await supabase.auth.updateUser({

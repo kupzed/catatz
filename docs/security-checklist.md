@@ -46,7 +46,8 @@ Security headers saat ini:
 - [ ] Origin development tambahan untuk OAuth hanya diizinkan lewat `ALLOWED_DEV_ORIGINS` dan tidak diset di production.
 - [ ] Login/register flow sudah dites.
 - [ ] Logout membersihkan session dan redirect ke `/login`.
-- [ ] Password update hanya untuk user login.
+- [ ] Password update mewajibkan verifikasi password lama (`currentPassword` mandatory re-authentication).
+- [ ] Action AI (voice input & file parsing) memvalidasi session user aktif sebelum memanggil API eksternal.
 - [ ] Reset password email memakai callback Supabase dan Redirect URLs yang valid.
 - [ ] Google OAuth provider aktif di Supabase Dashboard sebelum flow Google dipakai.
 - [ ] Manual Linking aktif di Supabase Dashboard sebelum fitur Link Identity Google dipakai.

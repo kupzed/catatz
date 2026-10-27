@@ -1,5 +1,6 @@
 'use server';
 
+import { createClient } from '@/configs/supabase/server';
 import { parseVoiceTranscript } from '@/lib/voice-parser';
 import type { ActionResult } from '@/types/general';
 import type { VoiceParseResult } from '@/types/voice-parser';
@@ -11,6 +12,17 @@ import type { VoiceParseResult } from '@/types/voice-parser';
 export async function processVoiceInput(
   rawTranscript: string,
 ): Promise<ActionResult<VoiceParseResult>> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      success: false,
+      error: 'Silakan login terlebih dahulu untuk menggunakan fitur suara.',
+    };
+  }
   try {
     const result = await parseVoiceTranscript(rawTranscript);
 
