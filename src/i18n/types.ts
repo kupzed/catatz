@@ -33,6 +33,8 @@ export interface Dictionary {
     category: string;
     wallet: string;
     type: string;
+    copy: string;
+    or: string;
   };
   nav: {
     transactions: string;
@@ -42,24 +44,29 @@ export interface Dictionary {
     categories: string;
     settings: string;
     newTransaction: string;
+    mainMenu: string;
+    others: string;
+    toggleSidebar: string;
   };
   auth: {
     login: {
       title: string;
       subtitle: string;
+      googleButton: string;
       emailLabel: string;
       emailPlaceholder: string;
       passwordLabel: string;
       passwordPlaceholder: string;
+      forgotPasswordLink: string;
       submit: string;
       submitting: string;
-      forgotPasswordLink: string;
       noAccount: string;
       registerLink: string;
     };
     register: {
       title: string;
       subtitle: string;
+      googleButton: string;
       nameLabel: string;
       namePlaceholder: string;
       emailLabel: string;
@@ -68,10 +75,17 @@ export interface Dictionary {
       passwordPlaceholder: string;
       confirmPasswordLabel: string;
       confirmPasswordPlaceholder: string;
+      strengthLabel: string;
+      strengthWeak: string;
+      strengthMedium: string;
+      strengthStrong: string;
       submit: string;
       submitting: string;
       hasAccount: string;
       loginLink: string;
+      checkEmailTitle: string;
+      checkEmailDescription: string;
+      backToLoginButton: string;
     };
     forgotPassword: {
       title: string;
@@ -98,6 +112,7 @@ export interface Dictionary {
   transactions: {
     title: string;
     subtitle: string;
+    dataCount: string;
     addNew: string;
     emptyState: string;
     emptyFilterState: string;
@@ -113,10 +128,12 @@ export interface Dictionary {
       all: string;
       expense: string;
       income: string;
+      transfer: string;
     };
     form: {
       createTitle: string;
       editTitle: string;
+      copyTitle: string;
       type: string;
       nominal: string;
       nominalPlaceholder: string;
@@ -141,8 +158,25 @@ export interface Dictionary {
       allWallets: string;
       allCategories: string;
       dateRange: string;
+      minAmount: string;
+      maxAmount: string;
+      sortBy: string;
+      sortByDate: string;
+      sortByAmount: string;
+      sortOrder: string;
+      sortDesc: string;
+      sortAsc: string;
       resetFilter: string;
       applyFilter: string;
+      activeFilters: string;
+      clearAll: string;
+      period: string;
+      periodToday: string;
+      periodThisWeek: string;
+      periodThisMonth: string;
+      periodThisYear: string;
+      periodAllTime: string;
+      periodCustom: string;
     };
     summary: {
       income: string;
@@ -156,11 +190,15 @@ export interface Dictionary {
       date: string;
       time: string;
       wallet: string;
+      sourceWallet: string;
       destinationWallet: string;
       category: string;
       notes: string;
       createdAt: string;
       updatedAt: string;
+      editButton: string;
+      copyButton: string;
+      deleteButton: string;
     };
     ai: {
       voiceInput: string;
@@ -168,6 +206,14 @@ export interface Dictionary {
       listening: string;
       processing: string;
       error: string;
+      fileUploadHint: string;
+    };
+    pagination: {
+      showing: string;
+      of: string;
+      transactions: string;
+      prevPage: string;
+      nextPage: string;
     };
   };
   wallets: {
@@ -192,19 +238,28 @@ export interface Dictionary {
       type: string;
       typePlaceholder: string;
       initialBalance: string;
+      currentBalance: string;
       accountNumber: string;
       accountNumberPlaceholder: string;
       color: string;
+      excludeTotal: string;
+      excludeTotalDescription: string;
+      selectBankPreset: string;
       submitCreate: string;
       submitUpdate: string;
     };
     detail: {
       title: string;
       currentBalance: string;
+      initialBalance: string;
       accountNumber: string;
       transactionsHistory: string;
       correction: string;
+      correctionTitle: string;
+      correctionDescription: string;
       emptyTransactions: string;
+      totalIncome: string;
+      totalExpense: string;
     };
   };
   debts: {
@@ -217,6 +272,8 @@ export interface Dictionary {
     types: {
       debt: string;
       receivable: string;
+      give: string;
+      receive: string;
     };
     status: {
       active: string;
@@ -226,6 +283,7 @@ export interface Dictionary {
     form: {
       createTitle: string;
       editTitle: string;
+      editContactTitle: string;
       type: string;
       personName: string;
       personNamePlaceholder: string;
@@ -233,6 +291,7 @@ export interface Dictionary {
       startDate: string;
       dueDate: string;
       wallet: string;
+      walletPlaceholder: string;
       notes: string;
       notesPlaceholder: string;
       submitCreate: string;
@@ -242,16 +301,22 @@ export interface Dictionary {
       title: string;
       contact: string;
       totalLoaned: string;
+      totalBorrowed: string;
       totalReturned: string;
       remainingBalance: string;
       installments: string;
       addInstallment: string;
       markAsPaid: string;
+      markAsActive: string;
       emptyInstallments: string;
     };
     installment: {
       title: string;
       createTitle: string;
+      editTitle: string;
+      paymentType: string;
+      typePayment: string;
+      typeLoan: string;
       nominal: string;
       date: string;
       wallet: string;
@@ -290,6 +355,11 @@ export interface Dictionary {
     subtitle: string;
     period: string;
     customPeriod: string;
+    tabs: {
+      monthly: string;
+      realtime: string;
+      custom: string;
+    };
     months: {
       jan: string;
       feb: string;
@@ -308,7 +378,9 @@ export interface Dictionary {
       totalIncome: string;
       totalExpense: string;
       netIncome: string;
+      initialBalance: string;
       accumulatedBalance: string;
+      endingBalance: string;
     };
     chart: {
       expenseByCategory: string;
@@ -325,6 +397,14 @@ export interface Dictionary {
       limit: string;
       overBudget: string;
     };
+    settings: {
+      title: string;
+      cutoffDayLabel: string;
+      cutoffDayDescription: string;
+      accumulateBalanceLabel: string;
+      accumulateBalanceDescription: string;
+      saveButton: string;
+    };
     export: {
       excelButton: string;
       pdfButton: string;
@@ -333,12 +413,18 @@ export interface Dictionary {
   settings: {
     title: string;
     subtitle: string;
+    tabs: {
+      general: string;
+      security: string;
+    };
     profile: {
       title: string;
       description: string;
       nameLabel: string;
       emailLabel: string;
       avatarLabel: string;
+      uploadAvatar: string;
+      removeAvatar: string;
       saveButton: string;
     };
     preferences: {
@@ -381,6 +467,9 @@ export interface Dictionary {
     connectedAccounts: {
       title: string;
       description: string;
+      googleConnected: string;
+      connectGoogle: string;
+      disconnectGoogle: string;
     };
     export: {
       title: string;
@@ -417,6 +506,14 @@ export interface Dictionary {
       selectWallet: string;
       selectCategory: string;
       passwordMismatch: string;
+      passwordMinLength: string;
+      nameRequired: string;
+      titleRequired: string;
+      dateRequired: string;
+      sameWalletTransfer: string;
+      destinationWalletRequired: string;
+      deleteWalletHasTransactions: string;
+      deleteCategoryHasTransactions: string;
     };
   };
   toast: {
@@ -426,8 +523,26 @@ export interface Dictionary {
     updated: string;
     deleted: string;
     sessionExpired: string;
+    sessionExpiredDesc: string;
     failedToLoad: string;
     networkError: string;
+    copySuccess: string;
+    transactionCreated: string;
+    transactionUpdated: string;
+    transactionDeleted: string;
+    walletCreated: string;
+    walletUpdated: string;
+    walletDeleted: string;
+    categoryCreated: string;
+    categoryUpdated: string;
+    categoryDeleted: string;
+    installmentCreated: string;
+    installmentUpdated: string;
+    installmentDeleted: string;
+    preferencesSaved: string;
+    profileUpdated: string;
+    passwordUpdated: string;
+    sessionTerminated: string;
   };
   pwa: {
     offline: {
@@ -438,6 +553,13 @@ export interface Dictionary {
     shortcuts: {
       newTransaction: string;
       reports: string;
+    };
+    install: {
+      bannerTitle: string;
+      bannerDesc: string;
+      installButton: string;
+      installedSuccess: string;
+      installFailed: string;
     };
   };
   notFound: {
@@ -452,5 +574,10 @@ export interface Dictionary {
     debts: string;
     categories: string;
     settings: string;
+    detailReports: string;
+    detailWallets: string;
+    detailTransactions: string;
+    detailDebts: string;
+    detailCategories: string;
   };
 }

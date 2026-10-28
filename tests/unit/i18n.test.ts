@@ -25,10 +25,35 @@ describe("i18n infrastructure", () => {
     expect(fallback).toBe(idDict);
   });
 
-  it("ensures id and en dictionaries share identical top-level keys", () => {
-    const idKeys = Object.keys(idDict).sort();
-    const enKeys = Object.keys(enDict).sort();
+  it("ensures id and en dictionaries share identical recursive keys and non-empty values", () => {
+    function getLeafEntries(obj: Record<string, unknown>, prefix = ""): [string, unknown][] {
+      return Object.entries(obj).flatMap(([key, value]) => {
+        const fullPath = prefix ? `${prefix}.${key}` : key;
+        if (value && typeof value === "object" && !Array.isArray(value)) {
+          return getLeafEntries(value as Record<string, unknown>, fullPath);
+        }
+        return [[fullPath, value]];
+      });
+    }
+
+    const idEntries = getLeafEntries(idDict as unknown as Record<string, unknown>);
+    const enEntries = getLeafEntries(enDict as unknown as Record<string, unknown>);
+
+    const idKeys = idEntries.map(([k]) => k).sort();
+    const enKeys = enEntries.map(([k]) => k).sort();
+
     expect(idKeys).toEqual(enKeys);
+    expect(idKeys.length).toBeGreaterThan(100);
+
+    for (const [key, value] of idEntries) {
+      expect(typeof value, `id.${key} should be a string`).toBe("string");
+      expect((value as string).trim().length, `id.${key} should not be empty`).toBeGreaterThan(0);
+    }
+
+    for (const [key, value] of enEntries) {
+      expect(typeof value, `en.${key} should be a string`).toBe("string");
+      expect((value as string).trim().length, `en.${key} should not be empty`).toBeGreaterThan(0);
+    }
   });
 
   it("normalizes user preferences language correctly", () => {
