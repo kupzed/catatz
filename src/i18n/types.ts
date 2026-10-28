@@ -265,6 +265,8 @@ export interface Dictionary {
       expense: string;
       balance: string;
       clickToSelectDate: string;
+      prevPeriod: string;
+      nextPeriod: string;
     };
     detail: {
       title: string;
@@ -352,8 +354,42 @@ export interface Dictionary {
     subtitle: string;
     addNew: string;
     emptyState: string;
+    emptyStateDesc: string;
     deleteConfirmTitle: string;
     deleteConfirmDescription: string;
+    totalActiveBalance: string;
+    walletsExcluded: string;
+    usedCount: string;
+    viewDetailTitle: string;
+    walletInUse: string;
+    walletInUseAria: string;
+    excludedFromTotal: string;
+    includedInTotal: string;
+    toasts: {
+      deleted: string;
+      deleteFailed: string;
+      created: string;
+      createFailed: string;
+      updated: string;
+      updateFailed: string;
+      excludedFromTotal: string;
+      includedInTotal: string;
+      updateStatusFailed: string;
+    };
+    usage: {
+      prefix: string;
+      suffix: string;
+      income: string;
+      expense: string;
+      transferOut: string;
+      transferIn: string;
+      balanceCorrection: string;
+      debt: string;
+      installment: string;
+      recurringOrigin: string;
+      recurringDestination: string;
+      transactions: string;
+    };
     types: {
       cash: string;
       bank: string;
@@ -364,15 +400,21 @@ export interface Dictionary {
     form: {
       createTitle: string;
       editTitle: string;
+      createDescription: string;
+      editDescription: string;
+      selectBankOptional: string;
       name: string;
       namePlaceholder: string;
       type: string;
       typePlaceholder: string;
       initialBalance: string;
+      initialBalanceReadOnlyInfo: string;
       currentBalance: string;
+      balanceChangeAutoCorrectionNotice: string;
       accountNumber: string;
       accountNumberPlaceholder: string;
       color: string;
+      customColor: string;
       excludeTotal: string;
       excludeTotalDescription: string;
       selectBankPreset: string;
@@ -381,16 +423,33 @@ export interface Dictionary {
     };
     detail: {
       title: string;
+      defaultDescription: string;
+      historyForWallet: string;
+      backToWallets: string;
+      excluded: string;
+      activeInTotal: string;
+      editWallet: string;
       currentBalance: string;
+      includedInActiveBalance: string;
+      excludedFromTotalBalance: string;
       initialBalance: string;
       accountNumber: string;
       transactionsHistory: string;
+      transactionsSubtitle: string;
+      dataCount: string;
       correction: string;
       correctionTitle: string;
       correctionDescription: string;
       emptyTransactions: string;
       totalIncome: string;
       totalExpense: string;
+      totalInflowActive: string;
+      totalOutflowActive: string;
+      netCashFlow: string;
+      usageDistribution: string;
+      transferOut: string;
+      transferIn: string;
+      debtAndInstallment: string;
     };
   };
   debts: {

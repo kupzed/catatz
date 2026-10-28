@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { rekeningIdParamSchema } from "@/validations/rekening-validation";
 import type { Transaksi } from "@/types/transaksi";
+import { getJenisDisplay } from "@/constants/banks";
+import idDict from "@/i18n/dictionaries/id";
+import enDict from "@/i18n/dictionaries/en";
 
 function calculateRekeningStats(rekeningId: string, transaksi: Transaksi[]) {
   let inflow = 0;
@@ -162,6 +165,30 @@ describe("Rekening Detail & Validation Logic", () => {
       expect(statsB.totalOutflow).toBe(50000);
       // Net flow: 200,000 - 50,000 = 150,000
       expect(statsB.netFlow).toBe(150000);
+    });
+  });
+
+  describe("getJenisDisplay", () => {
+    it("returns original string when dictionary is not provided", () => {
+      expect(getJenisDisplay("Tunai")).toBe("Tunai");
+      expect(getJenisDisplay("Investasi")).toBe("Investasi");
+      expect(getJenisDisplay("Bank")).toBe("Bank");
+      expect(getJenisDisplay("E-Wallet")).toBe("E-Wallet");
+      expect(getJenisDisplay("CustomType")).toBe("CustomType");
+    });
+
+    it("returns localized Indonesian display when idDictionary is provided", () => {
+      expect(getJenisDisplay("Tunai", idDict)).toBe("Tunai");
+      expect(getJenisDisplay("Investasi", idDict)).toBe("Investasi");
+      expect(getJenisDisplay("Bank", idDict)).toBe("Bank");
+      expect(getJenisDisplay("E-Wallet", idDict)).toBe("E-Wallet");
+    });
+
+    it("returns localized English display when enDictionary is provided", () => {
+      expect(getJenisDisplay("Tunai", enDict)).toBe("Cash");
+      expect(getJenisDisplay("Investasi", enDict)).toBe("Investment");
+      expect(getJenisDisplay("Bank", enDict)).toBe("Bank");
+      expect(getJenisDisplay("E-Wallet", enDict)).toBe("E-Wallet");
     });
   });
 });

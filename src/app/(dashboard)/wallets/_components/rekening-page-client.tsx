@@ -27,6 +27,9 @@ import { cn } from "@/lib/utils";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState, PageHeader } from "@/components/common";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
+import { getJenisDisplay } from "@/constants/banks";
+import type { Dictionary } from "@/i18n/types";
 
 type Props = {
   initialRekening: Rekening[];
@@ -45,43 +48,43 @@ const JENIS_CONFIG: Record<
 
 const JENIS_ORDER: JenisRekening[] = ["Bank", "E-Wallet", "Tunai", "Investasi"];
 
-function usageDescription(usage: RekeningUsageCounts) {
+function usageDescription(usage: RekeningUsageCounts, dict: Dictionary) {
   const parts = [
     usage.transaksi_masuk > 0
-      ? `${usage.transaksi_masuk} transaksi pemasukan`
+      ? `${usage.transaksi_masuk} ${dict.wallets.usage.income}`
       : null,
     usage.transaksi_keluar > 0
-      ? `${usage.transaksi_keluar} transaksi pengeluaran`
+      ? `${usage.transaksi_keluar} ${dict.wallets.usage.expense}`
       : null,
     usage.transfer_keluar > 0
-      ? `${usage.transfer_keluar} transfer keluar`
+      ? `${usage.transfer_keluar} ${dict.wallets.usage.transferOut}`
       : null,
     usage.transfer_masuk > 0
-      ? `${usage.transfer_masuk} transfer masuk`
+      ? `${usage.transfer_masuk} ${dict.wallets.usage.transferIn}`
       : null,
     usage.koreksi_saldo > 0
-      ? `${usage.koreksi_saldo} koreksi saldo`
+      ? `${usage.koreksi_saldo} ${dict.wallets.usage.balanceCorrection}`
       : null,
-    usage.hutang > 0 ? `${usage.hutang} hutang/piutang` : null,
+    usage.hutang > 0 ? `${usage.hutang} ${dict.wallets.usage.debt}` : null,
     usage.hutang_cicilan > 0
-      ? `${usage.hutang_cicilan} cicilan hutang/piutang`
+      ? `${usage.hutang_cicilan} ${dict.wallets.usage.installment}`
       : null,
     usage.recurring_asal > 0
-      ? `${usage.recurring_asal} transaksi berulang`
+      ? `${usage.recurring_asal} ${dict.wallets.usage.recurringOrigin}`
       : null,
     usage.recurring_tujuan > 0
-      ? `${usage.recurring_tujuan} transfer berulang`
+      ? `${usage.recurring_tujuan} ${dict.wallets.usage.recurringDestination}`
       : null,
   ].filter(Boolean);
 
   if (parts.length === 0 && usage.transaksi_asal > 0) {
-    parts.push(`${usage.transaksi_asal} transaksi`);
+    parts.push(`${usage.transaksi_asal} ${dict.wallets.usage.transactions}`);
   }
   if (parts.length === 0 && usage.transaksi_tujuan > 0) {
-    parts.push(`${usage.transaksi_tujuan} transfer masuk`);
+    parts.push(`${usage.transaksi_tujuan} ${dict.wallets.usage.transferIn}`);
   }
 
-  return `Rekening ini masih dipakai oleh ${parts.join(", ")}. Hapus data terkait terlebih dahulu sebelum menghapus rekening.`;
+  return `${dict.wallets.usage.prefix} ${parts.join(", ")}. ${dict.wallets.usage.suffix}`;
 }
 
 export default function RekeningPageClient({
@@ -90,6 +93,7 @@ export default function RekeningPageClient({
 }: Props) {
   const router = useRouter();
   const { formatRupiah } = useSystemPreferences();
+  const { dict } = useTranslation();
   const [rekening, setRekening] = useState(initialRekening);
   const [usageCounts, setUsageCounts] = useState(initialUsageCounts);
   const [prevInitialRekening, setPrevInitialRekening] = useState(initialRekening);
@@ -128,7 +132,7 @@ export default function RekeningPageClient({
   async function handleDelete(id: string) {
     const usage = usageCounts[id];
     if ((usage?.total ?? 0) > 0) {
-      toast.warning(usageDescription(usage));
+      toast.warning(usageDescription(usage, dict));
       return;
     }
 
@@ -141,9 +145,9 @@ export default function RekeningPageClient({
         delete next[id];
         return next;
       });
-      toast.success("Rekening dihapus");
+      toast.success(dict.wallets.toasts.deleted);
     } else {
-      toast.error(res.error ?? "Gagal menghapus");
+      toast.error(res.error ?? dict.wallets.toasts.deleteFailed);
     }
     setDeleting(null);
   }
@@ -155,7 +159,7 @@ export default function RekeningPageClient({
         prev.map((r) => (r.id === id ? { ...r, exclude_total: !current } : r)),
       );
     } else {
-      toast.error(res.error ?? "Gagal memperbarui");
+      toast.error(res.error ?? dict.wallets.toasts.updateFailed);
     }
   }
 
@@ -163,8 +167,8 @@ export default function RekeningPageClient({
     <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Header */}
       <PageHeader
-        title="Rekening"
-        subtitle="Kelola sumber dana Anda"
+        title={dict.wallets.title}
+        subtitle={dict.wallets.subtitle}
         action={
           <Button
             onClick={() => {
@@ -175,7 +179,7 @@ export default function RekeningPageClient({
             id="btn-tambah-rekening"
           >
             <Plus className="h-4 w-4" />
-            Tambah
+            {dict.common.add}
           </Button>
         }
       />
@@ -183,13 +187,16 @@ export default function RekeningPageClient({
       {/* Total Balance Card */}
       <div className="rounded-card bg-primary p-5 text-white ring-1 ring-white/5 sm:p-8">
         <p className="text-sm text-white uppercase tracking-wider mb-2">
-          Total Saldo (aktif)
+          {dict.wallets.totalActiveBalance}
         </p>
         <p className="break-all font-mono text-[28px] font-normal tracking-0 text-white leading-tight sm:text-[40px] lg:text-[44px]">
           {formatRupiah(totalSaldo)}
         </p>
         <p className="text-xs text-white/60 mt-3">
-          {rekening.filter((r) => r.exclude_total).length} rekening dikecualikan
+          {dict.wallets.walletsExcluded.replace(
+            "{count}",
+            String(rekening.filter((r) => r.exclude_total).length),
+          )}
         </p>
       </div>
 
@@ -197,8 +204,8 @@ export default function RekeningPageClient({
       {rekening.length === 0 ? (
         <EmptyState
           icon={Landmark}
-          title="Belum ada rekening"
-          description="Tambah rekening atau dompet pertama Anda"
+          title={dict.wallets.emptyState}
+          description={dict.wallets.emptyStateDesc}
         />
       ) : (
         Object.entries(grouped).map(([jenis, items]) => {
@@ -208,7 +215,7 @@ export default function RekeningPageClient({
             <div key={jenis}>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-2">
                 <JenisIcon className="h-4 w-4" />
-                {jenis}
+                {getJenisDisplay(jenis, dict)}
               </h3>
               <div className="grid gap-3 sm:grid-cols-2">
                 {items!.map((r) => {
@@ -216,118 +223,124 @@ export default function RekeningPageClient({
                   const isUsed = (usage?.total ?? 0) > 0;
 
                   return (
-                  <div
-                    key={r.id}
-                    onClick={() => router.push(`/wallets/${r.id}`)}
-                    className={cn(
-                      "relative rounded-card border border-hairline bg-card p-6 transition-colors hover:bg-surface-soft group border-t-2 cursor-pointer",
-                      r.exclude_total && "opacity-60",
-                    )}
-                    style={{ borderTopColor: r.warna ?? undefined }}
-                  >
-                    <div>
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors">
-                            {r.nama}
-                          </p>
-                          <Badge
-                            variant="secondary"
-                            className="text-xs mt-0.5 rounded-full bg-surface-strong text-muted-foreground"
-                          >
-                            {r.jenis}
-                          </Badge>
-                          {isUsed && usage ? (
-                            <Link
-                              href={`/wallets/${r.id}`}
-                              onClick={(e) => e.stopPropagation()}
-                              className="inline-block"
-                              title="Lihat detail & riwayat transaksi rekening ini"
+                    <div
+                      key={r.id}
+                      onClick={() => router.push(`/wallets/${r.id}`)}
+                      className={cn(
+                        "relative rounded-card border border-hairline bg-card p-6 transition-colors hover:bg-surface-soft group border-t-2 cursor-pointer",
+                        r.exclude_total && "opacity-60",
+                      )}
+                      style={{ borderTopColor: r.warna ?? undefined }}
+                    >
+                      <div>
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors">
+                              {r.nama}
+                            </p>
+                            <Badge
+                              variant="secondary"
+                              className="text-xs mt-0.5 rounded-full bg-surface-strong text-muted-foreground"
                             >
-                              <Badge
-                                variant="secondary"
-                                className="ml-1.5 text-xs mt-0.5 rounded-full bg-primary/10 text-primary border-none hover:bg-primary/20 transition-colors cursor-pointer"
+                              {getJenisDisplay(r.jenis, dict)}
+                            </Badge>
+                            {isUsed && usage ? (
+                              <Link
+                                href={`/wallets/${r.id}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="inline-block"
+                                title={dict.wallets.viewDetailTitle}
                               >
-                                Dipakai {usage.total} data
-                              </Badge>
-                            </Link>
-                          ) : null}
-                        </div>
-                        <div
-                          className="flex gap-1 flex-wrap"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 rounded-full bg-surface-strong hover:bg-surface-strong/80"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setEditData(r);
-                              setDialogOpen(true);
-                            }}
+                                <Badge
+                                  variant="secondary"
+                                  className="ml-1.5 text-xs mt-0.5 rounded-full bg-primary/10 text-primary border-none hover:bg-primary/20 transition-colors cursor-pointer"
+                                >
+                                  {dict.wallets.usedCount.replace(
+                                    "{count}",
+                                    String(usage.total),
+                                  )}
+                                </Badge>
+                              </Link>
+                            ) : null}
+                          </div>
+                          <div
+                            className="flex gap-1 flex-wrap"
+                            onClick={(e) => e.stopPropagation()}
                           >
-                              <Pencil className="h-3.5 w-3.5" />
-                            </Button>
-                          {isUsed && usage ? (
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-7 w-7 rounded-full bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20"
+                              className="h-7 w-7 rounded-full bg-surface-strong hover:bg-surface-strong/80"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                toast.warning(usageDescription(usage));
+                                setEditData(r);
+                                setDialogOpen(true);
                               }}
-                              title="Rekening masih dipakai"
-                              aria-label={`Rekening ${r.nama} masih dipakai`}
                             >
-                              <Trash2 className="h-3.5 w-3.5" />
+                              <Pencil className="h-3.5 w-3.5" />
                             </Button>
-                          ) : (
-                            <ConfirmDialog
-                              title="Hapus Rekening?"
-                              description="Rekening akan dihapus permanen karena belum dipakai oleh data transaksi, hutang/piutang, cicilan, atau template transaksi berulang."
-                              onConfirm={() => handleDelete(r.id)}
-                            >
+                            {isUsed && usage ? (
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 className="h-7 w-7 rounded-full bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20"
-                                disabled={deleting === r.id}
-                                onClick={(e) => e.stopPropagation()}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toast.warning(usageDescription(usage, dict));
+                                }}
+                                title={dict.wallets.walletInUse}
+                                aria-label={dict.wallets.walletInUseAria.replace(
+                                  "{name}",
+                                  r.nama,
+                                )}
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>
-                            </ConfirmDialog>
-                          )}
+                            ) : (
+                              <ConfirmDialog
+                                title={dict.wallets.deleteConfirmTitle}
+                                description={dict.wallets.deleteConfirmDescription}
+                                onConfirm={() => handleDelete(r.id)}
+                              >
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7 rounded-full bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20"
+                                  disabled={deleting === r.id}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </ConfirmDialog>
+                            )}
+                          </div>
+                        </div>
+                        <p className="font-mono text-xl font-medium text-foreground mt-3">
+                          {formatRupiah(Number(r.saldo_saat_ini))}
+                        </p>
+                        <div
+                          className="flex items-center gap-2 mt-3"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Switch
+                            checked={!r.exclude_total}
+                            onCheckedChange={() =>
+                              handleExcludeToggle(r.id, r.exclude_total)
+                            }
+                            id={`exclude-${r.id}`}
+                            className="scale-75"
+                          />
+                          <label
+                            htmlFor={`exclude-${r.id}`}
+                            className="text-xs text-muted-foreground cursor-pointer"
+                          >
+                            {r.exclude_total
+                              ? dict.wallets.excludedFromTotal
+                              : dict.wallets.includedInTotal}
+                          </label>
                         </div>
                       </div>
-                      <p className="font-mono text-xl font-medium text-foreground mt-3">
-                        {formatRupiah(Number(r.saldo_saat_ini))}
-                      </p>
-                      <div
-                        className="flex items-center gap-2 mt-3"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Switch
-                          checked={!r.exclude_total}
-                          onCheckedChange={() =>
-                            handleExcludeToggle(r.id, r.exclude_total)
-                          }
-                          id={`exclude-${r.id}`}
-                          className="scale-75"
-                        />
-                        <label
-                          htmlFor={`exclude-${r.id}`}
-                          className="text-xs text-muted-foreground cursor-pointer"
-                        >
-                          {r.exclude_total
-                            ? "Dikecualikan dari total"
-                            : "Termasuk dalam total"}
-                        </label>
-                      </div>
                     </div>
-                  </div>
                   );
                 })}
               </div>

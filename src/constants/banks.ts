@@ -1,5 +1,8 @@
 // Bank and E-Wallet constants for rekening selection UI
 
+import type { Dictionary } from '@/i18n/types';
+import type { JenisRekening } from '@/types/rekening';
+
 export type BankSlug = string;
 
 export type BankInfo = {
@@ -61,3 +64,28 @@ export const BANK_BY_JENIS = DAFTAR_BANK.reduce<Record<string, BankInfo[]>>(
   },
   {}
 );
+
+/**
+ * Returns localized label for wallet type (JenisRekening).
+ * Defaults to original string if dictionary is not provided.
+ */
+export function getJenisDisplay(
+  jenis: JenisRekening | string,
+  dict?: Dictionary
+): string {
+  if (dict) {
+    switch (jenis) {
+      case 'Tunai':
+        return dict.wallets.types.cash;
+      case 'Bank':
+        return dict.wallets.types.bank;
+      case 'E-Wallet':
+        return dict.wallets.types.ewallet;
+      case 'Investasi':
+        return dict.wallets.types.investment;
+      default:
+        return jenis;
+    }
+  }
+  return jenis;
+}
