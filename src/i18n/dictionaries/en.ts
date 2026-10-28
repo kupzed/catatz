@@ -35,6 +35,8 @@ const en: Dictionary = {
     type: "Type",
     copy: "Copy",
     or: "Or",
+    clear: "Clear",
+    noWallet: "No wallet",
   },
   nav: {
     transactions: "Transactions",
@@ -47,6 +49,21 @@ const en: Dictionary = {
     mainMenu: "Main Menu",
     others: "Others",
     toggleSidebar: "Toggle sidebar",
+    account: "Account",
+    user: "User",
+  },
+  theme: {
+    toggle: "Toggle theme",
+    select: "Select theme",
+    light: "Light",
+    dark: "Dark",
+    system: "System",
+    saveFailed: "Failed to save theme preference",
+  },
+  dialog: {
+    confirmTitle: "Are you sure?",
+    confirmDescription: "This action cannot be undone.",
+    continue: "Yes, Continue",
   },
   auth: {
     tagline: "Smart personal finance tracker",
@@ -594,6 +611,13 @@ const en: Dictionary = {
     title: "Page Not Found",
     description: "This link may have changed or is no longer available.",
     backLink: "Go to Transactions",
+  },
+  errorPage: {
+    badge: "Something went wrong",
+    title: "Page failed to load",
+    description: "Try reloading the page. If it still fails, go back to the previous page.",
+    backButton: "Back",
+    reloadButton: "Reload Page",
   },
   breadcrumb: {
     transactions: "Transactions",

@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { updateUserPreferences } from '@/actions/preference-action';
 import { toast } from 'sonner';
+import { useTranslation } from '@/i18n/use-translation';
 
 interface DarkmodeToggleProps {
   initialTheme?: string;
@@ -20,6 +21,7 @@ interface DarkmodeToggleProps {
 
 export function DarkmodeToggle({ initialTheme }: DarkmodeToggleProps) {
   const { theme, setTheme } = useTheme();
+  const { dict } = useTranslation();
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -40,7 +42,7 @@ export function DarkmodeToggle({ initialTheme }: DarkmodeToggleProps) {
       const res = await updateUserPreferences({ theme: newTheme });
       if (!res.success) {
         if (res.error !== 'Tidak terautentikasi') {
-          toast.error(res.error || 'Gagal menyimpan preferensi tema');
+          toast.error(res.error || dict.theme.saveFailed);
         }
       }
     } catch (err) {
@@ -57,7 +59,7 @@ export function DarkmodeToggle({ initialTheme }: DarkmodeToggleProps) {
         className="w-9 h-9"
       >
         <Sun className="h-4 w-4" />
-        <span className="sr-only">Toggle tema</span>
+        <span className="sr-only">{dict.theme.toggle}</span>
       </Button>
     );
   }
@@ -80,24 +82,24 @@ export function DarkmodeToggle({ initialTheme }: DarkmodeToggleProps) {
               className="w-9 h-9"
             >
               <Icon className="h-4 w-4 transition-all" />
-              <span className="sr-only">Toggle tema</span>
+              <span className="sr-only">{dict.theme.toggle}</span>
             </Button>
           </DropdownMenuTrigger>
         </TooltipTrigger>
-        <TooltipContent side="bottom">Pilih tema</TooltipContent>
+        <TooltipContent side="bottom">{dict.theme.select}</TooltipContent>
       </Tooltip>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => handleThemeChange('light')}>
           <Sun className="mr-2 h-4 w-4" />
-          <span>Terang</span>
+          <span>{dict.theme.light}</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleThemeChange('dark')}>
           <Moon className="mr-2 h-4 w-4" />
-          <span>Gelap</span>
+          <span>{dict.theme.dark}</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleThemeChange('system')}>
           <Monitor className="mr-2 h-4 w-4" />
-          <span>Sistem</span>
+          <span>{dict.theme.system}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

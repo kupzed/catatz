@@ -35,6 +35,8 @@ export interface Dictionary {
     type: string;
     copy: string;
     or: string;
+    clear: string;
+    noWallet: string;
   };
   nav: {
     transactions: string;
@@ -47,6 +49,21 @@ export interface Dictionary {
     mainMenu: string;
     others: string;
     toggleSidebar: string;
+    account: string;
+    user: string;
+  };
+  theme: {
+    toggle: string;
+    select: string;
+    light: string;
+    dark: string;
+    system: string;
+    saveFailed: string;
+  };
+  dialog: {
+    confirmTitle: string;
+    confirmDescription: string;
+    continue: string;
   };
   auth: {
     tagline: string;
@@ -576,6 +593,13 @@ export interface Dictionary {
     title: string;
     description: string;
     backLink: string;
+  };
+  errorPage: {
+    badge: string;
+    title: string;
+    description: string;
+    backButton: string;
+    reloadButton: string;
   };
   breadcrumb: {
     transactions: string;

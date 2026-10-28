@@ -4,6 +4,7 @@ import React, { forwardRef, useCallback, useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/i18n/use-translation";
 
 /**
  * ClearableInput — wraps the base Input with an end-positioned X button
@@ -27,6 +28,7 @@ export interface ClearableInputProps
 
 const ClearableInput = forwardRef<HTMLInputElement, ClearableInputProps>(
   ({ className, value, onClear, disabled, onChange, ...props }, ref) => {
+    const { dict } = useTranslation();
     // Track the current value internally to show/hide the clear button.
     // This is necessary for react-hook-form register() where `value` prop
     // is not passed — instead the input is uncontrolled.
@@ -113,7 +115,7 @@ const ClearableInput = forwardRef<HTMLInputElement, ClearableInputProps>(
               "hover:bg-muted hover:text-foreground",
               "transition-colors duration-150",
             )}
-            aria-label="Hapus"
+            aria-label={dict.common.clear}
           >
             <X className="h-3 w-3" />
           </button>

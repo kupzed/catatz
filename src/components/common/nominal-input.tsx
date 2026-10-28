@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 
 interface NominalInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   value: number | string;
@@ -19,6 +20,7 @@ export function NominalInput({
   ...props
 }: NominalInputProps) {
   const { preferences } = useSystemPreferences();
+  const { dict } = useTranslation();
   const allowDecimal = preferences.show_decimal_places;
   const formattedValue = formatDisplayValue(
     value,
@@ -112,7 +114,7 @@ export function NominalInput({
             "hover:bg-muted hover:text-foreground",
             "transition-colors duration-150",
           )}
-          aria-label="Hapus"
+          aria-label={dict.common.clear}
         >
           <X className="h-3 w-3" />
         </button>

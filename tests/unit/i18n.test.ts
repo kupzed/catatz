@@ -79,4 +79,38 @@ describe("i18n infrastructure", () => {
     const invalid = validateUserPreferenceUpdate({ language: "de" });
     expect(invalid.success).toBe(false);
   });
+
+  it("provides expected shared component translations for id and en", () => {
+    // Navigation items
+    expect(idDict.nav.transactions).toBe("Transaksi");
+    expect(enDict.nav.transactions).toBe("Transactions");
+    expect(idDict.nav.wallets).toBe("Rekening");
+    expect(enDict.nav.wallets).toBe("Wallets");
+    expect(idDict.nav.reports).toBe("Rekap");
+    expect(enDict.nav.reports).toBe("Reports");
+    expect(idDict.nav.debts).toBe("Hutang");
+    expect(enDict.nav.debts).toBe("Debts");
+    expect(idDict.nav.categories).toBe("Kategori");
+    expect(enDict.nav.categories).toBe("Categories");
+    expect(idDict.nav.newTransaction).toBe("Transaksi baru");
+    expect(enDict.nav.newTransaction).toBe("New transaction");
+
+    // Breadcrumbs
+    expect(idDict.breadcrumb.detailTransactions).toBe("Detail Transaksi");
+    expect(enDict.breadcrumb.detailTransactions).toBe("Transaction Detail");
+    expect(idDict.breadcrumb.detailWallets).toBe("Detail Rekening");
+    expect(enDict.breadcrumb.detailWallets).toBe("Wallet Detail");
+
+    // Not Found & Error Page
+    expect(idDict.notFound.title).toBe("Halaman tidak ditemukan");
+    expect(enDict.notFound.title).toBe("Page Not Found");
+    expect(idDict.errorPage.title).toBe("Halaman gagal dimuat");
+    expect(enDict.errorPage.title).toBe("Page failed to load");
+
+    // Theme & Dialog
+    expect(idDict.theme.light).toBe("Terang");
+    expect(enDict.theme.light).toBe("Light");
+    expect(idDict.dialog.confirmTitle).toBe("Apakah Anda yakin?");
+    expect(enDict.dialog.confirmTitle).toBe("Are you sure?");
+  });
 });

@@ -35,6 +35,8 @@ const id: Dictionary = {
     type: "Tipe",
     copy: "Salin",
     or: "Atau",
+    clear: "Hapus",
+    noWallet: "Tanpa rekening",
   },
   nav: {
     transactions: "Transaksi",
@@ -47,6 +49,21 @@ const id: Dictionary = {
     mainMenu: "Menu Utama",
     others: "Lainnya",
     toggleSidebar: "Buka/tutup sidebar",
+    account: "Akun",
+    user: "Pengguna",
+  },
+  theme: {
+    toggle: "Toggle tema",
+    select: "Pilih tema",
+    light: "Terang",
+    dark: "Gelap",
+    system: "Sistem",
+    saveFailed: "Gagal menyimpan preferensi tema",
+  },
+  dialog: {
+    confirmTitle: "Apakah Anda yakin?",
+    confirmDescription: "Tindakan ini tidak dapat dibatalkan.",
+    continue: "Ya, Lanjutkan",
   },
   auth: {
     tagline: "Pencatatan keuangan pribadi yang cerdas",
@@ -594,6 +611,13 @@ const id: Dictionary = {
     title: "Halaman tidak ditemukan",
     description: "Link ini mungkin sudah berubah atau tidak tersedia.",
     backLink: "Ke Transaksi",
+  },
+  errorPage: {
+    badge: "Ada yang tidak beres",
+    title: "Halaman gagal dimuat",
+    description: "Coba muat ulang halaman. Jika masih gagal, kembali ke halaman sebelumnya.",
+    backButton: "Kembali",
+    reloadButton: "Muat Ulang Halaman",
   },
   breadcrumb: {
     transactions: "Transaksi",
