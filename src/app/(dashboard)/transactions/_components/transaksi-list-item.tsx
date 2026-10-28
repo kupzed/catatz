@@ -2,13 +2,14 @@
 
 import type { DisplayTransaksi } from "@/hooks/use-offline-queue-sync";
 import { cn } from "@/lib/utils";
-import { TIPE_CONFIG } from "@/constants/transaksi";
+import { getTipeConfig } from "@/constants/transaksi";
 import { getTransaksiDisplayName } from "@/lib/transaksi-detail";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 
 export type TransaksiListItemProps = {
   transaksi: DisplayTransaksi;
@@ -26,11 +27,13 @@ export function TransaksiListItem({
   isDeleting,
 }: TransaksiListItemProps) {
   const { formatRupiah, formatTanggal, formatWaktu } = useSystemPreferences();
-  const cfg = TIPE_CONFIG[transaksi.tipe] ?? TIPE_CONFIG.expense;
+  const { dict } = useTranslation();
+  const tipeConfig = getTipeConfig(dict);
+  const cfg = tipeConfig[transaksi.tipe] ?? tipeConfig.expense;
   const TipeIcon = cfg.icon;
   const isTransferOrCorrection =
     transaksi.tipe === "transfer" || transaksi.tipe === "correction";
-  const displayName = getTransaksiDisplayName(transaksi);
+  const displayName = getTransaksiDisplayName(transaksi, dict);
   const waktuLabel = formatWaktu(transaksi.waktu);
   const categoryBadgeText = transaksi.kategori
     ? `${transaksi.kategori.ikon ? `${transaksi.kategori.ikon} ` : ""}${transaksi.kategori.nama}`
@@ -72,7 +75,7 @@ export function TransaksiListItem({
               )}
               {transaksi._pendingSync && (
                 <Badge className="border-0 bg-accent-yellow/10 px-1 py-0 text-[10px] text-accent-yellow">
-                  Menunggu sinkronisasi
+                  {dict.transactions.pendingSync}
                 </Badge>
               )}
             </div>
@@ -120,7 +123,7 @@ export function TransaksiListItem({
           )}
           {transaksi._pendingSync && (
             <Badge className="border-0 bg-accent-yellow/10 px-1.5 py-0 text-[10px] text-accent-yellow">
-              Menunggu sinkronisasi
+              {dict.transactions.pendingSync}
             </Badge>
           )}
         </div>
@@ -225,7 +228,7 @@ export function TransaksiListItem({
                 e.stopPropagation();
                 onDetail(transaksi);
               }}
-              aria-label={`Detail transaksi ${displayName}`}
+              aria-label={`${dict.transactions.detail.detailAria} ${displayName}`}
               id={`btn-detail-${transaksi.id}`}
             >
               <Eye className="h-3.5 w-3.5" />
@@ -240,7 +243,7 @@ export function TransaksiListItem({
               e.stopPropagation();
               onEdit(transaksi);
             }}
-            aria-label={`Edit transaksi ${displayName}`}
+            aria-label={`${dict.transactions.detail.editAria} ${displayName}`}
             id={`btn-edit-${transaksi.id}`}
           >
             <Pencil className="h-3.5 w-3.5" />
@@ -248,13 +251,13 @@ export function TransaksiListItem({
           <ConfirmDialog
             title={
               transaksi.tipe === "correction"
-                ? "Hapus Koreksi Saldo?"
-                : "Hapus Transaksi?"
+                ? dict.transactions.detail.deleteCorrectionConfirmTitle
+                : dict.transactions.detail.deleteConfirmTitle
             }
             description={
               transaksi.tipe === "correction"
-                ? "Koreksi saldo ini akan dihapus. Saldo rekening TIDAK akan otomatis dibalik."
-                : "Transaksi ini akan dihapus secara permanen."
+                ? dict.transactions.detail.deleteCorrectionConfirmDescription
+                : dict.transactions.detail.deleteConfirmDescription
             }
             onConfirm={() => onDelete(transaksi.id)}
           >
@@ -264,7 +267,7 @@ export function TransaksiListItem({
               className="h-8 w-8 rounded-full bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20 cursor-pointer"
               disabled={isDeleting}
               onClick={(e) => e.stopPropagation()}
-              aria-label={`Hapus transaksi ${displayName}`}
+              aria-label={`${dict.transactions.detail.deleteAria} ${displayName}`}
               id={`btn-delete-${transaksi.id}`}
             >
               <Trash2 className="h-3.5 w-3.5" />

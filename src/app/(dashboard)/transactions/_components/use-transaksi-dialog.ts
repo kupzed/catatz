@@ -15,6 +15,7 @@ import type { ParsedTransactionResult } from "@/types/transaction-parser";
 import { addToQueue, type QueuedAction } from "@/lib/offline-queue";
 import { resolveAutoFillTransaction } from "@/lib/transaction-auto-fill";
 import { toast } from "sonner";
+import { useTranslation } from "@/i18n/use-translation";
 import type { Transaksi, Kategori, JudulSuggestion } from "@/types/transaksi";
 import type { Rekening } from "@/types/rekening";
 import { todayISODate, currentTime } from "@/lib/utils";
@@ -52,6 +53,7 @@ export function useTransaksiDialog({
   lockKategori,
   lockRekening,
 }: UseTransaksiDialogParams) {
+  const { dict } = useTranslation();
   const isEdit = !!editData;
   const isCorrection = editData?.tipe === "correction";
   const [submitting, setSubmitting] = useState(false);
@@ -480,7 +482,7 @@ export function useTransaksiDialog({
   ) {
     const transactions = result.transactions;
     if (transactions.length === 0) {
-      toast.info(result.parse_summary || "Tidak ada transaksi terdeteksi");
+      toast.info(result.parse_summary || dict.transactions.ai.noTransactionsDetected);
       return;
     }
 
@@ -502,7 +504,9 @@ export function useTransaksiDialog({
       first.tipe === "piutang_baru" ||
       first.tipe === "bayar_hutang"
     ) {
-      toast.info(`Terdeteksi: ${first.tipe}. Silakan sesuaikan manual.`);
+      toast.info(
+        dict.transactions.ai.manualAdjust.replace("{type}", first.tipe),
+      );
     }
 
     if (
@@ -553,22 +557,22 @@ export function useTransaksiDialog({
     // Handle multiple transactions: toast info
     if (transactions.length > 1) {
       toast.info(
-        `${transactions.length} transaksi terdeteksi. Sisa ${
-          transactions.length - 1
-        } bisa diinput manual.`,
+        dict.transactions.ai.multipleDetected
+          .replace("{count}", String(transactions.length))
+          .replace("{remaining}", String(transactions.length - 1)),
         { duration: 5000 },
       );
     }
 
     const clarificationLabels: Record<string, string> = {
-      nominal: "nominal",
-      tanggal: "tanggal",
-      waktu: "waktu",
-      tipe: "jenis transaksi",
-      rekening: "rekening",
-      rekening_hint: "rekening",
-      rekening_tujuan: "rekening tujuan",
-      kategori: "kategori",
+      nominal: dict.common.nominal,
+      tanggal: dict.common.date,
+      waktu: dict.common.time,
+      tipe: dict.common.type,
+      rekening: dict.common.wallet,
+      rekening_hint: dict.common.wallet,
+      rekening_tujuan: dict.transactions.detail.destinationWallet,
+      kategori: dict.common.category,
     };
     const clarificationWarnings = first.clarification_fields.map(
       (field) => clarificationLabels[field] ?? field.replaceAll("_", " "),
@@ -578,17 +582,17 @@ export function useTransaksiDialog({
     );
 
     if (warnings.length > 0) {
-      toast.warning(`Mohon periksa: ${warnings.join(", ")}`, {
+      toast.warning(`${dict.transactions.ai.pleaseCheck}${warnings.join(", ")}`, {
         duration: 6000,
       });
     }
 
     toast.success(
-      `Terisi dari ${source}: ${
+      `${dict.transactions.ai.filledFrom}${source}: ${
         first.judul ||
         first.entitas ||
         result.parse_summary ||
-        "periksa kembali form transaksi"
+        dict.transactions.ai.recheckForm
       }`,
     );
   }
@@ -637,7 +641,7 @@ export function useTransaksiDialog({
         sanitizedValues.tipe === "transfer" &&
         sanitizedValues.rekening_id === sanitizedValues.rekening_tujuan
       ) {
-        toast.error("Rekening asal dan tujuan tidak boleh sama");
+        toast.error(dict.errors.validation.sameWalletTransfer);
         return;
       }
 
@@ -649,12 +653,12 @@ export function useTransaksiDialog({
 
         if (queuedAction) {
           toast.success(
-            "Transaksi tersimpan sementara. Akan disinkronkan saat online.",
+            dict.toast.syncCreateWhenOnline,
           );
           onQueued?.(queuedAction);
           onOpenChange(false);
         } else {
-          toast.error("Perangkat tidak mendukung penyimpanan offline.");
+          toast.error(dict.toast.offlineNotSupported);
         }
 
         return;
@@ -663,22 +667,22 @@ export function useTransaksiDialog({
       if (isEdit) {
         const res = await updateTransaksi(editData!.id, sanitizedValues);
         if (res.success && res.data) {
-          toast.success("Transaksi diperbarui");
+          toast.success(dict.toast.transactionUpdated);
           onUpdated(res.data);
           onOpenChange(false);
         } else {
-          toast.error(res.error ?? "Gagal memperbarui");
+          toast.error(res.error ?? dict.toast.updateFailed);
         }
       } else {
         const res = await createTransaksi(sanitizedValues);
         if (res.success && res.data) {
           toast.success(
-            copyFrom ? "Transaksi berhasil di-copy!" : "Transaksi disimpan",
+            copyFrom ? dict.toast.copySuccess : dict.toast.transactionCreated,
           );
           onCreated(res.data);
           onOpenChange(false);
         } else {
-          toast.error(res.error ?? "Gagal menyimpan");
+          toast.error(res.error ?? dict.toast.saveFailed);
         }
       }
     } finally {

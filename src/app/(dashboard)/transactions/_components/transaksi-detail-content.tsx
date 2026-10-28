@@ -10,6 +10,7 @@ import {
 } from "@/lib/transaksi-detail";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "@/i18n/use-translation";
 import {
   ArrowDown,
   FileText,
@@ -58,10 +59,11 @@ export function TransaksiDetailContent({
   className,
 }: TransaksiDetailContentProps) {
   const { formatRupiah, formatTanggal, formatWaktu } = useSystemPreferences();
+  const { dict } = useTranslation();
   const cfg = TIPE_CONFIG[transaksi.tipe] ?? TIPE_CONFIG.expense;
   const TipeIcon = cfg.icon;
   const iconTheme = getHeroIconTheme(transaksi.tipe);
-  const nominalDisplay = getTransaksiNominalDisplay(transaksi);
+  const nominalDisplay = getTransaksiNominalDisplay(transaksi, dict);
   const userTags = filterSystemTags(transaksi.tags);
   const waktuLabel = formatWaktu(transaksi.waktu);
   const isPendingSync = (transaksi as DisplayTransaksi)._pendingSync;
@@ -120,14 +122,14 @@ export function TransaksiDetailContent({
           <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
             {isPendingSync && (
               <Badge className="border-0 bg-accent-yellow/15 px-3 py-1 rounded-full text-xs font-medium text-accent-yellow">
-                Menunggu sinkronisasi
+                {dict.transactions.pendingSync}
               </Badge>
             )}
 
             {transaksi.is_recurring && (
               <Badge className="border-0 bg-primary/10 px-3 py-1 rounded-full text-xs font-medium text-primary flex items-center gap-1">
                 <Repeat className="h-3 w-3" />
-                <span>Berulang</span>
+                <span>{dict.transactions.recurring}</span>
               </Badge>
             )}
           </div>
@@ -139,7 +141,7 @@ export function TransaksiDetailContent({
         <div className="rounded-[20px] p-4 border border-hairline bg-card space-y-3">
           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
             <Wallet className="h-3.5 w-3.5" />
-            Alur Transfer Rekening
+            {dict.transactions.detail.transferFlow}
           </span>
 
           <div className="flex flex-col gap-2 pt-1">
@@ -155,10 +157,10 @@ export function TransaksiDetailContent({
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[11px] text-muted-foreground font-medium">
-                  Rekening Asal
+                  {dict.transactions.detail.sourceWallet}
                 </p>
                 <p className="text-sm font-semibold text-foreground truncate">
-                  {transaksi.rekening?.nama ?? "Rekening Asal"}
+                  {transaksi.rekening?.nama ?? dict.transactions.detail.sourceWallet}
                 </p>
                 {transaksi.rekening?.jenis && (
                   <p className="text-[11px] text-muted-foreground truncate">
@@ -189,10 +191,10 @@ export function TransaksiDetailContent({
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[11px] text-muted-foreground font-medium">
-                  Rekening Tujuan
+                  {dict.transactions.detail.destinationWallet}
                 </p>
                 <p className="text-sm font-semibold text-foreground truncate">
-                  {transaksi.rekening_tujuan_data?.nama ?? "Rekening Tujuan"}
+                  {transaksi.rekening_tujuan_data?.nama ?? dict.transactions.detail.destinationWallet}
                 </p>
                 {transaksi.rekening_tujuan_data?.jenis && (
                   <p className="text-[11px] text-muted-foreground truncate">
@@ -210,7 +212,7 @@ export function TransaksiDetailContent({
           <div className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0 gap-4">
             <div className="flex items-center gap-2 text-muted-foreground shrink-0">
               <Wallet className="h-4 w-4" />
-              <span className="text-xs font-medium">Rekening</span>
+              <span className="text-xs font-medium">{dict.transactions.detail.wallet}</span>
             </div>
             <div className="flex items-center gap-2 truncate justify-end">
               {transaksi.rekening?.warna && (
@@ -220,7 +222,7 @@ export function TransaksiDetailContent({
                 />
               )}
               <span className="text-sm font-semibold text-foreground truncate">
-                {transaksi.rekening?.nama ?? "Belum ditentukan"}
+                {transaksi.rekening?.nama ?? dict.transactions.notSpecified}
               </span>
               {transaksi.rekening?.jenis && (
                 <Badge
@@ -238,7 +240,7 @@ export function TransaksiDetailContent({
             <div className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0 gap-4">
               <div className="flex items-center gap-2 text-muted-foreground shrink-0">
                 <FileText className="h-4 w-4" />
-                <span className="text-xs font-medium">Judul</span>
+                <span className="text-xs font-medium">{dict.transactions.detail.titleLabel}</span>
               </div>
               <span className="text-sm font-semibold text-foreground text-right truncate">
                 {transaksi.judul}
@@ -251,7 +253,7 @@ export function TransaksiDetailContent({
             <div className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0 gap-4">
               <div className="flex items-center gap-2 text-muted-foreground shrink-0">
                 <Tag className="h-4 w-4" />
-                <span className="text-xs font-medium">Kategori</span>
+                <span className="text-xs font-medium">{dict.transactions.detail.category}</span>
               </div>
               <span className="text-sm font-medium text-foreground text-right flex items-center gap-1.5 truncate">
                 {transaksi.kategori.ikon && (
@@ -270,7 +272,7 @@ export function TransaksiDetailContent({
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-muted-foreground shrink-0">
               <FileText className="h-4 w-4" />
-              <span className="text-xs font-medium">Judul</span>
+              <span className="text-xs font-medium">{dict.transactions.detail.titleLabel}</span>
             </div>
             <span className="text-sm font-semibold text-foreground text-right truncate">
               {transaksi.judul}
@@ -284,7 +286,7 @@ export function TransaksiDetailContent({
         <div className="rounded-[20px] p-4 border border-hairline bg-card space-y-2">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             <FileText className="h-3.5 w-3.5" />
-            <span>Catatan</span>
+            <span>{dict.transactions.detail.notes}</span>
           </div>
           <p className="text-sm text-foreground/90 whitespace-pre-wrap wrap-break-word leading-relaxed pl-1">
             {transaksi.catatan}
@@ -316,7 +318,7 @@ export function TransaksiDetailContent({
       {/* 5. ID Referensi di paling bawah */}
       <div className="pt-2 pb-1 text-center">
         <p className="font-mono text-[11px] text-muted-foreground/60 select-all tracking-wide">
-          ID: {transaksi.id}
+          {dict.transactions.idLabel}: {transaksi.id}
         </p>
       </div>
     </div>

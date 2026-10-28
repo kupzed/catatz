@@ -5,6 +5,7 @@ import { FileSearch, Loader2, WifiOff } from "lucide-react";
 import { processTransactionFile } from "@/actions/transaction-file-action";
 import { Button } from "@/components/ui/button";
 import { useOnlineStatus } from "@/hooks/use-online-status";
+import { useTranslation } from "@/i18n/use-translation";
 import type { FileAutoFillResult } from "@/types/transaction-parser";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024;
@@ -44,6 +45,7 @@ export default function TransactionFileAutoFillButton({
   onBusyChange,
   disabled,
 }: Props) {
+  const { dict } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const isOnline = useOnlineStatus();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -63,7 +65,7 @@ export default function TransactionFileAutoFillButton({
 
   async function handleFile(file: File) {
     if (!isOnline) {
-      reportError("Auto Fill membutuhkan koneksi internet.");
+      reportError(dict.transactions.ai.fileOffline);
       return;
     }
 
@@ -71,17 +73,17 @@ export default function TransactionFileAutoFillButton({
       !ALLOWED_EXTENSIONS.has(getExtension(file.name)) &&
       !ALLOWED_MIME_TYPES.has(file.type.toLowerCase())
     ) {
-      reportError("Gunakan file JPEG, PNG, WebP, HEIC/HEIF, atau PDF.");
+      reportError(dict.transactions.ai.fileInvalidType);
       return;
     }
 
     if (file.size === 0) {
-      reportError("File kosong atau tidak dapat dibaca.");
+      reportError(dict.transactions.ai.fileEmpty);
       return;
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      reportError("Ukuran file terlalu besar. Maksimal 4 MB.");
+      reportError(dict.transactions.ai.fileTooLarge);
       return;
     }
 
@@ -96,10 +98,10 @@ export default function TransactionFileAutoFillButton({
       if (result.success && result.data) {
         onParsed(result.data);
       } else {
-        reportError(result.error ?? "Gagal menganalisis file.");
+        reportError(result.error ?? dict.transactions.ai.fileFailed);
       }
     } catch {
-      reportError("Gagal menganalisis file. Coba lagi.");
+      reportError(dict.transactions.ai.fileFailedRetry);
     } finally {
       setIsProcessing(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -126,7 +128,7 @@ export default function TransactionFileAutoFillButton({
         className="h-11 w-full gap-1 px-2 text-xs sm:px-4 sm:text-sm"
         onClick={() => inputRef.current?.click()}
         disabled={disabled || isProcessing || !isOnline}
-        aria-label="Pilih file untuk Auto Fill transaksi"
+        aria-label={dict.transactions.ai.fileAria}
       >
         {isProcessing ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -135,17 +137,17 @@ export default function TransactionFileAutoFillButton({
         ) : (
           <WifiOff className="h-4 w-4" />
         )}
-        {isProcessing ? "Menganalisis..." : "Auto Fill"}
+        {isProcessing ? dict.transactions.ai.fileAnalyzing : dict.transactions.ai.fileButton}
       </Button>
 
       {fileName && (
         <p className="max-w-full break-all px-1 text-[11px] leading-snug text-muted-foreground">
-          {isProcessing ? "Memproses" : "File terakhir"}: {fileName}
+          {isProcessing ? dict.transactions.ai.fileProcessing : dict.transactions.ai.fileLast}: {fileName}
         </p>
       )}
       {!isOnline && (
         <p className="px-1 text-[11px] leading-snug text-muted-foreground">
-          Koneksi internet diperlukan.
+          {dict.transactions.ai.fileInternetRequired}
         </p>
       )}
     </div>

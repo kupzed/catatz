@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/common";
+import { useTranslation } from "@/i18n/use-translation";
 import TransaksiDialog from "./transaksi-dialog";
 import { TransaksiFilterBar } from "./transaksi-filter-bar";
 import { TransaksiList } from "./transaksi-list";
@@ -46,6 +47,7 @@ export default function TransaksiPageClient({
   rekening,
   kategori,
 }: Props) {
+  const { dict } = useTranslation();
   const [transaksi, setTransaksi] = useState(initialTransaksi);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editData, setEditData] = useState<Transaksi | null>(null);
@@ -198,7 +200,7 @@ export default function TransaksiPageClient({
 
     if (target?._queuedId) {
       await removeFromQueue(target._queuedId);
-      toast.success("Transaksi sementara dihapus");
+      toast.success(dict.toast.tempTransactionDeleted);
       return;
     }
 
@@ -210,9 +212,9 @@ export default function TransaksiPageClient({
 
       if (queuedAction) {
         setTransaksi((prev) => prev.filter((t) => t.id !== id));
-        toast.success("Hapus transaksi akan disinkronkan saat online.");
+        toast.success(dict.toast.syncDeleteWhenOnline);
       } else {
-        toast.error("Perangkat tidak mendukung penyimpanan offline.");
+        toast.error(dict.toast.offlineNotSupported);
       }
 
       return;
@@ -222,9 +224,9 @@ export default function TransaksiPageClient({
     const res = await deleteTransaksi(id);
     if (res.success) {
       setTransaksi((prev) => prev.filter((t) => t.id !== id));
-      toast.success("Transaksi dihapus");
+      toast.success(dict.toast.transactionDeleted);
     } else {
-      toast.error(res.error ?? "Gagal menghapus");
+      toast.error(res.error ?? dict.toast.deleteFailed);
     }
     setDeleting(null);
   }
@@ -285,8 +287,8 @@ export default function TransaksiPageClient({
     <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Header */}
       <PageHeader
-        title="Transaksi"
-        subtitle="Riwayat arus kas Anda"
+        title={dict.transactions.title}
+        subtitle={dict.transactions.subtitle}
         titleClassName="truncate"
         subtitleClassName="truncate"
         subtitleAction={
@@ -294,7 +296,7 @@ export default function TransaksiPageClient({
             variant="secondary"
             className="text-xs px-2.5 py-0.5 rounded-full bg-surface-strong text-muted-foreground border-none shrink-0"
           >
-            {filtered.length} Data
+            {filtered.length} {dict.transactions.dataCount}
           </Badge>
         }
         action={
@@ -318,15 +320,15 @@ export default function TransaksiPageClient({
                 className="h-9 sm:h-10 text-sm w-32 sm:w-48 bg-background dark:bg-card border border-hairline text-foreground shrink-0 px-2 sm:px-3"
                 id="filter-periode"
               >
-                <SelectValue placeholder="Periode" />
+                <SelectValue placeholder={dict.transactions.filter.period} />
               </SelectTrigger>
               <SelectContent align="end" className="min-w-48">
-                <SelectItem value="hari">Hari Ini</SelectItem>
-                <SelectItem value="minggu">Minggu Ini</SelectItem>
-                <SelectItem value="bulan">Bulan Ini</SelectItem>
-                <SelectItem value="tahun">Tahun Ini</SelectItem>
-                <SelectItem value="all">Semua Waktu</SelectItem>
-                <SelectItem value="custom">Custom</SelectItem>
+                <SelectItem value="hari">{dict.transactions.filter.periodToday}</SelectItem>
+                <SelectItem value="minggu">{dict.transactions.filter.periodThisWeek}</SelectItem>
+                <SelectItem value="bulan">{dict.transactions.filter.periodThisMonth}</SelectItem>
+                <SelectItem value="tahun">{dict.transactions.filter.periodThisYear}</SelectItem>
+                <SelectItem value="all">{dict.transactions.filter.periodAllTime}</SelectItem>
+                <SelectItem value="custom">{dict.transactions.filter.periodCustom}</SelectItem>
               </SelectContent>
             </Select>
           </div>
