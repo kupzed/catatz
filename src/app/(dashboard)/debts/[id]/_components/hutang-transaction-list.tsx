@@ -9,6 +9,7 @@ import { ArrowDownLeft, ArrowUpRight, Pencil, Plus, Trash2 } from "lucide-react"
 import { useSystemPreferences } from "@/providers/system-preference-provider";
 import { deleteCicilan } from "@/actions/hutang-action";
 import { toast } from "sonner";
+import { useTranslation } from "@/i18n/use-translation";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -19,10 +20,15 @@ type Props = {
   onSuccess: (refreshed: Hutang) => void;
 };
 
-function getRekeningName(rekening: Rekening[], id?: string | null) {
-  if (!id) return "Tanpa Rekening";
+function getRekeningName(
+  rekening: Rekening[],
+  id?: string | null,
+  noWalletLabel = "Tanpa Rekening",
+  notFoundLabel = "Rekening tidak ditemukan",
+) {
+  if (!id) return noWalletLabel;
   const item = rekening.find((r) => r.id === id);
-  return item ? `${item.nama} (${item.jenis})` : "Rekening tidak ditemukan";
+  return item ? `${item.nama} (${item.jenis})` : notFoundLabel;
 }
 
 export function HutangTransactionList({
@@ -32,6 +38,7 @@ export function HutangTransactionList({
   onAddTransaction,
   onSuccess,
 }: Props) {
+  const { dict } = useTranslation();
   const { formatRupiah, formatTanggal, formatWaktu } = useSystemPreferences();
   const isPiutang = hutang.tipe === "memberi";
 
@@ -46,10 +53,10 @@ export function HutangTransactionList({
   async function handleDelete(id: string) {
     const res = await deleteCicilan(id);
     if (res.success && res.data) {
-      toast.success("Transaksi dihapus");
+      toast.success(dict.debts.toasts.txDeleted);
       onSuccess(res.data);
     } else {
-      toast.error(res.error ?? "Gagal menghapus transaksi");
+      toast.error(res.error ?? dict.debts.toasts.txDeleteFailed);
     }
   }
 
@@ -58,12 +65,12 @@ export function HutangTransactionList({
       <div className="rounded-card border border-dashed border-hairline p-6 sm:p-8 text-center space-y-3">
         <div>
           <p className="text-sm font-semibold text-foreground">
-            Belum ada transaksi
+            {dict.debts.emptyTransactions}
           </p>
           <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
             {isPiutang
-              ? "Mulai dengan mencatat pinjaman yang Anda berikan kepada pihak ini."
-              : "Mulai dengan mencatat pinjaman yang Anda terima dari pihak ini."}
+              ? dict.debts.startByGivingLoan
+              : dict.debts.startByReceivingLoan}
           </p>
         </div>
         {onAddTransaction && (
@@ -73,7 +80,9 @@ export function HutangTransactionList({
             className="rounded-full bg-primary hover:bg-primary-active text-white font-semibold gap-1.5 h-9 px-4 text-xs shadow-none"
           >
             <Plus className="h-3.5 w-3.5" />
-            {isPiutang ? "Beri Pinjaman Pertama" : "Catat Pinjaman Diterima"}
+            {isPiutang
+              ? dict.debts.transactionDialog.giveFirstLoan
+              : dict.debts.transactionDialog.recordReceivedLoan}
           </Button>
         )}
       </div>
@@ -92,11 +101,11 @@ export function HutangTransactionList({
 
         const label = isPiutang
           ? isPinjaman
-            ? "Pinjaman Diberikan"
-            : "Pembayaran Diterima"
+            ? dict.debts.txLabels.loanGiven
+            : dict.debts.txLabels.paymentReceived
           : isPinjaman
-            ? "Pinjaman Diterima"
-            : "Pembayaran Hutang";
+            ? dict.debts.txLabels.loanReceived
+            : dict.debts.txLabels.debtPaid;
 
         return (
           <div
@@ -125,7 +134,12 @@ export function HutangTransactionList({
                     {label}
                   </span>
                   <Badge variant="secondary" className="text-[10px] rounded-full px-2">
-                    {getRekeningName(rekening, item.rekening_id)}
+                    {getRekeningName(
+                      rekening,
+                      item.rekening_id,
+                      dict.debts.installment.noWallet,
+                      dict.debts.installment.walletNotFound,
+                    )}
                   </Badge>
                 </div>
 
@@ -160,21 +174,21 @@ export function HutangTransactionList({
                   variant="ghost"
                   className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
                   onClick={() => onEditTransaction(item)}
-                  aria-label="Edit transaksi"
+                  aria-label={dict.debts.editTxAria}
                 >
                   <Pencil className="h-3.5 w-3.5" />
                 </Button>
 
                 <ConfirmDialog
-                  title="Hapus Transaksi?"
-                  description="Saldo rekening terkait akan dikembalikan secara otomatis sesuai dengan nominal transaksi ini."
+                  title={dict.debts.deleteTxConfirmTitle}
+                  description={dict.debts.deleteTxConfirmDescription}
                   onConfirm={() => handleDelete(item.id)}
                 >
                   <Button
                     size="icon"
                     variant="ghost"
                     className="h-8 w-8 rounded-full text-semantic-down hover:bg-semantic-down/10"
-                    aria-label="Hapus transaksi"
+                    aria-label={dict.debts.deleteTxAria}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
@@ -207,10 +221,17 @@ export function HutangTransactionList({
             <div className="min-w-0 space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm font-semibold text-foreground">
-                  {isPiutang ? "Pinjaman Awal (Diberikan)" : "Pinjaman Awal (Diterima)"}
+                  {isPiutang
+                    ? dict.debts.txLabels.initialLoanGiven
+                    : dict.debts.txLabels.initialLoanReceived}
                 </span>
                 <Badge variant="outline" className="text-[10px] rounded-full px-2">
-                  {getRekeningName(rekening, hutang.rekening_id)}
+                  {getRekeningName(
+                    rekening,
+                    hutang.rekening_id,
+                    dict.debts.installment.noWallet,
+                    dict.debts.installment.walletNotFound,
+                  )}
                 </Badge>
               </div>
 

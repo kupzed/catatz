@@ -9,6 +9,7 @@ import {
 } from "@/validations/hutang-validation";
 import { updateHutangContact } from "@/actions/hutang-action";
 import { toast } from "sonner";
+import { useTranslation } from "@/i18n/use-translation";
 import type { Hutang } from "@/types/hutang";
 import {
   Dialog,
@@ -36,6 +37,7 @@ export function HutangContactEditDialog({
   hutang,
   onSuccess,
 }: Props) {
+  const { dict } = useTranslation();
   const [submitting, setSubmitting] = useState(false);
 
   const {
@@ -64,11 +66,11 @@ export function HutangContactEditDialog({
     try {
       const res = await updateHutangContact(hutang.id, values);
       if (res.success && res.data) {
-        toast.success("Informasi kontak diperbarui");
+        toast.success(dict.debts.toasts.contactUpdated);
         onSuccess(res.data);
         onOpenChange(false);
       } else {
-        toast.error(res.error ?? "Gagal memperbarui kontak");
+        toast.error(res.error ?? dict.debts.toasts.contactUpdateFailed);
       }
     } finally {
       setSubmitting(false);
@@ -79,18 +81,18 @@ export function HutangContactEditDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Informasi Pihak</DialogTitle>
+          <DialogTitle>{dict.debts.form.editContactTitle}</DialogTitle>
           <DialogDescription>
-            Perbarui nama atau catatan kontak hutang/piutang ini.
+            {dict.debts.form.editContactDialogDesc}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="contact-nama">Nama Pihak / Entitas</Label>
+            <Label htmlFor="contact-nama">{dict.debts.form.entityNameLabel}</Label>
             <ClearableInput
               id="contact-nama"
-              placeholder="Nama orang atau instansi"
+              placeholder={dict.debts.form.entityNamePlaceholder}
               {...register("nama_entitas")}
               onClear={() => setValue("nama_entitas", "")}
               className={errors.nama_entitas ? "border-rose-500" : ""}
@@ -101,10 +103,10 @@ export function HutangContactEditDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="contact-catatan">Catatan</Label>
+            <Label htmlFor="contact-catatan">{dict.debts.form.notes}</Label>
             <ClearableInput
               id="contact-catatan"
-              placeholder="Keterangan opsional"
+              placeholder={dict.debts.form.notesPlaceholderContact}
               {...register("catatan")}
               onClear={() => setValue("catatan", "")}
             />
@@ -115,8 +117,9 @@ export function HutangContactEditDialog({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
+              className="rounded-full"
             >
-              Batal
+              {dict.common.cancel}
             </Button>
             <Button
               type="submit"
@@ -124,7 +127,7 @@ export function HutangContactEditDialog({
               className="bg-primary hover:bg-primary-active text-white rounded-full h-11 px-5"
             >
               {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              Perbarui
+              {dict.debts.form.submitUpdate}
             </Button>
           </DialogFooter>
         </form>

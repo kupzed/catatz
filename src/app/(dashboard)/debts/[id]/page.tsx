@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getHutangDetail } from "@/actions/hutang-action";
 import { getRekening } from "@/actions/rekening-action";
+import { getLocale } from "@/i18n/get-locale";
+import { getDictionary } from "@/i18n/get-dictionary";
 import { HutangDetailClient } from "./_components/hutang-detail-client";
 
 type Props = {
@@ -10,18 +12,22 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const res = await getHutangDetail(id);
+  const locale = await getLocale();
+  const [res, dict] = await Promise.all([
+    getHutangDetail(id),
+    getDictionary(locale),
+  ]);
 
   if (!res.success || !res.data) {
     return {
-      title: "Detail Hutang",
-      description: "Detail catatan hutang dan piutang.",
+      title: dict.debts.detail.title,
+      description: dict.debts.detail.fallbackDescription,
     };
   }
 
   return {
-    title: `${res.data.nama_entitas} - Hutang & Piutang`,
-    description: `Detail transaksi hutang dan piutang dengan ${res.data.nama_entitas}.`,
+    title: `${res.data.nama_entitas} - ${dict.debts.detail.title}`,
+    description: `${dict.debts.detail.metaDescriptionPrefix} ${res.data.nama_entitas}.`,
   };
 }
 
