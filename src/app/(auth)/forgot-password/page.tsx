@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, Mail, ArrowLeft } from "lucide-react";
+import { useTranslation } from "@/i18n/use-translation";
 
 export default function ForgotPasswordPage() {
+  const { dict } = useTranslation();
   const [state, formAction, isPending] = useActionState(
     resetPasswordRequest,
     null,
@@ -17,12 +19,12 @@ export default function ForgotPasswordPage() {
 
   useEffect(() => {
     if (state?.error) {
-      toast.error("Gagal", { description: state.error });
+      toast.error(dict.toast.error, { description: state.error });
     }
     if (state?.success && state?.message) {
-      toast.success("Terkirim", { description: state.message });
+      toast.success(dict.auth.forgotPassword.sentSuccessTitle, { description: state.message });
     }
-  }, [state]);
+  }, [state, dict]);
 
   return (
     <div className="bg-card dark:bg-surface-dark-elevated border border-border dark:border-white/10 rounded-card p-8">
@@ -31,18 +33,20 @@ export default function ForgotPasswordPage() {
         className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
-        Kembali ke Login
+        {dict.auth.forgotPassword.backToLogin}
       </Link>
 
-      <h2 className="text-xl font-normal text-foreground mb-1">Lupa Password?</h2>
+      <h2 className="text-xl font-normal text-foreground mb-1">
+        {dict.auth.forgotPassword.title}
+      </h2>
       <p className="text-muted-foreground text-sm mb-6">
-        Masukkan email yang terdaftar untuk mengatur ulang password.
+        {dict.auth.forgotPassword.subtitle}
       </p>
 
       <form action={formAction} method="POST" className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email" className="text-muted-foreground text-sm font-medium">
-            Email
+            {dict.auth.forgotPassword.emailLabel}
           </Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
@@ -50,7 +54,7 @@ export default function ForgotPasswordPage() {
               id="email"
               name="email"
               type="email"
-              placeholder="nama@email.com"
+              placeholder={dict.auth.forgotPassword.emailPlaceholder}
               required
               className="pl-10 bg-background dark:bg-surface-dark border-border dark:border-white/15 text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
@@ -65,10 +69,10 @@ export default function ForgotPasswordPage() {
           {isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Mengirim...
+              {dict.auth.forgotPassword.submitting}
             </>
           ) : (
-            "Kirim Link Reset Password"
+            dict.auth.forgotPassword.submit
           )}
         </Button>
       </form>

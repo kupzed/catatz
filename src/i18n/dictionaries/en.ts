@@ -49,6 +49,8 @@ const en: Dictionary = {
     toggleSidebar: "Toggle sidebar",
   },
   auth: {
+    tagline: "Smart personal finance tracker",
+    metadataTitle: "Authentication",
     login: {
       title: "Welcome back",
       subtitle: "Sign in to your CatatZ account",
@@ -62,6 +64,12 @@ const en: Dictionary = {
       submitting: "Signing in...",
       noAccount: "Don't have an account?",
       registerLink: "Sign up now",
+      googleLoginFailed: "Google sign in failed",
+      loginFailed: "Sign in failed",
+      resetSuccess: "Password updated successfully, please sign in.",
+      authCallbackFailed: "Link is invalid or has expired.",
+      sessionRevoked:
+        "Your session was terminated from another device. Please sign in again.",
     },
     register: {
       title: "Create a new account",
@@ -87,6 +95,8 @@ const en: Dictionary = {
       checkEmailDescription:
         "We have sent a verification link to your email. Please click the link to activate your account.",
       backToLoginButton: "Go to Login Page",
+      googleRegisterFailed: "Google sign up failed",
+      registerFailed: "Sign up failed",
     },
     forgotPassword: {
       title: "Forgot Password?",
@@ -98,6 +108,7 @@ const en: Dictionary = {
       backToLogin: "Back to Login",
       successMessage:
         "If the email is registered, a password reset link will be sent to that email.",
+      sentSuccessTitle: "Sent",
     },
     resetPassword: {
       title: "Reset Password",

@@ -49,6 +49,8 @@ const id: Dictionary = {
     toggleSidebar: "Buka/tutup sidebar",
   },
   auth: {
+    tagline: "Pencatatan keuangan pribadi yang cerdas",
+    metadataTitle: "Autentikasi",
     login: {
       title: "Selamat datang kembali",
       subtitle: "Masuk ke akun CatatZ Anda",
@@ -62,6 +64,12 @@ const id: Dictionary = {
       submitting: "Masuk...",
       noAccount: "Belum punya akun?",
       registerLink: "Daftar sekarang",
+      googleLoginFailed: "Google login gagal",
+      loginFailed: "Login gagal",
+      resetSuccess: "Password berhasil diperbarui, silakan login.",
+      authCallbackFailed: "Link tidak valid atau kadaluarsa.",
+      sessionRevoked:
+        "Sesi Anda telah diakhiri dari perangkat lain. Silakan login kembali.",
     },
     register: {
       title: "Buat akun baru",
@@ -87,6 +95,8 @@ const id: Dictionary = {
       checkEmailDescription:
         "Kami telah mengirim link verifikasi ke email Anda. Silakan klik link tersebut untuk mengaktifkan akun.",
       backToLoginButton: "Ke Halaman Login",
+      googleRegisterFailed: "Daftar via Google gagal",
+      registerFailed: "Pendaftaran gagal",
     },
     forgotPassword: {
       title: "Lupa Password?",
@@ -98,6 +108,7 @@ const id: Dictionary = {
       backToLogin: "Kembali ke Login",
       successMessage:
         "Jika email terdaftar, link reset password akan dikirimkan ke email tersebut.",
+      sentSuccessTitle: "Terkirim",
     },
     resetPassword: {
       title: "Reset Password",

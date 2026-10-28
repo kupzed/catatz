@@ -49,6 +49,8 @@ export interface Dictionary {
     toggleSidebar: string;
   };
   auth: {
+    tagline: string;
+    metadataTitle: string;
     login: {
       title: string;
       subtitle: string;
@@ -62,6 +64,11 @@ export interface Dictionary {
       submitting: string;
       noAccount: string;
       registerLink: string;
+      googleLoginFailed: string;
+      loginFailed: string;
+      resetSuccess: string;
+      authCallbackFailed: string;
+      sessionRevoked: string;
     };
     register: {
       title: string;
@@ -86,6 +93,8 @@ export interface Dictionary {
       checkEmailTitle: string;
       checkEmailDescription: string;
       backToLoginButton: string;
+      googleRegisterFailed: string;
+      registerFailed: string;
     };
     forgotPassword: {
       title: string;
@@ -96,6 +105,7 @@ export interface Dictionary {
       submitting: string;
       backToLogin: string;
       successMessage: string;
+      sentSuccessTitle: string;
     };
     resetPassword: {
       title: string;
