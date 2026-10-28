@@ -3,6 +3,7 @@ export const CURRENCY_PREFERENCES = ["IDR"] as const;
 export const DATE_FORMAT_PREFERENCES = ["id-ID", "en-US"] as const;
 export const NUMBER_FORMAT_PREFERENCES = ["id-ID", "en-US"] as const;
 export const TIME_FORMAT_PREFERENCES = ["24h", "12h"] as const;
+export const LANGUAGE_PREFERENCES = ["id", "en"] as const;
 export const LANDING_PAGE_PREFERENCES = [
   "/transactions",
   "/wallets",
@@ -16,6 +17,7 @@ export type CurrencyPreference = (typeof CURRENCY_PREFERENCES)[number];
 export type DateFormatPreference = (typeof DATE_FORMAT_PREFERENCES)[number];
 export type NumberFormatPreference = (typeof NUMBER_FORMAT_PREFERENCES)[number];
 export type TimeFormatPreference = (typeof TIME_FORMAT_PREFERENCES)[number];
+export type LanguagePreference = (typeof LANGUAGE_PREFERENCES)[number];
 export type LandingPagePreference = (typeof LANDING_PAGE_PREFERENCES)[number];
 
 export type UserPreferences = {
@@ -28,12 +30,13 @@ export type UserPreferences = {
   time_format: TimeFormatPreference;
   cutoff_day: number;
   akumulasi_saldo: boolean;
+  language: LanguagePreference;
 };
 
 export type UserPreferenceUpdate = Partial<UserPreferences>;
 
 export const USER_PREFERENCE_SELECT =
-  "theme, currency, date_format, number_format, default_landing_page, show_decimal_places, time_format, cutoff_day, akumulasi_saldo";
+  "theme, currency, date_format, number_format, default_landing_page, show_decimal_places, time_format, cutoff_day, akumulasi_saldo, language";
 
 export const DEFAULT_USER_PREFERENCES: UserPreferences = {
   theme: "system",
@@ -45,6 +48,7 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
   time_format: "24h",
   cutoff_day: 1,
   akumulasi_saldo: false,
+  language: "id",
 };
 
 const PREFERENCE_OPTIONS = {
@@ -54,6 +58,7 @@ const PREFERENCE_OPTIONS = {
   number_format: NUMBER_FORMAT_PREFERENCES,
   default_landing_page: LANDING_PAGE_PREFERENCES,
   time_format: TIME_FORMAT_PREFERENCES,
+  language: LANGUAGE_PREFERENCES,
 } as const;
 
 function isOneOf<T extends readonly string[]>(
@@ -103,6 +108,9 @@ export function normalizeUserPreferences(
       typeof input?.akumulasi_saldo === "boolean"
         ? input.akumulasi_saldo
         : DEFAULT_USER_PREFERENCES.akumulasi_saldo,
+    language: isOneOf(input?.language, LANGUAGE_PREFERENCES)
+      ? input.language
+      : DEFAULT_USER_PREFERENCES.language,
   };
 }
 
@@ -119,6 +127,7 @@ export function validateUserPreferenceUpdate(
     "time_format",
     "cutoff_day",
     "akumulasi_saldo",
+    "language",
   ]);
   const data: UserPreferenceUpdate = {};
 
