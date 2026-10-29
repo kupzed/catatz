@@ -29,6 +29,7 @@ import {
   customPeriodSchema,
   type CustomPeriodSchema,
 } from "@/validations/rekap-validation";
+import { useTranslation } from "@/i18n/use-translation";
 
 export type RekapCustomDialogProps = {
   open: boolean;
@@ -43,6 +44,7 @@ export function RekapCustomDialog({
   editData,
   onSuccess,
 }: RekapCustomDialogProps) {
+  const { dict } = useTranslation();
   const isEdit = !!editData;
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
@@ -90,25 +92,25 @@ export function RekapCustomDialog({
       if (isEdit && editData) {
         const res = await updateCustomPeriod(editData.id, values);
         if (res.success) {
-          toast.success("Periode kustom berhasil diperbarui");
+          toast.success(dict.reports.toasts.customUpdated);
           onOpenChange(false);
           onSuccess?.();
         } else {
-          toast.error(res.error ?? "Gagal memperbarui periode kustom");
+          toast.error(res.error ?? dict.reports.toasts.customUpdateFailed);
         }
       } else {
         const res = await createCustomPeriod(values);
         if (res.success) {
-          toast.success("Periode kustom berhasil dibuat");
+          toast.success(dict.reports.toasts.customCreated);
           onOpenChange(false);
           onSuccess?.();
         } else {
-          toast.error(res.error ?? "Gagal membuat periode kustom");
+          toast.error(res.error ?? dict.reports.toasts.customCreateFailed);
         }
       }
     } catch (err) {
       console.error("Error submitting custom period:", err);
-      toast.error("Terjadi kesalahan saat menyimpan periode kustom");
+      toast.error(dict.reports.toasts.customSaveError);
     } finally {
       setIsSubmitting(false);
     }
@@ -121,15 +123,15 @@ export function RekapCustomDialog({
     try {
       const res = await deleteCustomPeriod(editData.id);
       if (res.success) {
-        toast.success("Periode kustom berhasil dihapus");
+        toast.success(dict.reports.toasts.customDeleted);
         onOpenChange(false);
         onSuccess?.();
       } else {
-        toast.error(res.error ?? "Gagal menghapus periode kustom");
+        toast.error(res.error ?? dict.reports.toasts.customDeleteFailed);
       }
     } catch (err) {
       console.error("Error deleting custom period:", err);
-      toast.error("Terjadi kesalahan saat menghapus periode kustom");
+      toast.error(dict.reports.toasts.customDeleteError);
     } finally {
       setIsDeleting(false);
     }
@@ -140,12 +142,14 @@ export function RekapCustomDialog({
       <DialogContent className="max-w-md sm:max-w-lg rounded-card border-hairline p-6">
         <DialogHeader className="space-y-1.5 pb-2">
           <DialogTitle className="text-lg font-semibold tracking-tight text-foreground">
-            {isEdit ? "Edit Periode Kustom" : "Tambah Periode Kustom"}
+            {isEdit
+              ? dict.reports.customDialog.editTitle
+              : dict.reports.customDialog.createTitle}
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
             {isEdit
-              ? "Perbarui nama atau rentang tanggal periode kustom Anda."
-              : "Buat rentang tanggal khusus untuk analisis rekap keuangan tertentu."}
+              ? dict.reports.customDialog.editDesc
+              : dict.reports.customDialog.createDesc}
           </DialogDescription>
         </DialogHeader>
 
@@ -153,11 +157,11 @@ export function RekapCustomDialog({
           {/* Input Nama Periode */}
           <div className="space-y-1.5 min-w-0">
             <Label htmlFor="nama" className="text-xs sm:text-sm font-medium">
-              Nama Periode
+              {dict.reports.customDialog.nameLabel}
             </Label>
             <ClearableInput
               id="nama"
-              placeholder="Contoh: Liburan Akhir Tahun, Proyek Renovasi"
+              placeholder={dict.reports.customDialog.namePlaceholder}
               className="h-12 rounded-input border-hairline bg-background text-sm"
               {...register("nama")}
               onClear={() => setValue("nama", "")}
@@ -175,7 +179,7 @@ export function RekapCustomDialog({
                 htmlFor="tanggal_mulai"
                 className="text-xs sm:text-sm font-medium"
               >
-                Tanggal Mulai
+                {dict.reports.customDialog.startDateLabel}
               </Label>
               <Input
                 id="tanggal_mulai"
@@ -196,7 +200,7 @@ export function RekapCustomDialog({
                 htmlFor="tanggal_selesai"
                 className="text-xs sm:text-sm font-medium"
               >
-                Tanggal Selesai
+                {dict.reports.customDialog.endDateLabel}
               </Label>
               <Input
                 id="tanggal_selesai"
@@ -218,10 +222,10 @@ export function RekapCustomDialog({
             <div>
               {isEdit && (
                 <ConfirmDialog
-                  title="Hapus Periode Kustom?"
-                  description="Periode kustom ini akan dihapus. Riwayat transaksi di dalamnya tetap aman dan tidak akan terhapus."
-                  confirmText="Hapus"
-                  cancelText="Batal"
+                  title={dict.reports.customDialog.deleteConfirmTitle}
+                  description={dict.reports.customDialog.deleteConfirmDesc}
+                  confirmText={dict.reports.customDialog.deleteButton}
+                  cancelText={dict.reports.customDialog.cancelButton}
                   variant="destructive"
                   onConfirm={handleDelete}
                 >
@@ -238,7 +242,7 @@ export function RekapCustomDialog({
                     ) : (
                       <Trash2 className="size-4" />
                     )}
-                    <span>Hapus</span>
+                    <span>{dict.reports.customDialog.deleteButton}</span>
                   </Button>
                 </ConfirmDialog>
               )}
@@ -253,7 +257,7 @@ export function RekapCustomDialog({
                 disabled={isSubmitting || isDeleting}
                 className="h-11 min-h-11 rounded-full border-hairline px-5 text-sm font-medium hover:bg-surface-strong transition-colors"
               >
-                Batal
+                {dict.reports.customDialog.cancelButton}
               </Button>
               <Button
                 type="submit"
@@ -264,10 +268,10 @@ export function RekapCustomDialog({
                 {isSubmitting && <Loader2 className="size-4 animate-spin" />}
                 <span>
                   {isSubmitting
-                    ? "Menyimpan..."
+                    ? dict.reports.customDialog.savingSubmit
                     : isEdit
-                      ? "Simpan Perubahan"
-                      : "Buat Periode"}
+                      ? dict.reports.customDialog.editSubmit
+                      : dict.reports.customDialog.createSubmit}
                 </span>
               </Button>
             </div>

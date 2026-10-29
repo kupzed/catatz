@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 import { RekapDonutChart } from "@/app/(dashboard)/reports/_components/rekap-charts";
 
 export type BreakdownMode = "kategori" | "judul";
@@ -137,6 +138,7 @@ function BreakdownRows({
   onToggle: (id: string) => void;
 }) {
   const { formatRupiah } = useSystemPreferences();
+  const { dict } = useTranslation();
 
   if (items.length === 0) {
     return (
@@ -145,7 +147,7 @@ function BreakdownRows({
           {title}
         </h3>
         <div className="rounded-input border border-dashed border-hairline p-5 text-center text-sm text-muted-foreground">
-          Belum ada data {title.toLowerCase()}.
+          {dict.reports.detail.noDataFor.replace("{title}", title.toLowerCase())}
         </div>
       </div>
     );
@@ -158,7 +160,9 @@ function BreakdownRows({
           {title}
         </h3>
         <span className="text-xs font-mono text-muted-foreground">
-          {items.length} {mode === "kategori" ? "kategori" : "judul"}
+          {mode === "kategori"
+            ? dict.reports.realtime.categoryCount.replace("{count}", String(items.length))
+            : dict.reports.realtime.titleCount.replace("{count}", String(items.length))}
         </span>
       </div>
 
@@ -205,7 +209,9 @@ function BreakdownRows({
                   />
 
                   <div className="mt-1.5 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                    <span className="truncate">{item.count} transaksi</span>
+                    <span className="truncate">
+                      {item.count} {dict.reports.detail.transactions}
+                    </span>
                     <span className="shrink-0 font-mono">{item.persentase}%</span>
                   </div>
                 </div>
@@ -226,7 +232,7 @@ function BreakdownRows({
                     ))
                   ) : (
                     <div className="p-4 text-center text-xs text-muted-foreground border-t border-hairline">
-                      Tidak ada detail transaksi.
+                      {dict.reports.detail.noTransactionDetail}
                     </div>
                   )}
                 </div>
@@ -240,6 +246,7 @@ function BreakdownRows({
 }
 
 export function RekapDetailBreakdown({ detail }: RekapDetailBreakdownProps) {
+  const { dict } = useTranslation();
   const [mode, setMode] = useState<BreakdownMode>("kategori");
   const [donutType, setDonutType] = useState<"expense" | "income">("expense");
   // Satu baris terbuka per bagian (activeExpenseId untuk pengeluaran, activeIncomeId untuk pemasukan)
@@ -298,10 +305,12 @@ export function RekapDetailBreakdown({ detail }: RekapDetailBreakdownProps) {
               </span>
               <div>
                 <CardTitle className="text-base sm:text-lg font-semibold text-foreground">
-                  Rincian Transaksi
+                  {dict.reports.detail.transactionBreakdown}
                 </CardTitle>
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  Berdasarkan {mode === "kategori" ? "kategori transaksi" : "judul transaksi"} (D10)
+                  {mode === "kategori"
+                    ? dict.reports.detail.breakdownCategoryDesc
+                    : dict.reports.detail.breakdownTitleDesc}
                 </p>
               </div>
             </div>
@@ -311,13 +320,13 @@ export function RekapDetailBreakdown({ detail }: RekapDetailBreakdownProps) {
                 value="kategori"
                 className="rounded-full text-xs font-semibold data-active:bg-card"
               >
-                Kategori
+                {dict.reports.realtime.categoryTab}
               </TabsTrigger>
               <TabsTrigger
                 value="judul"
                 className="rounded-full text-xs font-semibold data-active:bg-card"
               >
-                Judul
+                {dict.reports.realtime.titleTab}
               </TabsTrigger>
             </TabsList>
           </div>
@@ -329,10 +338,14 @@ export function RekapDetailBreakdown({ detail }: RekapDetailBreakdownProps) {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
               <div>
                 <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                  Grafik Proporsi {mode === "kategori" ? "Kategori" : "Judul"}
+                  {mode === "kategori"
+                    ? dict.reports.detail.chartPropCategory
+                    : dict.reports.detail.chartPropTitle}
                 </h4>
                 <p className="text-xs text-muted-foreground">
-                  Visualisasi pembagian {donutType === "expense" ? "pengeluaran" : "pemasukan"} periode berjalan
+                  {donutType === "expense"
+                    ? dict.reports.detail.chartPropExpenseDesc
+                    : dict.reports.detail.chartPropIncomeDesc}
                 </p>
               </div>
 
@@ -348,7 +361,7 @@ export function RekapDetailBreakdown({ detail }: RekapDetailBreakdownProps) {
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  Pengeluaran
+                  {dict.reports.detail.expenseButton}
                 </button>
                 <button
                   type="button"
@@ -360,21 +373,27 @@ export function RekapDetailBreakdown({ detail }: RekapDetailBreakdownProps) {
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  Pemasukan
+                  {dict.reports.detail.incomeButton}
                 </button>
               </div>
             </div>
 
             {activeDonutItems.length === 0 ? (
               <div className="py-8 text-center text-xs text-muted-foreground">
-                Belum ada data {donutType === "expense" ? "pengeluaran" : "pemasukan"} untuk ditampilkan pada grafik.
+                {donutType === "expense"
+                  ? dict.reports.detail.noExpenseChartData
+                  : dict.reports.detail.noIncomeChartData}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-2">
                 <RekapDonutChart
                   data={activeDonutItems}
                   totalExpense={activeDonutTotal}
-                  centerLabel={donutType === "expense" ? "Total Pengeluaran" : "Total Pemasukan"}
+                  centerLabel={
+                    donutType === "expense"
+                      ? dict.reports.detail.totalExpense
+                      : dict.reports.detail.totalIncome
+                  }
                   height={240}
                 />
               </div>
@@ -384,14 +403,14 @@ export function RekapDetailBreakdown({ detail }: RekapDetailBreakdownProps) {
           <TabsContent value="kategori" className="m-0 space-y-6">
             <div className="grid gap-8 lg:grid-cols-2">
               <BreakdownRows
-                title="Pengeluaran per Kategori"
+                title={dict.reports.chart.expenseByCategory}
                 items={detail.kategori.expense}
                 mode="kategori"
                 activeId={activeExpenseId}
                 onToggle={handleToggleExpense}
               />
               <BreakdownRows
-                title="Pemasukan per Kategori"
+                title={dict.reports.chart.incomeByCategory}
                 items={detail.kategori.income}
                 mode="kategori"
                 activeId={activeIncomeId}
@@ -403,14 +422,14 @@ export function RekapDetailBreakdown({ detail }: RekapDetailBreakdownProps) {
           <TabsContent value="judul" className="m-0 space-y-6">
             <div className="grid gap-8 lg:grid-cols-2">
               <BreakdownRows
-                title="Pengeluaran per Judul"
+                title={dict.reports.chart.expenseByTitle}
                 items={detail.judul.expense}
                 mode="judul"
                 activeId={activeExpenseId}
                 onToggle={handleToggleExpense}
               />
               <BreakdownRows
-                title="Pemasukan per Judul"
+                title={dict.reports.chart.incomeByTitle}
                 items={detail.judul.income}
                 mode="judul"
                 activeId={activeIncomeId}

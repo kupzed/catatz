@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 import { ProporsiSaldoChart } from "./proporsi-saldo-chart";
 import { RekapDetailBreakdown } from "./rekap-detail-breakdown";
 
@@ -78,8 +79,10 @@ export function RekapDetailClient({
   saldoAkhir,
 }: RekapDetailClientProps) {
   const { formatRupiah } = useSystemPreferences();
+  const { dict, locale } = useTranslation();
 
-  const formattedPeriod = formatPeriodLabel(detail.startDate, detail.endDate);
+  const rekapLocale = locale === "en" ? "en-US" : "id-ID";
+  const formattedPeriod = formatPeriodLabel(detail.startDate, detail.endDate, rekapLocale);
   const displayTitle = jenis === "custom" && customName ? customName : formattedPeriod;
 
   // D8: Net Hutang Piutang = (hutang_baru + cicilan_piutang) - (piutang_baru + cicilan_hutang)
@@ -108,7 +111,14 @@ export function RekapDetailClient({
               className="h-10 min-h-11 rounded-full border-hairline px-4 gap-2 text-sm font-medium hover:bg-surface-strong transition-colors"
             >
               <ArrowLeft className="size-4 shrink-0" />
-              <span>Kembali ke {jenis === "custom" ? "Custom" : "Bulanan"}</span>
+              <span>
+                {dict.reports.detail.backTo.replace(
+                  "{tab}",
+                  jenis === "custom"
+                    ? dict.reports.tabs.custom
+                    : dict.reports.tabs.monthly,
+                )}
+              </span>
             </Button>
           </Link>
         </div>
@@ -120,10 +130,12 @@ export function RekapDetailClient({
                 variant="secondary"
                 className="rounded-full bg-surface-strong px-2.5 py-0.5 text-xs font-medium text-muted-foreground border-none"
               >
-                {jenis === "custom" ? "Periode Custom" : "Siklus Bulanan"}
+                {jenis === "custom"
+                  ? dict.reports.detail.customPeriodBadge
+                  : dict.reports.detail.monthlyCycleBadge}
               </Badge>
               <span className="font-mono text-xs text-muted-foreground">
-                {detail.daysInPeriod} hari
+                {detail.daysInPeriod} {dict.reports.detail.days}
               </span>
             </div>
             <h1 className="mt-1 text-[28px] sm:text-[32px] font-normal tracking-[-0.4px] text-foreground">
@@ -144,7 +156,7 @@ export function RekapDetailClient({
         <Card className="rounded-card border border-hairline bg-card p-5">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-xs font-semibold uppercase tracking-wider">
-              Total Pengeluaran
+              {dict.reports.detail.totalExpense}
             </span>
             <span className="rounded-full bg-semantic-down/10 p-1.5 text-semantic-down">
               <ArrowDownRight className="size-4" />
@@ -154,7 +166,10 @@ export function RekapDetailClient({
             {formatRupiah(detail.total_expense)}
           </p>
           <p className="mt-1 font-mono text-xs text-muted-foreground">
-            Rata-rata: {formatRupiah(detail.rata_expense_harian)} / hari
+            {dict.reports.detail.averageDaily.replace(
+              "{amount}",
+              formatRupiah(detail.rata_expense_harian),
+            )}
           </p>
         </Card>
 
@@ -162,7 +177,7 @@ export function RekapDetailClient({
         <Card className="rounded-card border border-hairline bg-card p-5">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-xs font-semibold uppercase tracking-wider">
-              Total Pemasukan
+              {dict.reports.detail.totalIncome}
             </span>
             <span className="rounded-full bg-semantic-up/10 p-1.5 text-semantic-up">
               <ArrowUpRight className="size-4" />
@@ -172,7 +187,10 @@ export function RekapDetailClient({
             {formatRupiah(detail.total_income)}
           </p>
           <p className="mt-1 font-mono text-xs text-muted-foreground">
-            Rata-rata: {formatRupiah(detail.rata_income_harian)} / hari
+            {dict.reports.detail.averageDaily.replace(
+              "{amount}",
+              formatRupiah(detail.rata_income_harian),
+            )}
           </p>
         </Card>
 
@@ -180,7 +198,7 @@ export function RekapDetailClient({
         <Card className="rounded-card border border-hairline bg-card p-5">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-xs font-semibold uppercase tracking-wider">
-              Selisih Utama
+              {dict.reports.detail.netMain}
             </span>
             <span className="rounded-full bg-surface-strong p-1.5 text-muted-foreground">
               <Scale className="size-4" />
@@ -195,7 +213,7 @@ export function RekapDetailClient({
             {formatSignedRupiah(detail.net, formatRupiah)}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Pemasukan dikurangi pengeluaran
+            {dict.reports.detail.netMainDesc}
           </p>
         </Card>
       </div>
@@ -206,35 +224,41 @@ export function RekapDetailClient({
         <Card className="rounded-card border border-hairline bg-card">
           <CardHeader className="p-6 pb-2">
             <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Rincian Finansial Periode
+              {dict.reports.detail.financialBreakdownTitle}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 pt-0">
             <div className="divide-y divide-hairline">
               <MetricRow
-                label="Pengeluaran"
+                label={dict.reports.card.expense}
                 value={detail.total_expense}
                 className="text-semantic-down"
               />
               <MetricRow
-                label="Rata-rata pengeluaran / hari"
+                label={dict.reports.detail.avgExpensePerDay}
                 value={detail.rata_expense_harian}
                 className="text-semantic-down"
-                note={`Dibagi ${detail.daysInPeriod} hari periode`}
+                note={dict.reports.detail.dividedByDays.replace(
+                  "{days}",
+                  String(detail.daysInPeriod),
+                )}
               />
               <MetricRow
-                label="Pemasukan"
+                label={dict.reports.card.income}
                 value={detail.total_income}
                 className="text-semantic-up"
               />
               <MetricRow
-                label="Rata-rata pemasukan / hari"
+                label={dict.reports.detail.avgIncomePerDay}
                 value={detail.rata_income_harian}
                 className="text-semantic-up"
-                note={`Dibagi ${detail.daysInPeriod} hari periode`}
+                note={dict.reports.detail.dividedByDays.replace(
+                  "{days}",
+                  String(detail.daysInPeriod),
+                )}
               />
               <MetricRow
-                label="Selisih utama"
+                label={dict.reports.detail.netMain}
                 value={detail.net}
                 className={valueColor(detail.net)}
                 signed
@@ -243,22 +267,28 @@ export function RekapDetailClient({
               {/* Baris Koreksi Saldo hanya jika ada aktivitas */}
               {hasKoreksi && (
                 <MetricRow
-                  label="Koreksi Saldo"
+                  label={dict.reports.detail.balanceCorrection}
                   value={detail.koreksi.net}
                   className={valueColor(detail.koreksi.net)}
                   signed
-                  note={`${detail.koreksi.count} aktivitas penyesuaian rekening`}
+                  note={dict.reports.detail.adjustmentActivities.replace(
+                    "{count}",
+                    String(detail.koreksi.count),
+                  )}
                 />
               )}
 
               {/* Baris Hutang & Piutang hanya jika ada aktivitas (D8) */}
               {hasHutangPiutang && (
                 <MetricRow
-                  label="Arus Kas Hutang & Piutang"
+                  label={dict.reports.detail.debtCashFlow}
                   value={hutangPiutangNet}
                   className={valueColor(hutangPiutangNet)}
                   signed
-                  note={`${detail.hutang_piutang.count} mutasi (pinjaman & cicilan)`}
+                  note={dict.reports.detail.debtMutations.replace(
+                    "{count}",
+                    String(detail.hutang_piutang.count),
+                  )}
                 />
               )}
 
@@ -266,16 +296,16 @@ export function RekapDetailClient({
               {showSaldoAkumulasi && (
                 <>
                   <MetricRow
-                    label="Saldo Awal"
+                    label={dict.reports.card.initialBalance}
                     value={saldoAwal!}
                     className="text-foreground"
-                    note="Total saldo rekening sebelum periode dimulai"
+                    note={dict.reports.detail.initialBalanceDesc}
                   />
                   <MetricRow
-                    label="Saldo Akhir"
+                    label={dict.reports.card.endingBalance}
                     value={saldoAkhir!}
                     className="text-foreground font-bold"
-                    note="Total saldo rekening pada akhir periode"
+                    note={dict.reports.detail.endingBalanceDesc}
                   />
                 </>
               )}

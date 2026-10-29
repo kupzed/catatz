@@ -14,6 +14,7 @@ import {
 import { AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 
 export type ProporsiSaldoChartProps = {
   totalExpense: number;
@@ -29,6 +30,7 @@ export function ProporsiSaldoChart({
   akumulasiAktif = false,
 }: ProporsiSaldoChartProps) {
   const { formatRupiah } = useSystemPreferences();
+  const { dict } = useTranslation();
 
   // D9: Sisa saldo = pemasukan (+ saldo awal bila akumulasi aktif) - pengeluaran
   const totalDanaMasuk = totalIncome + (akumulasiAktif ? saldoAwal : 0);
@@ -41,12 +43,12 @@ export function ProporsiSaldoChart({
       return {
         chartData: [
           {
-            name: "Pengeluaran",
+            name: dict.reports.summary.totalExpense,
             nominal: totalExpense,
             color: "var(--semantic-down)",
           },
           {
-            name: "Sisa Saldo",
+            name: dict.reports.summary.remainingBalance,
             nominal: 0,
             color: "var(--semantic-down)",
           },
@@ -62,12 +64,12 @@ export function ProporsiSaldoChart({
       return {
         chartData: [
           {
-            name: "Pengeluaran",
+            name: dict.reports.summary.totalExpense,
             nominal: totalExpense,
             color: "var(--semantic-down)",
           },
           {
-            name: "Sisa Saldo",
+            name: dict.reports.summary.remainingBalance,
             nominal: sisaSaldo,
             color: "var(--primary)",
           },
@@ -81,12 +83,12 @@ export function ProporsiSaldoChart({
       return {
         chartData: [
           {
-            name: "Pengeluaran",
+            name: dict.reports.summary.totalExpense,
             nominal: totalExpense,
             color: "var(--semantic-down)",
           },
           {
-            name: "Sisa Saldo",
+            name: dict.reports.summary.remainingBalance,
             nominal: 0,
             color: "var(--primary)",
           },
@@ -100,12 +102,12 @@ export function ProporsiSaldoChart({
     return {
       chartData: [
         {
-          name: "Pengeluaran",
+          name: dict.reports.summary.totalExpense,
           nominal: 0,
           color: "var(--semantic-down)",
         },
         {
-          name: "Sisa Saldo",
+          name: dict.reports.summary.remainingBalance,
           nominal: 0,
           color: "var(--primary)",
         },
@@ -113,18 +115,18 @@ export function ProporsiSaldoChart({
       persenExpense: 0,
       persenSisa: 100,
     };
-  }, [isDefisit, totalDanaMasuk, totalExpense, sisaSaldo]);
+  }, [dict.reports.summary.remainingBalance, dict.reports.summary.totalExpense, isDefisit, sisaSaldo, totalDanaMasuk, totalExpense]);
 
   return (
     <Card className="rounded-card border border-hairline bg-card">
       <CardHeader className="p-6 pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            Proporsi Pengeluaran vs Sisa Saldo
+            {dict.reports.detail.proportionExpenseVsBalance}
           </CardTitle>
           {isDefisit && (
             <span className="inline-flex items-center gap-1 rounded-full bg-semantic-down/10 px-2.5 py-0.5 text-xs font-semibold text-semantic-down">
-              <AlertTriangle className="size-3" /> Defisit
+              <AlertTriangle className="size-3" /> {dict.reports.detail.deficitBadge}
             </span>
           )}
         </div>
@@ -183,7 +185,7 @@ export function ProporsiSaldoChart({
           <div className="rounded-input border border-hairline bg-surface-soft p-3">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <span className="size-2 rounded-full bg-semantic-down" />
-              <span>Pengeluaran</span>
+              <span>{dict.reports.summary.totalExpense}</span>
             </div>
             <div className="mt-1 flex items-baseline justify-between gap-2">
               <span className="font-mono text-sm font-semibold text-foreground">
@@ -198,7 +200,7 @@ export function ProporsiSaldoChart({
           <div className="rounded-input border border-hairline bg-surface-soft p-3">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <span className="size-2 rounded-full bg-primary" />
-              <span>Sisa Saldo</span>
+              <span>{dict.reports.summary.remainingBalance}</span>
             </div>
             <div className="mt-1 flex items-baseline justify-between gap-2">
               <span
@@ -220,11 +222,7 @@ export function ProporsiSaldoChart({
           <div className="flex items-center gap-2 rounded-input border border-semantic-down/30 bg-semantic-down/10 p-3 text-xs text-semantic-down">
             <AlertTriangle className="size-4 shrink-0" />
             <span>
-              Pengeluaran pada periode ini melebihi total dana masuk sebesar{" "}
-              <strong className="font-mono font-semibold">
-                {formatRupiah(Math.abs(sisaSaldo))}
-              </strong>
-              .
+              {dict.reports.detail.deficitWarning.replace("{amount}", formatRupiah(Math.abs(sisaSaldo)))}
             </span>
           </div>
         )}
