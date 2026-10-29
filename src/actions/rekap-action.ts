@@ -7,6 +7,8 @@ import type { TipeHutang } from '@/types/hutang';
 import type { TipeTransaksi } from '@/types/transaksi';
 import { countDaysInPeriod } from '@/lib/rekap-period';
 import { dateRangeSchema } from '@/validations/rekap-validation';
+import { getActionLocale } from '@/i18n/get-locale';
+import { getDictionary } from '@/i18n/get-dictionary';
 import {
   aggregateRekapByPeriods,
   type RekapRingkasanPeriode,
@@ -735,7 +737,10 @@ export async function upsertBudget(
 ) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: 'Tidak terautentikasi' };
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
+
+  if (!user) return { success: false, error: dict.errors.unauthenticated };
 
   const { error } = await supabase
     .from('budget')
@@ -756,9 +761,11 @@ export async function getEarliestTransactionDate(): Promise<ActionResult<string 
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    const locale = await getActionLocale(supabase, user?.id);
+    const dict = await getDictionary(locale);
 
     if (!user) {
-      return { success: false, error: 'Tidak terautentikasi' };
+      return { success: false, error: dict.errors.unauthenticated };
     }
 
     const { data, error } = await supabase
@@ -775,10 +782,12 @@ export async function getEarliestTransactionDate(): Promise<ActionResult<string 
 
     return { success: true, data: data?.tanggal ?? null };
   } catch (err) {
+    const locale = await getActionLocale();
+    const dict = await getDictionary(locale);
     const message =
       err instanceof Error
         ? err.message
-        : 'Terjadi kesalahan saat memuat tanggal awal transaksi';
+        : dict.actions.rekap.loadEarliestDateError;
     return { success: false, error: message };
   }
 }

@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  rekeningCreateSchema,
-  rekeningEditSchema,
+  getRekeningCreateSchema,
+  getRekeningEditSchema,
   type RekeningCreateSchema,
   type RekeningEditSchema,
 } from "@/validations/rekening-validation";
@@ -79,7 +79,7 @@ function CreateForm({
     setValue,
     formState: { errors },
   } = useForm<RekeningCreateSchema>({
-    resolver: zodResolver(rekeningCreateSchema),
+    resolver: zodResolver(getRekeningCreateSchema(dict)),
     defaultValues: {
       jenis: "Bank",
       saldo_awal: 0,
@@ -299,7 +299,7 @@ function EditForm({
     setValue,
     formState: { errors },
   } = useForm<RekeningEditSchema>({
-    resolver: zodResolver(rekeningEditSchema),
+    resolver: zodResolver(getRekeningEditSchema(dict)),
     defaultValues: {
       nama: editData.nama,
       jenis: editData.jenis,

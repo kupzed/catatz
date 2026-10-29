@@ -1221,6 +1221,7 @@ const en: Dictionary = {
       minLength: "Character length insufficient",
       maxLength: "Character length exceeds limit",
       mustBeNumber: "Must be a number",
+      nominalMustBeNumber: "Amount must be a number",
       mustBePositive: "Amount must be greater than 0",
       invalidFormat: "Invalid format",
       selectWallet: "Please select a wallet",
@@ -1236,6 +1237,158 @@ const en: Dictionary = {
         "Wallet cannot be deleted because it still has associated transactions",
       deleteCategoryHasTransactions:
         "Category cannot be deleted because it still has associated transactions",
+      titleMaxLength: "Title must be at most 200 characters",
+      destinationWalletOnlyForTransfer:
+        "Destination wallet can only be filled for transfers",
+      transferOrCorrectionNoTitle:
+        "Balance correction & transfer transactions cannot have a title",
+      transferOrCorrectionNoCategory:
+        "Transfer & balance correction transactions cannot have a category",
+      invalidTransactionId: "Invalid transaction ID",
+      walletNameRequired: "Wallet name is required",
+      balanceMustBeNumber: "Balance must be a number",
+      invalidColorFormat: "Invalid color format",
+      invalidWalletId: "Invalid wallet ID",
+      iconRequired: "Icon is required",
+      startDateRequired: "Start date is required",
+      cutoffDayNumber: "Cut-off day must be a number",
+      cutoffDayInteger: "Cut-off day must be an integer",
+      cutoffDayMin: "Cut-off day must be at least 1",
+      cutoffDayMax: "Cut-off day must be at most 31",
+      accumulateBalanceBoolean: "Accumulate balance must be a boolean",
+      dateFormatYMD: "Date format must be YYYY-MM-DD",
+      invalidDateFormat: "Invalid date format",
+      endDateBeforeStartDate:
+        "End date cannot be earlier than start date",
+      endDateBeforeStartDateRange:
+        "End date cannot be earlier than start date",
+      periodNameRequired: "Period name is required",
+      periodNameMaxLength: "Period name must be at most 100 characters",
+      periodTypeInvalid: "Period type must be 'bulanan' or 'custom'",
+      invalidCustomPeriodId: "Custom period ID must be a valid UUID",
+    },
+  },
+  actions: {
+    auth: {
+      originNotDetected:
+        "Request origin could not be determined. Restart dev server and check auth URL configuration.",
+      emailRequired: "Email is required",
+      passwordRequired: "Password is required",
+      accountCreatedCheckEmail:
+        "Account successfully created! Please check your email for verification.",
+      resetPasswordEmailSent:
+        "If the email is registered, a password reset link will be sent to that email.",
+      googleSignInFailed: "Failed to initialize Google sign in",
+      sessionInvalidLoginAgain: "Invalid session. Please sign in again.",
+      googleAlreadyConnected: "Google account is already connected.",
+      googleLinkFailed: "Failed to initialize Google connection",
+      googleNotConnected: "Google account is not connected yet.",
+      googleNeedOtherMethod:
+        "Add another sign-in method before disconnecting your Google account.",
+      googleUnlinked: "Google account successfully disconnected.",
+    },
+    profile: {
+      fileNotFound: "File not found",
+      fileFormatNotSupported:
+        "Unsupported file format. Please use JPG, PNG, or WebP.",
+      fileTooLarge: "File size is too large (maximum 2MB)",
+      currentPasswordRequired: "Current password is required",
+      currentPasswordIncorrect: "Current password is incorrect",
+      passwordUpdated: "Password successfully updated",
+      deleteAccountFailed: "Failed to delete account, please try again.",
+      systemError: "A system error occurred.",
+    },
+    preference: {
+      invalidPreference: "Invalid preference",
+      invalidDecimal: "Invalid decimal place preference",
+      invalidAccumulation: "Invalid balance accumulation preference",
+      invalidCutoff: "Cut-off day must be between 1 and 31",
+      invalidOption: "Invalid preference value",
+      noPreferencesToUpdate: "No preferences to update",
+    },
+    session: {
+      sessionTerminated: "Session successfully terminated",
+      currentDeviceNotIdentified: "Current device could not be identified",
+      allOtherSessionsTerminated: "All other sessions successfully terminated",
+    },
+    rekap: {
+      dbError: "A database error occurred",
+      migrationRequired:
+        "Report tables are not yet available in the database. Ensure database migration (014-rekap-periode.sql) has been applied.",
+      invalidSettingsData: "Invalid report settings data",
+      loadSettingsError: "An error occurred while loading report settings",
+      saveSettingsError: "An error occurred while saving report settings",
+      loadCustomPeriodsError:
+        "An error occurred while loading custom period list",
+      invalidCustomPeriodId: "Invalid custom period ID",
+      customPeriodNotFound: "Custom period not found",
+      customPeriodNotFoundOrUnauthorized:
+        "Custom period not found or unauthorized",
+      invalidCustomPeriodData: "Invalid custom period data",
+      createCustomPeriodError:
+        "An error occurred while creating custom period",
+      updateCustomPeriodError:
+        "An error occurred while updating custom period",
+      deleteCustomPeriodError:
+        "An error occurred while deleting custom period",
+      loadEarliestDateError:
+        "An error occurred while loading earliest transaction date",
+      calculateSaldoError:
+        "An error occurred while calculating period balance",
+    },
+    voice: {
+      loginRequired: "Please sign in first to use voice features.",
+      processError: "An error occurred while processing voice input.",
+    },
+    file: {
+      processError: "An error occurred while processing the file.",
+    },
+    export: {
+      fetchError: "Failed to fetch transaction data",
+      defaultUser: "User",
+      allTime: "All Time",
+      sincePrefix: "Since",
+      untilPrefix: "Until",
+      uncategorized: "Uncategorized",
+      otherCategories: "Other Categories",
+    },
+    transaksi: {
+      invalidData: "Invalid transaction data",
+      notFound: "Transaction not found",
+    },
+    rekening: {
+      invalidData: "Invalid wallet data",
+      notFound: "Wallet not found",
+      usageCalculateError: "Failed to calculate wallet usage",
+      usageCheckError: "Failed to check wallet usage",
+      correctionFailed: "Failed to create balance correction",
+      correctionPrefix: "Failed to create balance correction:",
+      deleteHasUsage:
+        "This wallet is still used by financial records. Delete related records before deleting this wallet.",
+    },
+    hutang: {
+      invalidContactData: "Invalid contact data",
+      invalidStatusData: "Invalid status data",
+      typeCannotBeChangedHistory:
+        "Type cannot be changed after transaction history exists",
+      invalidTransactionData: "Invalid transaction data",
+      contactNotFound: "Debt/receivable contact not found",
+      invalidDebtData: "Invalid debt/receivable data",
+      typeCannotBeChangedInstallments:
+        "Debt/receivable type cannot be changed after installments exist. Delete installments first.",
+      invalidInstallmentData: "Invalid installment data",
+    },
+    kategori: {
+      invalidData: "Invalid category data",
+      notFound: "Category not found",
+      notFoundOrUnauthorized: "Category not found or unauthorized",
+      notAllowed: "Not allowed",
+      typeCannotBeChangedTransactions:
+        "Category type cannot be changed because transactions are still using this category.",
+      typeCannotBeChangedRecurring:
+        "Category type cannot be changed because recurring templates are still using this category.",
+      deleteHasUsage:
+        "This category is still used by financial records. Delete or update related records before deleting this category.",
     },
   },
   toast: {

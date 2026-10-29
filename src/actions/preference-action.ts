@@ -11,13 +11,17 @@ import {
   type UserPreferences,
   type UserPreferenceUpdate,
 } from '@/lib/user-preferences';
+import { getActionLocale } from '@/i18n/get-locale';
+import { getDictionary } from '@/i18n/get-dictionary';
 
 export async function getUserPreferences(): Promise<ActionResult<UserPreferences>> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
   
   if (!user) {
-    return { success: false, error: 'Tidak terautentikasi' };
+    return { success: false, error: dict.errors.unauthenticated };
   }
 
   const { data, error } = await supabase
@@ -43,12 +47,14 @@ export async function getUserPreferences(): Promise<ActionResult<UserPreferences
 export async function updateUserPreferences(values: UserPreferenceUpdate): Promise<ActionResult<UserPreferences>> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
   
   if (!user) {
-    return { success: false, error: 'Tidak terautentikasi' };
+    return { success: false, error: dict.errors.unauthenticated };
   }
 
-  const validation = validateUserPreferenceUpdate(values);
+  const validation = validateUserPreferenceUpdate(values, dict);
   if (!validation.success) {
     return { success: false, error: validation.error };
   }

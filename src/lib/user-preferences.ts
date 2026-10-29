@@ -114,8 +114,11 @@ export function normalizeUserPreferences(
   };
 }
 
+import type { Dictionary } from "@/i18n/types";
+
 export function validateUserPreferenceUpdate(
   values: Record<string, unknown>,
+  dict?: Dictionary,
 ): { success: true; data: UserPreferenceUpdate } | { success: false; error: string } {
   const allowedKeys = new Set<keyof UserPreferences>([
     "theme",
@@ -135,14 +138,21 @@ export function validateUserPreferenceUpdate(
     const key = rawKey as keyof UserPreferences;
 
     if (!allowedKeys.has(key)) {
-      return { success: false, error: `Preferensi ${rawKey} tidak valid` };
+      return {
+        success: false,
+        error: dict
+          ? `${dict.actions.preference.invalidPreference}: ${rawKey}`
+          : `Preferensi ${rawKey} tidak valid`,
+      };
     }
 
     if (key === "show_decimal_places") {
       if (typeof value !== "boolean") {
         return {
           success: false,
-          error: "Preferensi angka desimal tidak valid",
+          error:
+            dict?.actions.preference.invalidDecimal ??
+            "Preferensi angka desimal tidak valid",
         };
       }
 
@@ -154,7 +164,9 @@ export function validateUserPreferenceUpdate(
       if (typeof value !== "boolean") {
         return {
           success: false,
-          error: "Preferensi akumulasi saldo tidak valid",
+          error:
+            dict?.actions.preference.invalidAccumulation ??
+            "Preferensi akumulasi saldo tidak valid",
         };
       }
 
@@ -171,7 +183,9 @@ export function validateUserPreferenceUpdate(
       ) {
         return {
           success: false,
-          error: "Tanggal cut-off siklus harus antara 1 dan 31",
+          error:
+            dict?.actions.preference.invalidCutoff ??
+            "Tanggal cut-off siklus harus antara 1 dan 31",
         };
       }
 
@@ -181,14 +195,24 @@ export function validateUserPreferenceUpdate(
 
     const options = PREFERENCE_OPTIONS[key as keyof typeof PREFERENCE_OPTIONS];
     if (options && !isOneOf(value, options)) {
-      return { success: false, error: `Nilai preferensi ${rawKey} tidak valid` };
+      return {
+        success: false,
+        error: dict
+          ? `${dict.actions.preference.invalidOption}: ${rawKey}`
+          : `Nilai preferensi ${rawKey} tidak valid`,
+      };
     }
 
     data[key] = value as never;
   }
 
   if (Object.keys(data).length === 0) {
-    return { success: false, error: "Tidak ada preferensi yang diperbarui" };
+    return {
+      success: false,
+      error:
+        dict?.actions.preference.noPreferencesToUpdate ??
+        "Tidak ada preferensi yang diperbarui",
+    };
   }
 
   return { success: true, data };

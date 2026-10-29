@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  hutangTransactionSchema,
+  getHutangTransactionSchema,
   type HutangTransactionSchema,
 } from "@/validations/hutang-validation";
 import { createHutangTransaction, updateCicilan } from "@/actions/hutang-action";
@@ -63,7 +63,7 @@ export function HutangTransactionDialog({
     reset,
     formState: { errors },
   } = useForm<HutangTransactionSchema>({
-    resolver: zodResolver(hutangTransactionSchema),
+    resolver: zodResolver(getHutangTransactionSchema(dict)),
     defaultValues: {
       hutang_id: hutang.id,
       jenis_transaksi: totalPinjaman === 0 ? "pinjaman" : defaultJenis,

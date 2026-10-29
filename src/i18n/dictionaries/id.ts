@@ -1225,6 +1225,7 @@ const id: Dictionary = {
       minLength: "Panjang karakter tidak mencukupi",
       maxLength: "Panjang karakter melebihi batas",
       mustBeNumber: "Harus berupa angka",
+      nominalMustBeNumber: "Nominal harus berupa angka",
       mustBePositive: "Nominal harus lebih dari 0",
       invalidFormat: "Format tidak valid",
       selectWallet: "Pilih rekening terlebih dahulu",
@@ -1240,6 +1241,159 @@ const id: Dictionary = {
         "Rekening tidak dapat dihapus karena masih memiliki transaksi terkait",
       deleteCategoryHasTransactions:
         "Kategori tidak dapat dihapus karena masih memiliki transaksi terkait",
+      titleMaxLength: "Judul maksimal 200 karakter",
+      destinationWalletOnlyForTransfer:
+        "Rekening tujuan hanya boleh diisi untuk transfer",
+      transferOrCorrectionNoTitle:
+        "Transaksi koreksi & transfer tidak boleh memiliki judul",
+      transferOrCorrectionNoCategory:
+        "Transaksi transfer & koreksi tidak boleh memiliki kategori",
+      invalidTransactionId: "ID transaksi tidak valid",
+      walletNameRequired: "Nama rekening wajib diisi",
+      balanceMustBeNumber: "Saldo harus berupa angka",
+      invalidColorFormat: "Format warna tidak valid",
+      invalidWalletId: "ID rekening tidak valid",
+      iconRequired: "Ikon wajib diisi",
+      startDateRequired: "Tanggal mulai wajib diisi",
+      cutoffDayNumber: "Cut-off hari harus berupa angka",
+      cutoffDayInteger: "Cut-off hari harus berupa bilangan bulat",
+      cutoffDayMin: "Cut-off hari minimal 1",
+      cutoffDayMax: "Cut-off hari maksimal 31",
+      accumulateBalanceBoolean: "Akumulasi saldo harus bernilai boolean",
+      dateFormatYMD: "Format tanggal harus YYYY-MM-DD",
+      invalidDateFormat: "Format tanggal tidak valid",
+      endDateBeforeStartDate:
+        "Tanggal selesai tidak boleh lebih awal dari tanggal mulai",
+      endDateBeforeStartDateRange:
+        "Tanggal sampai tidak boleh lebih awal dari tanggal dari",
+      periodNameRequired: "Nama periode wajib diisi",
+      periodNameMaxLength: "Nama periode maksimal 100 karakter",
+      periodTypeInvalid: "Jenis periode harus 'bulanan' atau 'custom'",
+      invalidCustomPeriodId: "ID periode kustom harus berupa UUID yang valid",
+    },
+  },
+  actions: {
+    auth: {
+      originNotDetected:
+        "Origin request tidak terbaca. Restart dev server dan cek konfigurasi URL auth.",
+      emailRequired: "Email wajib diisi",
+      passwordRequired: "Password wajib diisi",
+      accountCreatedCheckEmail:
+        "Akun berhasil dibuat! Silakan cek email untuk verifikasi.",
+      resetPasswordEmailSent:
+        "Jika email terdaftar, link reset password akan dikirimkan ke email tersebut.",
+      googleSignInFailed: "Gagal menginisialisasi login Google",
+      sessionInvalidLoginAgain: "Sesi tidak valid. Silakan login ulang.",
+      googleAlreadyConnected: "Akun Google sudah terhubung.",
+      googleLinkFailed: "Gagal menginisialisasi koneksi Google",
+      googleNotConnected: "Akun Google belum terhubung.",
+      googleNeedOtherMethod:
+        "Tambahkan metode login lain sebelum memutuskan akun Google.",
+      googleUnlinked: "Akun Google berhasil diputuskan.",
+    },
+    profile: {
+      fileNotFound: "File tidak ditemukan",
+      fileFormatNotSupported:
+        "Format file tidak didukung. Gunakan JPG, PNG, atau WebP.",
+      fileTooLarge: "Ukuran file terlalu besar (maksimal 2MB)",
+      currentPasswordRequired: "Password lama wajib diisi",
+      currentPasswordIncorrect: "Password lama tidak sesuai",
+      passwordUpdated: "Password berhasil diperbarui",
+      deleteAccountFailed: "Gagal menghapus akun, silakan coba lagi.",
+      systemError: "Terjadi kesalahan sistem.",
+    },
+    preference: {
+      invalidPreference: "Preferensi tidak valid",
+      invalidDecimal: "Preferensi angka desimal tidak valid",
+      invalidAccumulation: "Preferensi akumulasi saldo tidak valid",
+      invalidCutoff: "Tanggal cut-off siklus harus antara 1 dan 31",
+      invalidOption: "Nilai preferensi tidak valid",
+      noPreferencesToUpdate: "Tidak ada preferensi yang diperbarui",
+    },
+    session: {
+      sessionTerminated: "Sesi berhasil diakhiri",
+      currentDeviceNotIdentified: "Perangkat saat ini tidak teridentifikasi",
+      allOtherSessionsTerminated: "Semua sesi lain berhasil diakhiri",
+    },
+    rekap: {
+      dbError: "Terjadi kesalahan pada database",
+      migrationRequired:
+        "Tabel rekap belum tersedia di database. Pastikan migrasi database (014-rekap-periode.sql) sudah dijalankan.",
+      invalidSettingsData: "Data pengaturan rekap tidak valid",
+      loadSettingsError: "Terjadi kesalahan saat memuat pengaturan rekap",
+      saveSettingsError: "Terjadi kesalahan saat menyimpan pengaturan rekap",
+      loadCustomPeriodsError:
+        "Terjadi kesalahan saat memuat daftar periode custom",
+      invalidCustomPeriodId: "ID periode custom tidak valid",
+      customPeriodNotFound: "Periode custom tidak ditemukan",
+      customPeriodNotFoundOrUnauthorized:
+        "Periode custom tidak ditemukan atau tidak memiliki hak akses",
+      invalidCustomPeriodData: "Data periode custom tidak valid",
+      createCustomPeriodError:
+        "Terjadi kesalahan saat membuat periode custom",
+      updateCustomPeriodError:
+        "Terjadi kesalahan saat memperbarui periode custom",
+      deleteCustomPeriodError:
+        "Terjadi kesalahan saat menghapus periode custom",
+      loadEarliestDateError:
+        "Terjadi kesalahan saat memuat tanggal awal transaksi",
+      calculateSaldoError:
+        "Terjadi kesalahan saat menghitung saldo periode",
+    },
+    voice: {
+      loginRequired:
+        "Silakan login terlebih dahulu untuk menggunakan fitur suara.",
+      processError: "Terjadi kesalahan saat memproses suara.",
+    },
+    file: {
+      processError: "Terjadi kesalahan saat memproses file.",
+    },
+    export: {
+      fetchError: "Gagal mengambil data transaksi",
+      defaultUser: "Pengguna",
+      allTime: "Semua Waktu",
+      sincePrefix: "Sejak",
+      untilPrefix: "Hingga",
+      uncategorized: "Tanpa Kategori",
+      otherCategories: "Kategori Lain-lain",
+    },
+    transaksi: {
+      invalidData: "Data transaksi tidak valid",
+      notFound: "Transaksi tidak ditemukan",
+    },
+    rekening: {
+      invalidData: "Data rekening tidak valid",
+      notFound: "Rekening tidak ditemukan",
+      usageCalculateError: "Gagal menghitung pemakaian rekening",
+      usageCheckError: "Gagal memeriksa pemakaian rekening",
+      correctionFailed: "Gagal membuat koreksi",
+      correctionPrefix: "Gagal membuat koreksi:",
+      deleteHasUsage:
+        "Rekening ini masih dipakai oleh data keuangan. Hapus data terkait terlebih dahulu sebelum menghapus rekening.",
+    },
+    hutang: {
+      invalidContactData: "Data nama pihak tidak valid",
+      invalidStatusData: "Data status tidak valid",
+      typeCannotBeChangedHistory:
+        "Tipe tidak dapat diubah setelah memiliki riwayat transaksi",
+      invalidTransactionData: "Data transaksi tidak valid",
+      contactNotFound: "Pihak hutang/piutang tidak ditemukan",
+      invalidDebtData: "Data hutang/piutang tidak valid",
+      typeCannotBeChangedInstallments:
+        "Tipe hutang/piutang tidak bisa diubah setelah memiliki cicilan. Hapus cicilan terlebih dahulu.",
+      invalidInstallmentData: "Data cicilan tidak valid",
+    },
+    kategori: {
+      invalidData: "Data kategori tidak valid",
+      notFound: "Kategori tidak ditemukan",
+      notFoundOrUnauthorized: "Kategori tidak ditemukan atau tidak diizinkan",
+      notAllowed: "Tidak diizinkan",
+      typeCannotBeChangedTransactions:
+        "Tipe kategori tidak bisa diubah karena masih ada transaksi yang menggunakan kategori ini.",
+      typeCannotBeChangedRecurring:
+        "Tipe kategori tidak bisa diubah karena masih ada template transaksi berulang yang menggunakan kategori ini.",
+      deleteHasUsage:
+        "Kategori ini masih dipakai oleh data keuangan. Hapus atau ubah data terkait terlebih dahulu sebelum menghapus kategori.",
     },
   },
   toast: {

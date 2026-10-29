@@ -6,18 +6,20 @@ import type { ActionResult } from '@/types/general';
 import type { RekapSettings, CustomPeriod } from '@/types/rekap';
 import {
   DEFAULT_REKAP_SETTINGS,
-  rekapSettingsSchema,
-  customPeriodSchema,
+  getRekapSettingsSchema,
+  getCustomPeriodSchema,
   type RekapSettingsSchema,
   type CustomPeriodSchema,
 } from '@/validations/rekap-validation';
+import { getActionLocale } from '@/i18n/get-locale';
+import { getDictionary } from '@/i18n/get-dictionary';
+import type { Dictionary } from '@/i18n/types';
 
-/**
- * Mengubah pesan error Supabase/PostgREST menjadi pesan ramah Bahasa Indonesia
- * terutama ketika tabel migrasi belum dieksekusi di database.
- */
-function handleDbError(error: { code?: string; message?: string } | null | undefined): string {
-  if (!error) return 'Terjadi kesalahan pada database';
+function handleDbError(
+  error: { code?: string; message?: string } | null | undefined,
+  dict?: Dictionary,
+): string {
+  if (!error) return dict?.actions.rekap.dbError ?? 'Terjadi kesalahan pada database';
 
   const code = error.code ?? '';
   const message = error.message ?? '';
@@ -31,25 +33,26 @@ function handleDbError(error: { code?: string; message?: string } | null | undef
     lower.includes('relation') ||
     lower.includes('could not find the table')
   ) {
-    return 'Tabel rekap belum tersedia di database. Pastikan migrasi database (014-rekap-periode.sql) sudah dijalankan.';
+    return (
+      dict?.actions.rekap.migrationRequired ??
+      'Tabel rekap belum tersedia di database. Pastikan migrasi database (014-rekap-periode.sql) sudah dijalankan.'
+    );
   }
 
-  return message || 'Terjadi kesalahan pada database';
+  return message || (dict?.actions.rekap.dbError ?? 'Terjadi kesalahan pada database');
 }
 
-/**
- * Mengambil pengaturan siklus rekap pengguna dari tabel user_preferences.
- * Jika belum ada data di database, kembalikan nilai default tanpa melakukan insert.
- */
 export async function getRekapSettings(): Promise<ActionResult<RekapSettings>> {
   try {
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    const locale = await getActionLocale(supabase, user?.id);
+    const dict = await getDictionary(locale);
 
     if (!user) {
-      return { success: false, error: 'Tidak terautentikasi' };
+      return { success: false, error: dict.errors.unauthenticated };
     }
 
     const { data, error } = await supabase
@@ -68,7 +71,7 @@ export async function getRekapSettings(): Promise<ActionResult<RekapSettings>> {
           },
         };
       }
-      return { success: false, error: handleDbError(error) };
+      return { success: false, error: handleDbError(error, dict) };
     }
 
     if (!data) {
@@ -89,14 +92,14 @@ export async function getRekapSettings(): Promise<ActionResult<RekapSettings>> {
       },
     };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Terjadi kesalahan saat memuat pengaturan rekap';
+    const locale = await getActionLocale();
+    const dict = await getDictionary(locale);
+    const message =
+      err instanceof Error ? err.message : dict.actions.rekap.loadSettingsError;
     return { success: false, error: message };
   }
 }
 
-/**
- * Memperbarui pengaturan siklus rekap pengguna (upsert ke user_preferences berdasarkan user_id).
- */
 export async function updateRekapSettings(
   values: RekapSettingsSchema,
 ): Promise<ActionResult<RekapSettings>> {
@@ -105,16 +108,20 @@ export async function updateRekapSettings(
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    const locale = await getActionLocale(supabase, user?.id);
+    const dict = await getDictionary(locale);
 
     if (!user) {
-      return { success: false, error: 'Tidak terautentikasi' };
+      return { success: false, error: dict.errors.unauthenticated };
     }
 
-    const validation = rekapSettingsSchema.safeParse(values);
+    const validation = getRekapSettingsSchema(dict).safeParse(values);
     if (!validation.success) {
       return {
         success: false,
-        error: validation.error.issues[0]?.message ?? 'Data pengaturan rekap tidak valid',
+        error:
+          validation.error.issues[0]?.message ??
+          dict.actions.rekap.invalidSettingsData,
       };
     }
 
@@ -133,7 +140,7 @@ export async function updateRekapSettings(
       .single();
 
     if (error) {
-      return { success: false, error: handleDbError(error) };
+      return { success: false, error: handleDbError(error, dict) };
     }
 
     revalidatePath('/reports');
@@ -147,23 +154,25 @@ export async function updateRekapSettings(
       },
     };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Terjadi kesalahan saat menyimpan pengaturan rekap';
+    const locale = await getActionLocale();
+    const dict = await getDictionary(locale);
+    const message =
+      err instanceof Error ? err.message : dict.actions.rekap.saveSettingsError;
     return { success: false, error: message };
   }
 }
 
-/**
- * Mengambil daftar periode custom milik pengguna, diurutkan tanggal_mulai descending.
- */
 export async function listCustomPeriods(): Promise<ActionResult<CustomPeriod[]>> {
   try {
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    const locale = await getActionLocale(supabase, user?.id);
+    const dict = await getDictionary(locale);
 
     if (!user) {
-      return { success: false, error: 'Tidak terautentikasi' };
+      return { success: false, error: dict.errors.unauthenticated };
     }
 
     const { data, error } = await supabase
@@ -173,7 +182,7 @@ export async function listCustomPeriods(): Promise<ActionResult<CustomPeriod[]>>
       .order('tanggal_mulai', { ascending: false });
 
     if (error) {
-      return { success: false, error: handleDbError(error) };
+      return { success: false, error: handleDbError(error, dict) };
     }
 
     return {
@@ -181,27 +190,31 @@ export async function listCustomPeriods(): Promise<ActionResult<CustomPeriod[]>>
       data: data ?? [],
     };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Terjadi kesalahan saat memuat daftar periode custom';
+    const locale = await getActionLocale();
+    const dict = await getDictionary(locale);
+    const message =
+      err instanceof Error
+        ? err.message
+        : dict.actions.rekap.loadCustomPeriodsError;
     return { success: false, error: message };
   }
 }
 
-/**
- * Mengambil satu periode custom berdasarkan ID.
- */
 export async function getCustomPeriod(id: string): Promise<ActionResult<CustomPeriod>> {
   try {
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    const locale = await getActionLocale(supabase, user?.id);
+    const dict = await getDictionary(locale);
 
     if (!user) {
-      return { success: false, error: 'Tidak terautentikasi' };
+      return { success: false, error: dict.errors.unauthenticated };
     }
 
     if (!id || typeof id !== 'string') {
-      return { success: false, error: 'ID periode custom tidak valid' };
+      return { success: false, error: dict.actions.rekap.invalidCustomPeriodId };
     }
 
     const { data, error } = await supabase
@@ -212,23 +225,25 @@ export async function getCustomPeriod(id: string): Promise<ActionResult<CustomPe
       .maybeSingle();
 
     if (error) {
-      return { success: false, error: handleDbError(error) };
+      return { success: false, error: handleDbError(error, dict) };
     }
 
     if (!data) {
-      return { success: false, error: 'Periode custom tidak ditemukan' };
+      return { success: false, error: dict.actions.rekap.customPeriodNotFound };
     }
 
     return { success: true, data };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Terjadi kesalahan saat memuat periode custom';
+    const locale = await getActionLocale();
+    const dict = await getDictionary(locale);
+    const message =
+      err instanceof Error
+        ? err.message
+        : dict.actions.rekap.loadCustomPeriodsError;
     return { success: false, error: message };
   }
 }
 
-/**
- * Membuat periode custom baru.
- */
 export async function createCustomPeriod(
   values: CustomPeriodSchema,
 ): Promise<ActionResult<CustomPeriod>> {
@@ -237,16 +252,20 @@ export async function createCustomPeriod(
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    const locale = await getActionLocale(supabase, user?.id);
+    const dict = await getDictionary(locale);
 
     if (!user) {
-      return { success: false, error: 'Tidak terautentikasi' };
+      return { success: false, error: dict.errors.unauthenticated };
     }
 
-    const validation = customPeriodSchema.safeParse(values);
+    const validation = getCustomPeriodSchema(dict).safeParse(values);
     if (!validation.success) {
       return {
         success: false,
-        error: validation.error.issues[0]?.message ?? 'Data periode custom tidak valid',
+        error:
+          validation.error.issues[0]?.message ??
+          dict.actions.rekap.invalidCustomPeriodData,
       };
     }
 
@@ -265,21 +284,23 @@ export async function createCustomPeriod(
       .single();
 
     if (error) {
-      return { success: false, error: handleDbError(error) };
+      return { success: false, error: handleDbError(error, dict) };
     }
 
     revalidatePath('/reports');
 
     return { success: true, data };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Terjadi kesalahan saat membuat periode custom';
+    const locale = await getActionLocale();
+    const dict = await getDictionary(locale);
+    const message =
+      err instanceof Error
+        ? err.message
+        : dict.actions.rekap.createCustomPeriodError;
     return { success: false, error: message };
   }
 }
 
-/**
- * Memperbarui periode custom yang sudah ada.
- */
 export async function updateCustomPeriod(
   id: string,
   values: CustomPeriodSchema,
@@ -289,20 +310,24 @@ export async function updateCustomPeriod(
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    const locale = await getActionLocale(supabase, user?.id);
+    const dict = await getDictionary(locale);
 
     if (!user) {
-      return { success: false, error: 'Tidak terautentikasi' };
+      return { success: false, error: dict.errors.unauthenticated };
     }
 
     if (!id || typeof id !== 'string') {
-      return { success: false, error: 'ID periode custom tidak valid' };
+      return { success: false, error: dict.actions.rekap.invalidCustomPeriodId };
     }
 
-    const validation = customPeriodSchema.safeParse(values);
+    const validation = getCustomPeriodSchema(dict).safeParse(values);
     if (!validation.success) {
       return {
         success: false,
-        error: validation.error.issues[0]?.message ?? 'Data periode custom tidak valid',
+        error:
+          validation.error.issues[0]?.message ??
+          dict.actions.rekap.invalidCustomPeriodData,
       };
     }
 
@@ -321,13 +346,13 @@ export async function updateCustomPeriod(
       .maybeSingle();
 
     if (error) {
-      return { success: false, error: handleDbError(error) };
+      return { success: false, error: handleDbError(error, dict) };
     }
 
     if (!data) {
       return {
         success: false,
-        error: 'Periode custom tidak ditemukan atau tidak memiliki hak akses',
+        error: dict.actions.rekap.customPeriodNotFoundOrUnauthorized,
       };
     }
 
@@ -335,14 +360,16 @@ export async function updateCustomPeriod(
 
     return { success: true, data };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Terjadi kesalahan saat memperbarui periode custom';
+    const locale = await getActionLocale();
+    const dict = await getDictionary(locale);
+    const message =
+      err instanceof Error
+        ? err.message
+        : dict.actions.rekap.updateCustomPeriodError;
     return { success: false, error: message };
   }
 }
 
-/**
- * Menghapus periode custom berdasarkan ID.
- */
 export async function deleteCustomPeriod(
   id: string,
 ): Promise<ActionResult<{ id: string }>> {
@@ -351,13 +378,15 @@ export async function deleteCustomPeriod(
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    const locale = await getActionLocale(supabase, user?.id);
+    const dict = await getDictionary(locale);
 
     if (!user) {
-      return { success: false, error: 'Tidak terautentikasi' };
+      return { success: false, error: dict.errors.unauthenticated };
     }
 
     if (!id || typeof id !== 'string') {
-      return { success: false, error: 'ID periode custom tidak valid' };
+      return { success: false, error: dict.actions.rekap.invalidCustomPeriodId };
     }
 
     const { data, error } = await supabase
@@ -369,13 +398,13 @@ export async function deleteCustomPeriod(
       .maybeSingle();
 
     if (error) {
-      return { success: false, error: handleDbError(error) };
+      return { success: false, error: handleDbError(error, dict) };
     }
 
     if (!data) {
       return {
         success: false,
-        error: 'Periode custom tidak ditemukan atau tidak memiliki hak akses',
+        error: dict.actions.rekap.customPeriodNotFoundOrUnauthorized,
       };
     }
 
@@ -383,7 +412,12 @@ export async function deleteCustomPeriod(
 
     return { success: true, data: { id: data.id } };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Terjadi kesalahan saat menghapus periode custom';
+    const locale = await getActionLocale();
+    const dict = await getDictionary(locale);
+    const message =
+      err instanceof Error
+        ? err.message
+        : dict.actions.rekap.deleteCustomPeriodError;
     return { success: false, error: message };
   }
 }

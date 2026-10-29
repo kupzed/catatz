@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  hutangContactSchema,
+  getHutangContactSchema,
   type HutangContactSchema,
 } from "@/validations/hutang-validation";
 import { createHutangContact, updateHutangContact } from "@/actions/hutang-action";
@@ -50,7 +50,7 @@ export default function HutangDialog({
     reset,
     formState: { errors },
   } = useForm<HutangContactSchema>({
-    resolver: zodResolver(hutangContactSchema),
+    resolver: zodResolver(getHutangContactSchema(dict)),
     defaultValues: {
       nama_entitas: "",
       catatan: "",

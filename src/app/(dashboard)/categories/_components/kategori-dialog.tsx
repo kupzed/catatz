@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  kategoriSchema,
+  getKategoriSchema,
   type KategoriSchema,
 } from "@/validations/kategori-validation";
 import { createKategori, updateKategori } from "@/actions/kategori-action";
@@ -100,7 +100,7 @@ export default function KategoriDialog({
     reset,
     formState: { errors },
   } = useForm<KategoriSchema>({
-    resolver: zodResolver(kategoriSchema),
+    resolver: zodResolver(getKategoriSchema(dict)),
     defaultValues: {
       nama: "",
       ikon: "💰",

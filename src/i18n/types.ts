@@ -1175,6 +1175,7 @@ export interface Dictionary {
       minLength: string;
       maxLength: string;
       mustBeNumber: string;
+      nominalMustBeNumber: string;
       mustBePositive: string;
       invalidFormat: string;
       selectWallet: string;
@@ -1188,6 +1189,134 @@ export interface Dictionary {
       destinationWalletRequired: string;
       deleteWalletHasTransactions: string;
       deleteCategoryHasTransactions: string;
+      titleMaxLength: string;
+      destinationWalletOnlyForTransfer: string;
+      transferOrCorrectionNoTitle: string;
+      transferOrCorrectionNoCategory: string;
+      invalidTransactionId: string;
+      walletNameRequired: string;
+      balanceMustBeNumber: string;
+      invalidColorFormat: string;
+      invalidWalletId: string;
+      iconRequired: string;
+      startDateRequired: string;
+      cutoffDayNumber: string;
+      cutoffDayInteger: string;
+      cutoffDayMin: string;
+      cutoffDayMax: string;
+      accumulateBalanceBoolean: string;
+      dateFormatYMD: string;
+      invalidDateFormat: string;
+      endDateBeforeStartDate: string;
+      endDateBeforeStartDateRange: string;
+      periodNameRequired: string;
+      periodNameMaxLength: string;
+      periodTypeInvalid: string;
+      invalidCustomPeriodId: string;
+    };
+  };
+  actions: {
+    auth: {
+      originNotDetected: string;
+      emailRequired: string;
+      passwordRequired: string;
+      accountCreatedCheckEmail: string;
+      resetPasswordEmailSent: string;
+      googleSignInFailed: string;
+      sessionInvalidLoginAgain: string;
+      googleAlreadyConnected: string;
+      googleLinkFailed: string;
+      googleNotConnected: string;
+      googleNeedOtherMethod: string;
+      googleUnlinked: string;
+    };
+    profile: {
+      fileNotFound: string;
+      fileFormatNotSupported: string;
+      fileTooLarge: string;
+      currentPasswordRequired: string;
+      currentPasswordIncorrect: string;
+      passwordUpdated: string;
+      deleteAccountFailed: string;
+      systemError: string;
+    };
+    preference: {
+      invalidPreference: string;
+      invalidDecimal: string;
+      invalidAccumulation: string;
+      invalidCutoff: string;
+      invalidOption: string;
+      noPreferencesToUpdate: string;
+    };
+    session: {
+      sessionTerminated: string;
+      currentDeviceNotIdentified: string;
+      allOtherSessionsTerminated: string;
+    };
+    rekap: {
+      dbError: string;
+      migrationRequired: string;
+      invalidSettingsData: string;
+      loadSettingsError: string;
+      saveSettingsError: string;
+      loadCustomPeriodsError: string;
+      invalidCustomPeriodId: string;
+      customPeriodNotFound: string;
+      customPeriodNotFoundOrUnauthorized: string;
+      invalidCustomPeriodData: string;
+      createCustomPeriodError: string;
+      updateCustomPeriodError: string;
+      deleteCustomPeriodError: string;
+      loadEarliestDateError: string;
+      calculateSaldoError: string;
+    };
+    voice: {
+      loginRequired: string;
+      processError: string;
+    };
+    file: {
+      processError: string;
+    };
+    export: {
+      fetchError: string;
+      defaultUser: string;
+      allTime: string;
+      sincePrefix: string;
+      untilPrefix: string;
+      uncategorized: string;
+      otherCategories: string;
+    };
+    transaksi: {
+      invalidData: string;
+      notFound: string;
+    };
+    rekening: {
+      invalidData: string;
+      notFound: string;
+      usageCalculateError: string;
+      usageCheckError: string;
+      correctionFailed: string;
+      correctionPrefix: string;
+      deleteHasUsage: string;
+    };
+    hutang: {
+      invalidContactData: string;
+      invalidStatusData: string;
+      typeCannotBeChangedHistory: string;
+      invalidTransactionData: string;
+      contactNotFound: string;
+      invalidDebtData: string;
+      typeCannotBeChangedInstallments: string;
+      invalidInstallmentData: string;
+    };
+    kategori: {
+      invalidData: string;
+      notFound: string;
+      notFoundOrUnauthorized: string;
+      notAllowed: string;
+      typeCannotBeChangedTransactions: string;
+      typeCannotBeChangedRecurring: string;
+      deleteHasUsage: string;
     };
   };
   toast: {

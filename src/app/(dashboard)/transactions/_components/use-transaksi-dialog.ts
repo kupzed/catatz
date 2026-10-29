@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  transaksiSchema,
+  getTransaksiSchema,
   type TransaksiSchema,
 } from "@/validations/transaksi-validation";
 import {
@@ -108,7 +108,7 @@ export function useTransaksiDialog({
       : (editData?.rekening_tujuan ?? copyFrom?.rekening_tujuan ?? undefined);
 
   const form = useForm<TransaksiSchema>({
-    resolver: zodResolver(transaksiSchema),
+    resolver: zodResolver(getTransaksiSchema(dict)),
     defaultValues: {
       tipe: initialFormTipe,
       tanggal: editData?.tanggal ?? todayISODate(),

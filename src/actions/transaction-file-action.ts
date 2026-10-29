@@ -7,6 +7,8 @@ import {
 } from "@/lib/transaction-file-parser";
 import type { ActionResult } from "@/types/general";
 import type { FileAutoFillResult } from "@/types/transaction-parser";
+import { getActionLocale } from "@/i18n/get-locale";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 function isSoftParserError(message: string) {
   return (
@@ -23,14 +25,16 @@ export async function processTransactionFile(
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
 
   if (!user) {
-    return { success: false, error: "Tidak terautentikasi." };
+    return { success: false, error: dict.errors.unauthenticated };
   }
 
   const value = formData.get("file");
   if (!(value instanceof File)) {
-    return { success: false, error: "File tidak ditemukan." };
+    return { success: false, error: dict.actions.profile.fileNotFound };
   }
 
   try {
@@ -58,7 +62,7 @@ export async function processTransactionFile(
   } catch {
     return {
       success: false,
-      error: "Terjadi kesalahan saat memproses file.",
+      error: dict.actions.file.processError,
     };
   }
 }
