@@ -9,6 +9,7 @@ import {
 } from "@/validations/kategori-validation";
 import { createKategori, updateKategori } from "@/actions/kategori-action";
 import { toast } from "sonner";
+import { useTranslation } from "@/i18n/use-translation";
 import type { Kategori } from "@/types/transaksi";
 import {
   Dialog,
@@ -87,6 +88,7 @@ export default function KategoriDialog({
   onCreated,
   onUpdated,
 }: Props) {
+  const { dict } = useTranslation();
   const isEdit = !!editData;
   const [submitting, setSubmitting] = useState(false);
 
@@ -135,20 +137,20 @@ export default function KategoriDialog({
       if (isEdit && editData) {
         const res = await updateKategori(editData.id, values);
         if (res.success && res.data) {
-          toast.success("Kategori diperbarui");
+          toast.success(dict.categories.toasts.updated);
           onUpdated?.(res.data);
           onOpenChange(false);
         } else {
-          toast.error(res.error ?? "Gagal memperbarui");
+          toast.error(res.error ?? dict.categories.toasts.updateFailed);
         }
       } else {
         const res = await createKategori(values);
         if (res.success && res.data) {
-          toast.success("Kategori ditambahkan");
+          toast.success(dict.categories.toasts.created);
           onCreated?.(res.data);
           onOpenChange(false);
         } else {
-          toast.error(res.error ?? "Gagal menambahkan");
+          toast.error(res.error ?? dict.categories.toasts.createFailed);
         }
       }
     } finally {
@@ -161,12 +163,14 @@ export default function KategoriDialog({
       <DialogContent className="max-w-sm sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {isEdit ? "Edit Kategori" : "Tambah Kategori"}
+            {isEdit
+              ? dict.categories.form.editTitle
+              : dict.categories.form.createTitle}
           </DialogTitle>
           <DialogDescription>
             {isEdit
-              ? "Perbarui informasi kategori kustom Anda."
-              : "Tambahkan kategori baru untuk mencatat transaksi."}
+              ? dict.categories.form.editDescription
+              : dict.categories.form.createDescription}
           </DialogDescription>
         </DialogHeader>
 
@@ -184,17 +188,17 @@ export default function KategoriDialog({
                 {ikon || "📁"}
               </div>
               <span className="text-xs text-muted-foreground font-medium">
-                Preview
+                {dict.categories.form.preview}
               </span>
             </div>
           </div>
 
           {/* Nama */}
           <div className="space-y-1.5">
-            <Label htmlFor="kat-nama">Nama Kategori</Label>
+            <Label htmlFor="kat-nama">{dict.categories.form.name}</Label>
             <ClearableInput
               id="kat-nama"
-              placeholder="Contoh: Makan Siang"
+              placeholder={dict.categories.form.namePlaceholder}
               {...register("nama")}
               onClear={() => setValue("nama", "")}
               className={errors.nama ? "border-rose-500" : ""}
@@ -206,7 +210,7 @@ export default function KategoriDialog({
 
           {/* Tipe */}
           <div className="space-y-1.5">
-            <Label>Tipe Kategori</Label>
+            <Label>{dict.categories.form.type}</Label>
             <Tabs
               value={tipe}
               onValueChange={(v) =>
@@ -214,9 +218,15 @@ export default function KategoriDialog({
               }
             >
               <TabsList className="w-full grid grid-cols-3">
-                <TabsTrigger value="expense">Pengeluaran</TabsTrigger>
-                <TabsTrigger value="income">Pemasukan</TabsTrigger>
-                <TabsTrigger value="all">Semua</TabsTrigger>
+                <TabsTrigger value="expense">
+                  {dict.categories.types.expense}
+                </TabsTrigger>
+                <TabsTrigger value="income">
+                  {dict.categories.types.income}
+                </TabsTrigger>
+                <TabsTrigger value="all">
+                  {dict.categories.types.all}
+                </TabsTrigger>
               </TabsList>
             </Tabs>
             {errors.tipe && (
@@ -226,7 +236,7 @@ export default function KategoriDialog({
 
           {/* Ikon */}
           <div className="space-y-2">
-            <Label htmlFor="kat-ikon">Ikon</Label>
+            <Label htmlFor="kat-ikon">{dict.categories.form.icon}</Label>
             <div className="flex gap-3 items-center">
               <Input
                 id="kat-ikon"
@@ -241,10 +251,10 @@ export default function KategoriDialog({
                 )}
                 placeholder="💰"
                 maxLength={5}
-                aria-label="Ikon kategori"
+                aria-label={dict.categories.form.iconAria}
               />
               <span className="text-xs text-muted-foreground leading-relaxed">
-                Ketik emoji manual atau pilih di bawah
+                {dict.categories.form.iconHint}
               </span>
             </div>
             {errors.ikon && (
@@ -261,7 +271,10 @@ export default function KategoriDialog({
                     "text-xl p-1.5 rounded hover:bg-accent transition-colors flex items-center justify-center",
                     ikon === e && "bg-accent border border-border",
                   )}
-                  aria-label={`Pilih emoji ${e}`}
+                  aria-label={dict.categories.form.selectEmojiAria.replace(
+                    "{emoji}",
+                    e,
+                  )}
                 >
                   {e}
                 </button>
@@ -271,7 +284,7 @@ export default function KategoriDialog({
 
           {/* Warna */}
           <div className="space-y-1.5">
-            <Label>Warna</Label>
+            <Label>{dict.categories.form.color}</Label>
             <div className="flex flex-wrap gap-2 items-center">
               {WARNA_PRESETS.map((c) => (
                 <button
@@ -292,7 +305,7 @@ export default function KategoriDialog({
                 value={warna}
                 onChange={(e) => setValue("warna", e.target.value)}
                 className="w-7 h-7 rounded-full border border-border cursor-pointer"
-                title="Pilih warna kustom"
+                title={dict.categories.form.customColorTitle}
               />
             </div>
             {errors.warna && (
@@ -305,8 +318,9 @@ export default function KategoriDialog({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
+              className="rounded-full"
             >
-              Batal
+              {dict.common.cancel}
             </Button>
             <Button
               type="submit"
@@ -314,7 +328,9 @@ export default function KategoriDialog({
               className="bg-primary hover:bg-primary-active text-white rounded-full h-11 px-5"
             >
               {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              {isEdit ? "Perbarui" : "Tambah"}
+              {isEdit
+                ? dict.categories.form.submitUpdate
+                : dict.categories.form.submitCreate}
             </Button>
           </DialogFooter>
         </form>
