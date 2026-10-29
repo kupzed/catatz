@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 
 /**
  * Sanitize avatar URL: only allow safe protocols to prevent XSS.
@@ -75,6 +76,7 @@ function SettingRow({
 }
 
 export function ProfileSection({ profile }: Props) {
+  const { dict } = useTranslation();
   const { formatTanggal } = useSystemPreferences();
   const [name, setName] = useState(profile?.name ?? "");
   const [isPending, setIsPending] = useState(false);
@@ -90,12 +92,12 @@ export function ProfileSection({ profile }: Props) {
 
     const validTypes = ["image/jpeg", "image/png", "image/webp"];
     if (!validTypes.includes(file.type)) {
-      toast.error("Format file tidak valid (hanya JPG, PNG, WEBP)");
+      toast.error(dict.settings.profile.toasts.invalidFileType);
       return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      toast.error("Ukuran file maksimal 2MB");
+      toast.error(dict.settings.profile.toasts.fileTooLarge);
       return;
     }
 
@@ -109,10 +111,10 @@ export function ProfileSection({ profile }: Props) {
     const res = await uploadAvatar(fd);
     if (res.success && res.data) {
       setAvatarPreview(sanitizeAvatarUrl(res.data.avatar_url));
-      toast.success("Avatar berhasil diperbarui");
+      toast.success(dict.settings.profile.toasts.avatarUpdated);
     } else {
       setAvatarPreview(sanitizeAvatarUrl(profile?.avatar_url));
-      toast.error(res.error || "Gagal mengunggah avatar");
+      toast.error(res.error || dict.settings.profile.toasts.avatarUploadFailed);
     }
 
     setIsAvatarPending(false);
@@ -126,9 +128,9 @@ export function ProfileSection({ profile }: Props) {
     const res = await removeAvatar();
     if (res.success) {
       setAvatarPreview(null);
-      toast.success("Avatar berhasil dihapus");
+      toast.success(dict.settings.profile.toasts.avatarRemoved);
     } else {
-      toast.error(res.error || "Gagal menghapus avatar");
+      toast.error(res.error || dict.settings.profile.toasts.avatarRemoveFailed);
     }
     setIsAvatarPending(false);
   };
@@ -136,7 +138,7 @@ export function ProfileSection({ profile }: Props) {
   const handleSave = async () => {
     const trimmedName = name.trim();
     if (trimmedName.length < 1 || trimmedName.length > 100) {
-      toast.error("Nama harus antara 1 sampai 100 karakter");
+      toast.error(dict.settings.profile.toasts.nameLengthError);
       return;
     }
 
@@ -145,9 +147,9 @@ export function ProfileSection({ profile }: Props) {
     setIsPending(false);
 
     if (res.success) {
-      toast.success("Profil berhasil diperbarui");
+      toast.success(dict.settings.profile.toasts.profileUpdated);
     } else {
-      toast.error(res.error || "Gagal memperbarui profil");
+      toast.error(res.error || dict.settings.profile.toasts.profileUpdateFailed);
     }
   };
 
@@ -167,17 +169,17 @@ export function ProfileSection({ profile }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Profile</CardTitle>
+        <CardTitle className="text-lg">{dict.settings.profile.title}</CardTitle>
         <CardDescription>
-          Kelola informasi publik dan data diri Anda.
+          {dict.settings.profile.description}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-0">
         <div className="flex items-center justify-between gap-6 py-4">
           <div>
-            <p className="text-sm font-medium">Avatar</p>
+            <p className="text-sm font-medium">{dict.settings.profile.avatarLabel}</p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Gambar profil Anda
+              {dict.settings.profile.avatarDescription}
             </p>
           </div>
           <div className="flex items-center gap-4 shrink-0">
@@ -193,7 +195,7 @@ export function ProfileSection({ profile }: Props) {
                   {isAvatarPending ? (
                     <Loader2 className="h-3 w-3 animate-spin" />
                   ) : null}
-                  Ganti Foto
+                  {dict.settings.profile.changeAvatar}
                 </Button>
                 {avatarPreview && (
                   <Button
@@ -203,7 +205,7 @@ export function ProfileSection({ profile }: Props) {
                     disabled={isAvatarPending}
                     className="h-8 text-xs text-red-500 hover:text-red-600 hover:bg-red-50 gap-2"
                   >
-                    Hapus
+                    {dict.settings.profile.removeAvatar}
                   </Button>
                 )}
               </div>
@@ -234,7 +236,10 @@ export function ProfileSection({ profile }: Props) {
 
         <Separator />
 
-        <SettingRow label="Email" description="Email tidak dapat diubah">
+        <SettingRow
+          label={dict.settings.profile.emailLabel}
+          description={dict.settings.profile.emailDescription}
+        >
           <Input
             id="profil-email"
             value={profile?.email ?? "–"}
@@ -245,13 +250,13 @@ export function ProfileSection({ profile }: Props) {
 
         <Separator />
 
-        <SettingRow label="Nama Tampilan">
+        <SettingRow label={dict.settings.profile.nameLabel}>
           <ClearableInput
             id="profil-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             onClear={() => setName("")}
-            placeholder="Nama Anda"
+            placeholder={dict.settings.profile.namePlaceholder}
             className="text-sm h-9"
           />
         </SettingRow>
@@ -260,8 +265,8 @@ export function ProfileSection({ profile }: Props) {
           <>
             <Separator />
             <SettingRow
-              label="Tanggal Bergabung"
-              description="Sejak akun Anda didaftarkan"
+              label={dict.settings.profile.joinDateLabel}
+              description={dict.settings.profile.joinDateDescription}
             >
               <Input
                 id="profil-created-at"
@@ -282,7 +287,7 @@ export function ProfileSection({ profile }: Props) {
             disabled={isPending}
           >
             {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            {isPending ? "Menyimpan..." : "Simpan Perubahan"}
+            {isPending ? dict.settings.profile.savingButton : dict.settings.profile.saveButton}
           </Button>
         </div>
       </CardContent>

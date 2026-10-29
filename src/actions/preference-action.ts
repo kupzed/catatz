@@ -74,7 +74,9 @@ export async function updateUserPreferences(values: UserPreferenceUpdate): Promi
   revalidatePath('/wallets');
   revalidatePath('/reports');
   revalidatePath('/debts');
+  revalidatePath('/categories');
   revalidatePath('/'); // Revalidate root for potential landing page redirect
+  revalidatePath('/', 'layout');
 
   return { success: true, data: normalizeUserPreferences(data) };
 }
