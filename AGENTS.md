@@ -29,6 +29,7 @@ Ada beberapa sumber kebenaran yang harus dipakai sebelum membuat perubahan:
 - `docs/ai-development-rules.md` adalah kebenaran utama untuk aturan kerja AI di repo ini.
 - **`DESIGN.md` adalah kebenaran utama untuk semua keputusan visual, design token, dan component styling.**
 - `docs/frontend-guidelines.md` adalah kebenaran implementasi desain di codebase ini (adaptasi DESIGN.md ke Tailwind/shadcn).
+- `src/i18n/` adalah kebenaran utama untuk teks UI bilingual (`id.ts`, `en.ts`), tipe `Dictionary`, dan konvensi lokalisasi.
 - `src/migrations` adalah lokasi migration project ini. Jangan mengasumsikan `supabase/migrations`.
 - `.env.example` hanya boleh berisi nama variable dan placeholder aman. Jangan expose nilai secret dari `.env`.
 
@@ -153,6 +154,7 @@ Setiap task wajib melewati documentation gate. Jika area berikut berubah, cek da
 | Auth, session, cookie, atau proxy                  | `docs/supabase-auth.md`, `docs/security-checklist.md`, `docs/troubleshooting.md`                               |
 | Environment variable atau deployment               | `docs/environment-variables.md`, `docs/deployment-vercel.md`, `README.md` jika quick start berubah             |
 | PWA, offline, service worker, atau cache           | `docs/pwa.md`, dokumen fitur terkait, `docs/security-checklist.md` jika caching berubah                        |
+| Teks UI, i18n, kamus terjemahan                    | `src/i18n/`, `docs/frontend-guidelines.md`, `docs/features/*`                                                   |
 | Reusable UI guideline                              | `docs/frontend-guidelines.md`                                                                                  |
 
 Jangan dokumentasikan fitur yang belum benar-benar tersedia sebagai fitur selesai. Jika dokumentasi tidak perlu diubah, final response tetap harus menyebut alasannya.
@@ -214,8 +216,23 @@ Clarify the final response contract and require a technical Conventional Commit 
 - Project memakai `src/proxy.ts`, bukan `middleware.ts`.
 - POST dan traffic `/api/*` harus tetap NetworkOnly di service worker.
 - Secret Gemini harus tetap di server-only env `AI_API_KEY`.
-- Gunakan Bahasa Indonesia untuk UI user-facing kecuali istilah teknis.
+- Teks UI user-facing WAJIB bilingual dan dikelola melalui kamus `src/i18n/` (`id.ts` dan `en.ts`). Dilarang hardcode teks tampilan bahasa tertentu secara langsung di komponen UI atau Server Actions. Default bahasa adalah `'id'`.
 - Jangan mengklaim Google OAuth, reset password email, recurring transaction, atau UI create/edit budget tersedia sebelum flow tersebut benar-benar ada di kode.
+
+## Internationalization (i18n) Ground Rules (GR-10 s/d GR-17)
+
+CatatZ mendukung bilingual (Bahasa Indonesia dan English) dengan arsitektur i18n berbasis kamus TypeScript tanpa library eksternal. Detail lengkap mengacu pada `docs/route-migration-plan.md` dan implementation plan i18n:
+
+| Rule | Deskripsi |
+| --- | --- |
+| **GR-10 (No External i18n Library)** | Tidak memakai `next-intl`, `react-intl`, atau `i18next`. Gunakan dictionary file TypeScript (`src/i18n/`) dengan typed keys — cocok untuk Server Components tanpa dependency baru. |
+| **GR-11 (Dictionary Structure)** | Satu file per locale (`id.ts`, `en.ts`) dengan objek nested yang identik. Key bersifat hierarchical: `page.section.element`. Semua keys di-type oleh satu shared `Dictionary` type di `src/i18n/types.ts`. |
+| **GR-12 (No Locale Routing)** | Tidak ada path prefix `/en/` atau `/id/`. Locale disimpan sebagai user preference di database (`user_preferences.language`). Default `'id'` untuk backward compatibility user existing. |
+| **GR-13 (Server-First Translation)** | Server Components dan Server Actions resolve locale dari database via `getLocale()`. Client Components menerima dictionary via React Context (`DictionaryProvider` / `useTranslation()`). |
+| **GR-14 (Financial Terms Consistency)** | Istilah keuangan universal (nama bank, "QRIS") tidak diterjemahkan. Domain terms: `pemasukan`→`income`, `pengeluaran`→`expense`, `hutang`→`debt`, `piutang`→`receivable`, `cicilan`→`installment`, `saldo`→`balance`, `rekening`→`wallet`. |
+| **GR-15 (Immutable DB Schema Names)** | Nama tabel, kolom, enum value (`transaksi`, `rekening`, `hutang`, `kategori`, `tipe_transaksi`, dll.) **TIDAK BOLEH diubah**. Hanya display text yang dilokalisasi. |
+| **GR-16 (Additive Migration Only)** | Perubahan database (kolom `language` di `user_preferences`) menggunakan migration additive (`017-user-preferences-language.sql`). Kolom lama tidak diubah/dihapus. |
+| **GR-17 (Phase Atomicity)** | Setiap perubahan menghasilkan aplikasi yang **fully functional** dan bebas regresi visual atau fungsional. |
 
 ## Quality and Safety
 
