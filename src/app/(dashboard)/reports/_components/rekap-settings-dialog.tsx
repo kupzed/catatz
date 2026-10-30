@@ -25,6 +25,7 @@ import {
 import { updateRekapSettings } from "@/actions/rekap-period-action";
 import type { RekapSettings } from "@/types/rekap";
 import { getCycleForDate, getTodayInJakarta } from "@/lib/rekap-period";
+import { useTranslation } from "@/i18n/use-translation";
 
 export type RekapSettingsDialogProps = {
   open: boolean;
@@ -45,6 +46,7 @@ function RekapSettingsForm({
   onSettingsSaved?: (newSettings: RekapSettings) => void;
 }) {
   const router = useRouter();
+  const { dict, locale } = useTranslation();
   const [selectedCutoff, setSelectedCutoff] = useState<number>(settings.cutoff_day);
   const [akumulasiSaldo, setAkumulasiSaldo] = useState<boolean>(settings.akumulasi_saldo);
   const [isSaving, setIsSaving] = useState(false);
@@ -52,8 +54,9 @@ function RekapSettingsForm({
   // Pratinjau siklus berjalan secara instan berdasarkan pilihan cut-off hari
   const runningCycle = useMemo(() => {
     const today = getTodayInJakarta();
-    return getCycleForDate(selectedCutoff, today);
-  }, [selectedCutoff]);
+    const rekapLocale = locale === "en" ? "en-US" : "id-ID";
+    return getCycleForDate(selectedCutoff, today, rekapLocale);
+  }, [locale, selectedCutoff]);
 
   const handleSave = async () => {
     if (isSaving) return;
@@ -80,12 +83,12 @@ function RekapSettingsForm({
         onSettingsSaved?.(previousSettings);
         setSelectedCutoff(previousSettings.cutoff_day);
         setAkumulasiSaldo(previousSettings.akumulasi_saldo);
-        toast.error(res.error || "Gagal menyimpan pengaturan rekap");
+        toast.error(res.error || dict.reports.toasts.settingsSaveFailed);
         return;
       }
 
       onSettingsSaved?.(res.data);
-      toast.success("Pengaturan rekap berhasil disimpan");
+      toast.success(dict.reports.toasts.settingsSaved);
       onOpenChange(false);
       router.refresh();
     } catch {
@@ -93,7 +96,7 @@ function RekapSettingsForm({
       onSettingsSaved?.(previousSettings);
       setSelectedCutoff(previousSettings.cutoff_day);
       setAkumulasiSaldo(previousSettings.akumulasi_saldo);
-      toast.error("Terjadi kesalahan saat menyimpan pengaturan");
+      toast.error(dict.reports.toasts.settingsSaveError);
     } finally {
       setIsSaving(false);
     }
@@ -102,9 +105,9 @@ function RekapSettingsForm({
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Pengaturan Rekap</DialogTitle>
+        <DialogTitle>{dict.reports.settings.title}</DialogTitle>
         <DialogDescription>
-          Sesuaikan tanggal mulai siklus keuangan dan metode perhitungan saldo.
+          {dict.reports.settings.description}
         </DialogDescription>
       </DialogHeader>
 
@@ -112,7 +115,7 @@ function RekapSettingsForm({
         {/* Tanggal Cut-off (1-31) */}
         <div className="space-y-2">
           <Label htmlFor="cutoff-select" className="text-sm font-medium">
-            Tanggal Mulai Siklus (Cut-off)
+            {dict.reports.settings.cutoffDayLabel}
           </Label>
           <Select
             value={String(selectedCutoff)}
@@ -120,35 +123,39 @@ function RekapSettingsForm({
           >
             <SelectTrigger
               id="cutoff-select"
-              aria-label="Pilih tanggal mulai siklus"
+              aria-label={dict.reports.settings.cutoffDaySelectAria}
               className="h-12 w-full rounded-input border-hairline"
             >
-              <SelectValue placeholder="Pilih tanggal" />
+              <SelectValue placeholder={dict.reports.settings.cutoffDayPlaceholder} />
             </SelectTrigger>
             <SelectContent className="max-h-60">
               {CUTOFF_DAYS.map((day) => (
                 <SelectItem key={day} value={String(day)}>
-                  {day === 1 ? "Tanggal 1 (Bulan kalender)" : `Tanggal ${day}`}
+                  {day === 1
+                    ? dict.reports.settings.cutoffDayFirst
+                    : dict.reports.settings.cutoffDayOther.replace("{day}", String(day))}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground">
-            Siklus berjalan otomatis berakhir satu hari sebelum tanggal cut-off berikutnya.
+            {dict.reports.settings.cutoffDayDescription}
           </p>
         </div>
 
         {/* Pratinjau Siklus Berjalan */}
         <div className="rounded-card border border-hairline bg-surface-soft p-4">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Pratinjau Siklus Berjalan
+            {dict.reports.settings.previewTitle}
           </p>
           <p className="mt-1 font-mono text-base font-semibold text-foreground">
             {runningCycle.label}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Rentang aktif: <span className="font-mono">{runningCycle.startDate}</span> s/d{" "}
-            <span className="font-mono">{runningCycle.endDate}</span> ({runningCycle.daysCount} hari inklusif)
+            {dict.reports.settings.activeRange
+              .replace("{start}", runningCycle.startDate)
+              .replace("{end}", runningCycle.endDate)
+              .replace("{days}", String(runningCycle.daysCount))}
           </p>
         </div>
 
@@ -159,18 +166,17 @@ function RekapSettingsForm({
               htmlFor="switch-akumulasi"
               className="text-sm font-medium leading-none cursor-pointer"
             >
-              Saldo Akumulasi
+              {dict.reports.settings.accumulateBalanceLabel}
             </Label>
             <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
-              Sertakan sisa saldo dari siklus sebelumnya sebagai saldo awal siklus berjalan.
-              Jika dinonaktifkan, saldo awal dimulai dari nol.
+              {dict.reports.settings.accumulateBalanceDescription}
             </p>
           </div>
           <Switch
             id="switch-akumulasi"
             checked={akumulasiSaldo}
             onCheckedChange={setAkumulasiSaldo}
-            aria-label="Saldo Akumulasi"
+            aria-label={dict.reports.settings.accumulateBalanceLabel}
             className="mt-0.5"
           />
         </div>
@@ -184,7 +190,7 @@ function RekapSettingsForm({
           disabled={isSaving}
           className="w-full rounded-full sm:w-auto"
         >
-          Batal
+          {dict.reports.settings.cancelButton}
         </Button>
         <Button
           type="button"
@@ -193,7 +199,7 @@ function RekapSettingsForm({
           className="h-11 w-full rounded-full bg-primary px-5 text-white hover:bg-primary-active sm:w-auto"
         >
           {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Simpan
+          {dict.reports.settings.saveButton}
         </Button>
       </DialogFooter>
     </>

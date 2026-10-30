@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import type { Kategori, KategoriUsageCounts } from "@/types/transaksi";
 import type { Transaksi } from "@/types/transaksi";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowDownLeft,
@@ -21,6 +22,7 @@ type Props = {
 };
 
 export function KategoriStatCards({ kategori, usage, transaksi }: Props) {
+  const { dict } = useTranslation();
   const { formatRupiah } = useSystemPreferences();
 
   const { totalExpense, totalIncome, netFlow, count, avgAmount } = useMemo(() => {
@@ -51,25 +53,25 @@ export function KategoriStatCards({ kategori, usage, transaksi }: Props) {
 
   const usageBadges = [
     {
-      label: "Pemasukan",
+      label: dict.categories.types.income,
       count: usage.transaksi_masuk,
       icon: ArrowDownLeft,
       color: "text-semantic-up",
     },
     {
-      label: "Pengeluaran",
+      label: dict.categories.types.expense,
       count: usage.transaksi_keluar,
       icon: ArrowUpRight,
       color: "text-semantic-down",
     },
     {
-      label: "Budget Bulanan",
+      label: dict.categories.stats.monthlyBudget,
       count: usage.budget,
       icon: CalendarDays,
       color: "text-primary",
     },
     {
-      label: "Transaksi Berulang",
+      label: dict.categories.stats.recurringTx,
       count: usage.recurring,
       icon: Repeat,
       color: "text-muted-foreground",
@@ -85,7 +87,7 @@ export function KategoriStatCards({ kategori, usage, transaksi }: Props) {
           <div className="rounded-card border border-hairline bg-card p-4 sm:p-5 transition-colors">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Total Pemasukan
+                {dict.categories.stats.totalIncome}
               </span>
               <div className="h-7 w-7 rounded-full bg-semantic-up/10 flex items-center justify-center">
                 <ArrowDownLeft className="h-4 w-4 text-semantic-up" />
@@ -95,14 +97,14 @@ export function KategoriStatCards({ kategori, usage, transaksi }: Props) {
               {formatRupiah(totalIncome)}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Dari {count} transaksi pemasukan
+              {dict.categories.stats.fromIncomeTx.replace("{count}", String(count))}
             </p>
           </div>
         ) : kategori.tipe === "expense" ? (
           <div className="rounded-card border border-hairline bg-card p-4 sm:p-5 transition-colors">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Total Pengeluaran
+                {dict.categories.stats.totalExpense}
               </span>
               <div className="h-7 w-7 rounded-full bg-semantic-down/10 flex items-center justify-center">
                 <ArrowUpRight className="h-4 w-4 text-semantic-down" />
@@ -112,14 +114,14 @@ export function KategoriStatCards({ kategori, usage, transaksi }: Props) {
               {formatRupiah(totalExpense)}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Dari {count} transaksi pengeluaran
+              {dict.categories.stats.fromExpenseTx.replace("{count}", String(count))}
             </p>
           </div>
         ) : (
           <div className="rounded-card border border-hairline bg-card p-4 sm:p-5 transition-colors">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Arus Kas Bersih
+                {dict.categories.stats.netCashflow}
               </span>
               <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center">
                 <Calculator className="h-4 w-4 text-primary" />
@@ -137,7 +139,9 @@ export function KategoriStatCards({ kategori, usage, transaksi }: Props) {
               {formatRupiah(netFlow)}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Masuk {formatRupiah(totalIncome)} · Keluar {formatRupiah(totalExpense)}
+              {dict.categories.stats.inOutSummary
+                .replace("{in}", formatRupiah(totalIncome))
+                .replace("{out}", formatRupiah(totalExpense))}
             </p>
           </div>
         )}
@@ -146,17 +150,20 @@ export function KategoriStatCards({ kategori, usage, transaksi }: Props) {
         <div className="rounded-card border border-hairline bg-card p-4 sm:p-5 transition-colors">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Frekuensi Transaksi
+              {dict.categories.stats.txFrequency}
             </span>
             <div className="h-7 w-7 rounded-full bg-surface-strong flex items-center justify-center">
               <Receipt className="h-4 w-4 text-muted-foreground" />
             </div>
           </div>
           <p className="font-mono text-xl sm:text-2xl font-semibold text-foreground truncate">
-            {count} <span className="text-sm font-normal text-muted-foreground">kali</span>
+            {count}{" "}
+            <span className="text-sm font-normal text-muted-foreground">
+              {dict.categories.stats.timesUnit}
+            </span>
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Dalam periode yang dipilih
+            {dict.categories.stats.inSelectedPeriod}
           </p>
         </div>
 
@@ -164,7 +171,7 @@ export function KategoriStatCards({ kategori, usage, transaksi }: Props) {
         <div className="rounded-card border border-hairline bg-card p-4 sm:p-5 transition-colors">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Rata-rata per Transaksi
+              {dict.categories.stats.avgPerTx}
             </span>
             <div className="h-7 w-7 rounded-full bg-surface-strong flex items-center justify-center">
               <Calculator className="h-4 w-4 text-muted-foreground" />
@@ -174,7 +181,7 @@ export function KategoriStatCards({ kategori, usage, transaksi }: Props) {
             {formatRupiah(avgAmount)}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Rata-rata pengeluaran/pemasukan
+            {dict.categories.stats.avgDesc}
           </p>
         </div>
       </div>
@@ -184,7 +191,7 @@ export function KategoriStatCards({ kategori, usage, transaksi }: Props) {
         <div className="rounded-card border border-hairline bg-card p-3 sm:p-4">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-semibold text-muted-foreground mr-1">
-              Penggunaan:
+              {dict.categories.stats.usageHeader}
             </span>
             {usageBadges.map((badge, idx) => {
               const Icon = badge.icon;

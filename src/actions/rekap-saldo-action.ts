@@ -13,6 +13,8 @@ import {
   type LedgerHutangItem,
   type LedgerCicilanItem,
 } from '@/lib/rekap-balance';
+import { getActionLocale } from '@/i18n/get-locale';
+import { getDictionary } from '@/i18n/get-dictionary';
 
 export type RekapSaldoPeriodInput = {
   startDate?: string;
@@ -43,9 +45,11 @@ export async function getSaldoPeriodeList<P extends RekapSaldoPeriodInput>(
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    const locale = await getActionLocale(supabase, user?.id);
+    const dict = await getDictionary(locale);
 
     if (!user) {
-      return { success: false, error: 'Tidak terautentikasi' };
+      return { success: false, error: dict.errors.unauthenticated };
     }
 
     // Normalisasi periode input
@@ -126,10 +130,12 @@ export async function getSaldoPeriodeList<P extends RekapSaldoPeriodInput>(
 
     return { success: true, data: results };
   } catch (err) {
+    const locale = await getActionLocale();
+    const dict = await getDictionary(locale);
     const message =
       err instanceof Error
         ? err.message
-        : 'Terjadi kesalahan saat menghitung saldo periode';
+        : dict.actions.rekap.calculateSaldoError;
     return { success: false, error: message };
   }
 }

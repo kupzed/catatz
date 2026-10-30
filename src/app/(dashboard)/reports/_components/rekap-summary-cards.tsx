@@ -1,9 +1,10 @@
 "use client";
 
 import type { RekapBulanan } from "@/actions/rekap-action";
-import { BULAN_NAMES } from "@/constants/rekap";
+import { getMonthNames } from "@/constants/rekap";
 import { cn } from "@/lib/utils";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 
 export type RekapSummaryCardsProps = {
   currentBulan: number;
@@ -21,27 +22,29 @@ export function RekapSummaryCards({
   totalExpense,
 }: RekapSummaryCardsProps) {
   const { formatRupiah } = useSystemPreferences();
+  const { dict } = useTranslation();
+  const monthNames = getMonthNames(dict);
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {[
         {
-          label: `Pemasukan ${BULAN_NAMES[currentBulan - 1]}`,
+          label: `${dict.reports.card.income} ${monthNames[currentBulan - 1]}`,
           value: currentMonth?.total_income ?? 0,
           color: "text-semantic-up",
         },
         {
-          label: `Pengeluaran ${BULAN_NAMES[currentBulan - 1]}`,
+          label: `${dict.reports.card.expense} ${monthNames[currentBulan - 1]}`,
           value: currentMonth?.total_expense ?? 0,
           color: "text-semantic-down",
         },
         {
-          label: `Total Pemasukan ${currentTahun}`,
+          label: `${dict.reports.summary.totalIncome} ${currentTahun}`,
           value: totalIncome,
           color: "text-semantic-up",
         },
         {
-          label: `Total Pengeluaran ${currentTahun}`,
+          label: `${dict.reports.summary.totalExpense} ${currentTahun}`,
           value: totalExpense,
           color: "text-semantic-down",
         },

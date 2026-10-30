@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Search, SlidersHorizontal, X } from "lucide-react";
 import { TransaksiFilterSheet } from "./transaksi-filter-sheet";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
+import { getTipeConfig } from "@/constants/transaksi";
 
 export type TransaksiFilterBarProps = {
   search: string;
@@ -19,13 +21,6 @@ export type TransaksiFilterBarProps = {
   rekening: Rekening[];
   kategori: Kategori[];
   onAddClick: () => void;
-};
-
-const TIPE_MAP: Record<TipeTransaksi, string> = {
-  income: "Pemasukan",
-  expense: "Pengeluaran",
-  transfer: "Transfer",
-  correction: "Koreksi Saldo",
 };
 
 export function TransaksiFilterBar({
@@ -39,6 +34,15 @@ export function TransaksiFilterBar({
 }: TransaksiFilterBarProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const { formatRupiah } = useSystemPreferences();
+  const { dict } = useTranslation();
+
+  const tipeConfig = getTipeConfig(dict);
+  const tipeMap: Record<TipeTransaksi, string> = {
+    income: tipeConfig.income.label,
+    expense: tipeConfig.expense.label,
+    transfer: tipeConfig.transfer.label,
+    correction: tipeConfig.correction.label,
+  };
 
   // Hitung jumlah filter yang sedang aktif
   const activeFilterCount = useMemo(() => {
@@ -155,10 +159,10 @@ export function TransaksiFilterBar({
           onClick={() => setSheetOpen(true)}
           className="h-12 px-3 sm:px-4 rounded-full border border-hairline bg-background hover:bg-surface-soft font-medium text-sm flex items-center justify-center gap-1.5 sm:gap-2 shrink-0 transition-colors cursor-pointer"
           id="btn-filter-trigger"
-          aria-label="Filter transaksi"
+          aria-label={dict.transactions.filter.title}
         >
           <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
-          <span>Filter</span>
+          <span>{dict.common.filter}</span>
           {activeFilterCount > 0 && (
             <Badge
               variant="secondary"
@@ -174,7 +178,7 @@ export function TransaksiFilterBar({
         <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <ClearableInput
-            placeholder="Cari judul, atau catatan..."
+            placeholder={dict.transactions.filter.searchPlaceholder}
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             onClear={() => onSearchChange("")}
@@ -187,13 +191,13 @@ export function TransaksiFilterBar({
         <Button
           type="button"
           onClick={onAddClick}
-          aria-label="Transaksi Baru"
-          title="Transaksi Baru"
+          aria-label={dict.transactions.filter.newTransaction}
+          title={dict.transactions.filter.newTransaction}
           className="h-12 w-12 sm:w-auto p-0 sm:px-5 bg-primary hover:bg-[#003ecc] text-white rounded-full font-semibold flex items-center justify-center gap-2 shrink-0 transition-colors cursor-pointer"
           id="btn-tambah-transaksi"
         >
           <Plus className="h-5 w-5 sm:h-4 sm:w-4" />
-          <span className="hidden sm:inline">Transaksi Baru</span>
+          <span className="hidden sm:inline">{dict.transactions.filter.newTransaction}</span>
         </Button>
       </div>
 
@@ -210,16 +214,16 @@ export function TransaksiFilterBar({
               id="badge-filter-tipe"
             >
               <span>
-                Tipe:{" "}
+                {dict.common.type}:{" "}
                 {filter.tipe.length === 1
-                  ? TIPE_MAP[filter.tipe[0]] ?? filter.tipe[0]
-                  : `${filter.tipe.length} dipilih`}
+                  ? tipeMap[filter.tipe[0]] ?? filter.tipe[0]
+                  : `${filter.tipe.length} ${dict.transactions.filter.selected}`}
               </span>
               <button
                 type="button"
                 onClick={removeTipe}
                 className="hover:text-semantic-down text-muted-foreground transition-colors p-0.5 rounded-full cursor-pointer"
-                aria-label="Hapus filter tipe"
+                aria-label={dict.transactions.filter.removeTypeFilter}
               >
                 <X className="h-3 w-3" />
               </button>
@@ -233,13 +237,13 @@ export function TransaksiFilterBar({
               id="badge-filter-transfer-asal"
             >
               <span className="flex items-center gap-1">
-                Sumber Dana: {transferAsalRek?.nama ?? "Rekening"}
+                {dict.transactions.filter.sourceBadge}: {transferAsalRek?.nama ?? dict.common.wallet}
               </span>
               <button
                 type="button"
                 onClick={removeTransferAsal}
                 className="hover:text-semantic-down text-muted-foreground transition-colors p-0.5 rounded-full cursor-pointer"
-                aria-label="Hapus filter sumber dana"
+                aria-label={dict.transactions.filter.removeSourceFilter}
               >
                 <X className="h-3 w-3" />
               </button>
@@ -253,13 +257,13 @@ export function TransaksiFilterBar({
               id="badge-filter-transfer-tujuan"
             >
               <span className="flex items-center gap-1">
-                Rekening Tujuan: {transferTujuanRek?.nama ?? "Rekening"}
+                {dict.transactions.filter.destinationBadge}: {transferTujuanRek?.nama ?? dict.common.wallet}
               </span>
               <button
                 type="button"
                 onClick={removeTransferTujuan}
                 className="hover:text-semantic-down text-muted-foreground transition-colors p-0.5 rounded-full cursor-pointer"
-                aria-label="Hapus filter rekening tujuan"
+                aria-label={dict.transactions.filter.removeDestinationFilter}
               >
                 <X className="h-3 w-3" />
               </button>
@@ -279,12 +283,12 @@ export function TransaksiFilterBar({
                   className="w-2 h-2 rounded-full shrink-0"
                   style={{ backgroundColor: rek?.warna }}
                 />
-                <span>Rekening: {rek?.nama ?? "Rekening"}</span>
+                <span>{dict.common.wallet}: {rek?.nama ?? dict.common.wallet}</span>
                 <button
                   type="button"
                   onClick={() => removeRekening(rekId)}
                   className="hover:text-semantic-down text-muted-foreground transition-colors p-0.5 rounded-full cursor-pointer"
-                  aria-label={`Hapus filter rekening ${rek?.nama}`}
+                  aria-label={`${dict.transactions.filter.removeWalletFilter} ${rek?.nama}`}
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -302,12 +306,12 @@ export function TransaksiFilterBar({
                 id={`badge-filter-kat-${katId}`}
               >
                 {kat?.ikon && <span>{kat.ikon}</span>}
-                <span>Kategori: {kat?.nama ?? "Kategori"}</span>
+                <span>{dict.common.category}: {kat?.nama ?? dict.common.category}</span>
                 <button
                   type="button"
                   onClick={() => removeKategori(katId)}
                   className="hover:text-semantic-down text-muted-foreground transition-colors p-0.5 rounded-full cursor-pointer"
-                  aria-label={`Hapus filter kategori ${kat?.nama}`}
+                  aria-label={`${dict.transactions.filter.removeCategoryFilter} ${kat?.nama}`}
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -328,16 +332,16 @@ export function TransaksiFilterBar({
             >
               <span>
                 {filter.nominal_min && filter.nominal_max
-                  ? `Nominal: ${formatRupiah(filter.nominal_min)} - ${formatRupiah(filter.nominal_max)}`
+                  ? `${dict.transactions.form.nominal}: ${formatRupiah(filter.nominal_min)} - ${formatRupiah(filter.nominal_max)}`
                   : filter.nominal_min
-                    ? `Nominal: ≥ ${formatRupiah(filter.nominal_min)}`
-                    : `Nominal: ≤ ${formatRupiah(filter.nominal_max!)}`}
+                    ? `${dict.transactions.form.nominal}: ≥ ${formatRupiah(filter.nominal_min)}`
+                    : `${dict.transactions.form.nominal}: ≤ ${formatRupiah(filter.nominal_max!)}`}
               </span>
               <button
                 type="button"
                 onClick={removeNominal}
                 className="hover:text-semantic-down text-muted-foreground transition-colors p-0.5 rounded-full cursor-pointer"
-                aria-label="Hapus filter rentang nominal"
+                aria-label={dict.transactions.filter.removeNominalFilter}
               >
                 <X className="h-3 w-3" />
               </button>
@@ -352,20 +356,20 @@ export function TransaksiFilterBar({
                 id="badge-filter-sort"
               >
                 <span>
-                  Urutan:{" "}
+                  {dict.transactions.filter.sortOrder}:{" "}
                   {filter.sortBy === "nominal"
                     ? filter.sortOrder === "asc"
-                      ? "Nominal Terkecil"
-                      : "Nominal Terbesar"
+                      ? dict.transactions.filter.sortAmountAsc
+                      : dict.transactions.filter.sortAmountDesc
                     : filter.sortBy === "tanggal" && filter.sortOrder === "asc"
-                      ? "Terlama"
-                      : "Kustom"}
+                      ? dict.transactions.filter.sortDateAsc
+                      : dict.transactions.filter.periodCustom}
                 </span>
                 <button
                   type="button"
                   onClick={removeSort}
                   className="hover:text-semantic-down text-muted-foreground transition-colors p-0.5 rounded-full cursor-pointer"
-                  aria-label="Reset urutan ke default"
+                  aria-label={dict.transactions.filter.resetSortToDefault}
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -381,7 +385,7 @@ export function TransaksiFilterBar({
             className="h-7 px-2.5 text-xs text-muted-foreground hover:text-semantic-down rounded-full font-medium cursor-pointer"
             id="btn-hapus-semua-filter"
           >
-            Hapus Semua
+            {dict.transactions.filter.clearAll}
           </Button>
         </div>
       )}

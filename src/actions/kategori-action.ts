@@ -4,10 +4,20 @@ import { createClient } from '@/configs/supabase/server';
 import { revalidatePath } from 'next/cache';
 import type { ActionResult } from '@/types/general';
 import type { Kategori, KategoriUsageCounts } from '@/types/transaksi';
-import { kategoriSchema } from '@/validations/kategori-validation';
-import type { KategoriSchema } from '@/validations/kategori-validation';
+import { getKategoriSchema, type KategoriSchema } from '@/validations/kategori-validation';
+import { getActionLocale } from '@/i18n/get-locale';
+import { getDictionary } from '@/i18n/get-dictionary';
+import type { Locale } from '@/i18n/types';
 
-function formatKategoriUsageParts(usage: KategoriUsageCounts): string[] {
+function formatKategoriUsageParts(usage: KategoriUsageCounts, locale: Locale = 'id'): string[] {
+  if (locale === 'en') {
+    return [
+      usage.transaksi > 0 ? `${usage.transaksi} transaction(s)` : null,
+      usage.budget > 0 ? `${usage.budget} monthly budget(s)` : null,
+      usage.recurring > 0 ? `${usage.recurring} recurring template(s)` : null,
+    ].filter(Boolean) as string[];
+  }
+
   return [
     usage.transaksi > 0 ? `${usage.transaksi} transaksi` : null,
     usage.budget > 0 ? `${usage.budget} budget bulanan` : null,
@@ -38,11 +48,11 @@ export async function getKategoriUsageCountsMap(): Promise<Record<string, Katego
       .not('kategori_id', 'is', null),
   ]);
 
-  const map: Record<string, KategoriUsageCounts> = {};
+  const usageMap: Record<string, KategoriUsageCounts> = {};
 
-  const getOrCreate = (id: string): KategoriUsageCounts => {
-    if (!map[id]) {
-      map[id] = {
+  const ensureEntry = (id: string): KategoriUsageCounts => {
+    if (!usageMap[id]) {
+      usageMap[id] = {
         transaksi: 0,
         transaksi_masuk: 0,
         transaksi_keluar: 0,
@@ -51,42 +61,33 @@ export async function getKategoriUsageCountsMap(): Promise<Record<string, Katego
         total: 0,
       };
     }
-    return map[id];
+    return usageMap[id];
   };
 
-  if (txRes.data) {
-    for (const row of txRes.data) {
-      if (row.kategori_id) {
-        const item = getOrCreate(row.kategori_id);
-        item.transaksi += 1;
-        if (row.tipe === 'income') item.transaksi_masuk += 1;
-        if (row.tipe === 'expense') item.transaksi_keluar += 1;
-        item.total += 1;
-      }
-    }
+  for (const item of txRes.data ?? []) {
+    if (!item.kategori_id) continue;
+    const entry = ensureEntry(item.kategori_id);
+    entry.transaksi += 1;
+    if (item.tipe === 'income') entry.transaksi_masuk += 1;
+    if (item.tipe === 'expense') entry.transaksi_keluar += 1;
+    entry.total += 1;
   }
 
-  if (budgetRes.data) {
-    for (const row of budgetRes.data) {
-      if (row.kategori_id) {
-        const item = getOrCreate(row.kategori_id);
-        item.budget += 1;
-        item.total += 1;
-      }
-    }
+  for (const item of budgetRes.data ?? []) {
+    if (!item.kategori_id) continue;
+    const entry = ensureEntry(item.kategori_id);
+    entry.budget += 1;
+    entry.total += 1;
   }
 
-  if (recurringRes.data) {
-    for (const row of recurringRes.data) {
-      if (row.kategori_id) {
-        const item = getOrCreate(row.kategori_id);
-        item.recurring += 1;
-        item.total += 1;
-      }
-    }
+  for (const item of recurringRes.data ?? []) {
+    if (!item.kategori_id) continue;
+    const entry = ensureEntry(item.kategori_id);
+    entry.recurring += 1;
+    entry.total += 1;
   }
 
-  return map;
+  return usageMap;
 }
 
 export async function getKategoriById(
@@ -94,9 +95,11 @@ export async function getKategoriById(
 ): Promise<ActionResult<{ kategori: Kategori; usage: KategoriUsageCounts }>> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
 
   if (!user) {
-    return { success: false, error: 'Tidak terautentikasi' };
+    return { success: false, error: dict.errors.unauthenticated };
   }
 
   const { data: kategori, error: fetchError } = await supabase
@@ -107,7 +110,7 @@ export async function getKategoriById(
     .single();
 
   if (fetchError || !kategori) {
-    return { success: false, error: 'Kategori tidak ditemukan' };
+    return { success: false, error: dict.actions.kategori.notFound };
   }
 
   const [txIncome, txExpense, budgetRes, recurringRes] = await Promise.all([
@@ -162,15 +165,21 @@ export async function getKategoriById(
 export async function createKategori(values: KategoriSchema): Promise<ActionResult<Kategori>> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
 
   if (!user) {
-    return { success: false, error: 'Tidak terautentikasi' };
+    return { success: false, error: dict.errors.unauthenticated };
   }
 
   // Validasi schema server-side
-  const parsed = kategoriSchema.safeParse(values);
+  const parsed = getKategoriSchema(dict).safeParse(values);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? 'Data kategori tidak valid' };
+    return {
+      success: false,
+      error:
+        parsed.error.issues[0]?.message ?? dict.actions.kategori.invalidData,
+    };
   }
 
   const { data, error } = await supabase
@@ -198,15 +207,21 @@ export async function createKategori(values: KategoriSchema): Promise<ActionResu
 export async function updateKategori(id: string, values: KategoriSchema): Promise<ActionResult<Kategori>> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
 
   if (!user) {
-    return { success: false, error: 'Tidak terautentikasi' };
+    return { success: false, error: dict.errors.unauthenticated };
   }
 
   // Validasi schema server-side
-  const parsed = kategoriSchema.safeParse(values);
+  const parsed = getKategoriSchema(dict).safeParse(values);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? 'Data kategori tidak valid' };
+    return {
+      success: false,
+      error:
+        parsed.error.issues[0]?.message ?? dict.actions.kategori.invalidData,
+    };
   }
 
   // Cek apakah tipe kategori berubah
@@ -218,7 +233,9 @@ export async function updateKategori(id: string, values: KategoriSchema): Promis
     .single();
 
   if (fetchError) {
-    if (fetchError.code === 'PGRST116') return { success: false, error: 'Kategori tidak ditemukan atau tidak diizinkan' };
+    if (fetchError.code === 'PGRST116') {
+      return { success: false, error: dict.actions.kategori.notFoundOrUnauthorized };
+    }
     return { success: false, error: fetchError.message };
   }
 
@@ -241,9 +258,14 @@ export async function updateKategori(id: string, values: KategoriSchema): Promis
       if (countError) return { success: false, error: countError.message };
 
       if ((count ?? 0) > 0) {
+        const targetLabel = parsed.data.tipe === 'income' ? dict.transactions.types.income : dict.transactions.types.expense;
+        const currentLabel = incompatibleTipe === 'income' ? dict.transactions.types.income.toLowerCase() : dict.transactions.types.expense.toLowerCase();
+        const errorMessage = locale === 'en'
+          ? `Category type cannot be changed to "${targetLabel}" because ${count} ${currentLabel} transactions are still using this category.`
+          : `Tipe kategori tidak bisa diubah ke "${targetLabel}" karena masih ada ${count} transaksi ${currentLabel} yang menggunakan kategori ini.`;
         return {
           success: false,
-          error: `Tipe kategori tidak bisa diubah ke "${parsed.data.tipe === 'income' ? 'Pemasukan' : 'Pengeluaran'}" karena masih ada ${count} transaksi ${incompatibleTipe === 'income' ? 'pemasukan' : 'pengeluaran'} yang menggunakan kategori ini.`,
+          error: errorMessage,
         };
       }
     }
@@ -261,9 +283,12 @@ export async function updateKategori(id: string, values: KategoriSchema): Promis
       if (recurringError) return { success: false, error: recurringError.message };
 
       if ((recurringCount ?? 0) > 0) {
+        const errorMessage = locale === 'en'
+          ? `Category type cannot be changed because ${recurringCount} recurring transaction templates are still using this category.`
+          : `Tipe kategori tidak bisa diubah karena masih ada ${recurringCount} template transaksi berulang yang menggunakan kategori ini.`;
         return {
           success: false,
-          error: `Tipe kategori tidak bisa diubah karena masih ada ${recurringCount} template transaksi berulang yang menggunakan kategori ini.`,
+          error: errorMessage,
         };
       }
     }
@@ -284,7 +309,7 @@ export async function updateKategori(id: string, values: KategoriSchema): Promis
 
   if (error) {
     if (error.code === 'PGRST116') {
-      return { success: false, error: 'Tidak diizinkan' };
+      return { success: false, error: dict.actions.kategori.notAllowed };
     }
     return { success: false, error: error.message };
   }
@@ -298,9 +323,11 @@ export async function updateKategori(id: string, values: KategoriSchema): Promis
 export async function deleteKategori(id: string): Promise<ActionResult> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
 
   if (!user) {
-    return { success: false, error: 'Tidak terautentikasi' };
+    return { success: false, error: dict.errors.unauthenticated };
   }
 
   // Proteksi: cek transaksi, budget, dan recurring transaksi
@@ -339,11 +366,14 @@ export async function deleteKategori(id: string): Promise<ActionResult> {
       budget: budgetCount,
       recurring: recurringCount,
       total: totalUsage,
-    });
+    }, locale);
     const detail = parts.length > 0 ? ` (${parts.join(', ')})` : '';
+    const errorMessage = locale === 'en'
+      ? `This category is still used by ${totalUsage} financial record(s)${detail}. Delete or update related records before deleting this category.`
+      : `Kategori ini masih dipakai oleh ${totalUsage} data keuangan${detail}. Hapus atau ubah data terkait terlebih dahulu sebelum menghapus kategori.`;
     return {
       success: false,
-      error: `Kategori ini masih dipakai oleh ${totalUsage} data keuangan${detail}. Hapus atau ubah data terkait terlebih dahulu sebelum menghapus kategori.`,
+      error: errorMessage,
     };
   }
 

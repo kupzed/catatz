@@ -83,6 +83,7 @@ Settings page mengambil user dan profile dari Supabase server client:
 - Nominal compact tetap ringkas dan tidak dipaksa 2 angka desimal.
 - Format tanggal mendukung `id-ID` dan `en-US`.
 - Format waktu mendukung `24h` dan `12h`; value database tetap disimpan sebagai `HH:mm`.
+- Preferensi bahasa mendukung `'id'` (Bahasa Indonesia) dan `'en'` (English); disimpan di `user_preferences.language`.
 - `default_landing_page` dipakai oleh route root `/` untuk menentukan redirect dashboard user.
 - Export file tidak berjalan jika tidak ada transaksi pada filter aktif.
 - Export PDF/XLSX/CSV mengikuti preferensi tanggal, waktu, format angka, dan opsi desimal user.
@@ -98,6 +99,7 @@ Settings page mengambil user dan profile dari Supabase server client:
 - Export data menampilkan jumlah transaksi siap export.
 - Theme memakai `next-themes`.
 - System Preference menyimpan perubahan secara optimistic, menyinkronkan `SystemPreferenceProvider`, lalu refresh server boundary setelah action sukses.
+- Perubahan pilihan bahasa pada selector `Bahasa / Language` seketika memperbarui konteks `DictionaryProvider` dan merender ulang seluruh komponen UI ke bahasa terpilih.
 - Section System Preference menampilkan preview nominal, tanggal, dan waktu berdasarkan pilihan aktif.
 - Input waktu transaksi, hutang, dan cicilan tetap memakai native `Input type="time"` agar layout form tanggal/waktu konsisten satu baris. Preferensi `time_format` dipakai untuk tampilan dan export; value database tetap `HH:mm`.
 

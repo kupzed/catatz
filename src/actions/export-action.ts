@@ -10,6 +10,8 @@ import {
   normalizeUserPreferences,
   type UserPreferences,
 } from "@/lib/user-preferences";
+import { getActionLocale } from "@/i18n/get-locale";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export type ExportTransaksi = {
   tanggal: string;
@@ -88,7 +90,10 @@ export async function getExportData(filter?: {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Tidak terautentikasi" };
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
+
+  if (!user) return { success: false, error: dict.errors.unauthenticated };
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -97,7 +102,7 @@ export async function getExportData(filter?: {
     .single();
 
   const userName =
-    profile?.name || user.user_metadata?.name || user.email || "Pengguna";
+    profile?.name || user.user_metadata?.name || user.email || dict.actions.export.defaultUser;
 
   const { data: preferenceRow } = await supabase
     .from("user_preferences")
@@ -136,20 +141,21 @@ export async function getExportData(filter?: {
   } catch (err) {
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Gagal mengambil data transaksi",
+      error:
+        err instanceof Error ? err.message : dict.actions.export.fetchError,
     };
   }
 
   const formatTipe = (tipe: string) => {
     switch (tipe) {
       case "income":
-        return "Pemasukan";
+        return dict.transactions.types.income;
       case "expense":
-        return "Pengeluaran";
+        return dict.transactions.types.expense;
       case "transfer":
-        return "Transfer";
+        return dict.transactions.types.transfer;
       case "correction":
-        return "Koreksi Saldo";
+        return dict.transactions.types.correction;
       default:
         return tipe;
     }
@@ -201,13 +207,13 @@ export async function getExportData(filter?: {
 
   const net = total_income - total_expense;
 
-  let periode = "Semua Waktu";
+  let periode = dict.actions.export.allTime;
   if (filter?.dari && filter?.sampai) {
     periode = `${formatDate(filter.dari)} - ${formatDate(filter.sampai)}`;
   } else if (filter?.dari) {
-    periode = `Sejak ${formatDate(filter.dari)}`;
+    periode = `${dict.actions.export.sincePrefix} ${formatDate(filter.dari)}`;
   } else if (filter?.sampai) {
-    periode = `Hingga ${formatDate(filter.sampai)}`;
+    periode = `${dict.actions.export.untilPrefix} ${formatDate(filter.sampai)}`;
   }
 
   let katQuery = supabase
@@ -249,7 +255,7 @@ export async function getExportData(filter?: {
 
       if (!acc[katId]) {
         acc[katId] = {
-          nama: kategori.nama ?? "Tanpa Kategori",
+          nama: kategori.nama ?? dict.actions.export.uncategorized,
           warna: kategori.warna ?? "#9ca3af",
           total: 0,
         };
@@ -268,7 +274,7 @@ export async function getExportData(filter?: {
         0,
       );
       topCategories.push({
-        nama: "Kategori Lain-lain",
+        nama: dict.actions.export.otherCategories,
         warna: "#9ca3af",
         total: otherTotal,
       });
@@ -301,7 +307,10 @@ export async function getExportCount(): Promise<
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Tidak terautentikasi" };
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
+
+  if (!user) return { success: false, error: dict.errors.unauthenticated };
 
   const { count, error } = await supabase
     .from("transaksi")

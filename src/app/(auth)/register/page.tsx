@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { useTranslation } from "@/i18n/use-translation";
 
 export default function RegisterPage() {
+  const { dict } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -20,7 +22,7 @@ export default function RegisterPage() {
     startGoogleTransition(async () => {
       const res = await signInWithGoogle();
       if (res?.error) {
-        toast.error("Daftar via Google gagal", { description: res.error });
+        toast.error(dict.auth.register.googleRegisterFailed, { description: res.error });
       } else if (res?.data?.url) {
         window.location.href = res.data.url;
       }
@@ -30,21 +32,21 @@ export default function RegisterPage() {
   const getStrength = (pwd: string) => {
     if (!pwd || pwd.length < 8)
       return {
-        label: "Lemah",
+        label: dict.auth.register.strengthWeak,
         width: "w-1/3",
         color: "bg-semantic-down",
         textColor: "text-semantic-down",
       };
     if (pwd.length >= 12 && /[0-9]/.test(pwd) && /[^A-Za-z0-9]/.test(pwd)) {
       return {
-        label: "Kuat",
+        label: dict.auth.register.strengthStrong,
         width: "w-full",
         color: "bg-semantic-up",
         textColor: "text-semantic-up",
       };
     }
     return {
-      label: "Sedang",
+      label: dict.auth.register.strengthMedium,
       width: "w-2/3",
       color: "bg-[#f4b000]",
       textColor: "text-[#f4b000]",
@@ -59,7 +61,7 @@ export default function RegisterPage() {
     const formData = new FormData(e.currentTarget);
     const result = await signUp(formData);
     if (result.error) {
-      toast.error("Pendaftaran gagal", { description: result.error });
+      toast.error(dict.auth.register.registerFailed, { description: result.error });
       setLoading(false);
     } else {
       toast.success(result.message);
@@ -71,14 +73,15 @@ export default function RegisterPage() {
     return (
       <div className="bg-card dark:bg-surface-dark-elevated border border-border dark:border-white/10 rounded-card p-8 text-center">
         <div className="text-5xl mb-4">📬</div>
-        <h2 className="text-xl font-normal text-foreground mb-2">Cek Email Anda</h2>
+        <h2 className="text-xl font-normal text-foreground mb-2">
+          {dict.auth.register.checkEmailTitle}
+        </h2>
         <p className="text-muted-foreground text-sm">
-          Kami telah mengirim link verifikasi ke email Anda. Silakan klik link
-          tersebut untuk mengaktifkan akun.
+          {dict.auth.register.checkEmailDescription}
         </p>
         <Link href="/login">
           <Button className="mt-6 bg-primary hover:bg-primary-active text-white w-full rounded-full font-semibold h-11">
-            Ke Halaman Login
+            {dict.auth.register.backToLoginButton}
           </Button>
         </Link>
       </div>
@@ -87,9 +90,11 @@ export default function RegisterPage() {
 
   return (
     <div className="bg-card dark:bg-surface-dark-elevated border border-border dark:border-white/10 rounded-card p-8">
-      <h2 className="text-xl font-normal text-foreground mb-1">Buat akun baru</h2>
+      <h2 className="text-xl font-normal text-foreground mb-1">
+        {dict.auth.register.title}
+      </h2>
       <p className="text-muted-foreground text-sm mb-6">
-        Mulai catat keuangan Anda hari ini
+        {dict.auth.register.subtitle}
       </p>
 
       <Button
@@ -118,7 +123,7 @@ export default function RegisterPage() {
             ></path>
           </svg>
         )}
-        Daftar dengan Google
+        {dict.auth.register.googleButton}
       </Button>
 
       <div className="relative mb-6">
@@ -127,7 +132,7 @@ export default function RegisterPage() {
         </div>
         <div className="relative flex justify-center text-sm">
           <span className="px-2 bg-card dark:bg-surface-dark-elevated text-muted-foreground">
-            Atau
+            {dict.common.or}
           </span>
         </div>
       </div>
@@ -135,7 +140,7 @@ export default function RegisterPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="name" className="text-muted-foreground text-sm font-medium">
-            Nama Lengkap
+            {dict.auth.register.nameLabel}
           </Label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
@@ -143,7 +148,7 @@ export default function RegisterPage() {
               id="name"
               name="name"
               type="text"
-              placeholder="Nama Anda"
+              placeholder={dict.auth.register.namePlaceholder}
               required
               className="pl-10 bg-background dark:bg-surface-dark border-border dark:border-white/15 text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
@@ -152,7 +157,7 @@ export default function RegisterPage() {
 
         <div className="space-y-2">
           <Label htmlFor="email" className="text-muted-foreground text-sm font-medium">
-            Email
+            {dict.auth.register.emailLabel}
           </Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
@@ -160,7 +165,7 @@ export default function RegisterPage() {
               id="email"
               name="email"
               type="email"
-              placeholder="nama@email.com"
+              placeholder={dict.auth.register.emailPlaceholder}
               required
               className="pl-10 bg-background dark:bg-surface-dark border-border dark:border-white/15 text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
@@ -172,7 +177,7 @@ export default function RegisterPage() {
             htmlFor="password"
             className="text-muted-foreground text-sm font-medium"
           >
-            Password
+            {dict.auth.register.passwordLabel}
           </Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
@@ -180,7 +185,7 @@ export default function RegisterPage() {
               id="password"
               name="password"
               type={showPassword ? "text" : "password"}
-              placeholder="Minimal 6 karakter"
+              placeholder={dict.auth.register.passwordPlaceholder}
               minLength={6}
               required
               value={passwordValue}
@@ -202,7 +207,7 @@ export default function RegisterPage() {
           {passwordValue.length > 0 && (
             <div className="space-y-1 mt-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Kekuatan:</span>
+                <span className="text-muted-foreground">{dict.auth.register.strengthLabel}</span>
                 <span className={`font-medium ${strength.textColor}`}>
                   {strength.label}
                 </span>
@@ -224,21 +229,21 @@ export default function RegisterPage() {
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Mendaftar...
+              {dict.auth.register.submitting}
             </>
           ) : (
-            "Daftar"
+            dict.auth.register.submit
           )}
         </Button>
       </form>
 
       <p className="text-center text-sm text-muted-foreground mt-6">
-        Sudah punya akun?{" "}
+        {dict.auth.register.hasAccount}{" "}
         <Link
           href="/login"
           className="text-primary hover:text-primary/80 font-medium transition-colors"
         >
-          Masuk
+          {dict.auth.register.loginLink}
         </Link>
       </p>
     </div>

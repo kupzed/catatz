@@ -22,6 +22,7 @@ import {
 import { NominalInput } from "@/components/common/nominal-input";
 import { RekeningSelect } from "@/components/common/rekening-select";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 import { ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -39,10 +40,12 @@ export function TransaksiDateTimeFields({
   control,
   errors,
 }: DateTimeFieldsProps) {
+  const { dict } = useTranslation();
+
   return (
     <div className="grid grid-cols-[3fr_1fr] gap-4">
       <div className="flex-1 space-y-1.5 min-w-0">
-        <Label htmlFor="tanggal">Tanggal</Label>
+        <Label htmlFor="tanggal">{dict.common.date}</Label>
         <Input
           id="tanggal"
           type="date"
@@ -54,7 +57,7 @@ export function TransaksiDateTimeFields({
         )}
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="waktu">Waktu</Label>
+        <Label htmlFor="waktu">{dict.common.time}</Label>
         <Controller
           control={control}
           name="waktu"
@@ -110,6 +113,7 @@ export function TransaksiRekeningFields({
   onSwapRekening,
 }: RekeningFieldsProps) {
   const { formatRupiah } = useSystemPreferences();
+  const { dict } = useTranslation();
 
   const disabledAsalValues = useMemo(() => {
     if (tipe !== "transfer") return undefined;
@@ -135,11 +139,11 @@ export function TransaksiRekeningFields({
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <Label htmlFor="rekening-select">
-            Rekening {tipe === "transfer" ? "Asal" : ""}
+            {tipe === "transfer" ? dict.transactions.form.sourceWallet : dict.common.wallet}
           </Label>
           {disabledRekeningId && (
             <span className="text-[11px] text-muted-foreground">
-              Terkunci di rekening ini
+              {dict.transactions.form.lockedWallet}
             </span>
           )}
         </div>
@@ -176,11 +180,11 @@ export function TransaksiRekeningFields({
                     field.onChange(val);
                   }
                 }}
-                placeholder="Pilih rekening"
+                placeholder={dict.transactions.form.walletPlaceholder}
                 id="rekening-select"
                 disabled={disabledRekeningId}
                 disabledValues={disabledAsalValues}
-                disabledReason="(Rekening tujuan)"
+                disabledReason={dict.transactions.form.disabledReasonDestination}
                 className={cn(
                   errors.rekening_id && "border-rose-500",
                   disabledRekeningId &&
@@ -198,22 +202,22 @@ export function TransaksiRekeningFields({
       {tipe === "transfer" && (
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <Label htmlFor="rekening-tujuan-select">Rekening Tujuan</Label>
+            <Label htmlFor="rekening-tujuan-select">{dict.transactions.form.destinationWallet}</Label>
             <div className="flex items-center gap-2">
               {canSwap && (
                 <button
                   type="button"
                   onClick={onSwapRekening}
                   className="inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:underline cursor-pointer transition-colors"
-                  title="Tukar posisi rekening asal dan tujuan"
+                  title={dict.transactions.form.swapWalletsTitle}
                 >
                   <ArrowUpDown className="h-3 w-3" />
-                  <span>Tukar Rekening</span>
+                  <span>{dict.transactions.form.swapWallets}</span>
                 </button>
               )}
               {disabledRekeningTujuan && (
                 <span className="text-[11px] text-muted-foreground">
-                  Terkunci di rekening ini
+                  {dict.transactions.form.lockedWallet}
                 </span>
               )}
             </div>
@@ -232,11 +236,11 @@ export function TransaksiRekeningFields({
                     field.onChange(val);
                   }
                 }}
-                placeholder="Pilih rekening tujuan"
+                placeholder={dict.transactions.form.destinationWalletPlaceholder}
                 id="rekening-tujuan-select"
                 disabled={disabledRekeningTujuan}
                 disabledValues={disabledTujuanValues}
-                disabledReason="(Rekening asal)"
+                disabledReason={dict.transactions.form.disabledReasonSource}
                 className={cn(
                   errors.rekening_tujuan && "border-rose-500",
                   disabledRekeningTujuan &&
@@ -268,16 +272,18 @@ export function TransaksiNominalField({
   control,
   errors,
 }: NominalFieldProps) {
+  const { dict } = useTranslation();
+
   return (
     <div className="space-y-1.5">
-      <Label htmlFor="nominal">Nominal (Rp)</Label>
+      <Label htmlFor="nominal">{dict.transactions.form.nominal} (Rp)</Label>
       <Controller
         control={control}
         name="nominal"
         render={({ field }) => (
           <NominalInput
             id="nominal"
-            placeholder="0"
+            placeholder={dict.transactions.form.nominalPlaceholder}
             value={field.value || ""}
             onValueChange={field.onChange}
             className={cn(
@@ -316,14 +322,15 @@ export function TransaksiJudulField({
   kategori,
   onSelectSuggestion,
 }: JudulFieldProps) {
+  const { dict } = useTranslation();
   const { onChange, ...registerProps } = register("judul");
 
   return (
     <div className="space-y-1.5">
-      <Label htmlFor="judul">Judul</Label>
+      <Label htmlFor="judul">{dict.transactions.form.titleOrNotes}</Label>
       <ClearableInput
         id="judul"
-        placeholder="Nama transaksi, misal: Gaji Bulanan, Kopi Starb..."
+        placeholder={dict.transactions.form.titleOrNotesPlaceholder}
         autoComplete="off"
         value={judul ?? ""}
         {...registerProps}
@@ -381,13 +388,15 @@ export function TransaksiKategoriField({
   kategoriList,
   disabled = false,
 }: KategoriFieldProps) {
+  const { dict } = useTranslation();
+
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
-        <Label htmlFor="kategori-select">Kategori</Label>
+        <Label htmlFor="kategori-select">{dict.common.category}</Label>
         {disabled && (
           <span className="text-[11px] text-muted-foreground">
-            Terkunci di kategori ini
+            {dict.transactions.form.lockedCategory}
           </span>
         )}
       </div>
@@ -407,7 +416,7 @@ export function TransaksiKategoriField({
                 disabled && "opacity-80 cursor-not-allowed bg-muted/40",
               )}
             >
-              <SelectValue placeholder="Pilih kategori" />
+              <SelectValue placeholder={dict.transactions.form.categoryPlaceholder} />
             </SelectTrigger>
             <SelectContent>
               {kategoriList.map((k) => (
@@ -440,15 +449,17 @@ export function TransaksiCatatanField({
   setValue,
   isCorrection,
 }: CatatanFieldProps) {
+  const { dict } = useTranslation();
+
   return (
     <div className="space-y-1.5">
-      <Label htmlFor="catatan">Catatan</Label>
+      <Label htmlFor="catatan">{dict.transactions.form.notes}</Label>
       <ClearableInput
         id="catatan"
         placeholder={
           isCorrection
-            ? "Alasan koreksi saldo (opsional)..."
-            : "Keterangan tambahan..."
+            ? dict.transactions.form.correctionNotesPlaceholder
+            : dict.transactions.form.additionalNotesPlaceholder
         }
         autoComplete="off"
         {...register("catatan")}

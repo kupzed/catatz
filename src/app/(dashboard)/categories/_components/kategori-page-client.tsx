@@ -13,6 +13,8 @@ import KategoriDialog from "./kategori-dialog";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState, PageHeader } from "@/components/common";
 import { ClearableInput } from "@/components/common/clearable-input";
+import { useTranslation } from "@/i18n/use-translation";
+import type { Dictionary } from "@/i18n/types";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -21,43 +23,57 @@ type Props = {
   initialUsageCounts?: Record<string, KategoriUsageCounts>;
 };
 
-const TIPE_CONFIG = {
-  expense: {
-    label: "Pengeluaran",
-    color: "text-semantic-down bg-semantic-down/10",
-  },
-  income: {
-    label: "Pemasukan",
-    color: "text-semantic-up bg-semantic-up/10",
-  },
-  all: {
-    label: "Semua Tipe",
-    color: "text-primary bg-primary/10",
-  },
-} as const;
+function TipeBadge({
+  tipe,
+  dict,
+}: {
+  tipe: Kategori["tipe"];
+  dict: Dictionary;
+}) {
+  const isExpense = tipe === "expense";
+  const isIncome = tipe === "income";
 
-function TipeBadge({ tipe }: { tipe: Kategori["tipe"] }) {
-  const cfg = TIPE_CONFIG[tipe] ?? TIPE_CONFIG.all;
+  const color = isExpense
+    ? "text-semantic-down bg-semantic-down/10"
+    : isIncome
+      ? "text-semantic-up bg-semantic-up/10"
+      : "text-primary bg-primary/10";
+
+  const label = isExpense
+    ? dict.categories.types.expense
+    : isIncome
+      ? dict.categories.types.income
+      : dict.categories.types.all;
+
   return (
     <span
       className={cn(
         "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium leading-none",
-        cfg.color,
+        color,
       )}
     >
-      {cfg.label}
+      {label}
     </span>
   );
 }
 
-function usageDescription(usage: KategoriUsageCounts) {
+function getUsageDescription(usage: KategoriUsageCounts, dict: Dictionary) {
   const parts = [
-    usage.transaksi > 0 ? `${usage.transaksi} transaksi` : null,
-    usage.budget > 0 ? `${usage.budget} budget bulanan` : null,
-    usage.recurring > 0 ? `${usage.recurring} template transaksi berulang` : null,
+    usage.transaksi > 0
+      ? dict.categories.usageTx.replace("{count}", String(usage.transaksi))
+      : null,
+    usage.budget > 0
+      ? dict.categories.usageBudget.replace("{count}", String(usage.budget))
+      : null,
+    usage.recurring > 0
+      ? dict.categories.usageRecurring.replace(
+          "{count}",
+          String(usage.recurring),
+        )
+      : null,
   ].filter(Boolean);
 
-  return `Kategori ini masih dipakai oleh ${parts.join(", ")}. Hapus atau ubah data terkait terlebih dahulu sebelum menghapus kategori.`;
+  return dict.categories.usageWarning.replace("{parts}", parts.join(", "));
 }
 
 export default function KategoriPageClient({
@@ -66,6 +82,7 @@ export default function KategoriPageClient({
   initialUsageCounts = {},
 }: Props) {
   const router = useRouter();
+  const { dict } = useTranslation();
   const rawList = initialKategori ?? fallbackKategori ?? [];
   const [items, setItems] = useState<Kategori[]>(rawList);
   const [usageCounts, setUsageCounts] = useState<Record<string, KategoriUsageCounts>>(initialUsageCounts);
@@ -128,9 +145,9 @@ export default function KategoriPageClient({
           delete next[k.id];
           return next;
         });
-        toast.success(`Kategori "${k.nama}" berhasil dihapus`);
+        toast.success(dict.categories.toasts.deleted.replace("{name}", k.nama));
       } else {
-        toast.error(res.error ?? "Gagal menghapus kategori");
+        toast.error(res.error ?? dict.categories.toasts.deleteFailed);
       }
     });
   }
@@ -139,8 +156,8 @@ export default function KategoriPageClient({
     <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Page Header */}
       <PageHeader
-        title="Kategori"
-        subtitle="Kelola kategori pemasukan dan pengeluaran Anda."
+        title={dict.categories.title}
+        subtitle={dict.categories.subtitle}
         subtitleClassName="mt-0.5"
         action={
           <Button
@@ -149,7 +166,7 @@ export default function KategoriPageClient({
             id="btn-tambah-kategori"
           >
             <Plus className="h-4 w-4" />
-            Tambah
+            {dict.categories.add}
           </Button>
         }
       />
@@ -159,7 +176,7 @@ export default function KategoriPageClient({
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-1">
-              Total Kategori
+              {dict.categories.totalCategories}
             </p>
             <p className="font-mono text-3xl sm:text-4xl font-normal text-foreground">
               {summary.total}
@@ -167,15 +184,15 @@ export default function KategoriPageClient({
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 text-xs">
             <div className="bg-surface-strong dark:bg-surface-dark-elevated rounded-full px-3.5 py-1.5 border border-hairline flex items-center gap-1.5">
-              <span className="text-muted-foreground font-medium">Pengeluaran:</span>
+              <span className="text-muted-foreground font-medium">{dict.categories.expenseLabel}</span>
               <span className="font-mono font-semibold text-semantic-down">{summary.expense}</span>
             </div>
             <div className="bg-surface-strong dark:bg-surface-dark-elevated rounded-full px-3.5 py-1.5 border border-hairline flex items-center gap-1.5">
-              <span className="text-muted-foreground font-medium">Pemasukan:</span>
+              <span className="text-muted-foreground font-medium">{dict.categories.incomeLabel}</span>
               <span className="font-mono font-semibold text-semantic-up">{summary.income}</span>
             </div>
             <div className="bg-surface-strong dark:bg-surface-dark-elevated rounded-full px-3.5 py-1.5 border border-hairline flex items-center gap-1.5">
-              <span className="text-muted-foreground font-medium">Semua Tipe:</span>
+              <span className="text-muted-foreground font-medium">{dict.categories.allTypesLabel}</span>
               <span className="font-mono font-semibold text-primary">{summary.all}</span>
             </div>
           </div>
@@ -188,7 +205,7 @@ export default function KategoriPageClient({
           <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <ClearableInput
             id="kategori-search"
-            placeholder="Cari kategori..."
+            placeholder={dict.categories.searchPlaceholder}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onClear={() => setSearch("")}
@@ -197,9 +214,9 @@ export default function KategoriPageClient({
         </div>
         <div className="grid grid-cols-3 gap-1 rounded-full bg-surface-strong p-1 sm:inline-grid sm:w-auto h-11 items-center">
           {[
-            { id: "all", label: "Semua" },
-            { id: "expense", label: "Pengeluaran" },
-            { id: "income", label: "Pemasukan" },
+            { id: "all", label: dict.categories.types.all },
+            { id: "expense", label: dict.categories.types.expense },
+            { id: "income", label: dict.categories.types.income },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -223,13 +240,13 @@ export default function KategoriPageClient({
           icon={Tags}
           title={
             search || filterTipe !== "all"
-              ? "Tidak ada kategori yang cocok"
-              : "Belum ada kategori"
+              ? dict.categories.emptySearchTitle
+              : dict.categories.emptyState
           }
           description={
             search || filterTipe !== "all"
-              ? "Coba sesuaikan kata kunci pencarian atau filter tipe."
-              : "Tambahkan kategori pertama Anda untuk mencatat transaksi."
+              ? dict.categories.emptySearchDescription
+              : dict.categories.emptyStateDescription
           }
           action={
             <Button
@@ -237,7 +254,7 @@ export default function KategoriPageClient({
               onClick={handleOpenAdd}
               className="mt-2 text-primary font-semibold"
             >
-              + Tambah Kategori
+              {dict.categories.addNew}
             </Button>
           }
         />
@@ -270,19 +287,22 @@ export default function KategoriPageClient({
                           {k.nama}
                         </p>
                         <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-                          <TipeBadge tipe={k.tipe} />
+                          <TipeBadge tipe={k.tipe} dict={dict} />
                           {isUsed && usage ? (
                             <Link
                               href={`/categories/${k.id}`}
                               onClick={(e) => e.stopPropagation()}
                               className="inline-block"
-                              title="Lihat riwayat transaksi kategori ini"
+                              title={dict.categories.viewHistoryTitle}
                             >
                               <Badge
                                 variant="secondary"
                                 className="text-xs rounded-full bg-primary/10 text-primary border-none hover:bg-primary/20 transition-colors cursor-pointer"
                               >
-                                Dipakai {usage.total} data
+                                {dict.categories.usedCount.replace(
+                                  "{count}",
+                                  String(usage.total),
+                                )}
                               </Badge>
                             </Link>
                           ) : null}
@@ -303,7 +323,10 @@ export default function KategoriPageClient({
                           e.stopPropagation();
                           handleEdit(k);
                         }}
-                        aria-label={`Edit ${k.nama}`}
+                        aria-label={dict.categories.editAria.replace(
+                          "{name}",
+                          k.nama,
+                        )}
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
@@ -315,23 +338,34 @@ export default function KategoriPageClient({
                           className="h-7 w-7 rounded-full bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20"
                           onClick={(e) => {
                             e.stopPropagation();
-                            toast.warning(usageDescription(usage));
+                            toast.warning(getUsageDescription(usage, dict));
                           }}
-                          aria-label={`Hapus ${k.nama}`}
+                          aria-label={dict.categories.deleteAria.replace(
+                            "{name}",
+                            k.nama,
+                          )}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       ) : (
                         <ConfirmDialog
-                          title={`Hapus kategori "${k.nama}"?`}
-                          description="Tindakan ini tidak dapat dibatalkan. Kategori ini akan dihapus permanen."
+                          title={dict.categories.deleteItemConfirmTitle.replace(
+                            "{name}",
+                            k.nama,
+                          )}
+                          description={
+                            dict.categories.deleteItemConfirmDescription
+                          }
                           onConfirm={() => handleDelete(k)}
                         >
                           <Button
                             size="icon"
                             variant="ghost"
                             className="h-7 w-7 rounded-full bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20"
-                            aria-label={`Hapus ${k.nama}`}
+                            aria-label={dict.categories.deleteAria.replace(
+                              "{name}",
+                              k.nama,
+                            )}
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>

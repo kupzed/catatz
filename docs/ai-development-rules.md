@@ -7,7 +7,7 @@
 > CatatZ adalah aplikasi yang telah aktif berjalan di tahap **production**. Semua AI agent (Codex, Claude, Gemini, dsb.) wajib beroperasi dengan standar kehati-hatian production:
 >
 > 1. **Data Finansial Nyata**: Logika transaksi, rekening, dan hutang/piutang memproses data uang asli pengguna. Tidak ada toleransi untuk perubahan logika yang merusak integritas saldo atau cascade data tanpa verifikasi.
-> 2. **Immutabilitas Migration**: File migration `src/migrations/` (`001` s/d `014`) merupakan riwayat production yang immutable. Jangan pernah memodifikasi migration lama. Perubahan schema hanya boleh melalui migration baru yang bersifat additive.
+> 2. **Immutabilitas Migration**: File migration `src/migrations/` (`001` s/d `017`) merupakan riwayat production yang immutable. Jangan pernah memodifikasi migration lama. Perubahan schema hanya boleh melalui migration baru yang bersifat additive.
 > 3. **Backward Compatibility**: Routing, Server Actions, auth sessions, dan RLS policies tidak boleh dirusak tanpa rencana migrasi dan kompatibilitas yang teruji.
 > 4. **Proteksi Secret**: Dilarang mengekspos token, API key, service role key, atau credential apapun. `AI_API_KEY` harus selalu di server-side.
 > 5. **Verifikasi Wajib**: Setiap task wajib divalidasi dengan `npm run verify:quick` sebelum dianggap selesai.
@@ -24,7 +24,7 @@
 - Setelah mengubah auth, update `docs/supabase-auth.md`.
 - Setelah mengubah deployment/env, update `docs/environment-variables.md` dan `docs/deployment-vercel.md`.
 - Jangan expose secret, token, service role key, atau credential.
-- Gunakan Bahasa Indonesia untuk UI user-facing kecuali istilah teknis.
+- Gunakan kamus `src/i18n/` untuk teks UI user-facing (bilingual ID/EN). Dilarang hardcode teks bahasa tertentu langsung di komponen.
 - Buat suggested Conventional Commit message dalam Bahasa Inggris setelah selesai.
 - Jangan membuat commit Git otomatis kecuali user meminta eksplisit.
 - Gunakan `.agents/skills/` sebagai canonical skill surface dan jangan menduplikasi isi skill ke `.claude/skills/`.
@@ -56,6 +56,7 @@
 | Auth/session/proxy | `docs/supabase-auth.md`, `docs/security-checklist.md`, `docs/troubleshooting.md` |
 | Env/deployment | `docs/environment-variables.md`, `docs/deployment-vercel.md`, `README.md` jika quick start berubah |
 | PWA/offline | `docs/pwa.md`, fitur terkait, `docs/security-checklist.md` jika caching berubah |
+| Teks UI, lokalisasi, kamus bahasa | `src/i18n/`, `docs/features/*`, `docs/frontend-guidelines.md` |
 | UI guideline reusable | `docs/frontend-guidelines.md` |
 | Agent workflow, skills, hooks, tests, CI, atau MCP | `docs/ecc-workflow.md`, `docs/folder-structure.md`, `README.md` jika command berubah |
 

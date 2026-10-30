@@ -3,11 +3,54 @@
 > **Sumber kebenaran desain:** [`DESIGN.md`](../DESIGN.md) — baca DESIGN.md sebelum membuat komponen atau halaman baru.  
 > Dokumen ini adalah adaptasi DESIGN.md ke implementasi Tailwind CSS v4 + shadcn/ui di codebase CatatZ.
 
-## Bahasa UI
+## Bahasa UI & Internasionalisasi (i18n)
 
-- UI user-facing menggunakan Bahasa Indonesia.
-- Istilah teknis boleh dipakai jika memang lebih jelas, misalnya PWA, export, login, atau server action.
-- Error message untuk user harus jelas dan tidak membocorkan detail internal yang sensitif.
+- UI user-facing mendukung dua bahasa: **Bahasa Indonesia (`id`, default)** dan **English (`en`)**.
+- **Dilarang hardcode string UI langsung di dalam JSX/TSX atau Server Action.**
+- Semua teks tampilan, label tombol, placeholder, modal/dialog text, empty state, badge, error/toast message, dan navigasi harus mengambil string dari kamus terjemahan `src/i18n/`.
+- Istilah teknis universal (misalnya PWA, QRIS, BCA) tidak diterjemahkan. Istilah finansial domain dipetakan konsisten: Pemasukan → Income, Pengeluaran → Expense, Rekening → Wallet, Saldo → Balance, Hutang → Debt, Piutang → Receivable, Cicilan → Installment.
+- Error message untuk user harus jelas, ramah, dan tidak membocorkan detail internal/stack trace yang sensitif.
+
+### Panduan Menggunakan i18n pada Komponen Baru:
+
+1. **Client Components**:
+   Gunakan hook `useTranslation()` dari `@/i18n`:
+   ```tsx
+   "use client";
+   import { useTranslation } from "@/i18n";
+
+   export function MyComponent() {
+     const { dict, locale } = useTranslation();
+     return <button>{dict.common.save}</button>;
+   }
+   ```
+
+2. **Server Components**:
+   Ambil locale dan dictionary langsung di server layer:
+   ```tsx
+   import { getLocale } from "@/i18n/get-locale";
+   import { getDictionary } from "@/i18n/get-dictionary";
+
+   export default async function MyPage() {
+     const locale = await getLocale();
+     const dict = getDictionary(locale);
+     return <h1>{dict.nav.transactions}</h1>;
+   }
+   ```
+
+3. **Validasi Form (Zod Factory Pattern)**:
+   Gunakan fungsi factory schema `get<Name>Schema(dict)` agar pesan validasi form otomatis mengikuti bahasa aktif:
+   ```tsx
+   const { dict } = useTranslation();
+   const schema = getTransaksiSchema(dict);
+   const form = useForm({ resolver: zodResolver(schema) });
+   ```
+
+4. **Menambahkan Key Baru ke Kamus**:
+   - Daftarkan key dan strukturnya di `src/i18n/types.ts` pada interface `Dictionary`.
+   - Tambahkan translasi Indonesianya di `src/i18n/dictionaries/id.ts`.
+   - Tambahkan translasi English-nya di `src/i18n/dictionaries/en.ts`.
+   - Jalankan `npm run verify:quick` untuk memastikan kedua file sinkron dan tipe TypeScript terpenuhi secara utuh.
 
 ## Stack UI
 

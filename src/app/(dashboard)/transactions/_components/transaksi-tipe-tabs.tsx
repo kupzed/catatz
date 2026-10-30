@@ -1,7 +1,10 @@
+"use client";
+
 import { SlidersHorizontal } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TIPE_TABS } from "@/constants/transaksi";
+import { getTipeTabs } from "@/constants/transaksi";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/i18n/use-translation";
 import type { TransaksiSchema } from "@/validations/transaksi-validation";
 
 type TransaksiTipeTabsProps = {
@@ -17,25 +20,28 @@ export function TransaksiTipeTabs({
   onTipeChange,
   allowedTipe,
 }: TransaksiTipeTabsProps) {
+  const { dict } = useTranslation();
+
   if (isCorrection) {
     return (
       <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
         <SlidersHorizontal className="h-4 w-4 text-amber-600 shrink-0" />
         <span className="text-sm font-medium text-amber-700 dark:text-amber-400">
-          Koreksi Saldo
+          {dict.transactions.types.correction}
         </span>
         <span className="text-xs text-amber-600 dark:text-amber-500 ml-auto">
-          Tipe tidak dapat diubah
+          {dict.transactions.tabs.typeCannotBeChanged}
         </span>
       </div>
     );
   }
 
+  const allTabs = getTipeTabs(dict);
   const tabs = allowedTipe
-    ? TIPE_TABS.filter((t) =>
+    ? allTabs.filter((t) =>
         allowedTipe.includes(t.value as TransaksiSchema["tipe"]),
       )
-    : TIPE_TABS;
+    : allTabs;
 
   const gridColsClass =
     tabs.length === 1

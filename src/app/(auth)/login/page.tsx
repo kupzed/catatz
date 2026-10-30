@@ -15,8 +15,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { useTranslation } from "@/i18n/use-translation";
 
 function LoginForm() {
+  const { dict } = useTranslation();
   const [state, formAction, isPending] = useActionState(signIn, null);
   const [showPassword, setShowPassword] = useState(false);
   const [isGooglePending, startGoogleTransition] = useTransition();
@@ -27,7 +29,7 @@ function LoginForm() {
     startGoogleTransition(async () => {
       const res = await signInWithGoogle();
       if (res?.error) {
-        toast.error("Google login gagal", { description: res.error });
+        toast.error(dict.auth.login.googleLoginFailed, { description: res.error });
       } else if (res?.data?.url) {
         window.location.href = res.data.url;
       }
@@ -36,33 +38,32 @@ function LoginForm() {
 
   useEffect(() => {
     if (state?.error) {
-      toast.error("Login gagal", { description: state.error });
+      toast.error(dict.auth.login.loginFailed, { description: state.error });
     }
-  }, [state]);
+  }, [state, dict]);
 
   useEffect(() => {
     if (message === "reset-success") {
-      toast.success("Berhasil", {
-        description: "Password berhasil diperbarui, silakan login.",
+      toast.success(dict.toast.success, {
+        description: dict.auth.login.resetSuccess,
       });
     } else if (message === "auth-callback-failed") {
-      toast.error("Gagal", {
-        description: "Link tidak valid atau kadaluarsa.",
+      toast.error(dict.toast.error, {
+        description: dict.auth.login.authCallbackFailed,
       });
     } else if (message === "session-revoked") {
-      toast.error("Sesi Berakhir", {
-        description:
-          "Sesi Anda telah diakhiri dari perangkat lain. Silakan login kembali.",
+      toast.error(dict.toast.sessionExpired, {
+        description: dict.auth.login.sessionRevoked,
       });
     }
-  }, [message]);
+  }, [message, dict]);
 
   return (
     <div className="bg-card dark:bg-surface-dark-elevated border border-border dark:border-white/10 rounded-card p-8">
       <h2 className="text-xl font-normal text-foreground mb-1">
-        Selamat datang kembali
+        {dict.auth.login.title}
       </h2>
-      <p className="text-muted-foreground text-sm mb-6">Masuk ke akun CatatZ Anda</p>
+      <p className="text-muted-foreground text-sm mb-6">{dict.auth.login.subtitle}</p>
 
       <Button
         type="button"
@@ -90,7 +91,7 @@ function LoginForm() {
             ></path>
           </svg>
         )}
-        Masuk dengan Google
+        {dict.auth.login.googleButton}
       </Button>
 
       <div className="relative mb-6">
@@ -99,7 +100,7 @@ function LoginForm() {
         </div>
         <div className="relative flex justify-center text-sm">
           <span className="px-2 bg-card dark:bg-surface-dark-elevated text-muted-foreground">
-            Atau
+            {dict.common.or}
           </span>
         </div>
       </div>
@@ -107,7 +108,7 @@ function LoginForm() {
       <form action={formAction} method="POST" className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email" className="text-muted-foreground text-sm font-medium">
-            Email
+            {dict.auth.login.emailLabel}
           </Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
@@ -115,7 +116,7 @@ function LoginForm() {
               id="email"
               name="email"
               type="email"
-              placeholder="nama@email.com"
+              placeholder={dict.auth.login.emailPlaceholder}
               required
               className="pl-10 bg-background dark:bg-surface-dark border-border dark:border-white/15 text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
@@ -127,7 +128,7 @@ function LoginForm() {
             htmlFor="password"
             className="text-muted-foreground text-sm font-medium"
           >
-            Password
+            {dict.auth.login.passwordLabel}
           </Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
@@ -135,7 +136,7 @@ function LoginForm() {
               id="password"
               name="password"
               type={showPassword ? "text" : "password"}
-              placeholder="••••••••"
+              placeholder={dict.auth.login.passwordPlaceholder}
               required
               className="pl-10 pr-10 bg-background dark:bg-surface-dark border-border dark:border-white/15 text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
@@ -156,7 +157,7 @@ function LoginForm() {
               href="/forgot-password"
               className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
             >
-              Lupa password?
+              {dict.auth.login.forgotPasswordLink}
             </Link>
           </div>
         </div>
@@ -169,21 +170,21 @@ function LoginForm() {
           {isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Masuk...
+              {dict.auth.login.submitting}
             </>
           ) : (
-            "Masuk"
+            dict.auth.login.submit
           )}
         </Button>
       </form>
 
       <p className="text-center text-sm text-muted-foreground mt-6">
-        Belum punya akun?{" "}
+        {dict.auth.login.noAccount}{" "}
         <Link
           href="/register"
           className="text-primary hover:text-primary/80 font-medium transition-colors"
         >
-          Daftar sekarang
+          {dict.auth.login.registerLink}
         </Link>
       </p>
     </div>

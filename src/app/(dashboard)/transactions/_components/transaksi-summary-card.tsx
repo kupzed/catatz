@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 
 export type TransaksiSummaryCardProps = {
   dateLabel: string;
@@ -29,6 +30,7 @@ export function TransaksiSummaryCard({
   totalExpense,
 }: TransaksiSummaryCardProps) {
   const { formatRupiah } = useSystemPreferences();
+  const { dict } = useTranslation();
 
   return (
     <div className="rounded-card border border-hairline bg-surface-dark dark:bg-surface-dark-elevated text-white overflow-hidden ring-1 ring-white/5">
@@ -53,7 +55,7 @@ export function TransaksiSummaryCard({
               preset !== "all" && "hover:underline underline-offset-2",
             )}
             disabled={preset === "all"}
-            title={preset !== "all" ? "Klik untuk pilih tanggal" : undefined}
+            title={preset !== "all" ? dict.transactions.summary.clickToSelectDate : undefined}
           >
             <CalendarIcon className="h-3.5 w-3.5 opacity-70" />
             {dateLabel}
@@ -87,7 +89,7 @@ export function TransaksiSummaryCard({
       <div className="grid grid-cols-3 divide-x divide-hairline px-3 sm:px-6 py-4 text-center bg-background dark:bg-card text-foreground rounded-b-card">
         <div className="px-0.5 sm:px-1 min-w-0">
           <p className="text-[10px] uppercase tracking-wider font-medium text-muted-foreground">
-            Pemasukan
+            {dict.transactions.summary.income}
           </p>
           <p className="font-mono text-sm sm:text-base font-semibold text-semantic-up mt-0.5 break-all leading-tight">
             {totalIncome > 0 ? "+" : ""}
@@ -96,7 +98,7 @@ export function TransaksiSummaryCard({
         </div>
         <div className="px-0.5 sm:px-1 min-w-0">
           <p className="text-[10px] uppercase tracking-wider font-medium text-muted-foreground">
-            Pengeluaran
+            {dict.transactions.summary.expense}
           </p>
           <p className="font-mono text-sm sm:text-base font-semibold text-semantic-down mt-0.5 break-all leading-tight">
             {formatRupiah(totalExpense)}
@@ -104,7 +106,7 @@ export function TransaksiSummaryCard({
         </div>
         <div className="px-0.5 sm:px-1 min-w-0">
           <p className="text-[10px] uppercase tracking-wider font-medium text-muted-foreground">
-            Selisih
+            {dict.transactions.summary.balance}
           </p>
           <p
             className={cn(

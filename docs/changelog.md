@@ -2,6 +2,22 @@
 
 Format mengikuti Keep a Changelog sederhana.
 
+## [Unreleased]
+
+### Added
+
+- **Dukungan Bilingual Penuh (Bahasa Indonesia & English / i18n)**:
+  - Arsitektur lokalisasi internal berbasis kamus TypeScript terstruktur di `src/i18n/` tanpa library eksternal (`next-intl`, `react-intl`, atau `i18next`).
+  - Kamus terjemahan lengkap (`src/i18n/dictionaries/id.ts` & `src/i18n/dictionaries/en.ts`) yang mencakup seluruh halaman transaksi, rekening, rekap/laporan, hutang/piutang, kategori, pengaturan, dan auth.
+  - Server-first resolution melalui `getLocale()` dari kolom preferensi `user_preferences.language` (default: `'id'`).
+  - React Context provider `DictionaryProvider` dan hook `useTranslation()` untuk rendering instan pada seluruh Client Components.
+  - Migrasi database additive `017-user-preferences-language.sql` yang menambahkan kolom `language` pada tabel `user_preferences`.
+  - Schema validasi Zod form menggunakan pattern pabrik `get<Entity>Schema(dict)` untuk error validasi dinamis dalam bahasa aktif.
+  - PWA manifest, offline fallback page (`offline.html`), offline indicator, dan dynamic HTML metadata bilingual (`<html lang={locale}>`).
+  - Selector bahasa terintegrasi di `/settings` (Preferensi Sistem) dengan optimistic update dan server boundary refresh.
+
+---
+
 ## [1.3.0] — 2026-10-22
 
 ### Added

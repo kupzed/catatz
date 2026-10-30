@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  hutangTransactionSchema,
+  getHutangTransactionSchema,
   type HutangTransactionSchema,
 } from "@/validations/hutang-validation";
 import { createHutangTransaction, updateCicilan } from "@/actions/hutang-action";
 import { toast } from "sonner";
+import { useTranslation } from "@/i18n/use-translation";
 import type { Hutang, HutangCicilan, JenisTransaksiHutang } from "@/types/hutang";
 import type { Rekening } from "@/types/rekening";
 import { todayISODate, currentTime } from "@/lib/utils";
@@ -50,6 +51,7 @@ export function HutangTransactionDialog({
   totalPinjaman,
   onSuccess,
 }: Props) {
+  const { dict } = useTranslation();
   const isEdit = !!editData;
   const [submitting, setSubmitting] = useState(false);
 
@@ -61,7 +63,7 @@ export function HutangTransactionDialog({
     reset,
     formState: { errors },
   } = useForm<HutangTransactionSchema>({
-    resolver: zodResolver(hutangTransactionSchema),
+    resolver: zodResolver(getHutangTransactionSchema(dict)),
     defaultValues: {
       hutang_id: hutang.id,
       jenis_transaksi: totalPinjaman === 0 ? "pinjaman" : defaultJenis,
@@ -107,20 +109,20 @@ export function HutangTransactionDialog({
           catatan: values.catatan,
         });
         if (res.success && res.data) {
-          toast.success("Transaksi diperbarui");
+          toast.success(dict.debts.toasts.transactionUpdated);
           onSuccess(res.data);
           onOpenChange(false);
         } else {
-          toast.error(res.error ?? "Gagal memperbarui transaksi");
+          toast.error(res.error ?? dict.debts.toasts.transactionUpdateFailed);
         }
       } else {
         const res = await createHutangTransaction(values);
         if (res.success && res.data) {
-          toast.success("Transaksi berhasil dicatat");
+          toast.success(dict.debts.toasts.transactionCreated);
           onSuccess(res.data);
           onOpenChange(false);
         } else {
-          toast.error(res.error ?? "Gagal mencatat transaksi");
+          toast.error(res.error ?? dict.debts.toasts.transactionCreateFailed);
         }
       }
     } finally {
@@ -136,33 +138,33 @@ export function HutangTransactionDialog({
         <DialogHeader>
           <DialogTitle>
             {isEdit
-              ? "Edit Transaksi"
+              ? dict.debts.transactionDialog.editTitle
               : jenisTransaksi === "pinjaman"
                 ? totalPinjaman === 0
                   ? isPiutang
-                    ? "Beri Pinjaman Pertama"
-                    : "Catat Pinjaman Diterima"
+                    ? dict.debts.transactionDialog.giveFirstLoan
+                    : dict.debts.transactionDialog.recordReceivedLoan
                   : isPiutang
-                    ? "Tambah Pinjaman Diberikan"
-                    : "Tambah Pinjaman Diterima"
+                    ? dict.debts.transactionDialog.addGivenLoan
+                    : dict.debts.transactionDialog.addReceivedLoan
                 : isPiutang
-                  ? "Catat Pembayaran"
-                  : "Bayar Hutang"}
+                  ? dict.debts.transactionDialog.recordPayment
+                  : dict.debts.transactionDialog.payDebt}
           </DialogTitle>
           <DialogDescription>
             {isEdit
-              ? "Perbarui riwayat transaksi hutang/piutang ini."
+              ? dict.debts.transactionDialog.editDescription
               : isPiutang
                 ? jenisTransaksi === "pinjaman"
                   ? totalPinjaman === 0
-                    ? "Catat pinjaman awal yang Anda berikan kepada pihak ini."
-                    : "Catat pinjaman tambahan yang Anda berikan kepada pihak ini."
-                  : "Catat uang pengembalian/cicilan yang Anda terima dari pihak ini."
+                    ? dict.debts.transactionDialog.descGiveInitialLoan
+                    : dict.debts.transactionDialog.descGiveAdditionalLoan
+                  : dict.debts.transactionDialog.descReceiveRepayment
                 : jenisTransaksi === "pinjaman"
                   ? totalPinjaman === 0
-                    ? "Catat pinjaman awal yang Anda terima dari pihak ini."
-                    : "Catat pinjaman tambahan yang Anda terima dari pihak ini."
-                  : "Catat uang pembayaran/cicilan yang Anda bayarkan kepada pihak ini."}
+                    ? dict.debts.transactionDialog.descReceiveInitialLoan
+                    : dict.debts.transactionDialog.descReceiveAdditionalLoan
+                  : dict.debts.transactionDialog.descMakePayment}
           </DialogDescription>
         </DialogHeader>
 
@@ -176,25 +178,29 @@ export function HutangTransactionDialog({
           >
             <TabsList className="w-full grid grid-cols-2">
               <TabsTrigger value="pinjaman">
-                {isPiutang ? "📤 Tambah Pinjaman" : "📥 Terima Pinjaman"}
+                {isPiutang
+                  ? `📤 ${dict.debts.transactionDialog.tabAddLoan}`
+                  : `📥 ${dict.debts.transactionDialog.tabReceiveLoan}`}
               </TabsTrigger>
               <TabsTrigger
                 value="pembayaran"
                 disabled={totalPinjaman === 0 && !isEdit}
                 title={
                   totalPinjaman === 0 && !isEdit
-                    ? "Catat pinjaman terlebih dahulu"
+                    ? dict.debts.transactionDialog.recordLoanFirst
                     : undefined
                 }
               >
-                {isPiutang ? "📥 Terima Pengembalian" : "📤 Bayar Hutang"}
+                {isPiutang
+                  ? `📥 ${dict.debts.transactionDialog.tabReceivePayment}`
+                  : `📤 ${dict.debts.transactionDialog.tabPayDebt}`}
               </TabsTrigger>
             </TabsList>
           </Tabs>
 
           {/* Nominal */}
           <div className="space-y-1.5">
-            <Label htmlFor="tx-nominal">Nominal (Rp)</Label>
+            <Label htmlFor="tx-nominal">{dict.debts.transactionDialog.nominalLabel}</Label>
             <Controller
               control={control}
               name="nominal"
@@ -216,7 +222,7 @@ export function HutangTransactionDialog({
           {/* Tanggal & Waktu */}
           <div className="grid grid-cols-[3fr_1fr] gap-3">
             <div className="flex-1 space-y-1.5 min-w-0">
-              <Label htmlFor="tx-tanggal">Tanggal</Label>
+              <Label htmlFor="tx-tanggal">{dict.common.date}</Label>
               <Input
                 id="tx-tanggal"
                 type="date"
@@ -230,7 +236,7 @@ export function HutangTransactionDialog({
               )}
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="tx-waktu">Waktu</Label>
+              <Label htmlFor="tx-waktu">{dict.common.time}</Label>
               <Controller
                 control={control}
                 name="waktu"
@@ -252,11 +258,11 @@ export function HutangTransactionDialog({
             <Label htmlFor="tx-rekening">
               {isPiutang
                 ? jenisTransaksi === "pinjaman"
-                  ? "Diambil dari Rekening"
-                  : "Diterima ke Rekening"
+                  ? dict.debts.transactionDialog.takenFromWallet
+                  : dict.debts.transactionDialog.receivedToWallet
                 : jenisTransaksi === "pinjaman"
-                  ? "Diterima ke Rekening"
-                  : "Dibayar dari Rekening"}
+                  ? dict.debts.transactionDialog.receivedToWallet
+                  : dict.debts.transactionDialog.paidFromWallet}
             </Label>
             <Controller
               control={control}
@@ -268,9 +274,9 @@ export function HutangTransactionDialog({
                   onValueChange={(val) =>
                     field.onChange(val === "none" ? "" : val)
                   }
-                  placeholder="(Tanpa Rekening)"
+                  placeholder={dict.debts.transactionDialog.noWalletPlaceholder}
                   includeNone={true}
-                  noneLabel="(Tanpa Rekening)"
+                  noneLabel={dict.debts.transactionDialog.noWalletPlaceholder}
                   className="h-10 text-sm"
                 />
               )}
@@ -279,10 +285,10 @@ export function HutangTransactionDialog({
 
           {/* Catatan */}
           <div className="space-y-1.5">
-            <Label htmlFor="tx-catatan">Catatan</Label>
+            <Label htmlFor="tx-catatan">{dict.debts.form.notes}</Label>
             <ClearableInput
               id="tx-catatan"
-              placeholder="Keterangan opsional"
+              placeholder={dict.debts.transactionDialog.notesPlaceholder}
               {...register("catatan")}
               onClear={() => setValue("catatan", "")}
             />
@@ -293,8 +299,9 @@ export function HutangTransactionDialog({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
+              className="rounded-full"
             >
-              Batal
+              {dict.common.cancel}
             </Button>
             <Button
               type="submit"
@@ -302,7 +309,7 @@ export function HutangTransactionDialog({
               className="bg-primary hover:bg-primary-active text-white rounded-full h-11 px-5"
             >
               {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              {isEdit ? "Perbarui" : "Simpan"}
+              {isEdit ? dict.debts.form.submitUpdate : dict.debts.form.submitCreate}
             </Button>
           </DialogFooter>
         </form>

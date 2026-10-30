@@ -51,6 +51,8 @@ import {
   useOfflineQueueSync,
   type DisplayTransaksi,
 } from "@/hooks/use-offline-queue-sync";
+import { useTranslation } from "@/i18n/use-translation";
+import { getJenisDisplay } from "@/constants/banks";
 import { RekeningStatCards } from "./rekening-stat-cards";
 
 type Props = {
@@ -71,14 +73,6 @@ const JENIS_CONFIG: Record<
   Investasi: { icon: TrendingUp, color: "text-emerald-500 bg-emerald-500/10" },
 };
 
-const TIPE_TABS: { label: string; value: TipeTransaksi | "all" }[] = [
-  { label: "Semua", value: "all" },
-  { label: "Pemasukan", value: "income" },
-  { label: "Pengeluaran", value: "expense" },
-  { label: "Transfer", value: "transfer" },
-  { label: "Koreksi", value: "correction" },
-];
-
 export function RekeningDetailClient({
   initialRekening,
   initialUsage,
@@ -88,6 +82,7 @@ export function RekeningDetailClient({
 }: Props) {
   const router = useRouter();
   const { formatRupiah } = useSystemPreferences();
+  const { dict } = useTranslation();
 
   // Core States
   const [rekening, setRekening] = useState<Rekening>(initialRekening);
@@ -126,6 +121,17 @@ export function RekeningDetailClient({
 
   // Filter States
   const [selectedTipe, setSelectedTipe] = useState<TipeTransaksi | "all">("all");
+
+  const tipeTabs = useMemo<{ label: string; value: TipeTransaksi | "all" }[]>(
+    () => [
+      { label: dict.common.all, value: "all" },
+      { label: dict.transactions.types.income, value: "income" },
+      { label: dict.transactions.types.expense, value: "expense" },
+      { label: dict.transactions.types.transfer, value: "transfer" },
+      { label: dict.transactions.types.correction, value: "correction" },
+    ],
+    [dict],
+  );
 
   const {
     preset,
@@ -230,11 +236,11 @@ export function RekeningDetailClient({
       setRekening((prev) => ({ ...prev, exclude_total: nextVal }));
       toast.success(
         nextVal
-          ? "Rekening dikecualikan dari total saldo"
-          : "Rekening dimasukkan ke dalam total saldo",
+          ? dict.wallets.toasts.excludedFromTotal
+          : dict.wallets.toasts.includedInTotal,
       );
     } else {
-      toast.error(res.error ?? "Gagal memperbarui status");
+      toast.error(res.error ?? dict.wallets.toasts.updateStatusFailed);
     }
   }
 
@@ -248,10 +254,10 @@ export function RekeningDetailClient({
         ...prev,
         total: Math.max(0, prev.total - 1),
       }));
-      toast.success("Transaksi berhasil dihapus");
+      toast.success(dict.toast.deleted);
       router.refresh();
     } else {
-      toast.error(res.error ?? "Gagal menghapus transaksi");
+      toast.error(res.error ?? dict.toast.deleteFailed);
     }
     setDeletingTxId(null);
   }
@@ -291,7 +297,7 @@ export function RekeningDetailClient({
             className="gap-1.5 -ml-2 text-muted-foreground hover:text-foreground rounded-full h-8 px-2.5 cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
-            Kembali ke Rekening
+            {dict.wallets.detail.backToWallets}
           </Button>
 
           <div className="flex items-center gap-2.5 flex-wrap">
@@ -307,7 +313,7 @@ export function RekeningDetailClient({
                 )}
               >
                 <JenisIcon className="h-3.5 w-3.5" />
-                {rekening.jenis}
+                {getJenisDisplay(rekening.jenis, dict)}
               </Badge>
               <Badge
                 variant="outline"
@@ -318,7 +324,9 @@ export function RekeningDetailClient({
                     : "bg-surface-strong text-foreground",
                 )}
               >
-                {rekening.exclude_total ? "Dikecualikan" : "Aktif di Total"}
+                {rekening.exclude_total
+                  ? dict.wallets.detail.excluded
+                  : dict.wallets.detail.activeInTotal}
               </Badge>
             </div>
           </div>
@@ -332,7 +340,7 @@ export function RekeningDetailClient({
             className="rounded-full h-10 sm:h-9 px-4 border-hairline hover:bg-surface-soft text-foreground text-xs font-medium gap-1.5 cursor-pointer justify-center"
           >
             <Pencil className="h-3.5 w-3.5" />
-            <span>Edit Rekening</span>
+            <span>{dict.wallets.detail.editWallet}</span>
           </Button>
 
           <Button
@@ -341,7 +349,7 @@ export function RekeningDetailClient({
             id="btn-tambah-transaksi-wallet"
           >
             <Plus className="h-4 w-4" />
-            <span>Tambah Transaksi</span>
+            <span>{dict.transactions.form.createTitle}</span>
           </Button>
         </div>
       </div>
@@ -354,7 +362,7 @@ export function RekeningDetailClient({
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-1">
-              Saldo Saat Ini
+              {dict.wallets.detail.currentBalance}
             </p>
             <p className="font-mono text-3xl sm:text-4xl lg:text-5xl font-normal text-foreground tracking-tight">
               {formatRupiah(Number(rekening.saldo_saat_ini))}
@@ -373,8 +381,8 @@ export function RekeningDetailClient({
               className="text-xs text-muted-foreground cursor-pointer select-none"
             >
               {!rekening.exclude_total
-                ? "Termasuk dalam total saldo aktif"
-                : "Dikecualikan dari total saldo"}
+                ? dict.wallets.detail.includedInActiveBalance
+                : dict.wallets.detail.excludedFromTotalBalance}
             </label>
           </div>
         </div>
@@ -393,17 +401,20 @@ export function RekeningDetailClient({
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-semibold text-foreground">
-                Histori Transaksi
+                {dict.wallets.detail.transactionsHistory}
               </h2>
               <Badge
                 variant="secondary"
                 className="text-xs px-2.5 py-0.5 rounded-full bg-surface-strong text-muted-foreground border-none font-mono"
               >
-                {tipeFiltered.length} Data
+                {dict.wallets.detail.dataCount.replace(
+                  "{count}",
+                  String(tipeFiltered.length),
+                )}
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Catatan transaksi terkait rekening ini
+              {dict.wallets.detail.transactionsSubtitle}
             </p>
           </div>
 
@@ -435,15 +446,15 @@ export function RekeningDetailClient({
                 )}
                 id="wallet-filter-periode"
               >
-                <SelectValue placeholder="Periode" />
+                <SelectValue placeholder={dict.transactions.filter.period} />
               </SelectTrigger>
               <SelectContent align="end" className="min-w-44 rounded-2xl">
-                <SelectItem value="all">Semua Waktu</SelectItem>
-                <SelectItem value="bulan">Bulan Ini</SelectItem>
-                <SelectItem value="minggu">Minggu Ini</SelectItem>
-                <SelectItem value="hari">Hari Ini</SelectItem>
-                <SelectItem value="tahun">Tahun Ini</SelectItem>
-                <SelectItem value="custom">Custom</SelectItem>
+                <SelectItem value="all">{dict.transactions.filter.periodAllTime}</SelectItem>
+                <SelectItem value="bulan">{dict.transactions.filter.periodThisMonth}</SelectItem>
+                <SelectItem value="minggu">{dict.transactions.filter.periodThisWeek}</SelectItem>
+                <SelectItem value="hari">{dict.transactions.filter.periodToday}</SelectItem>
+                <SelectItem value="tahun">{dict.transactions.filter.periodThisYear}</SelectItem>
+                <SelectItem value="custom">{dict.transactions.filter.periodCustom}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -456,7 +467,7 @@ export function RekeningDetailClient({
                     size="icon"
                     onClick={handlePrevDate}
                     className="h-6 w-6 rounded-full hover:bg-surface-soft dark:hover:bg-surface-dark p-0 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
-                    aria-label="Periode sebelumnya"
+                    aria-label={dict.transactions.summary.prevPeriod}
                   >
                     <ChevronLeft className="h-3.5 w-3.5" />
                   </Button>
@@ -467,7 +478,7 @@ export function RekeningDetailClient({
                   <button
                     type="button"
                     className="text-xs font-medium text-foreground hover:underline cursor-pointer flex items-center gap-1.5 min-w-0"
-                    title="Klik untuk pilih tanggal"
+                    title={dict.transactions.summary.clickToSelectDate}
                   >
                     <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                     <span className="truncate max-w-32.5 sm:max-w-none">{dateLabel}</span>
@@ -490,7 +501,7 @@ export function RekeningDetailClient({
                     size="icon"
                     onClick={handleNextDate}
                     className="h-6 w-6 rounded-full hover:bg-surface-soft dark:hover:bg-surface-dark p-0 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
-                    aria-label="Periode berikutnya"
+                    aria-label={dict.transactions.summary.nextPeriod}
                   >
                     <ChevronRight className="h-3.5 w-3.5" />
                   </Button>
@@ -504,7 +515,7 @@ export function RekeningDetailClient({
         <div className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between pt-1">
           {/* Tipe Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none -mx-1 px-1">
-            {TIPE_TABS.map((tab) => (
+            {tipeTabs.map((tab) => (
               <Button
                 key={tab.value}
                 variant="ghost"
@@ -527,7 +538,7 @@ export function RekeningDetailClient({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Cari transaksi..."
+              placeholder={dict.transactions.filter.searchPlaceholder}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="h-9 pl-9 pr-8 text-xs rounded-input bg-card border-hairline w-full"
@@ -537,7 +548,7 @@ export function RekeningDetailClient({
                 type="button"
                 onClick={() => setSearch("")}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
-                aria-label="Hapus pencarian"
+                aria-label={dict.common.clear}
               >
                 <X className="h-3.5 w-3.5" />
               </button>

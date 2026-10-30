@@ -14,6 +14,10 @@ import { createClient } from "@/configs/supabase/server";
 
 Client tersebut membaca cookie session Supabase melalui `next/headers`.
 
+## Internationalization (i18n) & Validation
+
+Server Actions mengembalikan pesan error dan sukses yang ter-lokalisasi sesuai preferensi bahasa user (`getActionLocale()`, fallback `'id'`). Validasi form di `src/validations/` menerapkan factory pattern (misalnya `getTransaksiSchema(dict?)`) agar pesan validasi Zod menggunakan kamus bahasa yang aktif, dengan default export instance tanpa argumen (`transaksiSchema`) untuk backward compatibility.
+
 ## Auth Actions
 
 ### `signUp`

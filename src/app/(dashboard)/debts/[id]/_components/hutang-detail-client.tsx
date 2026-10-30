@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Hutang, HutangCicilan, JenisTransaksiHutang } from "@/types/hutang";
 import type { Rekening } from "@/types/rekening";
+import { useTranslation } from "@/i18n/use-translation";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
 import { deleteHutang, toggleHutangStatus, updateHutangTipe } from "@/actions/hutang-action";
 import { toast } from "sonner";
@@ -33,6 +34,7 @@ type Props = {
 
 export function HutangDetailClient({ initialHutang, rekening }: Props) {
   const router = useRouter();
+  const { dict } = useTranslation();
   const { formatRupiah } = useSystemPreferences();
   const [hutang, setHutang] = useState<Hutang>(initialHutang);
 
@@ -72,11 +74,11 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
       setHutang(res.data);
       toast.success(
         nextStatus
-          ? "Status ditandai sebagai Lunas"
-          : "Status ditandai sebagai Belum Lunas",
+          ? dict.debts.toasts.markedPaid
+          : dict.debts.toasts.markedUnpaid,
       );
     } else {
-      toast.error(res.error ?? "Gagal mengubah status");
+      toast.error(res.error ?? dict.debts.toasts.statusChangeFailed);
     }
     setTogglingStatus(false);
   }
@@ -84,10 +86,10 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
   async function handleDeleteParty() {
     const res = await deleteHutang(hutang.id);
     if (res.success) {
-      toast.success("Catatan berhasil dihapus");
+      toast.success(dict.debts.toasts.partyDeleted);
       router.push("/debts");
     } else {
-      toast.error(res.error ?? "Gagal menghapus catatan");
+      toast.error(res.error ?? dict.debts.toasts.partyDeleteFailed);
     }
   }
 
@@ -96,9 +98,9 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
     const res = await updateHutangTipe(hutang.id, newTipe);
     if (res.success && res.data) {
       setHutang(res.data);
-      toast.success("Tipe hubungan berhasil diperbarui");
+      toast.success(dict.debts.toasts.typeSwitched);
     } else {
-      toast.error(res.error ?? "Gagal mengubah tipe");
+      toast.error(res.error ?? dict.debts.toasts.typeSwitchFailed);
     }
   }
 
@@ -128,7 +130,7 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
             className="gap-1.5 -ml-2 text-muted-foreground hover:text-foreground rounded-full h-8 px-2.5 mb-1"
           >
             <ArrowLeft className="h-4 w-4" />
-            Kembali ke Daftar
+            {dict.debts.detail.backToList}
           </Button>
 
           <div className="flex items-center gap-2.5 flex-wrap">
@@ -143,12 +145,12 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
                   : "bg-surface-strong text-muted-foreground",
               )}
             >
-              {isLunasTag ? "✓ Lunas" : "Belum Lunas"}
+              {isLunasTag ? `✓ ${dict.debts.status.paidOff}` : dict.debts.status.unpaid}
             </Badge>
           </div>
 
           <p className="text-xs sm:text-sm text-muted-foreground">
-            {hutang.catatan || "Tidak ada catatan khusus"}
+            {hutang.catatan || dict.debts.detail.noNotes}
           </p>
         </div>
 
@@ -164,12 +166,12 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
             {isLunasTag ? (
               <>
                 <Circle className="h-3.5 w-3.5 text-muted-foreground" />
-                Tandai Belum Lunas
+                {dict.debts.detail.markAsActive}
               </>
             ) : (
               <>
                 <CheckCircle2 className="h-3.5 w-3.5 text-semantic-up" />
-                Tandai Lunas
+                {dict.debts.detail.markAsPaid}
               </>
             )}
           </Button>
@@ -181,19 +183,19 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
             className="rounded-full gap-1.5 border-hairline h-9 sm:h-10 px-3.5 sm:px-4 text-xs font-semibold"
           >
             <Pencil className="h-3.5 w-3.5" />
-            Edit Info
+            {dict.debts.detail.editInfo}
           </Button>
 
           <ConfirmDialog
-            title="Hapus Kontak Ini?"
-            description="Semua riwayat pinjaman dan pembayaran dengan pihak ini akan dihapus. Saldo rekening terkait akan dikembalikan secara otomatis."
+            title={dict.debts.detail.deletePartyConfirmTitle}
+            description={dict.debts.detail.deletePartyConfirmDescription}
             onConfirm={handleDeleteParty}
           >
             <Button
               variant="outline"
               size="sm"
               className="rounded-full h-9 w-9 sm:h-10 sm:w-10 p-0 text-semantic-down border-hairline hover:bg-semantic-down/10"
-              aria-label="Hapus kontak"
+              aria-label={dict.debts.detail.deleteContactAria}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -205,7 +207,7 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
       {!hasTransactions && (
         <div className="rounded-card border border-hairline bg-surface-soft/60 p-4 space-y-2.5">
           <p className="text-xs font-medium text-foreground">
-            Tentukan hubungan keuangan dengan pihak ini:
+            {dict.debts.detail.selectRelationshipPrompt}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
             <Button
@@ -219,7 +221,7 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
               )}
               onClick={() => handleSwitchTipe("memberi")}
             >
-              📤 Piutang (Saya Meminjamkan)
+              📤 {dict.debts.types.receivable}
             </Button>
             <Button
               size="sm"
@@ -232,7 +234,7 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
               )}
               onClick={() => handleSwitchTipe("menerima")}
             >
-              📥 Hutang (Saya Berhutang)
+              📥 {dict.debts.types.debt}
             </Button>
           </div>
         </div>
@@ -243,7 +245,7 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
         <div className="rounded-card border border-hairline bg-card p-4 sm:p-5">
           <div className="flex items-center justify-between gap-2">
             <p className="text-xs font-medium text-muted-foreground">
-              {isPiutang ? "Total Dipinjamkan" : "Total Diterima"}
+              {isPiutang ? dict.debts.detail.totalLoaned : dict.debts.detail.totalReceived}
             </p>
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-surface-strong text-muted-foreground">
               <Wallet className="h-4 w-4" />
@@ -255,16 +257,16 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
           <p className="text-xs text-muted-foreground mt-1">
             {totalPinjaman > 0
               ? isPiutang
-                ? "Pokok piutang yang diberikan"
-                : "Pokok hutang yang diterima"
-              : "Belum ada pokok pinjaman"}
+                ? dict.debts.detail.principalLentDesc
+                : dict.debts.detail.principalBorrowedDesc
+              : dict.debts.detail.noPrincipalYet}
           </p>
         </div>
 
         <div className="rounded-card border border-hairline bg-card p-4 sm:p-5">
           <div className="flex items-center justify-between gap-2">
             <p className="text-xs font-medium text-muted-foreground">
-              {isPiutang ? "Total Pengembalian" : "Total Pembayaran"}
+              {isPiutang ? dict.debts.detail.totalReturned : dict.debts.detail.totalPaid}
             </p>
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-surface-strong text-semantic-up">
               <CheckCircle2 className="h-4 w-4" />
@@ -274,13 +276,17 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
             {formatRupiah(totalPembayaran)}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            {totalPinjaman > 0 ? `Terbayar ${pct}%` : "Belum ada pembayaran"}
+            {totalPinjaman > 0
+              ? dict.debts.detail.paidPercent.replace("{percent}", String(pct))
+              : dict.debts.detail.noPaymentYet}
           </p>
         </div>
 
         <div className="rounded-card border border-hairline bg-card p-4 sm:p-5">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-xs font-medium text-muted-foreground">Sisa Tagihan Riil</p>
+            <p className="text-xs font-medium text-muted-foreground">
+              {dict.debts.detail.realRemainingBalance}
+            </p>
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-surface-strong text-semantic-down">
               <HandCoins className="h-4 w-4" />
             </span>
@@ -299,10 +305,10 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
           </p>
           <p className="text-xs text-muted-foreground mt-1">
             {totalPinjaman === 0
-              ? "Belum ada pinjaman"
+              ? dict.debts.detail.noLoanYet
               : sisaRiil > 0
-                ? "Masih belum selesai"
-                : "Tidak ada sisa tagihan"}
+                ? dict.debts.detail.stillPending
+                : dict.debts.detail.noRemainingBill}
           </p>
         </div>
       </div>
@@ -312,14 +318,14 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
         <div className="rounded-card border border-semantic-up/30 bg-semantic-up/5 p-4 flex items-center justify-between gap-3 flex-wrap">
           <div>
             <p className="text-sm font-semibold text-semantic-up">
-              Kelebihan Pengembalian Terdeteksi
+              {dict.debts.detail.overpaymentDetected}
             </p>
             <p className="text-xs text-muted-foreground">
-              Total nominal yang dikembalikan melebihi pinjaman pokok sebesar{" "}
+              {dict.debts.detail.overpaymentDescription.split("{amount}")[0]}
               <span className="font-mono font-semibold text-semantic-up">
                 {formatRupiah(kelebihanBayar)}
               </span>
-              .
+              {dict.debts.detail.overpaymentDescription.split("{amount}")[1] ?? ""}
             </p>
           </div>
           <Badge className="bg-semantic-up text-white rounded-full px-3 py-1 text-xs">
@@ -332,7 +338,9 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
       {totalPinjaman > 0 && (
         <div className="rounded-card border border-hairline bg-card p-4 sm:p-5 space-y-2">
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Persentase Pelunasan: {pct}%</span>
+            <span>
+              {dict.debts.detail.paidOffPercentage.replace("{percent}", String(pct))}
+            </span>
             <span className="font-mono">
               {formatRupiah(totalPembayaran)} / {formatRupiah(totalPinjaman)}
             </span>
@@ -344,7 +352,7 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
       {/* Action Buttons for Transactions */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h2 className="text-lg font-semibold text-foreground">
-          Riwayat Transaksi
+          {dict.debts.detail.transactionsHistory}
         </h2>
 
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
@@ -355,7 +363,9 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
               className="rounded-full bg-primary hover:bg-primary-active text-white font-semibold gap-1.5 h-10 px-5 w-full sm:w-auto shadow-none"
             >
               <Plus className="h-4 w-4" />
-              {isPiutang ? "Beri Pinjaman" : "Catat Pinjaman Diterima"}
+              {isPiutang
+                ? dict.debts.detail.giveLoanButton
+                : dict.debts.detail.receiveLoanButton}
             </Button>
           ) : (
             <>
@@ -365,7 +375,9 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
                 className="rounded-full bg-primary hover:bg-primary-active text-white font-semibold gap-1.5 h-10 px-4 flex-1 sm:flex-initial shadow-none"
               >
                 <Plus className="h-4 w-4" />
-                {isPiutang ? "Catat Pembayaran" : "Bayar Hutang"}
+                {isPiutang
+                  ? dict.debts.detail.recordPaymentButton
+                  : dict.debts.detail.payDebtButton}
               </Button>
 
               <Button
@@ -375,7 +387,7 @@ export function HutangDetailClient({ initialHutang, rekening }: Props) {
                 className="rounded-full border-hairline font-semibold gap-1.5 h-10 px-4 flex-1 sm:flex-initial bg-card hover:bg-surface-strong"
               >
                 <Plus className="h-4 w-4" />
-                Tambah Pinjaman
+                {dict.debts.detail.addLoanButton}
               </Button>
             </>
           )}

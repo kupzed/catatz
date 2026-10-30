@@ -25,6 +25,13 @@ catatz/
 │   ├── configs/
 │   ├── constants/
 │   ├── hooks/
+│   ├── i18n/
+│   │   ├── dictionaries/
+│   │   ├── client-provider.tsx
+│   │   ├── get-dictionary.ts
+│   │   ├── get-locale.ts
+│   │   ├── types.ts
+│   │   └── use-translation.ts
 │   ├── lib/
 │   ├── migrations/
 │   ├── providers/
@@ -56,6 +63,7 @@ catatz/
 - `src/configs`: konfigurasi environment dan Supabase client.
 - `src/constants`: data konstan seperti daftar bank/e-wallet.
 - `src/hooks`: hook client untuk mobile, online status, PWA install, dan voice input.
+- `src/i18n`: arsitektur lokalisasi internal (bilingual ID/EN). Berisi kamus (`dictionaries/id.ts`, `dictionaries/en.ts`), type `Dictionary` (`types.ts`), server resolver (`get-locale.ts`, `get-dictionary.ts`), serta React Context provider dan hook client (`client-provider.tsx`, `use-translation.ts`).
 - `src/lib`: helper umum seperti formatter, PDF/spreadsheet generator, offline queue, service worker registration, parser AI bersama, voice parser, dan parser file transaksi.
 - `src/migrations`: SQL migration manual untuk schema, RLS, trigger, storage bucket, dan grant API.
 - `src/providers`: provider global untuk theme dan React Query.

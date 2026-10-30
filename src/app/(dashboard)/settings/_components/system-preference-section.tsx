@@ -33,12 +33,13 @@ import {
 } from "@/actions/preference-action";
 import type { UserPreferences } from "@/lib/user-preferences";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 
-const THEME_OPTIONS = [
-  { value: "light", label: "Terang", icon: Sun },
-  { value: "dark", label: "Gelap", icon: Moon },
-  { value: "system", label: "Sistem", icon: Monitor },
-] as const;
+const THEME_ICONS = {
+  light: Sun,
+  dark: Moon,
+  system: Monitor,
+} as const;
 
 type Props = {
   preferences: UserPreferences;
@@ -66,10 +67,17 @@ function SettingRow({ label, description, children }: SettingRowProps) {
 
 export function SystemPreferenceSection({ preferences }: Props) {
   const router = useRouter();
+  const { dict } = useTranslation();
   const { setTheme } = useTheme();
   const { setPreferences, updatePreferences } = useSystemPreferences();
   const [localPrefs, setLocalPrefs] = useState<UserPreferences>(preferences);
   const [isPending, setIsPending] = useState(false);
+
+  const themeOptions = [
+    { value: "light" as const, label: dict.settings.preferences.themeLight, icon: THEME_ICONS.light },
+    { value: "dark" as const, label: dict.settings.preferences.themeDark, icon: THEME_ICONS.dark },
+    { value: "system" as const, label: dict.settings.preferences.themeSystem, icon: THEME_ICONS.system },
+  ];
 
   const handlePreferenceChange = async <K extends keyof UserPreferences>(
     key: K,
@@ -92,7 +100,7 @@ export function SystemPreferenceSection({ preferences }: Props) {
       } as Partial<UserPreferences>);
 
       if (!res.success || !res.data) {
-        toast.error(res.error || "Gagal menyimpan preferensi");
+        toast.error(res.error || dict.settings.preferences.toasts.saveFailed);
         setLocalPrefs(previous);
         setPreferences(previous);
         if (key === "theme") {
@@ -104,9 +112,9 @@ export function SystemPreferenceSection({ preferences }: Props) {
       setLocalPrefs(res.data);
       setPreferences(res.data);
       router.refresh();
-      toast.success("Preferensi berhasil diperbarui");
+      toast.success(dict.settings.preferences.toasts.saveSuccess);
     } catch {
-      toast.error("Gagal menyimpan preferensi");
+      toast.error(dict.settings.preferences.toasts.saveFailed);
       setLocalPrefs(previous);
       setPreferences(previous);
       if (key === "theme") {
@@ -122,9 +130,9 @@ export function SystemPreferenceSection({ preferences }: Props) {
       <CardHeader>
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
-            <CardTitle className="text-lg">System Preference</CardTitle>
+            <CardTitle className="text-lg">{dict.settings.preferences.title}</CardTitle>
             <CardDescription>
-              Atur tampilan, format data, dan preferensi sistem aplikasi.
+              {dict.settings.preferences.description}
             </CardDescription>
           </div>
           {isPending && (
@@ -135,13 +143,13 @@ export function SystemPreferenceSection({ preferences }: Props) {
       <CardContent className="space-y-0">
         <div className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <p className="text-sm font-medium">Tema Warna</p>
+            <p className="text-sm font-medium">{dict.settings.preferences.themeLabel}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              Pilih tema terang, gelap, atau ikuti sistem.
+              {dict.settings.preferences.themeDescription}
             </p>
           </div>
           <div className="flex w-fit items-center gap-1 rounded-[8px] border border-hairline bg-surface-strong p-1">
-            {THEME_OPTIONS.map(({ value, label, icon: Icon }) => (
+            {themeOptions.map(({ value, label, icon: Icon }) => (
               <button
                 key={value}
                 type="button"
@@ -162,7 +170,35 @@ export function SystemPreferenceSection({ preferences }: Props) {
 
         <Separator />
 
-        <SettingRow label="Mata Uang" description="Format mata uang default.">
+        <SettingRow
+          label={dict.settings.preferences.languageLabel}
+          description={dict.settings.preferences.languageDescription}
+        >
+          <Select
+            value={localPrefs.language}
+            onValueChange={(val) =>
+              handlePreferenceChange(
+                "language",
+                val as UserPreferences["language"],
+              )
+            }
+          >
+            <SelectTrigger className="h-9 text-sm" size="sm" aria-label={dict.settings.preferences.languageLabel}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="id">{dict.settings.preferences.languageId}</SelectItem>
+              <SelectItem value="en">{dict.settings.preferences.languageEn}</SelectItem>
+            </SelectContent>
+          </Select>
+        </SettingRow>
+
+        <Separator />
+
+        <SettingRow
+          label={dict.settings.preferences.currencyLabel}
+          description={dict.settings.preferences.currencyDescription}
+        >
           <Select
             value={localPrefs.currency}
             onValueChange={(val) =>
@@ -172,7 +208,7 @@ export function SystemPreferenceSection({ preferences }: Props) {
               )
             }
           >
-            <SelectTrigger className="h-9 text-sm" size="sm">
+            <SelectTrigger className="h-9 text-sm" size="sm" aria-label={dict.settings.preferences.currencyLabel}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -184,8 +220,8 @@ export function SystemPreferenceSection({ preferences }: Props) {
         <Separator />
 
         <SettingRow
-          label="Format Tanggal"
-          description="Tampilan tanggal aplikasi dan export."
+          label={dict.settings.preferences.dateFormatLabel}
+          description={dict.settings.preferences.dateFormatDescription}
         >
           <Select
             value={localPrefs.date_format}
@@ -196,7 +232,7 @@ export function SystemPreferenceSection({ preferences }: Props) {
               )
             }
           >
-            <SelectTrigger className="h-9 text-sm" size="sm">
+            <SelectTrigger className="h-9 text-sm" size="sm" aria-label={dict.settings.preferences.dateFormatLabel}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -209,8 +245,8 @@ export function SystemPreferenceSection({ preferences }: Props) {
         <Separator />
 
         <SettingRow
-          label="Format Angka"
-          description="Pemisah ribuan dan desimal."
+          label={dict.settings.preferences.numberFormatLabel}
+          description={dict.settings.preferences.numberFormatDescription}
         >
           <Select
             value={localPrefs.number_format}
@@ -221,7 +257,7 @@ export function SystemPreferenceSection({ preferences }: Props) {
               )
             }
           >
-            <SelectTrigger className="h-9 text-sm" size="sm">
+            <SelectTrigger className="h-9 text-sm" size="sm" aria-label={dict.settings.preferences.numberFormatLabel}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -234,19 +270,21 @@ export function SystemPreferenceSection({ preferences }: Props) {
         <Separator />
 
         <SettingRow
-          label="Tampilkan 2 Angka Desimal"
-          description="Nominal penuh akan menampilkan dua digit di belakang koma."
+          label={dict.settings.preferences.decimalPlacesLabel}
+          description={dict.settings.preferences.decimalPlacesDescription}
         >
           <div className="flex items-center justify-between rounded-input border border-hairline bg-background px-4 py-3">
             <span className="text-sm text-muted-foreground">
-              {localPrefs.show_decimal_places ? "Aktif" : "Nonaktif"}
+              {localPrefs.show_decimal_places
+                ? dict.settings.preferences.active
+                : dict.settings.preferences.inactive}
             </span>
             <Switch
               checked={localPrefs.show_decimal_places}
               onCheckedChange={(checked) =>
                 handlePreferenceChange("show_decimal_places", checked)
               }
-              aria-label="Tampilkan dua angka desimal"
+              aria-label={dict.settings.preferences.decimalPlacesLabel}
             />
           </div>
         </SettingRow>
@@ -254,8 +292,8 @@ export function SystemPreferenceSection({ preferences }: Props) {
         <Separator />
 
         <SettingRow
-          label="Format Waktu"
-          description="Tampilan dan input waktu transaksi."
+          label={dict.settings.preferences.timeFormatLabel}
+          description={dict.settings.preferences.timeFormatDescription}
         >
           <Select
             value={localPrefs.time_format}
@@ -266,12 +304,12 @@ export function SystemPreferenceSection({ preferences }: Props) {
               )
             }
           >
-            <SelectTrigger className="h-9 text-sm" size="sm">
+            <SelectTrigger className="h-9 text-sm" size="sm" aria-label={dict.settings.preferences.timeFormatLabel}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="24h">24 jam - 14:30</SelectItem>
-              <SelectItem value="12h">12 jam - 02:30 PM</SelectItem>
+              <SelectItem value="24h">{dict.settings.preferences.time24h}</SelectItem>
+              <SelectItem value="12h">{dict.settings.preferences.time12h}</SelectItem>
             </SelectContent>
           </Select>
         </SettingRow>
@@ -279,22 +317,22 @@ export function SystemPreferenceSection({ preferences }: Props) {
         <Separator />
 
         <div className="py-4">
-          <p className="text-sm font-medium">Preview Format</p>
+          <p className="text-sm font-medium">{dict.settings.preferences.previewTitle}</p>
           <div className="mt-3 grid gap-3 sm:grid-cols-3">
             <div className="rounded-input border border-hairline bg-surface-soft p-3">
-              <p className="text-xs text-muted-foreground">Nominal</p>
+              <p className="text-xs text-muted-foreground">{dict.settings.preferences.previewAmount}</p>
               <p className="mt-1 break-all font-mono text-sm font-semibold">
                 {formatRupiah(1000, false, localPrefs)}
               </p>
             </div>
             <div className="rounded-input border border-hairline bg-surface-soft p-3">
-              <p className="text-xs text-muted-foreground">Tanggal</p>
+              <p className="text-xs text-muted-foreground">{dict.settings.preferences.previewDate}</p>
               <p className="mt-1 text-sm font-semibold">
                 {formatTanggal("2026-06-02", "dd MMM yyyy", localPrefs)}
               </p>
             </div>
             <div className="rounded-input border border-hairline bg-surface-soft p-3">
-              <p className="text-xs text-muted-foreground">Waktu</p>
+              <p className="text-xs text-muted-foreground">{dict.settings.preferences.previewTime}</p>
               <p className="mt-1 font-mono text-sm font-semibold">
                 {formatWaktu("14:30", localPrefs)}
               </p>
@@ -304,7 +342,10 @@ export function SystemPreferenceSection({ preferences }: Props) {
 
         <Separator />
 
-        <SettingRow label="Halaman Awal" description="Halaman setelah login.">
+        <SettingRow
+          label={dict.settings.preferences.landingPageLabel}
+          description={dict.settings.preferences.landingPageDescription}
+        >
           <Select
             value={localPrefs.default_landing_page}
             onValueChange={(val) =>
@@ -314,15 +355,15 @@ export function SystemPreferenceSection({ preferences }: Props) {
               )
             }
           >
-            <SelectTrigger className="h-9 text-sm" size="sm">
+            <SelectTrigger className="h-9 text-sm" size="sm" aria-label={dict.settings.preferences.landingPageLabel}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="/transactions">Transaksi</SelectItem>
-              <SelectItem value="/wallets">Rekening</SelectItem>
-              <SelectItem value="/reports">Rekap</SelectItem>
-              <SelectItem value="/debts">Hutang</SelectItem>
-              <SelectItem value="/categories">Kategori</SelectItem>
+              <SelectItem value="/transactions">{dict.nav.transactions}</SelectItem>
+              <SelectItem value="/wallets">{dict.nav.wallets}</SelectItem>
+              <SelectItem value="/reports">{dict.nav.reports}</SelectItem>
+              <SelectItem value="/debts">{dict.nav.debts}</SelectItem>
+              <SelectItem value="/categories">{dict.nav.categories}</SelectItem>
             </SelectContent>
           </Select>
         </SettingRow>

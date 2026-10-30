@@ -8,6 +8,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/i18n/use-translation";
+import type { Dictionary } from "@/i18n/types";
+
+function getWalletTypeLabel(jenis: string, dict: Dictionary): string {
+  switch (jenis) {
+    case "Tunai":
+      return dict.wallets.types.cash;
+    case "Bank":
+      return dict.wallets.types.bank;
+    case "E-Wallet":
+      return dict.wallets.types.ewallet;
+    case "Investasi":
+      return dict.wallets.types.investment;
+    case "Lainnya":
+      return dict.wallets.types.other;
+    default:
+      return jenis;
+  }
+}
 
 interface RekeningSelectProps {
   rekening: Rekening[];
@@ -28,16 +47,20 @@ export function RekeningSelect({
   rekening,
   value,
   onValueChange,
-  placeholder = "Pilih rekening",
+  placeholder,
   className,
   size = "default",
   includeNone = false,
-  noneLabel = "Tanpa rekening",
+  noneLabel,
   disabled = false,
   disabledValues,
   disabledReason,
   id,
 }: RekeningSelectProps) {
+  const { dict } = useTranslation();
+  const resolvedPlaceholder = placeholder ?? dict.transactions.form.walletPlaceholder;
+  const resolvedNoneLabel = noneLabel ?? dict.common.noWallet;
+
   return (
     <Select
       value={value}
@@ -49,14 +72,14 @@ export function RekeningSelect({
         size={size}
         className={className}
       >
-        <SelectValue placeholder={placeholder} />
+        <SelectValue placeholder={resolvedPlaceholder} />
       </SelectTrigger>
       <SelectContent>
         {includeNone && (
           <SelectItem value="none">
             <span className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-muted-foreground/30" />
-              {noneLabel}
+              {resolvedNoneLabel}
             </span>
           </SelectItem>
         )}
@@ -77,7 +100,7 @@ export function RekeningSelect({
                   {r.nama}
                 </span>{" "}
                 <span className="text-muted-foreground text-xs ml-1 font-normal">
-                  ({r.jenis})
+                  ({getWalletTypeLabel(r.jenis, dict)})
                 </span>
                 {isDisabledItem && disabledReason && (
                   <span className="text-[10px] text-muted-foreground ml-auto italic">

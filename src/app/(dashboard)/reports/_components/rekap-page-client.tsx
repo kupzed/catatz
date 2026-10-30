@@ -6,6 +6,7 @@ import { SlidersHorizontal } from "lucide-react";
 import { PageHeader } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useTranslation } from "@/i18n/use-translation";
 import { RekapSettingsDialog } from "./rekap-settings-dialog";
 import { RekapRealtimeTab } from "./rekap-realtime-tab";
 import { RekapBulananTab } from "./rekap-bulanan-tab";
@@ -35,6 +36,7 @@ type TabValue = "realtime" | "bulanan" | "custom";
 export default function RekapPageClient({
   initialSettings = DEFAULT_REKAP_SETTINGS,
 }: RekapPageClientProps) {
+  const { dict } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -76,15 +78,15 @@ export default function RekapPageClient({
     >
       {/* Header dengan tombol pengaturan 44px di pojok kanan atas */}
       <PageHeader
-        title="Rekap Keuangan"
-        subtitle="Analisis keuangan, ringkasan per siklus, dan laporan periode"
+        title={dict.reports.title}
+        subtitle={dict.reports.subtitle}
         action={
           <Button
             type="button"
             variant="outline"
             size="icon"
             onClick={() => setIsSettingsOpen(true)}
-            aria-label="Pengaturan Rekap"
+            aria-label={dict.reports.settings.title}
             className="size-11 min-h-11 min-w-11 rounded-full border-hairline hover:bg-surface-strong"
           >
             <SlidersHorizontal className="size-5 text-foreground" />
@@ -99,9 +101,9 @@ export default function RekapPageClient({
         className="w-full space-y-6"
       >
         <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:inline-grid">
-          <TabsTrigger value="realtime">Realtime</TabsTrigger>
-          <TabsTrigger value="bulanan">Bulanan</TabsTrigger>
-          <TabsTrigger value="custom">Custom</TabsTrigger>
+          <TabsTrigger value="realtime">{dict.reports.tabs.realtime}</TabsTrigger>
+          <TabsTrigger value="bulanan">{dict.reports.tabs.monthly}</TabsTrigger>
+          <TabsTrigger value="custom">{dict.reports.tabs.custom}</TabsTrigger>
         </TabsList>
 
         {/* Tab Realtime */}

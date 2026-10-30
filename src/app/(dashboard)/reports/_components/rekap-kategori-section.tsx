@@ -2,10 +2,11 @@
 
 import { lazy, Suspense } from "react";
 import type { RekapKategori } from "@/actions/rekap-action";
-import { BULAN_NAMES } from "@/constants/rekap";
+import { getMonthNames } from "@/constants/rekap";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 
 const RekapPieChart = lazy(() =>
   import("./rekap-charts").then((module) => ({
@@ -23,6 +24,8 @@ export function RekapKategoriSection({
   currentBulan,
 }: RekapKategoriSectionProps) {
   const { formatRupiah } = useSystemPreferences();
+  const { dict } = useTranslation();
+  const monthNames = getMonthNames(dict);
 
   if (data.length === 0) return null;
 
@@ -30,7 +33,7 @@ export function RekapKategoriSection({
     <div className="grid md:grid-cols-2 gap-6">
       <div className="rounded-card border border-hairline bg-card p-8">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-          Pengeluaran per Kategori ({BULAN_NAMES[currentBulan - 1]})
+          {dict.reports.chart.expenseByCategory} ({monthNames[currentBulan - 1]})
         </h2>
         <Suspense fallback={<Skeleton className="h-50 w-full" />}>
           <RekapPieChart data={data} />
@@ -39,7 +42,7 @@ export function RekapKategoriSection({
 
       <div className="rounded-card border border-hairline bg-card p-8">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-          Rincian Kategori
+          {dict.reports.chart.categoryDetails}
         </h2>
         <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
           {data.map((k) => (

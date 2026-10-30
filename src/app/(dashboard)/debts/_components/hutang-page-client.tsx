@@ -13,11 +13,13 @@ import HutangDialog from "./hutang-dialog";
 import { EmptyState, PageHeader } from "@/components/common";
 import { HutangGroup } from "./hutang-group";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 
 type Props = { initialHutang: Hutang[]; rekening: Rekening[] };
 
 export default function HutangPageClient({ initialHutang }: Props) {
   const { formatRupiah } = useSystemPreferences();
+  const { dict } = useTranslation();
   const [hutang, setHutang] = useState(initialHutang);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editData, setEditData] = useState<Hutang | null>(null);
@@ -50,9 +52,9 @@ export default function HutangPageClient({ initialHutang }: Props) {
     const res = await deleteHutang(id);
     if (res.success) {
       setHutang((prev) => prev.filter((h) => h.id !== id));
-      toast.success("Catatan pihak berhasil dihapus");
+      toast.success(dict.debts.toasts.deleted);
     } else {
-      toast.error(res.error ?? "Gagal menghapus");
+      toast.error(res.error ?? dict.debts.toasts.deleteFailed);
     }
   }
 
@@ -91,8 +93,8 @@ export default function HutangPageClient({ initialHutang }: Props) {
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
       <PageHeader
-        title="Hutang & Piutang"
-        subtitle="Kelola daftar pihak dan pantau sisa pinjaman"
+        title={dict.debts.title}
+        subtitle={dict.debts.subtitle}
         action={
           <Button
             onClick={() => {
@@ -103,7 +105,7 @@ export default function HutangPageClient({ initialHutang }: Props) {
             id="btn-tambah-hutang"
           >
             <Plus className="h-4 w-4" />
-            Tambah Pihak
+            {dict.debts.addContact}
           </Button>
         }
       />
@@ -114,10 +116,10 @@ export default function HutangPageClient({ initialHutang }: Props) {
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-foreground">
-                Piutang Aktif
+                {dict.debts.activeReceivable}
               </p>
               <p className="text-xs text-muted-foreground">
-                Total nominal yang masih perlu diterima
+                {dict.debts.activeReceivableDesc}
               </p>
             </div>
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-surface-strong text-semantic-up">
@@ -133,10 +135,10 @@ export default function HutangPageClient({ initialHutang }: Props) {
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-foreground">
-                Hutang Aktif
+                {dict.debts.activeDebt}
               </p>
               <p className="text-xs text-muted-foreground">
-                Total nominal yang masih perlu dibayar
+                {dict.debts.activeDebtDesc}
               </p>
             </div>
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-surface-strong text-semantic-down">
@@ -154,7 +156,7 @@ export default function HutangPageClient({ initialHutang }: Props) {
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Cari nama pihak atau catatan..."
+            placeholder={dict.debts.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 rounded-input h-11 bg-card border-hairline"
@@ -168,13 +170,13 @@ export default function HutangPageClient({ initialHutang }: Props) {
         >
           <TabsList className="grid grid-cols-3 w-full sm:w-auto h-11 rounded-full p-1 bg-surface-strong">
             <TabsTrigger value="semua" className="rounded-full text-xs font-semibold px-4">
-              Semua
+              {dict.common.all}
             </TabsTrigger>
             <TabsTrigger value="belum_lunas" className="rounded-full text-xs font-semibold px-4">
-              Belum Lunas
+              {dict.debts.status.unpaid}
             </TabsTrigger>
             <TabsTrigger value="lunas" className="rounded-full text-xs font-semibold px-4">
-              Lunas
+              {dict.debts.status.paidOff}
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -184,24 +186,24 @@ export default function HutangPageClient({ initialHutang }: Props) {
       {filteredHutang.length === 0 ? (
         <EmptyState
           icon={HandCoins}
-          title={hutang.length === 0 ? "Belum ada pihak hutang/piutang" : "Tidak ditemukan pihak yang cocok"}
+          title={hutang.length === 0 ? dict.debts.emptyState : dict.debts.emptySearchState}
           description={
             hutang.length === 0
-              ? "Klik tombol '+ Tambah Pihak' untuk mulai mencatat kontak hutang atau piutang."
-              : "Coba ubah kata kunci pencarian atau filter status."
+              ? dict.debts.emptyStateDescription
+              : dict.debts.emptySearchDescription
           }
         />
       ) : (
         <div className="space-y-6">
           <HutangGroup
-            title="Piutang (Memberi Pinjaman)"
+            title={dict.debts.types.receivableGroup}
             items={memberi}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />
 
           <HutangGroup
-            title="Hutang (Menerima Pinjaman)"
+            title={dict.debts.types.debtGroup}
             items={menerima}
             onEdit={handleEdit}
             onDelete={handleDelete}
