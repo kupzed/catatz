@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPeriodLabel, getTodayInJakarta } from "@/lib/rekap-period";
 import type { CustomPeriod, RekapSettings } from "@/types/rekap";
+import { useTranslation } from "@/i18n/use-translation";
 import { RekapCustomDialog } from "./rekap-custom-dialog";
 import { RekapPeriodCard, type RekapPeriodCardData } from "./rekap-period-card";
 
@@ -20,6 +21,8 @@ export type RekapCustomTabProps = {
 };
 
 export function RekapCustomTab({ settings }: RekapCustomTabProps) {
+  const { dict, locale } = useTranslation();
+  const rekapLocale = locale === "en" ? "en-US" : "id-ID";
   const [periods, setPeriods] = useState<CustomPeriod[]>([]);
   const [items, setItems] = useState<RekapPeriodCardData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -37,7 +40,7 @@ export function RekapCustomTab({ settings }: RekapCustomTabProps) {
   }> => {
     const res = await listCustomPeriods();
     if (!res.success || !res.data) {
-      toast.error(res.error ?? "Gagal memuat daftar periode kustom");
+      toast.error(res.error ?? dict.reports.toasts.loadCustomFailed);
       return { customList: [], mapped: [] };
     }
 
@@ -49,7 +52,7 @@ export function RekapCustomTab({ settings }: RekapCustomTabProps) {
     const ranges = customList.map((p) => ({
       startDate: p.tanggal_mulai,
       endDate: p.tanggal_selesai,
-      label: formatPeriodLabel(p.tanggal_mulai, p.tanggal_selesai),
+      label: formatPeriodLabel(p.tanggal_mulai, p.tanggal_selesai, rekapLocale),
     }));
 
     const [ringkasanList, saldoResult] = await Promise.all([
@@ -81,7 +84,7 @@ export function RekapCustomTab({ settings }: RekapCustomTabProps) {
         nama: p.nama,
         startDate: p.tanggal_mulai,
         endDate: p.tanggal_selesai,
-        label: formatPeriodLabel(p.tanggal_mulai, p.tanggal_selesai),
+        label: formatPeriodLabel(p.tanggal_mulai, p.tanggal_selesai, rekapLocale),
         isCurrent,
         total_expense: ringkasan?.total_expense ?? 0,
         total_income: ringkasan?.total_income ?? 0,
@@ -95,7 +98,7 @@ export function RekapCustomTab({ settings }: RekapCustomTabProps) {
     });
 
     return { customList, mapped };
-  }, [settings.akumulasi_saldo, today]);
+  }, [dict.reports.toasts.loadCustomFailed, rekapLocale, settings.akumulasi_saldo, today]);
 
   // Track previous settings akumulasi_saldo untuk update loading state saat render
   const [prevAkumulasi, setPrevAkumulasi] = useState(settings.akumulasi_saldo);
@@ -119,7 +122,7 @@ export function RekapCustomTab({ settings }: RekapCustomTabProps) {
       .catch((err) => {
         if (!ignore) {
           console.error("Gagal memuat rekap custom:", err);
-          toast.error("Gagal memuat data periode kustom");
+          toast.error(dict.reports.toasts.loadCustomFailed);
           setPeriods([]);
           setItems([]);
           setIsLoading(false);
@@ -129,7 +132,7 @@ export function RekapCustomTab({ settings }: RekapCustomTabProps) {
     return () => {
       ignore = true;
     };
-  }, [fetchCustomPeriodData]);
+  }, [fetchCustomPeriodData, dict.reports.toasts.loadCustomFailed]);
 
   // Reload callback setelah mutasi dialog (tambah, edit, hapus)
   const reloadData = useCallback(() => {
@@ -141,12 +144,12 @@ export function RekapCustomTab({ settings }: RekapCustomTabProps) {
       })
       .catch((err) => {
         console.error("Gagal memuat rekap custom:", err);
-        toast.error("Gagal memuat data periode kustom");
+        toast.error(dict.reports.toasts.loadCustomFailed);
       })
       .finally(() => {
         setIsLoading(false);
       });
-  }, [fetchCustomPeriodData]);
+  }, [fetchCustomPeriodData, dict.reports.toasts.loadCustomFailed]);
 
   // Handler membuka dialog tambah
   const handleOpenAdd = () => {
@@ -196,8 +199,8 @@ export function RekapCustomTab({ settings }: RekapCustomTabProps) {
           <div className="p-8">
             <EmptyState
               icon={CalendarRange}
-              title="Belum Ada Periode Kustom"
-              description="Buat rentang tanggal khusus untuk menganalisis pengeluaran liburan, proyek, atau acara tertentu."
+              title={dict.reports.emptyState.customTitle}
+              description={dict.reports.emptyState.customDesc}
               action={
                 <Button
                   type="button"
@@ -205,7 +208,7 @@ export function RekapCustomTab({ settings }: RekapCustomTabProps) {
                   className="rounded-full bg-primary px-6 text-primary-foreground hover:bg-primary/90 h-11 min-h-11 gap-2 transition-colors"
                 >
                   <Plus className="size-4" />
-                  <span>Tambah Periode Kustom</span>
+                  <span>{dict.reports.emptyState.createCustomButton}</span>
                 </Button>
               }
             />
@@ -240,11 +243,11 @@ export function RekapCustomTab({ settings }: RekapCustomTabProps) {
       <Button
         type="button"
         onClick={handleOpenAdd}
-        aria-label="Tambah Periode Kustom Baru"
+        aria-label={dict.reports.customDialog.newPeriodAria}
         className="fixed right-4 md:right-8 bottom-[calc(7.5rem+env(safe-area-inset-bottom))] md:bottom-8 z-40 h-12 min-h-11 rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground shadow-lg hover:bg-primary/90 transition-all flex items-center gap-2"
       >
         <Plus className="size-5 shrink-0" />
-        <span className="font-medium">Periode Baru</span>
+        <span className="font-medium">{dict.reports.customDialog.newPeriodButton}</span>
       </Button>
 
       {/* Modal Dialog Tambah / Edit Periode Kustom */}

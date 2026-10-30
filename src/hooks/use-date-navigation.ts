@@ -19,6 +19,7 @@ import {
 import { enUS, id as idLocale } from "date-fns/locale";
 import type { TransaksiFilter } from "@/types/transaksi";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 
 export type CustomDateStep = "dari" | "sampai";
 export type DateNavigationFilter = Pick<TransaksiFilter, "dari" | "sampai">;
@@ -42,6 +43,7 @@ export type UseDateNavigationReturn = {
 /** Mengelola preset, label, dan perpindahan tanggal untuk halaman transaksi. */
 export function useDateNavigation(initialPreset: string = "hari"): UseDateNavigationReturn {
   const { preferences } = useSystemPreferences();
+  const { dict, locale: activeLocale } = useTranslation();
   const [preset, setPreset] = useState<string>(initialPreset);
   const [baseDate, setBaseDate] = useState<Date>(new Date());
   const [dateFilter, setDateFilter] = useState<DateNavigationFilter>({});
@@ -89,9 +91,13 @@ export function useDateNavigation(initialPreset: string = "hari"): UseDateNaviga
   }
 
   const dateLabel = useMemo(() => {
-    const locale = preferences.date_format === "en-US" ? enUS : idLocale;
+    const locale =
+      preferences.date_format === "en-US" || activeLocale === "en"
+        ? enUS
+        : idLocale;
 
-    if (preset === "all") return "Semua Waktu";
+    if (preset === "all")
+      return dict?.transactions?.filter?.periodAllTime ?? (activeLocale === "en" ? "All Time" : "Semua Waktu");
     if (preset === "hari")
       return format(baseDate, "EEEE, dd MMM yyyy", { locale });
     if (preset === "minggu") {
@@ -113,12 +119,12 @@ export function useDateNavigation(initialPreset: string = "hari"): UseDateNaviga
         return `${format(dDari, "dd MMM yyyy", { locale })} - ${format(dSampai, "dd MMM yyyy", { locale })}`;
       } else if (dateFilter.dari) {
         if (customStep === "sampai")
-          return `${format(parseISO(dateFilter.dari), "dd MMM", { locale })} \u2192 Pilih akhir`;
-        return `Mulai ${format(parseISO(dateFilter.dari), "dd MMM yyyy", { locale })}`;
+          return `${format(parseISO(dateFilter.dari), "dd MMM", { locale })} \u2192 ${activeLocale === "en" ? "Select end" : "Pilih akhir"}`;
+        return `${activeLocale === "en" ? "From " : "Mulai "}${format(parseISO(dateFilter.dari), "dd MMM yyyy", { locale })}`;
       }
-      return "Pilih Rentang";
+      return activeLocale === "en" ? "Select Range" : "Pilih Rentang";
     }
-    return "Rentang Waktu";
+    return activeLocale === "en" ? "Time Range" : "Rentang Waktu";
   }, [
     baseDate,
     preset,
@@ -126,6 +132,8 @@ export function useDateNavigation(initialPreset: string = "hari"): UseDateNaviga
     dateFilter.sampai,
     customStep,
     preferences.date_format,
+    activeLocale,
+    dict,
   ]);
 
   const canNavigateDate = preset !== "all" && preset !== "custom";

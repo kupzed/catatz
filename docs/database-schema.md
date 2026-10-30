@@ -241,6 +241,7 @@ Deskripsi: preferensi tampilan dan format data milik user.
 | `time_format` | `text` | No | `'24h'` | Format waktu tampilan/input, `24h` atau `12h`. |
 | `cutoff_day` | `smallint` | No | `1` | Tanggal cut-off siklus rekap bulanan (1–31). |
 | `akumulasi_saldo` | `boolean` | No | `false` | Menentukan apakah saldo awal siklus mengakumulasi saldo berjalan sebelumnya. |
+| `language` | `text` | No | `'id'` | Preferensi bahasa aplikasi: `'id'` (Indonesia) atau `'en'` (English). |
 | `created_at` | `timestamptz` | Yes | `now()` | Waktu dibuat. |
 | `updated_at` | `timestamptz` | Yes | `now()` | Waktu terakhir diubah dari application layer. |
 
@@ -249,6 +250,7 @@ Constraints/index:
 - Unique `user_id`.
 - Check `chk_user_preferences_time_format`: `time_format IN ('24h', '12h')`.
 - Check `chk_user_preferences_cutoff_day`: `cutoff_day BETWEEN 1 AND 31`.
+- Check `chk_user_preferences_language`: `language IN ('id', 'en')`.
 - Index `idx_user_preferences_user_id` pada `user_id`.
 
 ## Tabel `user_sessions`

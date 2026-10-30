@@ -14,12 +14,14 @@ import type {
 } from '@/types/hutang';
 import { fetchAllRows } from '@/lib/supabase-fetch';
 import {
-  hutangSchema,
-  cicilanSchema,
-  hutangContactSchema,
-  hutangTransactionSchema,
-  hutangToggleStatusSchema,
+  getHutangSchema,
+  getCicilanSchema,
+  getHutangContactSchema,
+  getHutangTransactionSchema,
+  getHutangToggleStatusSchema,
 } from '@/validations/hutang-validation';
+import { getActionLocale } from '@/i18n/get-locale';
+import { getDictionary } from '@/i18n/get-dictionary';
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
@@ -78,14 +80,18 @@ export async function createHutangContact(
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
 
-  if (!user) return { success: false, error: 'Tidak terautentikasi' };
+  if (!user) return { success: false, error: dict.errors.unauthenticated };
 
-  const parsed = hutangContactSchema.safeParse(values);
+  const parsed = getHutangContactSchema(dict).safeParse(values);
   if (!parsed.success) {
     return {
       success: false,
-      error: parsed.error.issues[0]?.message ?? 'Data nama pihak tidak valid',
+      error:
+        parsed.error.issues[0]?.message ??
+        dict.actions.hutang.invalidContactData,
     };
   }
 
@@ -115,11 +121,16 @@ export async function updateHutangContact(
   values: HutangContactFormValues,
 ): Promise<ActionResult<Hutang>> {
   const supabase = await createClient();
-  const parsed = hutangContactSchema.safeParse(values);
+  const locale = await getActionLocale(supabase);
+  const dict = await getDictionary(locale);
+
+  const parsed = getHutangContactSchema(dict).safeParse(values);
   if (!parsed.success) {
     return {
       success: false,
-      error: parsed.error.issues[0]?.message ?? 'Data nama pihak tidak valid',
+      error:
+        parsed.error.issues[0]?.message ??
+        dict.actions.hutang.invalidContactData,
     };
   }
 
@@ -146,9 +157,12 @@ export async function toggleHutangStatus(
   isLunas: boolean,
 ): Promise<ActionResult<Hutang>> {
   const supabase = await createClient();
-  const parsed = hutangToggleStatusSchema.safeParse({ id, is_lunas: isLunas });
+  const locale = await getActionLocale(supabase);
+  const dict = await getDictionary(locale);
+
+  const parsed = getHutangToggleStatusSchema().safeParse({ id, is_lunas: isLunas });
   if (!parsed.success) {
-    return { success: false, error: 'Data status tidak valid' };
+    return { success: false, error: dict.actions.hutang.invalidStatusData };
   }
 
   const { error } = await supabase
@@ -174,6 +188,9 @@ export async function updateHutangTipe(
   tipe: 'memberi' | 'menerima',
 ): Promise<ActionResult<Hutang>> {
   const supabase = await createClient();
+  const locale = await getActionLocale(supabase);
+  const dict = await getDictionary(locale);
+
   const { data: cicilan } = await supabase
     .from('hutang_cicilan')
     .select('id')
@@ -182,7 +199,7 @@ export async function updateHutangTipe(
   if ((cicilan ?? []).length > 0) {
     return {
       success: false,
-      error: 'Tipe tidak dapat diubah setelah memiliki riwayat transaksi',
+      error: dict.actions.hutang.typeCannotBeChangedHistory,
     };
   }
 
@@ -202,11 +219,16 @@ export async function createHutangTransaction(
   values: HutangTransactionFormValues,
 ): Promise<ActionResult<Hutang>> {
   const supabase = await createClient();
-  const parsed = hutangTransactionSchema.safeParse(values);
+  const locale = await getActionLocale(supabase);
+  const dict = await getDictionary(locale);
+
+  const parsed = getHutangTransactionSchema(dict).safeParse(values);
   if (!parsed.success) {
     return {
       success: false,
-      error: parsed.error.issues[0]?.message ?? 'Data transaksi tidak valid',
+      error:
+        parsed.error.issues[0]?.message ??
+        dict.actions.hutang.invalidTransactionData,
     };
   }
 
@@ -217,7 +239,7 @@ export async function createHutangTransaction(
     .single();
 
   if (parentError || !parentHutang) {
-    return { success: false, error: 'Pihak hutang/piutang tidak ditemukan' };
+    return { success: false, error: dict.actions.hutang.contactNotFound };
   }
 
   const { error } = await supabase.from('hutang_cicilan').insert({
@@ -247,13 +269,19 @@ export async function createHutang(
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
 
-  if (!user) return { success: false, error: 'Tidak terautentikasi' };
+  if (!user) return { success: false, error: dict.errors.unauthenticated };
 
   // Validasi schema server-side
-  const parsed = hutangSchema.safeParse(values);
+  const parsed = getHutangSchema(dict).safeParse(values);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? 'Data hutang/piutang tidak valid' };
+    return {
+      success: false,
+      error:
+        parsed.error.issues[0]?.message ?? dict.actions.hutang.invalidDebtData,
+    };
   }
 
   const { data, error } = await supabase
@@ -282,11 +310,17 @@ export async function updateHutang(
   values: Partial<HutangFormValues>,
 ): Promise<ActionResult<Hutang>> {
   const supabase = await createClient();
+  const locale = await getActionLocale(supabase);
+  const dict = await getDictionary(locale);
 
   // Validasi schema server-side (partial — hanya field yang dikirim)
-  const parsed = hutangSchema.partial().safeParse(values);
+  const parsed = getHutangSchema(dict).partial().safeParse(values);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? 'Data hutang/piutang tidak valid' };
+    return {
+      success: false,
+      error:
+        parsed.error.issues[0]?.message ?? dict.actions.hutang.invalidDebtData,
+    };
   }
 
   const { data: existing, error: existingError } = await supabase
@@ -309,8 +343,7 @@ export async function updateHutang(
   if (parsed.data.tipe && parsed.data.tipe !== existing?.tipe && hasCicilan) {
     return {
       success: false,
-      error:
-        'Tipe hutang/piutang tidak bisa diubah setelah memiliki cicilan. Hapus cicilan terlebih dahulu.',
+      error: dict.actions.hutang.typeCannotBeChangedInstallments,
     };
   }
 
@@ -381,11 +414,18 @@ export async function createCicilan(
   values: CicilanFormValues,
 ): Promise<ActionResult<Hutang>> {
   const supabase = await createClient();
+  const locale = await getActionLocale(supabase);
+  const dict = await getDictionary(locale);
 
   // Validasi schema server-side
-  const parsed = cicilanSchema.safeParse(values);
+  const parsed = getCicilanSchema(dict).safeParse(values);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? 'Data cicilan tidak valid' };
+    return {
+      success: false,
+      error:
+        parsed.error.issues[0]?.message ??
+        dict.actions.hutang.invalidInstallmentData,
+    };
   }
 
   const { error } = await supabase.from('hutang_cicilan').insert({

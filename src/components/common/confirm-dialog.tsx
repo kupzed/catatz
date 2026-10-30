@@ -12,6 +12,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { ReactNode } from "react";
+import { useTranslation } from "@/i18n/use-translation";
 
 interface ConfirmDialogProps {
   children: ReactNode;
@@ -31,23 +32,29 @@ interface ConfirmDialogProps {
 
 export function ConfirmDialog({
   children,
-  title = "Apakah Anda yakin?",
-  description = "Tindakan ini tidak dapat dibatalkan.",
+  title,
+  description,
   onConfirm,
   variant = "destructive",
-  confirmText = "Ya, Lanjutkan",
-  cancelText = "Batal",
+  confirmText,
+  cancelText,
 }: ConfirmDialogProps) {
+  const { dict } = useTranslation();
+  const resolvedTitle = title ?? dict.dialog.confirmTitle;
+  const resolvedDescription = description ?? dict.dialog.confirmDescription;
+  const resolvedConfirmText = confirmText ?? dict.dialog.continue;
+  const resolvedCancelText = cancelText ?? dict.common.cancel;
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+          <AlertDialogTitle>{resolvedTitle}</AlertDialogTitle>
+          <AlertDialogDescription>{resolvedDescription}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{cancelText}</AlertDialogCancel>
+          <AlertDialogCancel>{resolvedCancelText}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             variant={variant === "destructive" ? "default" : variant}
@@ -57,7 +64,7 @@ export function ConfirmDialog({
                 : undefined
             }
           >
-            {confirmText}
+            {resolvedConfirmText}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

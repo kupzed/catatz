@@ -23,6 +23,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "@/i18n/use-translation";
 
 export type ConnectedAccount = {
   provider: string;
@@ -61,6 +62,7 @@ export function ConnectedAccountSection({
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { dict } = useTranslation();
   const [isLinkPending, startLinkTransition] = useTransition();
   const [isUnlinkPending, startUnlinkTransition] = useTransition();
 
@@ -82,20 +84,18 @@ export function ConnectedAccountSection({
     }
 
     if (message === "google-linked") {
-      toast.success("Akun Google berhasil terhubung.");
+      toast.success(dict.settings.connectedAccounts.toasts.linkedSuccess);
     } else if (message === "google-link-email-mismatch") {
-      toast.error("Akun Google tidak dihubungkan", {
-        description: "Email Google berbeda dari email utama akun CatatZ Anda.",
+      toast.error(dict.settings.connectedAccounts.toasts.emailMismatchTitle, {
+        description: dict.settings.connectedAccounts.toasts.emailMismatchDesc,
       });
     } else if (message === "google-link-cleanup-failed") {
-      toast.error("Koneksi Google perlu ditinjau", {
-        description:
-          "Email Google berbeda, tetapi koneksi belum bisa dibatalkan otomatis.",
+      toast.error(dict.settings.connectedAccounts.toasts.cleanupFailedTitle, {
+        description: dict.settings.connectedAccounts.toasts.cleanupFailedDesc,
       });
     } else {
-      toast.error("Gagal menghubungkan akun Google", {
-        description:
-          "Pastikan provider Google dan Manual Linking aktif di Supabase.",
+      toast.error(dict.settings.connectedAccounts.toasts.linkFailedTitle, {
+        description: dict.settings.connectedAccounts.toasts.linkFailedDesc,
       });
     }
 
@@ -104,14 +104,14 @@ export function ConnectedAccountSection({
     const query = params.toString();
     const nextUrl = query ? `/settings?${query}` : "/settings";
     router.replace(nextUrl, { scroll: false });
-  }, [router, searchParams]);
+  }, [dict, router, searchParams]);
 
   function handleLinkGoogle() {
     startLinkTransition(async () => {
       const res = await linkGoogleIdentity();
 
       if (res.error) {
-        toast.error("Gagal menghubungkan akun Google", {
+        toast.error(dict.settings.connectedAccounts.toasts.linkFailedTitle, {
           description: res.error,
         });
         return;
@@ -122,7 +122,7 @@ export function ConnectedAccountSection({
         return;
       }
 
-      toast.success(res.message || "Akun Google sudah terhubung.");
+      toast.success(res.message || dict.settings.connectedAccounts.toasts.linkedSuccess);
       router.refresh();
     });
   }
@@ -132,13 +132,13 @@ export function ConnectedAccountSection({
       const res = await unlinkGoogleIdentity();
 
       if (res.error) {
-        toast.error("Gagal memutuskan akun Google", {
+        toast.error(dict.settings.connectedAccounts.toasts.unlinkFailedTitle, {
           description: res.error,
         });
         return;
       }
 
-      toast.success(res.message || "Akun Google berhasil diputuskan.");
+      toast.success(res.message || dict.settings.connectedAccounts.toasts.unlinkedSuccess);
       router.refresh();
     });
   }
@@ -146,9 +146,9 @@ export function ConnectedAccountSection({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Akun Terhubung</CardTitle>
+        <CardTitle className="text-lg">{dict.settings.connectedAccounts.title}</CardTitle>
         <CardDescription>
-          Kelola metode login pihak ketiga yang tersambung dengan CatatZ.
+          {dict.settings.connectedAccounts.description}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -165,17 +165,17 @@ export function ConnectedAccountSection({
                     variant="outline"
                     className="border-0 bg-semantic-up/10 text-semantic-up rounded-full"
                   >
-                    Terhubung
+                    {dict.settings.connectedAccounts.connected}
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="bg-muted/30">
-                    Belum terhubung
+                    {dict.settings.connectedAccounts.notConnected}
                   </Badge>
                 )}
               </div>
               <p className="break-all text-xs text-muted-foreground">
                 {googleAccount?.email ||
-                  (hasGoogleProvider ? primaryEmail : "Belum ada akun Google")}
+                  (hasGoogleProvider ? primaryEmail : dict.settings.connectedAccounts.noAccount)}
               </p>
             </div>
           </div>
@@ -189,8 +189,8 @@ export function ConnectedAccountSection({
               disabled={!canUnlinkGoogle || isUnlinkPending}
               title={
                 canUnlinkGoogle
-                  ? "Putuskan akun Google"
-                  : "Tambahkan metode login lain sebelum memutuskan Google"
+                  ? dict.settings.connectedAccounts.disconnectTooltip
+                  : dict.settings.connectedAccounts.cannotDisconnectTooltip
               }
               className="rounded-full border border-hairline text-foreground"
             >
@@ -199,7 +199,7 @@ export function ConnectedAccountSection({
               ) : (
                 <Link2Off className="h-3.5 w-3.5" />
               )}
-              Putuskan
+              {dict.settings.connectedAccounts.disconnect}
             </Button>
           ) : (
             <Button
@@ -214,7 +214,7 @@ export function ConnectedAccountSection({
               ) : (
                 <Link2 className="h-3.5 w-3.5" />
               )}
-              Hubungkan
+              {dict.settings.connectedAccounts.connect}
             </Button>
           )}
         </div>
@@ -223,17 +223,14 @@ export function ConnectedAccountSection({
           <div className="flex gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-emerald-700 dark:text-emerald-400">
             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
             <p className="text-xs leading-relaxed">
-              Akun Google ini dapat dipakai untuk masuk ke CatatZ bersama metode
-              login lain yang masih aktif.
+              {dict.settings.connectedAccounts.connectedNotice}
             </p>
           </div>
         ) : (
           <div className="flex gap-3 rounded-lg border border-amber-500/20 bg-amber-500/10 p-3 text-amber-700 dark:text-amber-400">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <p className="text-xs leading-relaxed">
-              Hubungkan Google dengan email yang sama seperti{" "}
-              <span className="font-medium">{primaryEmail}</span> agar identity
-              tersambung ke akun CatatZ ini.
+              {dict.settings.connectedAccounts.connectNotice.replace("{email}", primaryEmail)}
             </p>
           </div>
         )}

@@ -10,6 +10,9 @@ import { OfflineIndicator } from '@/components/pwa/offline-indicator';
 import { PWAComponents } from '@/components/pwa/pwa-components';
 import { SwProvider } from '@/components/pwa/sw-provider';
 import { ErrorBoundary } from '@/components/error-boundary';
+import { getLocale } from '@/i18n/get-locale';
+import { getDictionary } from '@/i18n/get-dictionary';
+import { DictionaryProvider } from '@/i18n/client-provider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -34,40 +37,44 @@ const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
   : null;
 
-export const metadata: Metadata = {
-  title: {
-    default: 'CatatZ — Pencatatan Keuangan Pribadi',
-    template: '%s | CatatZ',
-  },
-  description:
-    'Aplikasi pencatatan keuangan pribadi yang cepat, intuitif, dan cerdas. Catat pemasukan, pengeluaran, transfer, hutang, dan rekap keuangan Anda.',
-  keywords: ['keuangan pribadi', 'pencatatan keuangan', 'budgeting', 'catatan hutang'],
-  manifest: '/manifest.json',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'black-translucent',
-    title: 'CatatZ',
-  },
-  icons: {
-    icon: [
-      { url: '/icons/icon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
-    ],
-    apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180' }],
-    shortcut: '/icons/icon-192x192.png',
-  },
-  other: {
-    'mobile-web-app-capable': 'yes',
-    'apple-mobile-web-app-capable': 'yes',
-    'apple-mobile-web-app-status-bar-style': 'black-translucent',
-    'apple-mobile-web-app-title': 'CatatZ',
-    'application-name': 'CatatZ',
-    'msapplication-TileColor': '#0052ff',
-    'msapplication-TileImage': '/icons/icon-144x144.png',
-    'theme-color': '#0052ff',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const dict = await getDictionary(locale);
+
+  return {
+    title: {
+      default: dict.metadata.title,
+      template: '%s | CatatZ',
+    },
+    description: dict.metadata.description,
+    keywords: dict.metadata.keywords,
+    manifest: '/manifest.json',
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: 'black-translucent',
+      title: 'CatatZ',
+    },
+    icons: {
+      icon: [
+        { url: '/icons/icon-32x32.png', sizes: '32x32', type: 'image/png' },
+        { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+        { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+      ],
+      apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180' }],
+      shortcut: '/icons/icon-192x192.png',
+    },
+    other: {
+      'mobile-web-app-capable': 'yes',
+      'apple-mobile-web-app-capable': 'yes',
+      'apple-mobile-web-app-status-bar-style': 'black-translucent',
+      'apple-mobile-web-app-title': 'CatatZ',
+      'application-name': 'CatatZ',
+      'msapplication-TileColor': '#0052ff',
+      'msapplication-TileImage': '/icons/icon-144x144.png',
+      'theme-color': '#0052ff',
+    },
+  };
+}
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -79,13 +86,16 @@ export const viewport: Viewport = {
   // userScalable: false,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const dict = await getDictionary(locale);
+
   return (
-    <html lang="id" className={`${inter.variable} ${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+    <html lang={locale} className={`${inter.variable} ${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <head>
         {supabaseOrigin ? <link rel="preconnect" href={supabaseOrigin} /> : null}
         <link rel="dns-prefetch" href="https://generativelanguage.googleapis.com" />
@@ -102,10 +112,12 @@ export default function RootLayout({
           >
             <SwProvider>
               <TooltipProvider>
-                <ErrorBoundary>{children}</ErrorBoundary>
-                <OfflineIndicator />
-                <PWAComponents />
-                <Toaster richColors position="top-right" />
+                <DictionaryProvider locale={locale} dict={dict}>
+                  <ErrorBoundary>{children}</ErrorBoundary>
+                  <OfflineIndicator />
+                  <PWAComponents />
+                  <Toaster richColors position="top-right" />
+                </DictionaryProvider>
               </TooltipProvider>
             </SwProvider>
           </ThemeProvider>

@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import type { Rekening, RekeningUsageCounts } from "@/types/rekening";
 import type { Transaksi } from "@/types/transaksi";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowDownLeft,
@@ -22,6 +23,7 @@ type Props = {
 
 export function RekeningStatCards({ rekening, usage, transaksi }: Props) {
   const { formatRupiah } = useSystemPreferences();
+  const { dict } = useTranslation();
 
   const { totalInflow, totalOutflow, netFlow } = useMemo(() => {
     let inflow = 0;
@@ -52,37 +54,37 @@ export function RekeningStatCards({ rekening, usage, transaksi }: Props) {
 
   const usageBadges = [
     {
-      label: "Pemasukan",
+      label: dict.transactions.types.income,
       count: usage.transaksi_masuk,
       icon: ArrowDownLeft,
       color: "text-semantic-up",
     },
     {
-      label: "Pengeluaran",
+      label: dict.transactions.types.expense,
       count: usage.transaksi_keluar,
       icon: ArrowUpRight,
       color: "text-semantic-down",
     },
     {
-      label: "Transfer Keluar",
+      label: dict.wallets.detail.transferOut,
       count: usage.transfer_keluar,
       icon: ArrowUpRight,
       color: "text-muted-foreground",
     },
     {
-      label: "Transfer Masuk",
+      label: dict.wallets.detail.transferIn,
       count: usage.transfer_masuk,
       icon: ArrowDownLeft,
       color: "text-semantic-up",
     },
     {
-      label: "Koreksi Saldo",
+      label: dict.transactions.types.correction,
       count: usage.koreksi_saldo,
       icon: SlidersHorizontal,
       color: "text-muted-foreground",
     },
     {
-      label: "Hutang/Cicilan",
+      label: dict.wallets.detail.debtAndInstallment,
       count: usage.hutang + usage.hutang_cicilan,
       icon: HandCoins,
       color: "text-muted-foreground",
@@ -97,7 +99,7 @@ export function RekeningStatCards({ rekening, usage, transaksi }: Props) {
         <div className="rounded-card border border-hairline bg-card p-4 sm:p-5 transition-colors">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Total Masuk (Data Aktif)
+              {dict.wallets.detail.totalInflowActive}
             </span>
             <div className="h-7 w-7 rounded-full bg-semantic-up/10 text-semantic-up flex items-center justify-center">
               <ArrowDownLeft className="h-4 w-4" />
@@ -112,7 +114,7 @@ export function RekeningStatCards({ rekening, usage, transaksi }: Props) {
         <div className="rounded-card border border-hairline bg-card p-4 sm:p-5 transition-colors">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Total Keluar (Data Aktif)
+              {dict.wallets.detail.totalOutflowActive}
             </span>
             <div className="h-7 w-7 rounded-full bg-semantic-down/10 text-semantic-down flex items-center justify-center">
               <ArrowUpRight className="h-4 w-4" />
@@ -127,7 +129,7 @@ export function RekeningStatCards({ rekening, usage, transaksi }: Props) {
         <div className="rounded-card border border-hairline bg-card p-4 sm:p-5 transition-colors">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Arus Kas Bersih
+              {dict.wallets.detail.netCashFlow}
             </span>
             <div className="h-7 w-7 rounded-full bg-surface-strong text-muted-foreground flex items-center justify-center">
               <ArrowLeftRight className="h-4 w-4" />
@@ -152,7 +154,10 @@ export function RekeningStatCards({ rekening, usage, transaksi }: Props) {
         <div className="rounded-card border border-hairline bg-surface-soft/60 p-4">
           <div className="flex items-center justify-between mb-2.5">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Distribusi Pemakaian ({usage.total} Data Terkait)
+              {dict.wallets.detail.usageDistribution.replace(
+                "{count}",
+                String(usage.total),
+              )}
             </span>
           </div>
           <div className="flex flex-wrap gap-2">

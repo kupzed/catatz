@@ -28,7 +28,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { formatDistanceToNow } from "date-fns";
-import { id } from "date-fns/locale";
+import { enUS, id as idLocale } from "date-fns/locale";
+import { useTranslation } from "@/i18n/use-translation";
 
 type SessionInfo = {
   id: string;
@@ -41,28 +42,36 @@ type SessionInfo = {
 };
 
 export function ActiveSessionsSection() {
+  const { dict, locale } = useTranslation();
+  const dateLocale = locale === "en" ? enUS : idLocale;
   const [sessions, setSessions] = useState<SessionInfo[]>([]);
   const [currentDeviceId, setCurrentDeviceId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [revokingId, setRevokingId] = useState<string | null>(null);
   const [isRevokingAll, setIsRevokingAll] = useState(false);
 
-  const fetchSessions = async () => {
-    setIsLoading(true);
-    const res = await getActiveSessions();
-    if (res.success && res.data) {
-      setSessions(res.data.sessions);
-      setCurrentDeviceId(res.data.current_device_id);
-    } else {
-      toast.error("Gagal memuat sesi aktif");
-    }
-    setIsLoading(false);
-  };
-
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void fetchSessions();
-  }, []);
+    let ignore = false;
+
+    const load = async () => {
+      const res = await getActiveSessions();
+      if (!ignore) {
+        if (res.success && res.data) {
+          setSessions(res.data.sessions);
+          setCurrentDeviceId(res.data.current_device_id);
+        } else {
+          toast.error(dict.settings.sessions.toasts.loadFailed);
+        }
+        setIsLoading(false);
+      }
+    };
+
+    void load();
+
+    return () => {
+      ignore = true;
+    };
+  }, [dict.settings.sessions.toasts.loadFailed]);
 
   const handleRevoke = async (id: string) => {
     setRevokingId(id);
@@ -71,7 +80,7 @@ export function ActiveSessionsSection() {
       toast.success(res.message);
       setSessions((prev) => prev.filter((s) => s.id !== id));
     } else {
-      toast.error(res.error || "Gagal mengakhiri sesi");
+      toast.error(res.error || dict.settings.sessions.toasts.revokeFailed);
     }
     setRevokingId(null);
   };
@@ -85,7 +94,7 @@ export function ActiveSessionsSection() {
         prev.filter((s) => s.device_id === currentDeviceId),
       );
     } else {
-      toast.error(res.error || "Gagal mengakhiri sesi lain");
+      toast.error(res.error || dict.settings.sessions.toasts.revokeAllFailed);
     }
     setIsRevokingAll(false);
   };
@@ -108,9 +117,9 @@ export function ActiveSessionsSection() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Active Sessions</CardTitle>
+        <CardTitle className="text-lg">{dict.settings.sessions.title}</CardTitle>
         <CardDescription>
-          Lihat dan kelola perangkat yang sedang login ke akun Anda.
+          {dict.settings.sessions.description}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -120,7 +129,7 @@ export function ActiveSessionsSection() {
           </div>
         ) : sessions.length === 0 ? (
           <div className="text-center py-4 text-muted-foreground text-sm">
-            Tidak ada data sesi aktif.
+            {dict.settings.sessions.empty}
           </div>
         ) : (
           <>
@@ -128,7 +137,7 @@ export function ActiveSessionsSection() {
             {currentSession && (
               <div className="space-y-3">
                 <h3 className="text-sm font-medium text-foreground">
-                  Current Device
+                  {dict.settings.sessions.currentDeviceTitle}
                 </h3>
                 <div className="flex items-center justify-between gap-4 py-3 px-4 bg-surface-soft rounded-input border border-hairline border-l-2">
                   <div className="flex items-center gap-3 min-w-0">
@@ -147,7 +156,7 @@ export function ActiveSessionsSection() {
                     </div>
                   </div>
                   <div className="shrink-0 text-xs font-medium text-semantic-up bg-semantic-up/10 px-2.5 py-0.5 rounded-full">
-                    Aktif sekarang
+                    {dict.settings.sessions.activeNow}
                   </div>
                 </div>
               </div>
@@ -158,7 +167,7 @@ export function ActiveSessionsSection() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-medium text-foreground">
-                    Other Sessions
+                    {dict.settings.sessions.otherDevicesTitle}
                   </h3>
                   {otherSessions.length > 1 && (
                     <AlertDialog>
@@ -168,22 +177,20 @@ export function ActiveSessionsSection() {
                           size="sm"
                           className="h-8 rounded-full bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20 text-sm px-3"
                         >
-                          Logout All
+                          {dict.settings.sessions.terminateAllButton}
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>
-                            Akhiri semua sesi lain?
+                            {dict.settings.sessions.revokeAllTitle}
                           </AlertDialogTitle>
                           <AlertDialogDescription>
-                            Anda akan keluar dari semua perangkat lain yang
-                            terhubung dengan akun ini. Perangkat saat ini akan
-                            tetap aktif.
+                            {dict.settings.sessions.revokeAllDesc}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Batal</AlertDialogCancel>
+                          <AlertDialogCancel>{dict.common.cancel}</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={handleRevokeAll}
                             className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
@@ -191,7 +198,7 @@ export function ActiveSessionsSection() {
                             {isRevokingAll ? (
                               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             ) : (
-                              "Ya, Akhiri Semua"
+                              dict.settings.sessions.revokeAllConfirm
                             )}
                           </AlertDialogAction>
                         </AlertDialogFooter>
@@ -218,10 +225,10 @@ export function ActiveSessionsSection() {
                             {session.browser || "Unknown Browser"}
                           </p>
                           <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                            Terakhir aktif{" "}
+                            {dict.settings.sessions.lastActiveLabel}{" "}
                             {formatDistanceToNow(
                               new Date(session.last_active_at),
-                              { addSuffix: true, locale: id },
+                              { addSuffix: true, locale: dateLocale },
                             )}
                           </p>
                         </div>
@@ -232,7 +239,7 @@ export function ActiveSessionsSection() {
                             variant="ghost"
                             size="icon"
                             className="shrink-0 h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                            title="Logout session"
+                            title={dict.settings.sessions.logoutSessionTooltip}
                           >
                             <LogOut className="w-4 h-4" />
                           </Button>
@@ -240,15 +247,14 @@ export function ActiveSessionsSection() {
                         <AlertDialogContent>
                           <AlertDialogHeader>
                             <AlertDialogTitle>
-                              Akhiri sesi ini?
+                              {dict.settings.sessions.revokeTitle}
                             </AlertDialogTitle>
                             <AlertDialogDescription>
-                              Perangkat ini akan segera dikeluarkan dari akun
-                              Anda.
+                              {dict.settings.sessions.revokeDesc}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Batal</AlertDialogCancel>
+                            <AlertDialogCancel>{dict.common.cancel}</AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => handleRevoke(session.id)}
                               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
@@ -256,7 +262,7 @@ export function ActiveSessionsSection() {
                               {revokingId === session.id ? (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                               ) : (
-                                "Ya, Akhiri"
+                                dict.settings.sessions.revokeConfirm
                               )}
                             </AlertDialogAction>
                           </AlertDialogFooter>

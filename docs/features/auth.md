@@ -62,6 +62,7 @@ Status: **Production (Aktif)** untuk email/password login/register, reset passwo
 - Settings menampilkan status akun Google di bagian Akun Terhubung dan menyediakan tombol Hubungkan/Putuskan.
 - Login/register memiliki toggle show password.
 - Register menampilkan indikator kekuatan password sederhana.
+- Semua halaman autentikasi (`/login`, `/register`, `/forgot-password`, `/reset-password`) mendukung lokalisasi bilingual (ID/EN) untuk seluruh heading, label form, placeholder, error validation, tombol aksi, dan pesan status.
 
 ## TODO / Improvement
 

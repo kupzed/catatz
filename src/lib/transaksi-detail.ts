@@ -1,5 +1,6 @@
-import { TIPE_CONFIG } from "@/constants/transaksi";
+import { TIPE_CONFIG, getTipeConfig } from "@/constants/transaksi";
 import type { Transaksi } from "@/types/transaksi";
+import type { Dictionary } from "@/i18n/types";
 
 const SYSTEM_TAG_PREFIXES = ["correction_"];
 const SYSTEM_TAGS = new Set(["correction_add", "correction_sub"]);
@@ -46,13 +47,15 @@ export function getTransaksiNominalDisplay(
   transaksi: Pick<Transaksi, "tipe"> & {
     tags?: string[] | null;
   },
+  dict?: Dictionary,
 ): TransaksiNominalDisplay {
   const { tipe, tags } = transaksi;
+  const config = getTipeConfig(dict);
 
   if (tipe === "income") {
     return {
       sign: "+",
-      label: "Pemasukan",
+      label: config.income.label,
       colorClass: "text-semantic-up",
       badgeClass: TIPE_CONFIG.income.badge,
       isNegative: false,
@@ -62,7 +65,7 @@ export function getTransaksiNominalDisplay(
   if (tipe === "expense") {
     return {
       sign: "-",
-      label: "Pengeluaran",
+      label: config.expense.label,
       colorClass: "text-semantic-down",
       badgeClass: TIPE_CONFIG.expense.badge,
       isNegative: true,
@@ -72,7 +75,7 @@ export function getTransaksiNominalDisplay(
   if (tipe === "transfer") {
     return {
       sign: "",
-      label: "Transfer",
+      label: config.transfer.label,
       colorClass: "text-foreground",
       badgeClass: TIPE_CONFIG.transfer.badge,
       isNegative: false,
@@ -84,7 +87,7 @@ export function getTransaksiNominalDisplay(
     if (direction === "add") {
       return {
         sign: "+",
-        label: "Koreksi (Penambahan)",
+        label: dict?.transactions.types.correctionAdd ?? "Koreksi (Penambahan)",
         colorClass: "text-accent-yellow",
         badgeClass: TIPE_CONFIG.correction.badge,
         isNegative: false,
@@ -93,7 +96,7 @@ export function getTransaksiNominalDisplay(
     if (direction === "sub") {
       return {
         sign: "-",
-        label: "Koreksi (Pengurangan)",
+        label: dict?.transactions.types.correctionSub ?? "Koreksi (Pengurangan)",
         colorClass: "text-accent-yellow",
         badgeClass: TIPE_CONFIG.correction.badge,
         isNegative: true,
@@ -101,7 +104,7 @@ export function getTransaksiNominalDisplay(
     }
     return {
       sign: "",
-      label: "Koreksi Saldo",
+      label: config.correction.label,
       colorClass: "text-accent-yellow",
       badgeClass: TIPE_CONFIG.correction.badge,
       isNegative: false,
@@ -110,7 +113,7 @@ export function getTransaksiNominalDisplay(
 
   return {
     sign: "",
-    label: "Transaksi",
+    label: dict?.transactions.title ?? "Transaksi",
     colorClass: "text-foreground",
     badgeClass: "bg-surface-strong text-muted-foreground",
     isNegative: false,
@@ -126,11 +129,13 @@ export function getTransaksiDisplayName(
     judul?: string | null;
     catatan?: string | null;
   },
+  dict?: Dictionary,
 ): string {
+  const config = getTipeConfig(dict);
   if (transaksi.tipe === "transfer" || transaksi.tipe === "correction") {
-    return TIPE_CONFIG[transaksi.tipe]?.label ?? "Transaksi";
+    return config[transaksi.tipe]?.label ?? dict?.transactions.title ?? "Transaksi";
   }
   if (transaksi.judul?.trim()) return transaksi.judul.trim();
   if (transaksi.catatan?.trim()) return transaksi.catatan.trim();
-  return TIPE_CONFIG[transaksi.tipe]?.label ?? "Transaksi";
+  return config[transaksi.tipe]?.label ?? dict?.transactions.title ?? "Transaksi";
 }

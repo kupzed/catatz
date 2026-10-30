@@ -18,6 +18,7 @@ import {
   type RekapCycleRange,
 } from "@/lib/rekap-period";
 import type { RekapSettings } from "@/types/rekap";
+import { useTranslation } from "@/i18n/use-translation";
 import { RekapPeriodCard, type RekapPeriodCardData } from "./rekap-period-card";
 
 export type RekapBulananTabProps = {
@@ -25,13 +26,15 @@ export type RekapBulananTabProps = {
 };
 
 export function RekapBulananTab({ settings }: RekapBulananTabProps) {
+  const { dict, locale } = useTranslation();
   const [items, setItems] = useState<RekapPeriodCardData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const rekapLocale = locale === "en" ? "en-US" : "id-ID";
   const today = useMemo(() => getTodayInJakarta(), []);
   const currentCycle = useMemo(
-    () => getCycleContaining(settings.cutoff_day, today),
-    [settings.cutoff_day, today],
+    () => getCycleContaining(settings.cutoff_day, today, rekapLocale),
+    [rekapLocale, settings.cutoff_day, today],
   );
 
   // Helper untuk memuat ringkasan finansial dan saldo untuk sekumpulan siklus
@@ -110,6 +113,7 @@ export function RekapBulananTab({ settings }: RekapBulananTabProps) {
           referenceDate: today,
           count: 240, // Batas aman 20 tahun
           earliestDate: earliestDate ?? currentCycle.startDate,
+          locale: rekapLocale,
         });
 
         const data = await fetchCycleData(cycles);
@@ -120,7 +124,7 @@ export function RekapBulananTab({ settings }: RekapBulananTabProps) {
       } catch (err) {
         if (!ignore) {
           console.error("Gagal memuat rekap bulanan:", err);
-          toast.error("Gagal memuat siklus bulanan");
+          toast.error(dict.reports.toasts.loadMonthlyFailed);
           setItems([]);
           setIsLoading(false);
         }
@@ -132,7 +136,14 @@ export function RekapBulananTab({ settings }: RekapBulananTabProps) {
     return () => {
       ignore = true;
     };
-  }, [currentCycle.startDate, fetchCycleData, settings.cutoff_day, today]);
+  }, [
+    currentCycle.startDate,
+    dict.reports.toasts.loadMonthlyFailed,
+    fetchCycleData,
+    rekapLocale,
+    settings.cutoff_day,
+    today,
+  ]);
 
   // Skeleton saat memuat awal
   if (isLoading) {
@@ -172,8 +183,8 @@ export function RekapBulananTab({ settings }: RekapBulananTabProps) {
         <div className="p-8">
           <EmptyState
             icon={CalendarDays}
-            title="Tidak Ada Siklus Bulanan"
-            description="Belum ada siklus bulanan yang tersedia untuk ditampilkan."
+            title={dict.reports.emptyState.monthlyTitle}
+            description={dict.reports.emptyState.monthlyDesc}
           />
         </div>
       </Card>

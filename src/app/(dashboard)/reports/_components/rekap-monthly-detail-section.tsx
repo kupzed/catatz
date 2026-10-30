@@ -16,7 +16,7 @@ import type {
   RekapDetailBulanan,
   RekapDetailTransaksi,
 } from "@/actions/rekap-action";
-import { BULAN_NAMES } from "@/constants/rekap";
+import { getMonthNames } from "@/constants/rekap";
 import { TIPE_CONFIG } from "@/constants/transaksi";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 
 type BreakdownMode = "kategori" | "judul";
 type RekapMonthlyDetailSectionProps = {
@@ -94,6 +95,8 @@ function MonthSelector({
   onSelectMonth: (bulan: number) => void;
   disabled?: boolean;
 }) {
+  const { dict } = useTranslation();
+  const monthNames = getMonthNames(dict);
   const previousMonth = bulan === 1 ? 12 : bulan - 1;
   const nextMonth = bulan === 12 ? 1 : bulan + 1;
 
@@ -126,7 +129,7 @@ function MonthSelector({
           <SelectContent align="center">
             {months.map((item) => (
               <SelectItem key={item.bulan} value={String(item.bulan)}>
-                {BULAN_NAMES[item.bulan - 1]} {item.tahun}
+                {monthNames[item.bulan - 1]} {item.tahun}
               </SelectItem>
             ))}
           </SelectContent>
@@ -322,6 +325,8 @@ function BreakdownRows({
 }
 
 function BreakdownSection({ detail }: { detail: RekapDetailBulanan }) {
+  const { dict } = useTranslation();
+  const monthNames = getMonthNames(dict);
   const [mode, setMode] = useState<BreakdownMode>("kategori");
   const [activeId, setActiveId] = useState<string | null>(null);
   const breakdown: RekapBreakdown = mode === "kategori" ? detail.kategori : detail.judul;
@@ -352,7 +357,7 @@ function BreakdownSection({ detail }: { detail: RekapDetailBulanan }) {
               Rincian {titleSuffix}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {BULAN_NAMES[detail.bulan - 1]} {detail.tahun}
+              {monthNames[detail.bulan - 1]} {detail.tahun}
             </p>
           </div>
         </div>
@@ -409,6 +414,8 @@ export function RekapMonthlyDetailSection({
   isLoading,
 }: RekapMonthlyDetailSectionProps) {
   const { formatTanggal } = useSystemPreferences();
+  const { dict } = useTranslation();
+  const monthNames = getMonthNames(dict);
   const hutangPiutangNet =
     detail.hutang_piutang.piutang_baru +
     detail.hutang_piutang.cicilan_piutang -
@@ -441,10 +448,10 @@ export function RekapMonthlyDetailSection({
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Detail Rekap
+              {dict.reports.detail.title}
             </p>
             <h2 className="mt-1 text-lg font-semibold text-foreground">
-              {BULAN_NAMES[detail.bulan - 1]} {detail.tahun}
+              {monthNames[detail.bulan - 1]} {detail.tahun}
             </h2>
           </div>
           <MonthSelector
@@ -458,7 +465,7 @@ export function RekapMonthlyDetailSection({
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
           <div>
             <p className="text-sm font-semibold text-foreground">
-              Selisih pemasukan dan pengeluaran
+              {dict.reports.detail.netMainDesc}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
               Koreksi saldo dan hutang/piutang dipisahkan dari selisih utama.
@@ -469,34 +476,34 @@ export function RekapMonthlyDetailSection({
           </div>
           <div>
             <DetailMetric
-              label="Pengeluaran"
+              label={dict.reports.card.expense}
               value={detail.total_expense}
               className="text-semantic-down"
             />
             <DetailMetric
-              label="Rata-rata pengeluaran per hari"
+              label={dict.reports.detail.avgExpensePerDay}
               value={detail.rata_expense_harian}
               className="text-semantic-down"
             />
             <DetailMetric
-              label="Pemasukan"
+              label={dict.reports.card.income}
               value={detail.total_income}
               className="text-semantic-up"
             />
             <DetailMetric
-              label="Rata-rata pemasukan per hari"
+              label={dict.reports.detail.avgIncomePerDay}
               value={detail.rata_income_harian}
               className="text-semantic-up"
             />
             <DetailMetric
-              label="Selisih utama"
+              label={dict.reports.detail.netMain}
               value={detail.net}
               className={valueColor(detail.net)}
               signed
             />
             {detail.koreksi.count > 0 && (
               <DetailMetric
-                label="Koreksi Saldo"
+                label={dict.reports.detail.balanceCorrection}
                 value={detail.koreksi.net}
                 className={valueColor(detail.koreksi.net)}
                 signed
@@ -504,7 +511,7 @@ export function RekapMonthlyDetailSection({
             )}
             {detail.hutang_piutang.count > 0 && (
               <DetailMetric
-                label="Hutang Piutang"
+                label={dict.reports.detail.debtCashFlow}
                 value={hutangPiutangNet}
                 className={valueColor(hutangPiutangNet)}
                 signed

@@ -1,14 +1,14 @@
 {
-  "name": "CatatZ — Pencatatan Keuangan",
+  "name": "CatatZ — Personal Finance Tracker",
   "short_name": "CatatZ",
-  "description": "Pencatatan keuangan pribadi yang cepat dan cerdas",
+  "description": "Fast and smart personal finance tracking",
   "start_url": "/transactions",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#ffffff",
   "theme_color": "#0052ff",
-  "lang": "id-ID",
+  "lang": "en",
   "categories": ["finance", "productivity"],
   "icons": [
     {
@@ -86,7 +86,7 @@
   ],
   "shortcuts": [
     {
-      "name": "Tambah Transaksi",
+      "name": "Add Transaction",
       "url": "/transactions?new=true",
       "icons": [
         {
@@ -97,7 +97,7 @@
       ]
     },
     {
-      "name": "Rekap",
+      "name": "Reports",
       "url": "/reports",
       "icons": [
         {
@@ -108,7 +108,7 @@
       ]
     },
     {
-      "name": "Rekening",
+      "name": "Wallets",
       "url": "/wallets",
       "icons": [
         {

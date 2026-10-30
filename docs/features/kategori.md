@@ -56,6 +56,7 @@ Fitur kategori digunakan untuk mengelola kategori pemasukan dan pengeluaran tran
 - Proteksi integritas finansial: Kategori tidak dapat dihapus jika masih digunakan oleh transaksi, alokasi budget, atau template transaksi berulang. Pengguna wajib memindahkan atau menghapus data terkait terlebih dahulu.
 - Tipe kategori harus `income`, `expense`, atau `all`.
 - Warna wajib berupa format hex (`#rrggbb`).
+- Seluruh teks antarmuka kategori (label hero card, filter bar, kartu ringkasan, dialog form, metrik statistik, dan notifikasi konfirmasi) bersifat bilingual via `src/i18n/`.
 
 ## UI Behavior
 

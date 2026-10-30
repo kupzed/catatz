@@ -14,10 +14,12 @@ import { Label } from "@/components/ui/label";
 import { Download, FileSpreadsheet, FileText, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useTranslation } from "@/i18n/use-translation";
 
 type ExportFormat = "pdf" | "xlsx" | "csv";
 
 export function ExportSection() {
+  const { dict } = useTranslation();
   const [loadingFormat, setLoadingFormat] = useState<ExportFormat | null>(
     null,
   );
@@ -57,11 +59,11 @@ export function ExportSection() {
 
       const res = await getExportData(exportFilter);
       if (!res.success || !res.data) {
-        toast.error(res.error ?? "Gagal mengambil data");
+        toast.error(res.error ?? dict.settings.export.toasts.fetchFailed);
         return;
       }
       if (res.data.transaksi.length === 0) {
-        toast.info("Tidak ada transaksi untuk diexport");
+        toast.info(dict.settings.export.toasts.noTransactions);
         return;
       }
 
@@ -89,12 +91,12 @@ export function ExportSection() {
       }
 
       toast.success(
-        `${format.toUpperCase()} berhasil dibuat - ${
-          res.data.transaksi.length
-        } transaksi`,
+        dict.settings.export.toasts.success
+          .replace("{format}", format.toUpperCase())
+          .replace("{count}", String(res.data.transaksi.length)),
       );
     } catch (err) {
-      toast.error(`Gagal membuat ${format.toUpperCase()}`);
+      toast.error(dict.settings.export.toasts.error.replace("{format}", format.toUpperCase()));
       console.error(err);
     } finally {
       setLoadingFormat(null);
@@ -104,10 +106,9 @@ export function ExportSection() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Export Data</CardTitle>
+        <CardTitle className="text-lg">{dict.settings.export.title}</CardTitle>
         <CardDescription>
-          Download laporan transaksi keuangan Anda dalam format PDF, XLSX, atau
-          CSV.
+          {dict.settings.export.description}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -115,7 +116,7 @@ export function ExportSection() {
           <div className="grid grid-cols-2 gap-4">
             <div className="flex-1 space-y-1.5 min-w-0">
               <Label htmlFor="dari" className="text-sm font-medium">
-                Dari Tanggal
+                {dict.settings.export.fromDateLabel}
               </Label>
               <Input
                 id="dari"
@@ -127,7 +128,7 @@ export function ExportSection() {
             </div>
             <div className="flex-1 space-y-1.5 min-w-0">
               <Label htmlFor="sampai" className="text-sm font-medium">
-                Sampai Tanggal
+                {dict.settings.export.toDateLabel}
               </Label>
               <Input
                 id="sampai"
@@ -141,26 +142,25 @@ export function ExportSection() {
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            Kosongkan untuk export semua transaksi
+            {dict.settings.export.emptyFilterNote}
           </p>
         </div>
 
         <div className="bg-surface-soft rounded-input p-4 flex flex-col gap-1 text-sm border border-hairline">
           <p className="font-medium">
-            {exportCount ?? "..."} transaksi siap diexport
+            {dict.settings.export.readyCount.replace("{count}", String(exportCount ?? "..."))}
           </p>
           <p className="text-muted-foreground">
-            Periode:{" "}
+            {dict.settings.export.periodLabel}{" "}
             {filter.dari || filter.sampai
-              ? `${filter.dari || "Awal"} - ${filter.sampai || "Sekarang"}`
-              : "Semua waktu"}
+              ? `${filter.dari || dict.settings.export.periodStartFallback} - ${filter.sampai || dict.settings.export.periodEndFallback}`
+              : dict.settings.export.allTime}
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground">
-            PDF dan XLSX berisi ringkasan keuangan. CSV berisi rincian
-            transaksi untuk import data.
+            {dict.settings.export.formatNote}
           </p>
           <div className="flex w-full flex-wrap gap-2 sm:w-auto">
             <Button
@@ -173,7 +173,7 @@ export function ExportSection() {
               ) : (
                 <FileText className="h-4 w-4 shrink-0" />
               )}
-              {loadingFormat === "pdf" ? "Membuat..." : "Export PDF"}
+              {loadingFormat === "pdf" ? dict.settings.export.generating : dict.settings.export.exportPdf}
             </Button>
             <Button
               variant="secondary"
@@ -186,7 +186,7 @@ export function ExportSection() {
               ) : (
                 <FileSpreadsheet className="h-4 w-4 shrink-0" />
               )}
-              {loadingFormat === "xlsx" ? "Membuat..." : "Export XLSX"}
+              {loadingFormat === "xlsx" ? dict.settings.export.generating : dict.settings.export.exportExcel}
             </Button>
             <Button
               variant="secondary"
@@ -199,7 +199,7 @@ export function ExportSection() {
               ) : (
                 <Download className="h-4 w-4 shrink-0" />
               )}
-              {loadingFormat === "csv" ? "Membuat..." : "Export CSV"}
+              {loadingFormat === "csv" ? dict.settings.export.generating : dict.settings.export.exportCsv}
             </Button>
           </div>
         </div>

@@ -152,6 +152,36 @@ Action layer juga menangani kasus khusus:
 - Cicilan hutang/piutang menyimpan snapshot tipe hutang agar rollback saldo tetap konsisten saat cicilan diubah, dihapus, atau terhapus lewat cascade parent.
 - Edit/delete transaksi `correction` membalik atau menerapkan perubahan saldo secara manual.
 
+## Alur Internasionalisasi (i18n)
+
+CatatZ mengadopsi arsitektur i18n zero-external-dependency (tanpa `next-intl` atau `i18next`) berbasis kamus TypeScript terstruktur di `src/i18n/`.
+
+```txt
+Browser / Client Request
+  |
+  v
+Root Layout (Server Component)
+  |
+  +-- getLocale() -> query user_preferences.language (default: 'id')
+  +-- getDictionary(locale) -> load typed Dictionary (id.ts / en.ts)
+  +-- <html lang={locale}>
+  +-- generateMetadata() -> dynamic metadata (title, description, keywords)
+  |
+  v
+DictionaryProvider (Client Context)
+  |
+  +-- Menyediakan dict aktif ke seluruh Client Components tree
+  +-- useTranslation() hook -> { dict, locale }
+```
+
+### Karakteristik Arsitektur i18n:
+
+1. **Server-First Resolution**: Server Components memanggil `await getLocale()` dan `getDictionary(locale)` untuk merender teks secara SSR tanpa layout shift.
+2. **Client Context Provider**: `DictionaryProvider` di `src/i18n/client-provider.tsx` membungkus root layout sehingga semua interactive Client Components dapat mengakses kamus melalui hook `useTranslation()`.
+3. **Factory Validation Pattern**: Validasi Zod form (`src/validations/*`) menggunakan pattern pabrik `get<Entity>Schema(dict)` yang menerima kamus terjemahan untuk menghasilkan pesan error validasi dinamis sesuai bahasa aktif.
+4. **Zero Locale Route Prefixes**: Tidak ada prefiks URL seperti `/en/` atau `/id/`. URL aplikasi tetap bersih (`/transactions`, `/wallets`, dll.). Bahasa disimpan pada profil user di database (`user_preferences.language`).
+5. **Formatters Aware**: Helper format nominal dan tanggal di `src/lib/formatter.ts` membaca preferensi `number_format`, `date_format`, dan `time_format` yang tersinkronisasi dengan preferensi pengguna.
+
 ## Alur PWA
 
 ```txt

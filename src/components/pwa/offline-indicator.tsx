@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { WifiOff } from "lucide-react";
 import { useOnlineStatus } from "@/hooks/use-online-status";
+import { useTranslation } from "@/i18n/use-translation";
 
 export function OfflineIndicator() {
   const isOnline = useOnlineStatus();
   const [mounted, setMounted] = useState(false);
+  const { dict } = useTranslation();
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -31,7 +33,7 @@ export function OfflineIndicator() {
       }`}
     >
       <WifiOff className="h-4 w-4 shrink-0" aria-hidden="true" />
-      <span>Tidak ada koneksi internet. Data baru membutuhkan koneksi.</span>
+      <span>{dict.pwa.offlineIndicator}</span>
     </div>
   );
 }

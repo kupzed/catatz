@@ -7,6 +7,8 @@ import { redirect } from "next/navigation";
 import type { ActionResult } from "@/types/general";
 import { createSessionRecord } from "./session-action";
 import { cookies, headers } from "next/headers";
+import { getActionLocale } from "@/i18n/get-locale";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 type AuthCallbackUrlResult =
   | { success: true; url: string }
@@ -85,10 +87,11 @@ async function createAuthCallbackUrl(
     : (await getRequestOrigin()) || environment.appUrl;
 
   if (!origin) {
+    const locale = await getActionLocale();
+    const dict = await getDictionary(locale);
     return {
       success: false,
-      error:
-        "Origin request tidak terbaca. Restart dev server dan cek konfigurasi URL auth.",
+      error: dict.actions.auth.originNotDetected,
     };
   }
 
@@ -142,9 +145,12 @@ export async function signUp(formData: FormData): Promise<ActionResult> {
     return { success: false, error: error.message };
   }
 
+  const locale = await getActionLocale();
+  const dict = await getDictionary(locale);
+
   return {
     success: true,
-    message: "Akun berhasil dibuat! Silakan cek email untuk verifikasi.",
+    message: dict.actions.auth.accountCreatedCheckEmail,
   };
 }
 
@@ -214,9 +220,11 @@ export async function resetPasswordRequest(
 ): Promise<ActionResult> {
   const supabase = await createClient();
   const email = formData.get("email") as string;
+  const locale = await getActionLocale();
+  const dict = await getDictionary(locale);
 
   if (!email) {
-    return { success: false, error: "Email wajib diisi" };
+    return { success: false, error: dict.actions.auth.emailRequired };
   }
 
   const callbackUrl = await createAuthCallbackUrl("/reset-password");
@@ -235,8 +243,7 @@ export async function resetPasswordRequest(
 
   return {
     success: true,
-    message:
-      "Jika email terdaftar, link reset password akan dikirimkan ke email tersebut.",
+    message: dict.actions.auth.resetPasswordEmailSent,
   };
 }
 
@@ -247,17 +254,19 @@ export async function updatePassword(
   const supabase = await createClient();
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
+  const locale = await getActionLocale();
+  const dict = await getDictionary(locale);
 
   if (!password || !confirmPassword) {
-    return { success: false, error: "Password wajib diisi" };
+    return { success: false, error: dict.actions.auth.passwordRequired };
   }
 
   if (password !== confirmPassword) {
-    return { success: false, error: "Konfirmasi password tidak cocok" };
+    return { success: false, error: dict.errors.validation.passwordMismatch };
   }
 
   if (password.length < 8) {
-    return { success: false, error: "Password minimal 8 karakter" };
+    return { success: false, error: dict.errors.validation.passwordMinLength };
   }
 
   const { error } = await supabase.auth.updateUser({ password });
@@ -295,11 +304,15 @@ export async function signInWithGoogle(): Promise<ActionResult<{ url: string }>>
     return { success: true, data: { url: data.url } };
   }
 
-  return { success: false, error: "Gagal menginisialisasi login Google" };
+  const locale = await getActionLocale();
+  const dict = await getDictionary(locale);
+  return { success: false, error: dict.actions.auth.googleSignInFailed };
 }
 
 export async function linkGoogleIdentity(): Promise<ActionResult<{ url: string }>> {
   const supabase = await createClient();
+  const locale = await getActionLocale();
+  const dict = await getDictionary(locale);
 
   const {
     data: { user },
@@ -307,7 +320,7 @@ export async function linkGoogleIdentity(): Promise<ActionResult<{ url: string }
   } = await supabase.auth.getUser();
 
   if (userError || !user) {
-    return { success: false, error: "Sesi tidak valid. Silakan login ulang." };
+    return { success: false, error: dict.actions.auth.sessionInvalidLoginAgain };
   }
 
   const { data: identitiesData, error: identitiesError } =
@@ -322,7 +335,7 @@ export async function linkGoogleIdentity(): Promise<ActionResult<{ url: string }
   );
 
   if (hasGoogleIdentity) {
-    return { success: true, message: "Akun Google sudah terhubung." };
+    return { success: true, message: dict.actions.auth.googleAlreadyConnected };
   }
 
   const queryParams: Record<string, string> = {
@@ -355,11 +368,13 @@ export async function linkGoogleIdentity(): Promise<ActionResult<{ url: string }
     return { success: true, data: { url: data.url } };
   }
 
-  return { success: false, error: "Gagal menginisialisasi koneksi Google" };
+  return { success: false, error: dict.actions.auth.googleLinkFailed };
 }
 
 export async function unlinkGoogleIdentity(): Promise<ActionResult> {
   const supabase = await createClient();
+  const locale = await getActionLocale();
+  const dict = await getDictionary(locale);
 
   const {
     data: { user },
@@ -367,7 +382,7 @@ export async function unlinkGoogleIdentity(): Promise<ActionResult> {
   } = await supabase.auth.getUser();
 
   if (userError || !user) {
-    return { success: false, error: "Sesi tidak valid. Silakan login ulang." };
+    return { success: false, error: dict.actions.auth.sessionInvalidLoginAgain };
   }
 
   const { data: identitiesData, error: identitiesError } =
@@ -383,13 +398,13 @@ export async function unlinkGoogleIdentity(): Promise<ActionResult> {
   );
 
   if (!googleIdentity) {
-    return { success: false, error: "Akun Google belum terhubung." };
+    return { success: false, error: dict.actions.auth.googleNotConnected };
   }
 
   if (identities.length < 2) {
     return {
       success: false,
-      error: "Tambahkan metode login lain sebelum memutuskan akun Google.",
+      error: dict.actions.auth.googleNeedOtherMethod,
     };
   }
 
@@ -401,5 +416,5 @@ export async function unlinkGoogleIdentity(): Promise<ActionResult> {
 
   revalidatePath("/settings");
 
-  return { success: true, message: "Akun Google berhasil diputuskan." };
+  return { success: true, message: dict.actions.auth.googleUnlinked };
 }

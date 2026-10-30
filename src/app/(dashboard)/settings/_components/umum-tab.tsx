@@ -30,7 +30,7 @@ export function UmumTab({ profile, preferences, connectedAccounts }: Props) {
     <div className="space-y-6 max-w-3xl">
       <ProfileSection profile={profile} />
       <SystemPreferenceSection
-        key={`${preferences.theme}-${preferences.currency}-${preferences.date_format}-${preferences.number_format}-${preferences.show_decimal_places}-${preferences.time_format}-${preferences.default_landing_page}`}
+        key={`${preferences.theme}-${preferences.currency}-${preferences.date_format}-${preferences.number_format}-${preferences.show_decimal_places}-${preferences.time_format}-${preferences.default_landing_page}-${preferences.language}`}
         preferences={preferences}
       />
       <ConnectedAccountSection

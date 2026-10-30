@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  hutangContactSchema,
+  getHutangContactSchema,
   type HutangContactSchema,
 } from "@/validations/hutang-validation";
 import { createHutangContact, updateHutangContact } from "@/actions/hutang-action";
@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { ClearableInput } from "@/components/common/clearable-input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "@/i18n/use-translation";
 
 type Props = {
   open: boolean;
@@ -38,6 +39,7 @@ export default function HutangDialog({
   onCreated,
   onUpdated,
 }: Props) {
+  const { dict } = useTranslation();
   const isEdit = !!editData;
   const [submitting, setSubmitting] = useState(false);
 
@@ -48,7 +50,7 @@ export default function HutangDialog({
     reset,
     formState: { errors },
   } = useForm<HutangContactSchema>({
-    resolver: zodResolver(hutangContactSchema),
+    resolver: zodResolver(getHutangContactSchema(dict)),
     defaultValues: {
       nama_entitas: "",
       catatan: "",
@@ -75,20 +77,20 @@ export default function HutangDialog({
       if (isEdit && editData) {
         const res = await updateHutangContact(editData.id, values);
         if (res.success && res.data) {
-          toast.success("Informasi pihak diperbarui");
+          toast.success(dict.debts.toasts.contactUpdated);
           onUpdated(res.data);
           onOpenChange(false);
         } else {
-          toast.error(res.error ?? "Gagal memperbarui informasi pihak");
+          toast.error(res.error ?? dict.debts.toasts.contactUpdateFailed);
         }
       } else {
         const res = await createHutangContact(values);
         if (res.success && res.data) {
-          toast.success("Pihak baru berhasil ditambahkan");
+          toast.success(dict.debts.toasts.contactCreated);
           onCreated(res.data);
           onOpenChange(false);
         } else {
-          toast.error(res.error ?? "Gagal menambahkan pihak");
+          toast.error(res.error ?? dict.debts.toasts.contactCreateFailed);
         }
       }
     } finally {
@@ -101,21 +103,21 @@ export default function HutangDialog({
       <DialogContent className="max-w-sm sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {isEdit ? "Edit Informasi Pihak" : "Tambah Pihak Hutang & Piutang"}
+            {isEdit ? dict.debts.form.editContactTitle : dict.debts.form.addContactTitle}
           </DialogTitle>
           <DialogDescription>
             {isEdit
-              ? "Perbarui nama atau catatan pihak ini."
-              : "Masukkan nama pihak dan catatan. Rincian transaksi dapat Anda kelola di halaman detail."}
+              ? dict.debts.form.editContactDescription
+              : dict.debts.form.addContactDescription}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="nama-entitas">Nama Pihak / Kontak</Label>
+            <Label htmlFor="nama-entitas">{dict.debts.form.personName}</Label>
             <ClearableInput
               id="nama-entitas"
-              placeholder="Contoh: Budi, Toko Makmur, Bank BCA"
+              placeholder={dict.debts.form.personNamePlaceholderContact}
               {...register("nama_entitas")}
               onClear={() => setValue("nama_entitas", "")}
               className={errors.nama_entitas ? "border-rose-500" : ""}
@@ -126,10 +128,10 @@ export default function HutangDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="catatan-entitas">Catatan</Label>
+            <Label htmlFor="catatan-entitas">{dict.debts.form.notes}</Label>
             <ClearableInput
               id="catatan-entitas"
-              placeholder="Keterangan opsional (misal: Teman kantor, Usaha)"
+              placeholder={dict.debts.form.notesPlaceholderContact}
               {...register("catatan")}
               onClear={() => setValue("catatan", "")}
             />
@@ -141,7 +143,7 @@ export default function HutangDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Batal
+              {dict.common.cancel}
             </Button>
             <Button
               type="submit"
@@ -149,7 +151,7 @@ export default function HutangDialog({
               className="bg-primary hover:bg-primary-active text-white rounded-full h-11 px-5"
             >
               {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              {isEdit ? "Perbarui" : "Simpan"}
+              {isEdit ? dict.common.update : dict.common.save}
             </Button>
           </DialogFooter>
         </form>

@@ -4,15 +4,15 @@ import { useState, useEffect } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  rekeningCreateSchema,
-  rekeningEditSchema,
+  getRekeningCreateSchema,
+  getRekeningEditSchema,
   type RekeningCreateSchema,
   type RekeningEditSchema,
 } from "@/validations/rekening-validation";
 import { createRekening, updateRekening } from "@/actions/rekening-action";
 import { toast } from "sonner";
 import type { Rekening } from "@/types/rekening";
-import { DAFTAR_BANK, BANK_BY_JENIS } from "@/constants/banks";
+import { DAFTAR_BANK, BANK_BY_JENIS, getJenisDisplay } from "@/constants/banks";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +37,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Loader2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 
 const WARNA_PRESETS = [
   "#6366f1",
@@ -69,6 +70,7 @@ function CreateForm({
   onCreated: (r: Rekening) => void;
   onClose: () => void;
 }) {
+  const { dict } = useTranslation();
   const [submitting, setSubmitting] = useState(false);
   const {
     control,
@@ -77,7 +79,7 @@ function CreateForm({
     setValue,
     formState: { errors },
   } = useForm<RekeningCreateSchema>({
-    resolver: zodResolver(rekeningCreateSchema),
+    resolver: zodResolver(getRekeningCreateSchema(dict)),
     defaultValues: {
       jenis: "Bank",
       saldo_awal: 0,
@@ -106,10 +108,10 @@ function CreateForm({
     try {
       const res = await createRekening(values);
       if (res.success && res.data) {
-        toast.success("Rekening ditambahkan");
+        toast.success(dict.wallets.toasts.created);
         onCreated(res.data);
         onClose();
-      } else toast.error(res.error ?? "Gagal menambahkan");
+      } else toast.error(res.error ?? dict.wallets.toasts.createFailed);
     } finally {
       setSubmitting(false);
     }
@@ -119,12 +121,12 @@ function CreateForm({
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Bank/E-Wallet Picker */}
       <div className="space-y-2">
-        <Label className="text-sm">Pilih Bank / E-Wallet (opsional)</Label>
+        <Label className="text-sm">{dict.wallets.form.selectBankOptional}</Label>
         <Tabs defaultValue="Bank">
           <TabsList className="w-full grid grid-cols-4 h-8 text-xs">
             {(["Bank", "E-Wallet", "Tunai", "Investasi"] as const).map((j) => (
               <TabsTrigger key={j} value={j} className="text-xs">
-                {j}
+                {getJenisDisplay(j, dict)}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -162,10 +164,10 @@ function CreateForm({
 
       {/* Nama */}
       <div className="space-y-1.5">
-        <Label htmlFor="rek-nama">Nama Rekening</Label>
+        <Label htmlFor="rek-nama">{dict.wallets.form.name}</Label>
         <ClearableInput
           id="rek-nama"
-          placeholder="Contoh: BCA Utama"
+          placeholder={dict.wallets.form.namePlaceholder}
           {...register("nama")}
           onClear={() => setValue("nama", "")}
           className={errors.nama ? "border-rose-500" : ""}
@@ -177,7 +179,7 @@ function CreateForm({
 
       {/* Jenis */}
       <div className="space-y-1.5">
-        <Label>Jenis Rekening</Label>
+        <Label>{dict.wallets.form.type}</Label>
         <Select
           value={jenis}
           onValueChange={(v) =>
@@ -188,17 +190,17 @@ function CreateForm({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Tunai">💵 Tunai</SelectItem>
-            <SelectItem value="Bank">🏦 Bank</SelectItem>
-            <SelectItem value="E-Wallet">📱 E-Wallet</SelectItem>
-            <SelectItem value="Investasi">📈 Investasi</SelectItem>
+            <SelectItem value="Tunai">💵 {dict.wallets.types.cash}</SelectItem>
+            <SelectItem value="Bank">🏦 {dict.wallets.types.bank}</SelectItem>
+            <SelectItem value="E-Wallet">📱 {dict.wallets.types.ewallet}</SelectItem>
+            <SelectItem value="Investasi">📈 {dict.wallets.types.investment}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {/* Saldo Awal */}
       <div className="space-y-1.5">
-        <Label htmlFor="saldo-awal">Saldo Awal (Rp)</Label>
+        <Label htmlFor="saldo-awal">{dict.wallets.form.initialBalance} (Rp)</Label>
         <Controller
           control={control}
           name="saldo_awal"
@@ -215,7 +217,7 @@ function CreateForm({
 
       {/* Warna */}
       <div className="space-y-1.5">
-        <Label>Warna</Label>
+        <Label>{dict.wallets.form.color}</Label>
         <div className="flex flex-wrap gap-2 items-center">
           {WARNA_PRESETS.map((c) => (
             <button
@@ -236,7 +238,7 @@ function CreateForm({
             value={warna}
             onChange={(e) => setValue("warna", e.target.value)}
             className="w-7 h-7 rounded-full border border-border cursor-pointer"
-            title="Pilih warna kustom"
+            title={dict.wallets.form.customColor}
           />
         </div>
       </div>
@@ -250,17 +252,17 @@ function CreateForm({
         />
         <div>
           <Label htmlFor="exclude-total-c" className="cursor-pointer text-sm">
-            Kecualikan dari total
+            {dict.wallets.form.excludeTotal}
           </Label>
           <p className="text-xs text-muted-foreground">
-            Saldo rekening ini tidak dihitung dalam total
+            {dict.wallets.form.excludeTotalDescription}
           </p>
         </div>
       </div>
 
       <DialogFooter>
         <Button type="button" variant="outline" onClick={onClose}>
-          Batal
+          {dict.common.cancel}
         </Button>
         <Button
           type="submit"
@@ -268,7 +270,7 @@ function CreateForm({
           className="bg-primary hover:bg-primary-active text-white rounded-full h-11 px-5"
         >
           {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-          Tambah
+          {dict.wallets.form.submitCreate}
         </Button>
       </DialogFooter>
     </form>
@@ -287,6 +289,7 @@ function EditForm({
   onUpdated: (r: Rekening) => void;
   onClose: () => void;
 }) {
+  const { dict } = useTranslation();
   const { formatRupiah } = useSystemPreferences();
   const [submitting, setSubmitting] = useState(false);
   const {
@@ -296,7 +299,7 @@ function EditForm({
     setValue,
     formState: { errors },
   } = useForm<RekeningEditSchema>({
-    resolver: zodResolver(rekeningEditSchema),
+    resolver: zodResolver(getRekeningEditSchema(dict)),
     defaultValues: {
       nama: editData.nama,
       jenis: editData.jenis,
@@ -327,10 +330,10 @@ function EditForm({
     try {
       const res = await updateRekening(editData.id, values);
       if (res.success && res.data) {
-        toast.success("Rekening diperbarui");
+        toast.success(dict.wallets.toasts.updated);
         onUpdated(res.data);
         onClose();
-      } else toast.error(res.error ?? "Gagal memperbarui");
+      } else toast.error(res.error ?? dict.wallets.toasts.updateFailed);
     } finally {
       setSubmitting(false);
     }
@@ -340,10 +343,10 @@ function EditForm({
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Nama */}
       <div className="space-y-1.5">
-        <Label htmlFor="rek-nama-e">Nama Rekening</Label>
+        <Label htmlFor="rek-nama-e">{dict.wallets.form.name}</Label>
         <ClearableInput
           id="rek-nama-e"
-          placeholder="Contoh: BCA Utama"
+          placeholder={dict.wallets.form.namePlaceholder}
           {...register("nama")}
           onClear={() => setValue("nama", "")}
           className={errors.nama ? "border-rose-500" : ""}
@@ -355,7 +358,7 @@ function EditForm({
 
       {/* Jenis */}
       <div className="space-y-1.5">
-        <Label>Jenis Rekening</Label>
+        <Label>{dict.wallets.form.type}</Label>
         <Select
           value={jenis}
           onValueChange={(v) =>
@@ -366,10 +369,10 @@ function EditForm({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Tunai">💵 Tunai</SelectItem>
-            <SelectItem value="Bank">🏦 Bank</SelectItem>
-            <SelectItem value="E-Wallet">📱 E-Wallet</SelectItem>
-            <SelectItem value="Investasi">📈 Investasi</SelectItem>
+            <SelectItem value="Tunai">💵 {dict.wallets.types.cash}</SelectItem>
+            <SelectItem value="Bank">🏦 {dict.wallets.types.bank}</SelectItem>
+            <SelectItem value="E-Wallet">📱 {dict.wallets.types.ewallet}</SelectItem>
+            <SelectItem value="Investasi">📈 {dict.wallets.types.investment}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -377,19 +380,19 @@ function EditForm({
       {/* Saldo Awal: readonly info */}
       <div className="space-y-1.5">
         <Label className="flex items-center gap-1.5">
-          Saldo Awal <Info className="h-3.5 w-3.5 text-muted-foreground" />
+          {dict.wallets.form.initialBalance} <Info className="h-3.5 w-3.5 text-muted-foreground" />
         </Label>
         <div className="flex h-10 items-center px-3 rounded-md border bg-muted/50 text-sm text-muted-foreground select-none">
           {formatRupiah(editData.saldo_awal ?? 0)}
         </div>
         <p className="text-xs text-muted-foreground">
-          Saldo awal tidak bisa diubah langsung.
+          {dict.wallets.form.initialBalanceReadOnlyInfo}
         </p>
       </div>
 
       {/* Saldo Saat Ini: editable */}
       <div className="space-y-1.5">
-        <Label htmlFor="saldo-saat-ini">Saldo Saat Ini (Rp)</Label>
+        <Label htmlFor="saldo-saat-ini">{dict.wallets.form.currentBalance} (Rp)</Label>
         <Controller
           control={control}
           name="saldo_saat_ini"
@@ -404,8 +407,7 @@ function EditForm({
         />
         {Number(currentSaldo) !== Number(editData.saldo_saat_ini) && (
           <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
-            <Info className="h-3 w-3" /> Perubahan saldo akan membuat transaksi
-            koreksi saldo otomatis.
+            <Info className="h-3 w-3" /> {dict.wallets.form.balanceChangeAutoCorrectionNotice}
           </p>
         )}
         {errors.saldo_saat_ini && (
@@ -417,7 +419,7 @@ function EditForm({
 
       {/* Warna */}
       <div className="space-y-1.5">
-        <Label>Warna</Label>
+        <Label>{dict.wallets.form.color}</Label>
         <div className="flex flex-wrap gap-2 items-center">
           {WARNA_PRESETS.map((c) => (
             <button
@@ -438,7 +440,7 @@ function EditForm({
             value={warna}
             onChange={(e) => setValue("warna", e.target.value)}
             className="w-7 h-7 rounded-full border border-border cursor-pointer"
-            title="Pilih warna kustom"
+            title={dict.wallets.form.customColor}
           />
         </div>
       </div>
@@ -452,17 +454,17 @@ function EditForm({
         />
         <div>
           <Label htmlFor="exclude-total-e" className="cursor-pointer text-sm">
-            Kecualikan dari total
+            {dict.wallets.form.excludeTotal}
           </Label>
           <p className="text-xs text-muted-foreground">
-            Saldo rekening ini tidak dihitung dalam total
+            {dict.wallets.form.excludeTotalDescription}
           </p>
         </div>
       </div>
 
       <DialogFooter>
         <Button type="button" variant="outline" onClick={onClose}>
-          Batal
+          {dict.common.cancel}
         </Button>
         <Button
           type="submit"
@@ -470,7 +472,7 @@ function EditForm({
           className="bg-primary hover:bg-primary-active text-white rounded-full h-11 px-5"
         >
           {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-          Perbarui
+          {dict.wallets.form.submitUpdate}
         </Button>
       </DialogFooter>
     </form>
@@ -487,18 +489,19 @@ export default function RekeningDialog({
   onCreated,
   onUpdated,
 }: Props) {
+  const { dict } = useTranslation();
   const isEdit = !!editData;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {isEdit ? "Edit Rekening" : "Tambah Rekening"}
+            {isEdit ? dict.wallets.form.editTitle : dict.wallets.form.createTitle}
           </DialogTitle>
           <DialogDescription>
             {isEdit
-              ? "Perbarui informasi rekening Anda."
-              : "Tambahkan rekening baru untuk mulai mencatat transaksi."}
+              ? dict.wallets.form.editDescription
+              : dict.wallets.form.createDescription}
           </DialogDescription>
         </DialogHeader>
         {isEdit && editData ? (

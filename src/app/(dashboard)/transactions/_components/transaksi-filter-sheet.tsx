@@ -25,6 +25,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NominalInput } from "@/components/common/nominal-input";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTranslation } from "@/i18n/use-translation";
 import { cn } from "@/lib/utils";
 import { Check, RotateCcw, Search, X } from "lucide-react";
 
@@ -46,6 +47,7 @@ export function TransaksiFilterSheet({
   kategori,
 }: TransaksiFilterSheetProps) {
   const isMobile = useIsMobile();
+  const { dict } = useTranslation();
   const [kategoriSearch, setKategoriSearch] = useState("");
 
   // Tipe segmented control: "all" | "expense" | "income" | "transfer"
@@ -155,10 +157,10 @@ export function TransaksiFilterSheet({
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <SheetTitle className="text-lg font-semibold text-foreground">
-                Filter Transaksi
+                {dict.transactions.filter.title}
               </SheetTitle>
               <SheetDescription className="text-xs text-muted-foreground">
-                Atur kriteria untuk menyaring daftar transaksi Anda.
+                {dict.transactions.filter.subtitle}
               </SheetDescription>
             </div>
             <SheetClose asChild>
@@ -166,7 +168,7 @@ export function TransaksiFilterSheet({
                 variant="ghost"
                 size="icon"
                 className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-surface-strong shrink-0 cursor-pointer"
-                aria-label="Tutup filter"
+                aria-label={dict.transactions.filter.closeFilter}
               >
                 <X className="h-5 w-5" />
               </Button>
@@ -179,7 +181,7 @@ export function TransaksiFilterSheet({
           {/* 1. Tipe Transaksi (Segmented Control 2x2 agar teks tidak bertumpuk di drawer desktop & mobile) */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-foreground">
-              Tipe Transaksi
+              {dict.transactions.form.type}
             </Label>
             <Tabs
               value={currentTipe}
@@ -192,28 +194,28 @@ export function TransaksiFilterSheet({
                   className="h-11 rounded-[10px] text-xs sm:text-sm font-medium transition-all"
                   id="tab-filter-semua"
                 >
-                  Semua
+                  {dict.common.all}
                 </TabsTrigger>
                 <TabsTrigger
                   value="expense"
                   className="h-11 rounded-[10px] text-xs sm:text-sm font-medium transition-all"
                   id="tab-filter-pengeluaran"
                 >
-                  Pengeluaran
+                  {dict.transactions.types.expense}
                 </TabsTrigger>
                 <TabsTrigger
                   value="income"
                   className="h-11 rounded-[10px] text-xs sm:text-sm font-medium transition-all"
                   id="tab-filter-pemasukan"
                 >
-                  Pemasukan
+                  {dict.transactions.types.income}
                 </TabsTrigger>
                 <TabsTrigger
                   value="transfer"
                   className="h-11 rounded-[10px] text-xs sm:text-sm font-medium transition-all"
                   id="tab-filter-transfer"
                 >
-                  Transfer
+                  {dict.transactions.types.transfer}
                 </TabsTrigger>
               </TabsList>
             </Tabs>
@@ -224,7 +226,7 @@ export function TransaksiFilterSheet({
             <div className="space-y-4 rounded-2xl bg-surface-soft p-4 border border-hairline">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Alur Transfer
+                  {dict.transactions.filter.transferFlow}
                 </span>
                 {(filter.transfer_asal_id || filter.transfer_tujuan_id) && (
                   <button
@@ -238,7 +240,7 @@ export function TransaksiFilterSheet({
                     }
                     className="text-xs text-primary hover:underline font-medium cursor-pointer"
                   >
-                    Reset Alur
+                    {dict.transactions.filter.resetFlow}
                   </button>
                 )}
               </div>
@@ -248,7 +250,7 @@ export function TransaksiFilterSheet({
                   htmlFor="filter-transfer-asal"
                   className="text-xs text-foreground font-medium"
                 >
-                  Sumber Dana (Rekening Asal)
+                  {dict.transactions.filter.sourceWallet}
                 </Label>
                 <Select
                   value={filter.transfer_asal_id ?? "all"}
@@ -263,10 +265,10 @@ export function TransaksiFilterSheet({
                     id="filter-transfer-asal"
                     className="h-12 rounded-input border-hairline bg-background text-sm"
                   >
-                    <SelectValue placeholder="Semua Sumber Dana" />
+                    <SelectValue placeholder={dict.transactions.filter.allSourceWallets} />
                   </SelectTrigger>
                   <SelectContent className="z-60">
-                    <SelectItem value="all">Semua Sumber Dana</SelectItem>
+                    <SelectItem value="all">{dict.transactions.filter.allSourceWallets}</SelectItem>
                     {rekening.map((r) => (
                       <SelectItem key={r.id} value={r.id}>
                         <span className="flex items-center gap-2">
@@ -290,7 +292,7 @@ export function TransaksiFilterSheet({
                   htmlFor="filter-transfer-tujuan"
                   className="text-xs text-foreground font-medium"
                 >
-                  Tujuan Transfer (Rekening Tujuan)
+                  {dict.transactions.filter.destinationWallet}
                 </Label>
                 <Select
                   value={filter.transfer_tujuan_id ?? "all"}
@@ -305,10 +307,10 @@ export function TransaksiFilterSheet({
                     id="filter-transfer-tujuan"
                     className="h-12 rounded-input border-hairline bg-background text-sm"
                   >
-                    <SelectValue placeholder="Semua Tujuan" />
+                    <SelectValue placeholder={dict.transactions.filter.allDestinations} />
                   </SelectTrigger>
                   <SelectContent className="z-60">
-                    <SelectItem value="all">Semua Tujuan</SelectItem>
+                    <SelectItem value="all">{dict.transactions.filter.allDestinations}</SelectItem>
                     {rekening.map((r) => (
                       <SelectItem key={r.id} value={r.id}>
                         <span className="flex items-center gap-2">
@@ -333,7 +335,7 @@ export function TransaksiFilterSheet({
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
                   <Label className="text-sm font-semibold text-foreground">
-                    Rekening
+                    {dict.common.wallet}
                   </Label>
                   {selectedRek.length > 0 && (
                     <button
@@ -381,7 +383,7 @@ export function TransaksiFilterSheet({
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
                   <Label className="text-sm font-semibold text-foreground">
-                    Kategori
+                    {dict.common.category}
                   </Label>
                   {selectedKat.length > 0 && (
                     <button
@@ -401,7 +403,7 @@ export function TransaksiFilterSheet({
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
                     <input
                       type="text"
-                      placeholder="Cari kategori..."
+                      placeholder={dict.transactions.filter.searchCategory}
                       value={kategoriSearch}
                       onChange={(e) => setKategoriSearch(e.target.value)}
                       className="w-full h-10 pl-9 pr-3 rounded-input border border-hairline bg-background text-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
@@ -433,7 +435,7 @@ export function TransaksiFilterSheet({
                   })}
                   {filteredKategori.length === 0 && (
                     <p className="text-xs text-muted-foreground py-2">
-                      Tidak ada kategori yang cocok.
+                      {dict.transactions.filter.noCategoriesFound}
                     </p>
                   )}
                 </div>
@@ -445,7 +447,7 @@ export function TransaksiFilterSheet({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label className="text-sm font-semibold text-foreground">
-                Rentang Nominal
+                {dict.transactions.filter.nominalRange}
               </Label>
               {(filter.nominal_min || filter.nominal_max) && (
                 <button
@@ -459,14 +461,14 @@ export function TransaksiFilterSheet({
                   }
                   className="text-xs text-primary hover:underline font-medium cursor-pointer"
                 >
-                  Reset Nominal
+                  {dict.transactions.filter.resetNominal}
                 </button>
               )}
             </div>
             <div className="grid grid-cols-2 gap-3 items-center">
               <div className="space-y-1.5">
                 <span className="text-xs text-muted-foreground font-medium">
-                  Nominal Minimum
+                  {dict.transactions.filter.minNominal}
                 </span>
                 <NominalInput
                   id="filter-nominal-min"
@@ -488,7 +490,7 @@ export function TransaksiFilterSheet({
               </div>
               <div className="space-y-1.5">
                 <span className="text-xs text-muted-foreground font-medium">
-                  Nominal Maksimum
+                  {dict.transactions.filter.maxNominal}
                 </span>
                 <NominalInput
                   id="filter-nominal-max"
@@ -517,7 +519,7 @@ export function TransaksiFilterSheet({
               htmlFor="filter-sort-select"
               className="text-sm font-semibold text-foreground"
             >
-              Urutkan Transaksi
+              {dict.transactions.filter.sortTransactions}
             </Label>
             <Select
               value={`${filter.sortBy ?? "tanggal"}-${filter.sortOrder ?? "desc"}`}
@@ -533,13 +535,13 @@ export function TransaksiFilterSheet({
                 id="filter-sort-select"
                 className="h-12 rounded-input border-hairline bg-background text-sm"
               >
-                <SelectValue placeholder="Urutkan" />
+                <SelectValue placeholder={dict.transactions.filter.sortPlaceholder} />
               </SelectTrigger>
               <SelectContent className="z-60">
-                <SelectItem value="tanggal-desc">📅 Terbaru</SelectItem>
-                <SelectItem value="tanggal-asc">📅 Terlama</SelectItem>
-                <SelectItem value="nominal-desc">💰 Terbesar</SelectItem>
-                <SelectItem value="nominal-asc">💰 Terkecil</SelectItem>
+                <SelectItem value="tanggal-desc">{dict.transactions.filter.sortDateDesc}</SelectItem>
+                <SelectItem value="tanggal-asc">{dict.transactions.filter.sortDateAsc}</SelectItem>
+                <SelectItem value="nominal-desc">{dict.transactions.filter.sortAmountDesc}</SelectItem>
+                <SelectItem value="nominal-asc">{dict.transactions.filter.sortAmountAsc}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -555,7 +557,7 @@ export function TransaksiFilterSheet({
             id="btn-reset-filter-sheet"
           >
             <RotateCcw className="h-3.5 w-3.5" />
-            <span>Reset</span>
+            <span>{dict.common.reset}</span>
           </Button>
 
           <Button
@@ -564,7 +566,7 @@ export function TransaksiFilterSheet({
             className="rounded-full h-12 px-6 bg-primary hover:bg-[#003ecc] text-white font-semibold text-sm transition-colors flex-1 cursor-pointer shadow-sm"
             id="btn-apply-filter-sheet"
           >
-            Terapkan Filter
+            {dict.transactions.filter.applyFilter}
           </Button>
         </SheetFooter>
       </SheetContent>

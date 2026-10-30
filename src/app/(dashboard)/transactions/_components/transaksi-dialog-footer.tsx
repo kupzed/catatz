@@ -2,6 +2,7 @@ import { Loader2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/i18n/use-translation";
 
 type TransaksiDialogFooterProps = {
   isEdit: boolean;
@@ -22,6 +23,7 @@ export function TransaksiDialogFooter({
   onCopy,
   onCancel,
 }: TransaksiDialogFooterProps) {
+  const { dict } = useTranslation();
   const showCopyButton = isEdit && !isCorrection;
 
   return (
@@ -44,7 +46,7 @@ export function TransaksiDialogFooter({
           ) : (
             <Copy className="h-3.5 w-3.5" />
           )}
-          Copy
+          {dict.common.copy}
         </Button>
       )}
 
@@ -54,7 +56,7 @@ export function TransaksiDialogFooter({
         onClick={onCancel}
         className="w-full rounded-full sm:w-auto"
       >
-        Batal
+        {dict.common.cancel}
       </Button>
 
       <Button
@@ -63,7 +65,7 @@ export function TransaksiDialogFooter({
         className="h-11 w-full rounded-full bg-primary px-3 text-white hover:bg-primary-active sm:w-auto sm:px-5"
       >
         {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-        {isEdit ? "Perbarui" : "Simpan"}
+        {isEdit ? dict.common.update : dict.common.save}
       </Button>
     </DialogFooter>
   );

@@ -7,11 +7,18 @@ import {
   USER_PREFERENCE_SELECT,
   normalizeUserPreferences,
 } from "@/lib/user-preferences";
+import { getLocale } from "@/i18n/get-locale";
+import { getDictionary } from "@/i18n/get-dictionary";
 
-export const metadata: Metadata = {
-  title: "Pengaturan",
-  description: "Pengaturan dan preferensi CatatZ Anda.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const dict = await getDictionary(locale);
+
+  return {
+    title: dict.settings.title,
+    description: dict.settings.subtitle,
+  };
+}
 
 export default async function SettingsPage() {
   const supabase = await createClient();

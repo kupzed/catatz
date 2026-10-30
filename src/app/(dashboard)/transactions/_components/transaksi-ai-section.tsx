@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { Sparkles } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { useTranslation } from "@/i18n/use-translation";
 import type { ParsedTransactionResult } from "@/types/transaction-parser";
 
 const VoiceInputButton = dynamic(() => import("./voice-input-button"), {
@@ -34,10 +35,12 @@ export function TransaksiAiSection({
   onFileBusyChange,
   onParsedResult,
 }: TransaksiAiSectionProps) {
+  const { dict } = useTranslation();
+
   return (
     <div className="space-y-3 rounded-card border border-primary/20 bg-primary/5 p-4">
       <Label className="text-xs text-primary flex items-center gap-1">
-        <Sparkles className="h-3.5 w-3.5" /> Input Otomatis (AI)
+        <Sparkles className="h-3.5 w-3.5" /> {dict.transactions.ai.badge}
       </Label>
       <div className="grid grid-cols-2 items-start gap-2">
         <VoiceInputButton
@@ -54,8 +57,7 @@ export function TransaksiAiSection({
         />
       </div>
       <p className="text-xs leading-relaxed text-muted-foreground">
-        Unggah screenshot atau PDF maksimal 4 MB. File diproses sementara oleh AI
-        dan tidak disimpan.
+        {dict.transactions.ai.hint}
       </p>
     </div>
   );

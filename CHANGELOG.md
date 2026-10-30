@@ -1,3 +1,23 @@
+## Unreleased
+
+Introducing **Full Bilingual Support (Indonesian & English / i18n)** across all user-facing flows:
+
+- **Zero-Dependency TypeScript i18n Architecture (`src/i18n/`):**
+  - Fully-typed dictionary pattern (`id.ts`, `en.ts`) adhering to a strict recursive `Dictionary` interface.
+  - Server-first locale resolution via `getLocale()` from `user_preferences.language` (defaulting to `'id'`).
+  - React Context `DictionaryProvider` and `useTranslation()` client hook for seamless client component translation without content flash.
+  - Dynamic root layout `<html lang={locale}>` and localized HTML metadata (title, description, keywords).
+- **Zod Validation Schema Factory Pattern:**
+  - Migrated form validation schemas to factory functions (`get<Entity>Schema(dict)`) ensuring real-time bilingual validation error messages.
+- **Database Language Preference (`017-user-preferences-language.sql`):**
+  - Additive migration introducing `language TEXT NOT NULL DEFAULT 'id'` with check constraint on `user_preferences`.
+- **System Preference Language Switcher (`/settings`):**
+  - Instant language toggling with optimistic client feedback and server boundary refresh.
+- **PWA Localization:**
+  - Localized offline fallback page (`offline.html`), offline indicator, and app manifest metadata.
+
+---
+
 ## v1.3.0
 
 The fourth release of CatatZ, introducing **User-Owned Categories & Category Detail Workspaces**, a **comprehensive Debt & Loan System Overhaul with Entity Contacts**, **Wallet Detail Workspaces with Transfer Direction Switcher**, **Server-Side Transaction Pagination bypassing PostgREST limits**, **Transaction Detail Drawer with Copy Actions**, **modernized engine dependencies (Next.js 16.4, React 19.3, Vitest 5)**, and an expanded test suite of **293 unit tests (97.2% coverage)**.

@@ -11,21 +11,23 @@ import {
 import Link from "next/link";
 import { Fragment } from "react";
 import { useBreadcrumbTitle } from "@/providers/breadcrumb-title-provider";
-
-const ROUTE_NAMES: Record<string, string> = {
-  transactions: "Transaksi",
-  wallets: "Rekening",
-  reports: "Rekap",
-  debts: "Hutang",
-  settings: "Pengaturan",
-  categories: "Kategori",
-  detail: "Detail Rekap",
-};
+import { useTranslation } from "@/i18n/use-translation";
 
 export default function DashboardBreadcrumb() {
   const pathname = usePathname();
   const { title: customTitle } = useBreadcrumbTitle();
+  const { dict } = useTranslation();
   const segments = pathname.split("/").filter(Boolean);
+
+  const routeNames: Record<string, string> = {
+    transactions: dict.breadcrumb.transactions,
+    wallets: dict.breadcrumb.wallets,
+    reports: dict.breadcrumb.reports,
+    debts: dict.breadcrumb.debts,
+    settings: dict.breadcrumb.settings,
+    categories: dict.breadcrumb.categories,
+    detail: dict.breadcrumb.detailReports,
+  };
 
   return (
     <Breadcrumb>
@@ -39,18 +41,18 @@ export default function DashboardBreadcrumb() {
           const prevSegment = index > 0 ? segments[index - 1] : "";
           const isLast = index === segments.length - 1;
 
-          let label = ROUTE_NAMES[segment];
+          let label = routeNames[segment];
           if (!label) {
             if (isLast && customTitle) {
               label = customTitle;
             } else if (isUuid && prevSegment === "wallets") {
-              label = "Detail Rekening";
+              label = dict.breadcrumb.detailWallets;
             } else if (isUuid && prevSegment === "transactions") {
-              label = "Detail Transaksi";
+              label = dict.breadcrumb.detailTransactions;
             } else if (isUuid && prevSegment === "debts") {
-              label = "Detail Hutang & Piutang";
+              label = dict.breadcrumb.detailDebts;
             } else if (isUuid && prevSegment === "categories") {
-              label = "Detail Kategori";
+              label = dict.breadcrumb.detailCategories;
             } else {
               label = segment.charAt(0).toUpperCase() + segment.slice(1);
             }

@@ -5,15 +5,29 @@ import { revalidatePath } from 'next/cache';
 import type { ActionResult } from '@/types/general';
 import type { Transaksi, TransaksiFormValues, TransaksiFilter, Kategori, JudulSuggestion } from '@/types/transaksi';
 import { fetchAllRows } from '@/lib/supabase-fetch';
-import { transaksiSchema, transaksiIdParamSchema } from '@/validations/transaksi-validation';
+import {
+  getTransaksiSchema,
+  getTransaksiIdParamSchema,
+  transaksiSchema,
+} from '@/validations/transaksi-validation';
+import { getActionLocale } from '@/i18n/get-locale';
+import { getDictionary } from '@/i18n/get-dictionary';
+import type { Dictionary } from '@/i18n/types';
 
-function validateTransaksiValues(values: TransaksiFormValues): ActionResult<TransaksiFormValues> {
-  const parsed = transaksiSchema.safeParse(values);
+function validateTransaksiValues(
+  values: TransaksiFormValues,
+  dict?: Dictionary,
+): ActionResult<TransaksiFormValues> {
+  const schema = dict ? getTransaksiSchema(dict) : transaksiSchema;
+  const parsed = schema.safeParse(values);
 
   if (!parsed.success) {
     return {
       success: false,
-      error: parsed.error.issues[0]?.message ?? 'Data transaksi tidak valid',
+      error:
+        parsed.error.issues[0]?.message ??
+        dict?.actions.transaksi.invalidData ??
+        'Data transaksi tidak valid',
     };
   }
 
@@ -122,18 +136,23 @@ export async function getTransaksi(filter: TransaksiFilter = {}): Promise<Transa
 }
 
 export async function getTransaksiById(id: string): Promise<ActionResult<Transaksi | null>> {
-  const parsedId = transaksiIdParamSchema.safeParse(id);
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
+
+  const parsedId = getTransaksiIdParamSchema(dict).safeParse(id);
   if (!parsedId.success) {
     return {
       success: false,
-      error: parsedId.error.issues[0]?.message ?? 'ID transaksi tidak valid',
+      error:
+        parsedId.error.issues[0]?.message ??
+        dict.errors.validation.invalidTransactionId,
     };
   }
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    return { success: false, error: 'Tidak terautentikasi' };
+    return { success: false, error: dict.errors.unauthenticated };
   }
 
   const { data, error } = await supabase
@@ -158,9 +177,12 @@ export async function getTransaksiById(id: string): Promise<ActionResult<Transak
 export async function createTransaksi(values: TransaksiFormValues): Promise<ActionResult<Transaksi>> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: 'Tidak terautentikasi' };
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
 
-  const validation = validateTransaksiValues(values);
+  if (!user) return { success: false, error: dict.errors.unauthenticated };
+
+  const validation = validateTransaksiValues(values, dict);
   if (!validation.success || !validation.data) {
     return { success: false, error: validation.error };
   }
@@ -190,7 +212,10 @@ export async function updateTransaksi(
 ): Promise<ActionResult<Transaksi>> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: 'Tidak terautentikasi' };
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
+
+  if (!user) return { success: false, error: dict.errors.unauthenticated };
 
   // Ambil data transaksi lama untuk pengecekan tipe 'correction'
   const { data: oldTrx, error: oldTrxError } = await supabase
@@ -201,7 +226,7 @@ export async function updateTransaksi(
     .single();
 
   if (oldTrxError || !oldTrx) {
-    return { success: false, error: 'Transaksi tidak ditemukan' };
+    return { success: false, error: dict.actions.transaksi.notFound };
   }
 
   const nextTipe = (values.tipe ?? oldTrx.tipe) as TransaksiFormValues['tipe'];
@@ -234,7 +259,7 @@ export async function updateTransaksi(
     tags: values.tags ?? oldTrx.tags ?? [],
     is_recurring: values.is_recurring ?? oldTrx.is_recurring ?? false,
   };
-  const validation = validateTransaksiValues(mergedValues);
+  const validation = validateTransaksiValues(mergedValues, dict);
   if (!validation.success || !validation.data) {
     return { success: false, error: validation.error };
   }
@@ -291,6 +316,11 @@ export async function updateTransaksi(
 
 export async function deleteTransaksi(id: string): Promise<ActionResult> {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
+
+  if (!user) return { success: false, error: dict.errors.unauthenticated };
 
   // Cek apakah ini transaksi correction — jika ya, balik saldo secara manual (Opsi B)
   const { data: trx } = await supabase
