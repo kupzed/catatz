@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/i18n/use-translation";
 
 export default function AppError({
   error,
@@ -13,6 +14,7 @@ export default function AppError({
   reset: () => void;
 }) {
   const router = useRouter();
+  const { dict } = useTranslation();
 
   useEffect(() => {
     console.error("[app-error] CatatZ route crashed", error);
@@ -29,20 +31,22 @@ export default function AppError({
           className="mx-auto h-16 w-16 rounded-full"
         />
         <div className="space-y-2">
-          <p className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
-            Ada yang tidak beres
+          <p className="text-sm font-semibold text-primary">
+            {dict.errorPage.badge}
           </p>
-          <h1 className="text-2xl font-bold text-foreground">Halaman gagal dimuat</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            {dict.errorPage.title}
+          </h1>
           <p className="text-sm leading-6 text-muted-foreground">
-            Coba muat ulang halaman. Jika masih gagal, kembali ke halaman sebelumnya.
+            {dict.errorPage.description}
           </p>
         </div>
         <div className="flex flex-col justify-center gap-2 sm:flex-row">
-          <Button type="button" variant="outline" onClick={() => router.back()}>
-            Kembali
+          <Button type="button" variant="outline" onClick={() => router.back()} className="rounded-full">
+            {dict.errorPage.backButton}
           </Button>
-          <Button type="button" onClick={reset} className="bg-indigo-600 text-white hover:bg-indigo-500">
-            Muat Ulang Halaman
+          <Button type="button" onClick={reset} className="rounded-full bg-primary text-primary-foreground hover:bg-[#003ecc]">
+            {dict.errorPage.reloadButton}
           </Button>
         </div>
       </div>

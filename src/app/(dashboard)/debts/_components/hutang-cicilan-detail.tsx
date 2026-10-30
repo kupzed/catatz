@@ -8,6 +8,7 @@ import {
 } from "@/hooks/use-hutang-cicilan";
 import { HutangCicilanItem } from "./hutang-cicilan-item";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 
 export type HutangCicilanDetailProps = {
   hutang: Hutang;
@@ -29,6 +30,7 @@ export function HutangCicilanDetail({
   cicilanHook,
 }: HutangCicilanDetailProps) {
   const { formatRupiah } = useSystemPreferences();
+  const { dict } = useTranslation();
   const cicilan = sortCicilan(hutang.cicilan);
 
   return (
@@ -37,9 +39,11 @@ export function HutangCicilanDetail({
       className="space-y-3 border-t border-hairline bg-surface-soft/60 p-4"
     >
       <div>
-        <p className="text-sm font-semibold text-foreground">Detail Cicilan</p>
+        <p className="text-sm font-semibold text-foreground">
+          {dict.debts.installmentDetail}
+        </p>
         <p className="text-xs text-muted-foreground">
-          {hutang.nama_entitas} · sisa{" "}
+          {hutang.nama_entitas} · {dict.debts.remaining}{" "}
           <span className="font-mono">
             {formatRupiah(Number(hutang.sisa_tagihan))}
           </span>
@@ -48,7 +52,7 @@ export function HutangCicilanDetail({
 
       {cicilan.length === 0 ? (
         <div className="rounded-input border border-dashed border-hairline bg-card p-4 text-center text-sm text-muted-foreground">
-          Belum ada cicilan.
+          {dict.debts.noInstallmentsYet}
         </div>
       ) : (
         <div className="space-y-3">

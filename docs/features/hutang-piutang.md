@@ -82,6 +82,8 @@ Initial data diambil dengan:
    - Menghapus transaksi atau kontak otomatis mengembalikan saldo rekening ke kondisi semula.
 5. **Revalidasi**:
    - Perubahan data hutang/piutang merevalidate path `/debts`, `/debts/[id]`, `/wallets`, dan `/reports`.
+6. **Internasionalisasi (i18n)**:
+   - Seluruh label UI (Hutang, Piutang, status Belum Lunas/Lunas, dialog tambah pihak, transaksi pinjaman/pembayaran, dan riwayat cicilan) dikelola secara bilingual (Bahasa Indonesia & English) melalui kamus `src/i18n/`.
 
 ## UI Behavior
 

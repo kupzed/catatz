@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatNumber } from "@/lib/utils";
+import { useTranslation } from "@/i18n/use-translation";
 
 export type TransaksiPaginationProps = {
   currentPage: number;
@@ -29,6 +30,7 @@ export function TransaksiPagination({
   onPageChange,
   onPageSizeChange,
 }: TransaksiPaginationProps) {
+  const { dict } = useTranslation();
   const startItem = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalItems);
 
@@ -69,26 +71,26 @@ export function TransaksiPagination({
       {/* Mobile view top row / Desktop left: info & page size */}
       <div className="flex items-center justify-between sm:justify-start gap-3 text-xs sm:text-sm text-muted-foreground">
         <div>
-          Menampilkan{" "}
+          {dict.transactions.pagination.showing}{" "}
           <span className="font-mono font-medium text-foreground">
             {formatNumber(startItem)}-{formatNumber(endItem)}
           </span>{" "}
-          dari{" "}
+          {dict.transactions.pagination.of}{" "}
           <span className="font-mono font-medium text-foreground">
             {formatNumber(totalItems)}
           </span>{" "}
-          data
+          {dict.transactions.pagination.transactions}
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
-          <span className="hidden sm:inline">Per halaman:</span>
+          <span className="hidden sm:inline">{dict.transactions.pagination.perPage}</span>
           <Select
             value={String(pageSize)}
             onValueChange={(val) => onPageSizeChange(Number(val))}
           >
             <SelectTrigger
               className="h-8 sm:h-9 w-18 sm:w-19.5 rounded-full border-hairline text-xs sm:text-sm font-mono text-foreground shrink-0 px-2 sm:px-2.5"
-              aria-label="Pilih jumlah baris per halaman"
+              aria-label={dict.transactions.pagination.selectRowsPerPage}
             >
               <SelectValue />
             </SelectTrigger>
@@ -110,15 +112,15 @@ export function TransaksiPagination({
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage <= 1}
           className="rounded-full h-8 sm:h-9 px-2.5 sm:px-3 text-xs sm:text-sm gap-1 border-hairline"
-          aria-label="Halaman sebelumnya"
+          aria-label={dict.transactions.pagination.prevPageAria}
         >
           <ChevronLeft className="size-3.5 sm:size-4" />
-          <span className="inline">Prev</span>
+          <span className="inline">{dict.transactions.pagination.prevPage}</span>
         </Button>
 
         {/* Mobile page indicator */}
         <div className="sm:hidden text-xs text-muted-foreground font-mono">
-          Hal <span className="font-semibold text-foreground">{currentPage}</span> / {totalPages}
+          {dict.transactions.pagination.page} <span className="font-semibold text-foreground">{currentPage}</span> / {totalPages}
         </div>
 
         {/* Desktop page buttons */}
@@ -149,7 +151,7 @@ export function TransaksiPagination({
                     ? "bg-primary text-primary-foreground hover:bg-[#003ecc]"
                     : "text-muted-foreground hover:text-foreground hover:bg-surface-strong"
                 }`}
-                aria-label={`Halaman ${pageNum}`}
+                aria-label={`${dict.transactions.pagination.pageAria} ${pageNum}`}
                 aria-current={isActive ? "page" : undefined}
               >
                 {pageNum}
@@ -164,9 +166,9 @@ export function TransaksiPagination({
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
           className="rounded-full h-8 sm:h-9 px-2.5 sm:px-3 text-xs sm:text-sm gap-1 border-hairline"
-          aria-label="Halaman berikutnya"
+          aria-label={dict.transactions.pagination.nextPageAria}
         >
-          <span className="inline">Next</span>
+          <span className="inline">{dict.transactions.pagination.nextPage}</span>
           <ChevronRight className="size-3.5 sm:size-4" />
         </Button>
       </div>

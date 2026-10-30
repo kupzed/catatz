@@ -11,6 +11,7 @@ import { getRekapDetailByRange, type RekapBreakdownItem } from "@/actions/rekap-
 import { getSaldoPeriodeList } from "@/actions/rekap-saldo-action";
 import { getCycleContaining, getTodayInJakarta } from "@/lib/rekap-period";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 import type { RekapSettings } from "@/types/rekap";
 
 // Lazy-load komponen Donut Recharts untuk optimasi bundle size
@@ -39,12 +40,14 @@ export type RealtimeBreakdownMode = "kategori" | "judul";
 
 export function RekapRealtimeTab({ settings }: RekapRealtimeTabProps) {
   const { formatRupiah } = useSystemPreferences();
+  const { dict, locale } = useTranslation();
 
   // Tentukan siklus berjalan berdasarkan cut-off setting dan waktu terkini di Asia/Jakarta (D6)
+  const rekapLocale = locale === "en" ? "en-US" : "id-ID";
   const today = useMemo(() => getTodayInJakarta(), []);
   const cycle = useMemo(
-    () => getCycleContaining(settings.cutoff_day, today),
-    [settings.cutoff_day, today],
+    () => getCycleContaining(settings.cutoff_day, today, rekapLocale),
+    [rekapLocale, settings.cutoff_day, today],
   );
 
   const [mode, setMode] = useState<RealtimeBreakdownMode>("kategori");
@@ -77,12 +80,12 @@ export function RekapRealtimeTab({ settings }: RekapRealtimeTabProps) {
         setSaldoAwal(0);
       }
     } catch {
-      toast.error("Gagal memuat rekap realtime");
+      toast.error(dict.reports.toasts.loadRealtimeFailed);
     } finally {
       setIsLoading(false);
       setIsRefetching(false);
     }
-  }, [cycle, settings.akumulasi_saldo]);
+  }, [cycle, dict.reports.toasts.loadRealtimeFailed, settings.akumulasi_saldo]);
 
   // Initial fetch pada mount atau saat siklus berubah
   useEffect(() => {
@@ -109,7 +112,7 @@ export function RekapRealtimeTab({ settings }: RekapRealtimeTabProps) {
       })
       .catch(() => {
         if (!ignore) {
-          toast.error("Gagal memuat rekap realtime");
+          toast.error(dict.reports.toasts.loadRealtimeFailed);
           setIsLoading(false);
         }
       });
@@ -117,7 +120,7 @@ export function RekapRealtimeTab({ settings }: RekapRealtimeTabProps) {
     return () => {
       ignore = true;
     };
-  }, [cycle, settings.akumulasi_saldo]);
+  }, [cycle, dict.reports.toasts.loadRealtimeFailed, settings.akumulasi_saldo]);
 
   // Refetch saat visibilitychange/focus dan event online (D5)
   useEffect(() => {
@@ -175,11 +178,11 @@ export function RekapRealtimeTab({ settings }: RekapRealtimeTabProps) {
             <div>
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
-                  Siklus Berjalan
+                  {dict.reports.realtime.activeCycle}
                 </span>
                 {isRefetching && (
                   <span className="inline-flex items-center gap-1 text-xs text-muted-foreground animate-pulse">
-                    <RefreshCw className="size-3 animate-spin" /> Memperbarui data...
+                    <RefreshCw className="size-3 animate-spin" /> {dict.reports.realtime.updatingData}
                   </span>
                 )}
               </div>
@@ -187,27 +190,29 @@ export function RekapRealtimeTab({ settings }: RekapRealtimeTabProps) {
                 {cycle.label}
               </CardTitle>
               <CardDescription className="mt-1 text-xs text-muted-foreground">
-                Rentang aktif: <span className="font-mono">{cycle.startDate}</span> s/d{" "}
-                <span className="font-mono">{cycle.endDate}</span> ({cycle.daysCount} hari inklusif)
+                {dict.reports.realtime.activeRange
+                  .replace("{start}", cycle.startDate)
+                  .replace("{end}", cycle.endDate)
+                  .replace("{days}", String(cycle.daysCount))}
               </CardDescription>
             </div>
 
             {/* Metrik Finansial Header: Pengeluaran, Pemasukan, dan Sisa Saldo */}
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
               <div className="rounded-input border border-hairline bg-surface-soft p-3 text-left sm:text-right">
-                <p className="text-xs text-muted-foreground">Pengeluaran</p>
+                <p className="text-xs text-muted-foreground">{dict.reports.summary.totalExpense}</p>
                 <p className="mt-0.5 font-mono text-base sm:text-lg font-bold text-semantic-down">
                   {formatRupiah(totalExpense)}
                 </p>
               </div>
               <div className="rounded-input border border-hairline bg-surface-soft p-3 text-left sm:text-right">
-                <p className="text-xs text-muted-foreground">Pemasukan</p>
+                <p className="text-xs text-muted-foreground">{dict.reports.summary.totalIncome}</p>
                 <p className="mt-0.5 font-mono text-base sm:text-lg font-bold text-semantic-up">
                   {formatRupiah(totalIncome)}
                 </p>
               </div>
               <div className="rounded-input border border-hairline bg-surface-soft p-3 text-left sm:text-right">
-                <p className="text-xs text-muted-foreground">Sisa Saldo</p>
+                <p className="text-xs text-muted-foreground">{dict.reports.summary.remainingBalance}</p>
                 <p
                   className={`mt-0.5 font-mono text-base sm:text-lg font-bold ${
                     sisaSaldo >= 0 ? "text-semantic-up" : "text-semantic-down"
@@ -250,8 +255,8 @@ export function RekapRealtimeTab({ settings }: RekapRealtimeTabProps) {
           <CardContent className="p-6">
             <EmptyState
               icon={Receipt}
-              title="Belum Ada Pengeluaran"
-              description={`Belum ada transaksi pengeluaran yang tercatat pada siklus berjalan (${cycle.label}).`}
+              title={dict.reports.realtime.emptyExpenseTitle}
+              description={dict.reports.realtime.emptyExpenseDesc.replace("{cycle}", cycle.label)}
             />
           </CardContent>
         </Card>
@@ -263,7 +268,9 @@ export function RekapRealtimeTab({ settings }: RekapRealtimeTabProps) {
             <CardHeader className="p-6 pb-3">
               <div className="flex flex-col gap-3 sm:h-9 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                  Proporsi {mode === "kategori" ? "Kategori" : "Judul"}
+                  {mode === "kategori"
+                    ? dict.reports.realtime.proportionCategory
+                    : dict.reports.realtime.proportionTitle}
                 </CardTitle>
 
                 {/* Switcher Rincian Kategori | Judul */}
@@ -277,13 +284,13 @@ export function RekapRealtimeTab({ settings }: RekapRealtimeTabProps) {
                       value="kategori"
                       className="rounded-full text-xs font-semibold data-active:bg-card"
                     >
-                      <Tags className="mr-1.5 size-3.5" /> Kategori
+                      <Tags className="mr-1.5 size-3.5" /> {dict.reports.realtime.categoryTab}
                     </TabsTrigger>
                     <TabsTrigger
                       value="judul"
                       className="rounded-full text-xs font-semibold data-active:bg-card"
                     >
-                      <Type className="mr-1.5 size-3.5" /> Judul
+                      <Type className="mr-1.5 size-3.5" /> {dict.reports.realtime.titleTab}
                     </TabsTrigger>
                   </TabsList>
                 </Tabs>
@@ -297,7 +304,11 @@ export function RekapRealtimeTab({ settings }: RekapRealtimeTabProps) {
                   </div>
                 }
               >
-                <RekapDonutChart data={donutItems} totalExpense={totalExpense} />
+                <RekapDonutChart
+                  data={donutItems}
+                  totalExpense={totalExpense}
+                  centerLabel={dict.reports.detail.totalExpense}
+                />
               </Suspense>
             </CardContent>
           </Card>
@@ -307,10 +318,15 @@ export function RekapRealtimeTab({ settings }: RekapRealtimeTabProps) {
             <CardHeader className="p-6 pb-3">
               <div className="flex h-9 items-center justify-between">
                 <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                  Rincian {mode === "kategori" ? "Kategori" : "Judul"} ({activeData.length})
+                  {mode === "kategori"
+                    ? dict.reports.realtime.breakdownCategory
+                    : dict.reports.realtime.breakdownTitle}{" "}
+                  ({activeData.length})
                 </CardTitle>
                 <span className="inline-flex items-center rounded-full bg-surface-strong px-2.5 py-1 font-mono text-xs text-muted-foreground">
-                  {activeData.length} {mode === "kategori" ? "kategori" : "judul"}
+                  {mode === "kategori"
+                    ? dict.reports.realtime.categoryCount.replace("{count}", String(activeData.length))
+                    : dict.reports.realtime.titleCount.replace("{count}", String(activeData.length))}
                 </span>
               </div>
             </CardHeader>

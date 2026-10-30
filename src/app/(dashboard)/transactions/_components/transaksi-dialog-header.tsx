@@ -3,6 +3,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { useTranslation } from "@/i18n/use-translation";
 
 type TransaksiDialogHeaderProps = {
   isCorrection: boolean;
@@ -15,21 +16,23 @@ export function TransaksiDialogHeader({
   isEdit,
   isCopy,
 }: TransaksiDialogHeaderProps) {
+  const { dict } = useTranslation();
+
   const title = isCorrection
-    ? "Edit Koreksi Saldo"
+    ? dict.transactions.form.editCorrectionTitle
     : isEdit
-      ? "Edit Transaksi"
+      ? dict.transactions.form.editTitle
       : isCopy
-        ? "Copy Transaksi"
-        : "Tambah Transaksi";
+        ? dict.transactions.form.copyTitle
+        : dict.transactions.form.createTitle;
 
   const description = isCorrection
-    ? "Perbarui catatan koreksi saldo rekening."
+    ? dict.transactions.form.editCorrectionDescription
     : isEdit
-      ? "Perbarui rincian transaksi Anda."
+      ? dict.transactions.form.editDescription
       : isCopy
-        ? "Membuat transaksi baru dengan data yang sama."
-        : "Catat pengeluaran, pemasukan, atau transfer baru.";
+        ? dict.transactions.form.copyDescription
+        : dict.transactions.form.createDescription;
 
   return (
     <DialogHeader>

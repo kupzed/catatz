@@ -6,13 +6,17 @@ import type { ActionResult } from '@/types/general';
 import { createAdminClient } from '@/configs/supabase/admin';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
+import { getActionLocale } from '@/i18n/get-locale';
+import { getDictionary } from '@/i18n/get-dictionary';
 
 export async function updateProfile(values: { name: string }): Promise<ActionResult> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
   
   if (!user) {
-    return { success: false, error: 'Tidak terautentikasi' };
+    return { success: false, error: dict.errors.unauthenticated };
   }
 
   const { error } = await supabase
@@ -34,14 +38,16 @@ export async function updateProfile(values: { name: string }): Promise<ActionRes
 export async function uploadAvatar(formData: FormData): Promise<ActionResult<{ avatar_url: string }>> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
 
   if (!user) {
-    return { success: false, error: 'Tidak terautentikasi' };
+    return { success: false, error: dict.errors.unauthenticated };
   }
 
   const file = formData.get('avatar') as File;
   if (!file) {
-    return { success: false, error: 'File tidak ditemukan' };
+    return { success: false, error: dict.actions.profile.fileNotFound };
   }
 
   const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
@@ -50,12 +56,12 @@ export async function uploadAvatar(formData: FormData): Promise<ActionResult<{ a
   if (!ALLOWED_MIME_TYPES.includes(file.type as AllowedMimeType)) {
     return {
       success: false,
-      error: 'Format file tidak didukung. Gunakan JPG, PNG, atau WebP.',
+      error: dict.actions.profile.fileFormatNotSupported,
     };
   }
 
   if (file.size > 2 * 1024 * 1024) {
-    return { success: false, error: 'Ukuran file terlalu besar (maksimal 2MB)' };
+    return { success: false, error: dict.actions.profile.fileTooLarge };
   }
 
   const MIME_TO_EXT: Record<AllowedMimeType, string> = {
@@ -100,9 +106,11 @@ export async function uploadAvatar(formData: FormData): Promise<ActionResult<{ a
 export async function removeAvatar(): Promise<ActionResult> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
 
   if (!user) {
-    return { success: false, error: 'Tidak terautentikasi' };
+    return { success: false, error: dict.errors.unauthenticated };
   }
 
   const { data: files } = await supabase.storage.from('avatars').list(user.id);
@@ -131,13 +139,15 @@ export async function removeAvatar(): Promise<ActionResult> {
 export async function changePassword(values: { currentPassword: string, newPassword: string }): Promise<ActionResult> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
   
   if (!user || !user.email) {
-    return { success: false, error: 'Tidak terautentikasi' };
+    return { success: false, error: dict.errors.unauthenticated };
   }
 
   if (!values.currentPassword) {
-    return { success: false, error: 'Password lama wajib diisi' };
+    return { success: false, error: dict.actions.profile.currentPasswordRequired };
   }
 
   // Verifikasi password lama
@@ -147,7 +157,7 @@ export async function changePassword(values: { currentPassword: string, newPassw
   });
 
   if (verifyError) {
-    return { success: false, error: 'Password lama tidak sesuai' };
+    return { success: false, error: dict.actions.profile.currentPasswordIncorrect };
   }
 
   const { error } = await supabase.auth.updateUser({
@@ -158,15 +168,17 @@ export async function changePassword(values: { currentPassword: string, newPassw
     return { success: false, error: error.message };
   }
 
-  return { success: true, message: "Password berhasil diperbarui" };
+  return { success: true, message: dict.actions.profile.passwordUpdated };
 }
 
 export async function deleteAccount(): Promise<ActionResult> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
 
   if (!user) {
-    return { success: false, error: 'Tidak terautentikasi' };
+    return { success: false, error: dict.errors.unauthenticated };
   }
 
   try {
@@ -183,7 +195,7 @@ export async function deleteAccount(): Promise<ActionResult> {
     const { error: deleteError } = await adminAuth.auth.admin.deleteUser(user.id);
 
     if (deleteError) {
-      return { success: false, error: 'Gagal menghapus akun, silakan coba lagi.' };
+      return { success: false, error: dict.actions.profile.deleteAccountFailed };
     }
 
     // 3. Clear auth session/cookies secara manual
@@ -194,7 +206,7 @@ export async function deleteAccount(): Promise<ActionResult> {
     cookieStore.delete("last_ping");
 
   } catch {
-    return { success: false, error: 'Terjadi kesalahan sistem.' };
+    return { success: false, error: dict.actions.profile.systemError };
   }
 
   // 4. Redirect out

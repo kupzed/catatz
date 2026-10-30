@@ -1,11 +1,12 @@
 "use client";
 
 import type { BudgetWithUsage } from "@/actions/rekap-action";
-import { BULAN_NAMES } from "@/constants/rekap";
+import { getMonthNames } from "@/constants/rekap";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 
 const BUDGET_STATUS_COLORS: Record<string, string> = {
   aman: "bg-semantic-up/10 text-semantic-up",
@@ -23,13 +24,15 @@ export function RekapBudgetSection({
   currentBulan,
 }: RekapBudgetSectionProps) {
   const { formatRupiah } = useSystemPreferences();
+  const { dict } = useTranslation();
+  const monthNames = getMonthNames(dict);
 
   if (budgets.length === 0) return null;
 
   return (
     <div className="rounded-card border border-hairline bg-card p-8">
       <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-        Budget {BULAN_NAMES[currentBulan - 1]}
+        {dict.reports.budget.title} {monthNames[currentBulan - 1]}
       </h2>
       <div className="space-y-4">
         {budgets.map((b) => (

@@ -41,6 +41,7 @@ import {
 
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { signOut } from "@/actions/auth-action";
+import { useTranslation } from "@/i18n/use-translation";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -54,28 +55,11 @@ export type AppSidebarProps = {
   user?: AppSidebarUser;
 };
 
-// ─── Navigation config ───────────────────────────────────────────────────────
-
-const NAV_ITEMS = [
-  {
-    group: "Menu Utama",
-    items: [
-      { href: "/transactions", label: "Transaksi", icon: ArrowLeftRight },
-      { href: "/wallets", label: "Rekening", icon: Landmark },
-      { href: "/reports", label: "Rekap", icon: BarChart3 },
-      { href: "/debts", label: "Hutang", icon: HandCoins },
-    ],
-  },
-  {
-    group: "Lainnya",
-    items: [{ href: "/categories", label: "Kategori", icon: Tags }],
-  },
-] as const;
-
 // ─── Sidebar Header with collapse toggle ─────────────────────────────────────
 
 function SidebarHeaderContent() {
   const { toggleSidebar, state, isMobile } = useSidebar();
+  const { dict } = useTranslation();
   // Sidebar on mobile is always an expanded drawer, ignore desktop's collapsed state
   const isCollapsed = state === "collapsed" && !isMobile;
 
@@ -103,7 +87,7 @@ function SidebarHeaderContent() {
       {/* Collapse / expand toggle button — always visible */}
       <button
         onClick={toggleSidebar}
-        aria-label="Toggle sidebar"
+        aria-label={dict.nav.toggleSidebar}
         className={cn(
           "flex items-center justify-center rounded-[8px] p-2 text-muted-foreground",
           "hover:bg-surface-strong hover:text-foreground transition-colors",
@@ -121,6 +105,7 @@ function SidebarHeaderContent() {
 
 function UserCard({ user }: { user: AppSidebarUser }) {
   const { isMobile, setOpenMobile } = useSidebar();
+  const { dict } = useTranslation();
   const initials = user?.name
     ? user.name
         .split(" ")
@@ -138,7 +123,7 @@ function UserCard({ user }: { user: AppSidebarUser }) {
             <SidebarMenuButton
               size="lg"
               className="gap-3 h-auto py-2 px-2 hover:bg-muted/60 border border-transparent hover:border-border/40 transition-all data-[state=open]:bg-muted/60 data-[state=open]:border-border/40"
-              tooltip="Akun"
+              tooltip={dict.nav.account}
             >
               {/* Avatar */}
               <div className="w-7 h-7 rounded-full bg-surface-strong flex items-center justify-center text-foreground text-xs font-semibold shrink-0 overflow-hidden">
@@ -157,7 +142,7 @@ function UserCard({ user }: { user: AppSidebarUser }) {
               {/* Info — hidden in icon-only mode */}
               <div className="flex flex-col items-start min-w-0 group-data-[collapsible=icon]:hidden">
                 <span className="text-sm font-medium text-foreground truncate leading-tight">
-                  {user?.name ?? user?.email ?? "Pengguna"}
+                  {user?.name ?? user?.email ?? dict.nav.user}
                 </span>
               </div>
 
@@ -170,7 +155,7 @@ function UserCard({ user }: { user: AppSidebarUser }) {
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-medium">
-                  {user?.name ?? "Pengguna"}
+                  {user?.name ?? dict.nav.user}
                 </span>
                 <span className="text-xs text-muted-foreground">
                   {user?.email}
@@ -189,15 +174,17 @@ function UserCard({ user }: { user: AppSidebarUser }) {
                 }}
               >
                 <Settings className="h-4 w-4" />
-                Pengaturan
+                {dict.nav.settings}
               </Link>
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
 
             <ConfirmDialog
-              title="Keluar Akun?"
-              description="Anda harus login kembali untuk mengakses data."
+              title={`${dict.settings.logout.title}?`}
+              description={dict.settings.logout.description}
+              confirmText={dict.settings.logout.confirmButton}
+              cancelText={dict.common.cancel}
               onConfirm={() => signOut()}
             >
               <DropdownMenuItem
@@ -205,7 +192,7 @@ function UserCard({ user }: { user: AppSidebarUser }) {
                 className="text-rose-500 focus:text-rose-500 focus:bg-rose-500/10 flex items-center gap-2 cursor-pointer"
               >
                 <LogOut className="h-4 w-4" />
-                Keluar
+                {dict.settings.logout.confirmButton}
               </DropdownMenuItem>
             </ConfirmDialog>
           </DropdownMenuContent>
@@ -220,12 +207,29 @@ function UserCard({ user }: { user: AppSidebarUser }) {
 export default function AppSidebar({ user }: AppSidebarProps) {
   const pathname = usePathname();
   const { isMobile, setOpenMobile } = useSidebar();
+  const { dict } = useTranslation();
 
   const handleMobileClick = () => {
     if (isMobile) {
       setOpenMobile(false);
     }
   };
+
+  const navGroups = [
+    {
+      group: dict.nav.mainMenu,
+      items: [
+        { href: "/transactions", label: dict.nav.transactions, icon: ArrowLeftRight },
+        { href: "/wallets", label: dict.nav.wallets, icon: Landmark },
+        { href: "/reports", label: dict.nav.reports, icon: BarChart3 },
+        { href: "/debts", label: dict.nav.debts, icon: HandCoins },
+      ],
+    },
+    {
+      group: dict.nav.others,
+      items: [{ href: "/categories", label: dict.nav.categories, icon: Tags }],
+    },
+  ];
 
   return (
     <Sidebar collapsible="icon">
@@ -246,12 +250,12 @@ export default function AppSidebar({ user }: AppSidebarProps) {
                   "hover:bg-[#003ecc] hover:text-white",
                   "transition-colors",
                 )}
-                tooltip="Transaksi baru"
+                tooltip={dict.nav.newTransaction}
                 onClick={handleMobileClick}
               >
                 <Link href="/transactions?new=true">
                   <Plus className="h-4 w-4" />
-                  <span>Transaksi baru</span>
+                  <span>{dict.nav.newTransaction}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -259,7 +263,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
         </SidebarGroup>
 
         {/* ── Nav groups ── */}
-        {NAV_ITEMS.map((group) => (
+        {navGroups.map((group) => (
           <SidebarGroup key={group.group} className="py-1">
             <SidebarGroupLabel className="text-[11px] uppercase tracking-widest text-muted-foreground/60 font-medium px-2 h-7">
               {group.group}

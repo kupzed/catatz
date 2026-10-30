@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import type { ActionResult } from "@/types/general";
 import { cookies, headers } from "next/headers";
 import { UAParser } from "ua-parser-js";
+import { getActionLocale } from "@/i18n/get-locale";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export async function createSessionRecord(userId: string): Promise<void> {
   const supabase = await createClient();
@@ -92,9 +94,11 @@ export type SessionData = {
 export async function getActiveSessions(): Promise<ActionResult<{ sessions: SessionData[], current_device_id: string | null }>> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
 
   if (!user) {
-    return { success: false, error: "Unauthorized" };
+    return { success: false, error: dict.errors.unauthorized };
   }
 
   const cookieStore = await cookies();
@@ -117,9 +121,11 @@ export async function getActiveSessions(): Promise<ActionResult<{ sessions: Sess
 export async function revokeSession(sessionId: string): Promise<ActionResult> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
 
   if (!user) {
-    return { success: false, error: "Unauthorized" };
+    return { success: false, error: dict.errors.unauthorized };
   }
 
   const { error } = await supabase
@@ -133,7 +139,7 @@ export async function revokeSession(sessionId: string): Promise<ActionResult> {
   }
 
   revalidatePath("/settings", "layout");
-  return { success: true, message: "Sesi berhasil diakhiri" };
+  return { success: true, message: dict.actions.session.sessionTerminated };
 }
 
 export async function revokeAllOtherSessions(): Promise<ActionResult> {
@@ -142,13 +148,15 @@ export async function revokeAllOtherSessions(): Promise<ActionResult> {
   const deviceId = cookieStore.get("device_id")?.value;
   
   const { data: { user } } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
 
   if (!user) {
-    return { success: false, error: "Unauthorized" };
+    return { success: false, error: dict.errors.unauthorized };
   }
 
   if (!deviceId) {
-    return { success: false, error: "Perangkat saat ini tidak teridentifikasi" };
+    return { success: false, error: dict.actions.session.currentDeviceNotIdentified };
   }
 
   const { error } = await supabase
@@ -163,7 +171,7 @@ export async function revokeAllOtherSessions(): Promise<ActionResult> {
   }
 
   revalidatePath("/settings", "layout");
-  return { success: true, message: "Semua sesi lain berhasil diakhiri" };
+  return { success: true, message: dict.actions.session.allOtherSessionsTerminated };
 }
 
 export async function pingSessionActivity(): Promise<void> {

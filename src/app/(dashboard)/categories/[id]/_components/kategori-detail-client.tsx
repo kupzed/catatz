@@ -44,10 +44,9 @@ import { TransaksiDetailSheet } from "@/app/(dashboard)/transactions/_components
 import { TransaksiPagination } from "@/app/(dashboard)/transactions/_components/transaksi-pagination";
 import { useDateNavigation } from "@/hooks/use-date-navigation";
 import { useTransaksiFilter } from "@/hooks/use-transaksi-filter";
-import {
-  useOfflineQueueSync,
-  type DisplayTransaksi,
-} from "@/hooks/use-offline-queue-sync";
+import { useOfflineQueueSync, type DisplayTransaksi } from "@/hooks/use-offline-queue-sync";
+import { useTranslation } from "@/i18n/use-translation";
+import type { Dictionary } from "@/i18n/types";
 import { KategoriStatCards } from "./kategori-stat-cards";
 
 type Props = {
@@ -58,43 +57,57 @@ type Props = {
   allKategori: Kategori[];
 };
 
-const TIPE_CONFIG = {
-  expense: {
-    label: "Pengeluaran",
-    color: "text-semantic-down bg-semantic-down/10",
-  },
-  income: {
-    label: "Pemasukan",
-    color: "text-semantic-up bg-semantic-up/10",
-  },
-  all: {
-    label: "Semua Tipe",
-    color: "text-primary bg-primary/10",
-  },
-} as const;
+function TipeBadge({
+  tipe,
+  dict,
+}: {
+  tipe: Kategori["tipe"];
+  dict: Dictionary;
+}) {
+  const isExpense = tipe === "expense";
+  const isIncome = tipe === "income";
 
-function TipeBadge({ tipe }: { tipe: Kategori["tipe"] }) {
-  const cfg = TIPE_CONFIG[tipe] ?? TIPE_CONFIG.all;
+  const color = isExpense
+    ? "text-semantic-down bg-semantic-down/10"
+    : isIncome
+      ? "text-semantic-up bg-semantic-up/10"
+      : "text-primary bg-primary/10";
+
+  const label = isExpense
+    ? dict.categories.types.expense
+    : isIncome
+      ? dict.categories.types.income
+      : dict.categories.types.all;
+
   return (
     <span
       className={cn(
         "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold leading-none",
-        cfg.color,
+        color,
       )}
     >
-      {cfg.label}
+      {label}
     </span>
   );
 }
 
-function usageDescription(usage: KategoriUsageCounts) {
+function getUsageDescription(usage: KategoriUsageCounts, dict: Dictionary) {
   const parts = [
-    usage.transaksi > 0 ? `${usage.transaksi} transaksi` : null,
-    usage.budget > 0 ? `${usage.budget} budget bulanan` : null,
-    usage.recurring > 0 ? `${usage.recurring} template transaksi berulang` : null,
+    usage.transaksi > 0
+      ? dict.categories.usageTx.replace("{count}", String(usage.transaksi))
+      : null,
+    usage.budget > 0
+      ? dict.categories.usageBudget.replace("{count}", String(usage.budget))
+      : null,
+    usage.recurring > 0
+      ? dict.categories.usageRecurring.replace(
+          "{count}",
+          String(usage.recurring),
+        )
+      : null,
   ].filter(Boolean);
 
-  return `Kategori ini masih dipakai oleh ${parts.join(", ")}. Hapus atau ubah data terkait terlebih dahulu sebelum menghapus kategori.`;
+  return dict.categories.usageWarning.replace("{parts}", parts.join(", "));
 }
 
 export function KategoriDetailClient({
@@ -105,6 +118,7 @@ export function KategoriDetailClient({
   allKategori,
 }: Props) {
   const router = useRouter();
+  const { dict } = useTranslation();
 
   // Core States
   const [kategori, setKategori] = useState<Kategori>(initialKategori);
@@ -248,10 +262,10 @@ export function KategoriDetailClient({
   async function handleDeleteKategori() {
     const res = await deleteKategori(kategori.id);
     if (res.success) {
-      toast.success(`Kategori "${kategori.nama}" berhasil dihapus`);
+      toast.success(dict.categories.toasts.deleted.replace("{name}", kategori.nama));
       router.push("/categories");
     } else {
-      toast.error(res.error ?? "Gagal menghapus kategori");
+      toast.error(res.error ?? dict.categories.toasts.deleteFailed);
     }
   }
 
@@ -266,10 +280,10 @@ export function KategoriDetailClient({
         total: Math.max(0, prev.total - 1),
         transaksi: Math.max(0, prev.transaksi - 1),
       }));
-      toast.success("Transaksi berhasil dihapus");
+      toast.success(dict.toast.transactionDeleted);
       router.refresh();
     } else {
-      toast.error(res.error ?? "Gagal menghapus transaksi");
+      toast.error(res.error ?? dict.toast.error);
     }
     setDeletingTxId(null);
   }
@@ -296,6 +310,9 @@ export function KategoriDetailClient({
 
   const isUsed = usage.total > 0;
 
+  const [summaryDescPrefix, summaryDescSuffix] =
+    dict.categories.detail.summaryDesc.split("{name}");
+
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Top Navigation & Header */}
@@ -308,7 +325,7 @@ export function KategoriDetailClient({
             className="gap-1.5 -ml-2 text-muted-foreground hover:text-foreground rounded-full h-8 px-2.5 cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
-            Kembali ke Kategori
+            {dict.categories.detail.backToCategories}
           </Button>
 
           <div className="flex items-center gap-2.5 flex-wrap">
@@ -324,13 +341,16 @@ export function KategoriDetailClient({
               {kategori.nama}
             </h1>
             <div className="flex items-center gap-1.5 flex-wrap">
-              <TipeBadge tipe={kategori.tipe} />
+              <TipeBadge tipe={kategori.tipe} dict={dict} />
               {isUsed && (
                 <Badge
                   variant="outline"
                   className="rounded-full px-2.5 py-0.5 text-xs font-normal border-hairline bg-surface-strong text-foreground"
                 >
-                  Dipakai {usage.total} data
+                  {dict.categories.usedCount.replace(
+                    "{count}",
+                    String(usage.total),
+                  )}
                 </Badge>
               )}
             </div>
@@ -345,22 +365,25 @@ export function KategoriDetailClient({
             className="rounded-full h-10 sm:h-9 px-4 border-hairline hover:bg-surface-soft text-foreground text-xs font-medium gap-1.5 cursor-pointer justify-center"
           >
             <Pencil className="h-3.5 w-3.5" />
-            <span>Edit Kategori</span>
+            <span>{dict.categories.detail.editCategory}</span>
           </Button>
 
           {isUsed ? (
             <Button
               variant="outline"
-              onClick={() => toast.warning(usageDescription(usage))}
+              onClick={() => toast.warning(getUsageDescription(usage, dict))}
               className="rounded-full h-10 sm:h-9 px-4 border-hairline hover:bg-surface-soft text-semantic-down hover:text-semantic-down text-xs font-medium gap-1.5 cursor-pointer justify-center"
             >
               <Trash2 className="h-3.5 w-3.5" />
-              <span>Hapus</span>
+              <span>{dict.categories.detail.deleteCategory}</span>
             </Button>
           ) : (
             <ConfirmDialog
-              title={`Hapus kategori "${kategori.nama}"?`}
-              description="Tindakan ini tidak dapat dibatalkan. Kategori ini akan dihapus permanen."
+              title={dict.categories.deleteItemConfirmTitle.replace(
+                "{name}",
+                kategori.nama,
+              )}
+              description={dict.categories.deleteItemConfirmDescription}
               onConfirm={handleDeleteKategori}
             >
               <Button
@@ -368,7 +391,7 @@ export function KategoriDetailClient({
                 className="rounded-full h-10 sm:h-9 px-4 border-hairline hover:bg-surface-soft text-semantic-down hover:text-semantic-down text-xs font-medium gap-1.5 cursor-pointer justify-center w-full"
               >
                 <Trash2 className="h-3.5 w-3.5" />
-                <span>Hapus</span>
+                <span>{dict.categories.detail.deleteCategory}</span>
               </Button>
             </ConfirmDialog>
           )}
@@ -379,7 +402,7 @@ export function KategoriDetailClient({
             id="btn-tambah-transaksi-kategori"
           >
             <Plus className="h-4 w-4" />
-            <span>Tambah Transaksi</span>
+            <span>{dict.categories.detail.addTransaction}</span>
           </Button>
         </div>
       </div>
@@ -392,17 +415,22 @@ export function KategoriDetailClient({
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-1">
-              Ringkasan Kategori
+              {dict.categories.detail.summaryTitle}
             </p>
             <p className="text-sm text-muted-foreground">
-              Menampilkan seluruh riwayat transaksi, alokasi anggaran, dan frekuensi pencatatan untuk kategori <strong className="text-foreground">{kategori.nama}</strong>.
+              {summaryDescPrefix}
+              <strong className="text-foreground">{kategori.nama}</strong>
+              {summaryDescSuffix ?? ""}
             </p>
           </div>
           <div className="flex items-center gap-2">
             <span
               className="inline-block w-4 h-4 rounded-full border border-hairline shrink-0"
               style={{ backgroundColor: kategori.warna }}
-              title={`Kode warna: ${kategori.warna}`}
+              title={dict.categories.detail.colorCodeTitle.replace(
+                "{color}",
+                kategori.warna ?? "",
+              )}
             />
             <span className="font-mono text-xs text-muted-foreground">
               {kategori.warna}
@@ -424,17 +452,20 @@ export function KategoriDetailClient({
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-semibold text-foreground">
-                Histori Transaksi
+                {dict.categories.detail.txHistoryTitle}
               </h2>
               <Badge
                 variant="secondary"
                 className="text-xs px-2.5 py-0.5 rounded-full bg-surface-strong text-muted-foreground border-none font-mono"
               >
-                {tipeFiltered.length} Data
+                {dict.categories.detail.dataCount.replace(
+                  "{count}",
+                  String(tipeFiltered.length),
+                )}
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Catatan transaksi terkait kategori ini
+              {dict.categories.detail.txHistorySubtitle}
             </p>
           </div>
 
@@ -466,15 +497,15 @@ export function KategoriDetailClient({
                 )}
                 id="kategori-filter-periode"
               >
-                <SelectValue placeholder="Periode" />
+                <SelectValue placeholder={dict.categories.detail.periodPlaceholder} />
               </SelectTrigger>
               <SelectContent align="end" className="min-w-44 rounded-2xl">
-                <SelectItem value="all">Semua Waktu</SelectItem>
-                <SelectItem value="bulan">Bulan Ini</SelectItem>
-                <SelectItem value="minggu">Minggu Ini</SelectItem>
-                <SelectItem value="hari">Hari Ini</SelectItem>
-                <SelectItem value="tahun">Tahun Ini</SelectItem>
-                <SelectItem value="custom">Custom</SelectItem>
+                <SelectItem value="all">{dict.categories.detail.periodAll}</SelectItem>
+                <SelectItem value="bulan">{dict.categories.detail.periodMonth}</SelectItem>
+                <SelectItem value="minggu">{dict.categories.detail.periodWeek}</SelectItem>
+                <SelectItem value="hari">{dict.categories.detail.periodDay}</SelectItem>
+                <SelectItem value="tahun">{dict.categories.detail.periodYear}</SelectItem>
+                <SelectItem value="custom">{dict.categories.detail.periodCustom}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -487,7 +518,7 @@ export function KategoriDetailClient({
                     size="icon"
                     onClick={handlePrevDate}
                     className="h-6 w-6 rounded-full hover:bg-surface-soft dark:hover:bg-surface-dark p-0 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
-                    aria-label="Periode sebelumnya"
+                    aria-label={dict.categories.detail.prevPeriodAria}
                   >
                     <ChevronLeft className="h-3.5 w-3.5" />
                   </Button>
@@ -498,7 +529,7 @@ export function KategoriDetailClient({
                   <button
                     type="button"
                     className="text-xs font-medium text-foreground hover:underline cursor-pointer flex items-center gap-1.5 min-w-0"
-                    title="Klik untuk pilih tanggal"
+                    title={dict.categories.detail.clickDatePick}
                   >
                     <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                     <span className="truncate max-w-32.5 sm:max-w-none">{dateLabel}</span>
@@ -521,7 +552,7 @@ export function KategoriDetailClient({
                     size="icon"
                     onClick={handleNextDate}
                     className="h-6 w-6 rounded-full hover:bg-surface-soft dark:hover:bg-surface-dark p-0 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
-                    aria-label="Periode berikutnya"
+                    aria-label={dict.categories.detail.nextPeriodAria}
                   >
                     <ChevronRight className="h-3.5 w-3.5" />
                   </Button>
@@ -536,9 +567,9 @@ export function KategoriDetailClient({
           {kategori.tipe === "all" ? (
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none -mx-1 px-1">
               {[
-                { label: "Semua", value: "all" as const },
-                { label: "Pengeluaran", value: "expense" as const },
-                { label: "Pemasukan", value: "income" as const },
+                { label: dict.categories.types.all, value: "all" as const },
+                { label: dict.categories.types.expense, value: "expense" as const },
+                { label: dict.categories.types.income, value: "income" as const },
               ].map((tab) => (
                 <Button
                   key={tab.value}
@@ -565,7 +596,7 @@ export function KategoriDetailClient({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Cari transaksi..."
+              placeholder={dict.categories.detail.searchTxPlaceholder}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="h-9 pl-9 pr-8 text-xs rounded-input bg-card border-hairline w-full"
@@ -575,7 +606,7 @@ export function KategoriDetailClient({
                 type="button"
                 onClick={() => setSearch("")}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
-                aria-label="Hapus pencarian"
+                aria-label={dict.categories.detail.clearSearchAria}
               >
                 <X className="h-3.5 w-3.5" />
               </button>

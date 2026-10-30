@@ -67,6 +67,7 @@ vi.mock("@/actions/rekap-action", () => ({
     },
   }),
   getRekapRingkasanPeriodeList: vi.fn().mockResolvedValue([]),
+  getEarliestTransactionDate: vi.fn().mockResolvedValue({ success: true, data: undefined }),
 }));
 
 vi.mock("@/actions/rekap-saldo-action", () => ({

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { NominalInput } from "@/components/common/nominal-input";
 import { RekeningSelect } from "@/components/common/rekening-select";
+import { useTranslation } from "@/i18n/use-translation";
 
 export type HutangCicilanFormProps = {
   hutangId: string;
@@ -25,11 +26,13 @@ export function HutangCicilanForm({
   onSubmit,
   isLoading,
 }: HutangCicilanFormProps) {
+  const { dict } = useTranslation();
+
   return (
     <div className="space-y-3 border-t border-hairline bg-surface-soft/60 p-4">
       <div className="flex flex-col sm:flex-row gap-2">
         <div className="flex-1 space-y-1">
-          <Label className="text-xs">Nominal Cicilan (Rp)</Label>
+          <Label className="text-xs">{dict.debts.installment.amountLabel}</Label>
           <NominalInput
             placeholder="0"
             value={cicilanData[hutangId]?.nominal ?? ""}
@@ -45,7 +48,7 @@ export function HutangCicilanForm({
           />
         </div>
         <div className="flex-1 space-y-1">
-          <Label className="text-xs">Dari / Ke Rekening</Label>
+          <Label className="text-xs">{dict.debts.installment.walletLabel}</Label>
           <RekeningSelect
             rekening={rekening}
             value={cicilanData[hutangId]?.rekening_id ?? "none"}
@@ -55,9 +58,9 @@ export function HutangCicilanForm({
                 [hutangId]: { ...prev[hutangId], rekening_id: val },
               }))
             }
-            placeholder="Tanpa rekening"
+            placeholder={dict.debts.installment.noWallet}
             includeNone={true}
-            noneLabel="Tanpa rekening"
+            noneLabel={dict.debts.installment.noWallet}
             className="h-12 text-sm"
           />
         </div>
@@ -69,7 +72,7 @@ export function HutangCicilanForm({
           disabled={isLoading}
           className="h-11 rounded-full bg-primary px-5 text-white hover:bg-primary-active"
         >
-          Catat
+          {dict.debts.installment.record}
         </Button>
       </div>
     </div>

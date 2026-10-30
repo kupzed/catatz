@@ -4,6 +4,7 @@ import type { Dispatch, SetStateAction } from "react";
 import type { Hutang, HutangCicilan } from "@/types/hutang";
 import type { Rekening } from "@/types/rekening";
 import type { CicilanDraft } from "@/hooks/use-hutang-cicilan";
+import type { Dictionary } from "@/i18n/types";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { NominalInput } from "@/components/common/nominal-input";
 import { RekeningSelect } from "@/components/common/rekening-select";
@@ -13,6 +14,7 @@ import { ClearableInput } from "@/components/common/clearable-input";
 import { Label } from "@/components/ui/label";
 import { Pencil, Save, Trash2, X } from "lucide-react";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 
 export type HutangCicilanItemProps = {
   cicilan: HutangCicilan;
@@ -28,10 +30,10 @@ export type HutangCicilanItemProps = {
   isLoading: boolean;
 };
 
-function getRekeningLabel(rekening: Rekening[], id?: string | null) {
-  if (!id) return "Tanpa rekening";
+function getRekeningLabel(rekening: Rekening[], id?: string | null, dict?: Dictionary) {
+  if (!id) return dict?.debts.installment.noWallet ?? "Tanpa rekening";
   const item = rekening.find((r) => r.id === id);
-  return item ? `${item.nama} (${item.jenis})` : "Rekening tidak ditemukan";
+  return item ? `${item.nama} (${item.jenis})` : (dict?.debts.installment.walletNotFound ?? "Rekening tidak ditemukan");
 }
 
 export function HutangCicilanItem({
@@ -48,6 +50,7 @@ export function HutangCicilanItem({
   isLoading,
 }: HutangCicilanItemProps) {
   const { formatRupiah, formatTanggal, formatWaktu } = useSystemPreferences();
+  const { dict } = useTranslation();
 
   return (
     <div className="space-y-3 rounded-input border border-hairline bg-card p-3">
@@ -55,7 +58,7 @@ export function HutangCicilanItem({
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label className="text-xs">Nominal</Label>
+              <Label className="text-xs">{dict.debts.installment.nominal}</Label>
               <NominalInput
                 value={editDraft.nominal}
                 onValueChange={(value) =>
@@ -67,7 +70,7 @@ export function HutangCicilanItem({
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">Rekening</Label>
+              <Label className="text-xs">{dict.debts.installment.wallet}</Label>
               <RekeningSelect
                 rekening={rekening}
                 value={editDraft.rekening_id}
@@ -77,15 +80,15 @@ export function HutangCicilanItem({
                     rekening_id: value,
                   }))
                 }
-                placeholder="Tanpa rekening"
+                placeholder={dict.debts.installment.noWallet}
                 includeNone={true}
-                noneLabel="Tanpa rekening"
+                noneLabel={dict.debts.installment.noWallet}
                 className="h-9 text-xs"
               />
             </div>
             <div className="grid grid-cols-[3fr_1fr] gap-3 sm:col-span-2">
               <div className="space-y-1">
-                <Label className="text-xs">Tanggal</Label>
+                <Label className="text-xs">{dict.debts.installment.date}</Label>
                 <Input
                   type="date"
                   value={editDraft.tanggal}
@@ -99,7 +102,7 @@ export function HutangCicilanItem({
                 />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">Waktu</Label>
+                <Label className="text-xs">{dict.common.time}</Label>
                 <Input
                   type="time"
                   value={editDraft.waktu}
@@ -115,7 +118,7 @@ export function HutangCicilanItem({
             </div>
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Catatan</Label>
+            <Label className="text-xs">{dict.debts.installment.notes}</Label>
             <ClearableInput
               value={editDraft.catatan}
               onChange={(event) =>
@@ -130,7 +133,7 @@ export function HutangCicilanItem({
                   catatan: "",
                 }))
               }
-              placeholder="Catatan opsional"
+              placeholder={dict.debts.installment.notesOptional}
             />
           </div>
           <div className="flex justify-end gap-2">
@@ -141,7 +144,7 @@ export function HutangCicilanItem({
               onClick={onCancelEdit}
             >
               <X className="h-3.5 w-3.5" />
-              Batal
+              {dict.common.cancel}
             </Button>
             <Button
               size="sm"
@@ -150,7 +153,7 @@ export function HutangCicilanItem({
               onClick={() => onSave(hutang, cicilan)}
             >
               <Save className="h-3.5 w-3.5" />
-              Simpan
+              {dict.common.save}
             </Button>
           </div>
         </>
@@ -166,7 +169,7 @@ export function HutangCicilanItem({
                 {cicilan.waktu ? `, ${formatWaktu(cicilan.waktu)}` : ""}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                {getRekeningLabel(rekening, cicilan.rekening_id)}
+                {getRekeningLabel(rekening, cicilan.rekening_id, dict)}
               </p>
               {cicilan.catatan && (
                 <p className="text-xs text-muted-foreground mt-1">
@@ -180,20 +183,26 @@ export function HutangCicilanItem({
                 variant="ghost"
                 className="h-11 w-11 bg-surface-strong"
                 onClick={() => onStartEdit(cicilan)}
-                aria-label={`Edit cicilan ${formatRupiah(Number(cicilan.nominal))}`}
+                aria-label={dict.debts.installment.editAria.replace(
+                  "{amount}",
+                  formatRupiah(Number(cicilan.nominal)),
+                )}
               >
                 <Pencil className="h-3.5 w-3.5" />
               </Button>
               <ConfirmDialog
-                title="Hapus Cicilan?"
-                description="Cicilan ini akan dihapus dan saldo rekening terkait akan dikembalikan oleh trigger database."
+                title={dict.debts.installment.deleteConfirmTitle}
+                description={dict.debts.installment.deleteConfirmDescription}
                 onConfirm={() => onDelete(cicilan.id)}
               >
                 <Button
                   size="icon"
                   variant="ghost"
                   className="h-11 w-11 bg-surface-strong text-semantic-down hover:bg-surface-strong/80 hover:text-semantic-down"
-                  aria-label={`Hapus cicilan ${formatRupiah(Number(cicilan.nominal))}`}
+                  aria-label={dict.debts.installment.deleteAria.replace(
+                    "{amount}",
+                    formatRupiah(Number(cicilan.nominal)),
+                  )}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>

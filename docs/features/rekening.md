@@ -68,6 +68,7 @@ Initial data detail diambil dengan:
 - Rekening tidak bisa dihapus jika masih dipakai oleh transaksi, rekening tujuan transfer, hutang/piutang, cicilan, atau template transaksi berulang.
 - Server Action `deleteRekening` memeriksa pemakaian rekening sebelum delete.
 - Database memiliki trigger `trg_prevent_rekening_delete_when_referenced` sebagai proteksi backend tambahan untuk delete langsung.
+- Seluruh teks UI rekening (tipe rekening, dialog form, kartu statistik arus kas, rincian pemakaian, dan pesan konfirmasi hapus) bersifat bilingual via `src/i18n/`.
 
 ## UI Behavior
 

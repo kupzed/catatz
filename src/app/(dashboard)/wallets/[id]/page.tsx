@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getRekening, getRekeningById } from "@/actions/rekening-action";
 import { getTransaksi, getKategori } from "@/actions/transaksi-action";
+import { getLocale } from "@/i18n/get-locale";
+import { getDictionary } from "@/i18n/get-dictionary";
 import { RekeningDetailClient } from "./_components/rekening-detail-client";
 
 type Props = {
@@ -10,18 +12,20 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
+  const locale = await getLocale();
+  const dict = await getDictionary(locale);
   const res = await getRekeningById(id);
 
   if (!res.success || !res.data) {
     return {
-      title: "Detail Rekening",
-      description: "Detail rekening dan riwayat transaksi.",
+      title: dict.wallets.detail.title,
+      description: dict.wallets.detail.defaultDescription,
     };
   }
 
   return {
-    title: `${res.data.rekening.nama} - Detail Rekening | CatatZ`,
-    description: `Riwayat dan catatan transaksi untuk rekening ${res.data.rekening.nama}.`,
+    title: `${res.data.rekening.nama} - ${dict.wallets.detail.title} | CatatZ`,
+    description: `${dict.wallets.detail.historyForWallet} ${res.data.rekening.nama}.`,
   };
 }
 

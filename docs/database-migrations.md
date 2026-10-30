@@ -23,10 +23,11 @@ Migration project berada di `src/migrations`.
 | `014-rekap-periode.sql` | Menambahkan kolom `cutoff_day` dan `akumulasi_saldo` ke `user_preferences`, serta membuat table `rekap_periode_custom`, RLS, index, dan grant API untuk periode custom rekap. | Active |
 | `015-hutang-piutang-revamp.sql` | Merelaksasi `total_pinjaman` agar bisa 0 saat create kontak pihak, menambah kolom `jenis_transaksi` pada `hutang_cicilan` dan `is_lunas_manual` pada `hutang`, serta menyempurnakan trigger saldo dan sisa hutang untuk fleksibilitas pembayaran lebih. | Active |
 | `016-user-owned-categories.sql` | Mengalihkan kategori sistem menjadi user-owned (per-user), re-mapping relasi transaksi/budget/recurring, auto-seed kategori pada registrasi baru, dan update RLS policy. | Pending Apply |
+| `017-user-preferences-language.sql` | Menambahkan kolom `language` ('id' atau 'en') pada `user_preferences` untuk mendukung preferensi bahasa (i18n). | Active |
 
 ## Catatan Urutan
 
-File migration yang ada saat ini berurutan dari `001` sampai `016` di `src/migrations`. Migration `016-user-owned-categories.sql` mengalihkan kategori sistem menjadi per-user secara additive dan safe untuk data existing.
+File migration yang ada saat ini berurutan dari `001` sampai `017` di `src/migrations`. Migration `016-user-owned-categories.sql` mengalihkan kategori sistem menjadi per-user secara additive dan safe untuk data existing, sedangkan `017-user-preferences-language.sql` menambahkan kolom preferensi bahasa secara additive.
 
 Jangan menjalankan migration otomatis hanya berdasarkan asumsi nomor file tanpa review. Pastikan urutan eksekusi sesuai riwayat production/staging yang sebenarnya.
 

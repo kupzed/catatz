@@ -4,11 +4,17 @@ import { getRekapDetailByRange } from '@/actions/rekap-action';
 import { getCustomPeriod, getRekapSettings } from '@/actions/rekap-period-action';
 import { getSaldoPeriodeList } from '@/actions/rekap-saldo-action';
 import { DEFAULT_REKAP_SETTINGS, rekapDetailQuerySchema } from '@/validations/rekap-validation';
+import { getDictionary } from '@/i18n/get-dictionary';
+import { getLocale } from '@/i18n/get-locale';
 import { RekapDetailClient } from './_components/rekap-detail-client';
 
-export const metadata: Metadata = {
-  title: 'Detail Rekap',
-  description: 'Rincian transaksi, metrik keuangan, dan proporsi saldo untuk periode tertentu.',
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const dict = await getDictionary(locale);
+  return {
+    title: dict.reports.detail.title,
+    description: dict.reports.detail.description,
+  };
 };
 
 type RekapDetailPageProps = {

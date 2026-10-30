@@ -4,6 +4,8 @@ import { createClient } from '@/configs/supabase/server';
 import { parseVoiceTranscript } from '@/lib/voice-parser';
 import type { ActionResult } from '@/types/general';
 import type { VoiceParseResult } from '@/types/voice-parser';
+import { getActionLocale } from '@/i18n/get-locale';
+import { getDictionary } from '@/i18n/get-dictionary';
 
 /**
  * Server Action wrapper for parseVoiceTranscript.
@@ -16,11 +18,13 @@ export async function processVoiceInput(
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
 
   if (!user) {
     return {
       success: false,
-      error: 'Silakan login terlebih dahulu untuk menggunakan fitur suara.',
+      error: dict.actions.voice.loginRequired,
     };
   }
   try {
@@ -38,6 +42,6 @@ export async function processVoiceInput(
 
     return { success: true, data: result };
   } catch {
-    return { success: false, error: 'Terjadi kesalahan saat memproses suara.' };
+    return { success: false, error: dict.actions.voice.processError };
   }
 }

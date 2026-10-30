@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Mic, MicOff, Loader2, AlertCircle, Info } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "@/i18n/use-translation";
 import type { VoiceParseResult } from "@/types/voice-parser";
 
 // ─── Platform helpers (client-side only) ─────────────────────────────────────
@@ -43,6 +44,7 @@ export default function VoiceInputButton({
   onBusyChange,
   disabled,
 }: Props) {
+  const { dict } = useTranslation();
   const {
     isListening,
     isStarting,
@@ -92,7 +94,7 @@ export default function VoiceInputButton({
   const handleProcess = useCallback(
     async (text: string) => {
       if (!text.trim()) {
-        toast.error("Tidak ada suara yang terdeteksi.");
+        toast.error(dict.transactions.ai.voiceNoSound);
         return;
       }
 
@@ -102,18 +104,18 @@ export default function VoiceInputButton({
         if (result.success && result.data) {
           onParsed(result.data);
         } else {
-          const msg = result.error ?? "Gagal memproses suara.";
+          const msg = result.error ?? dict.transactions.ai.voiceFailed;
           onError(msg);
         }
       } catch {
-        const msg = "Gagal memproses suara.";
+        const msg = dict.transactions.ai.voiceFailed;
         onError(msg);
       } finally {
         setIsProcessing(false);
         resetTranscript();
       }
     },
-    [onError, onParsed, resetTranscript],
+    [dict, onError, onParsed, resetTranscript],
   );
 
   // Tampilkan error dari hook sebagai toast
@@ -166,11 +168,11 @@ export default function VoiceInputButton({
                 className={`${buttonClassName} text-muted-foreground`}
               >
                 <Mic className="h-3.5 w-3.5" />
-                Voice Input
+                {dict.transactions.ai.voiceInput}
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Browser tidak mendukung voice input</p>
+              <p>{dict.transactions.ai.voiceUnsupported}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -181,12 +183,12 @@ export default function VoiceInputButton({
   // ── Render: loading / processing ───────────────────────────────────────
 
   if (isProcessing || isStarting) {
-    let label = "Menyiapkan...";
-    if (recordingState === "requesting-permission") label = "Meminta izin...";
-    else if (isProcessing) label = "Memproses...";
+    let label = dict.transactions.ai.voicePreparing;
+    if (recordingState === "requesting-permission") label = dict.transactions.ai.voiceRequestingPermission;
+    else if (isProcessing) label = dict.transactions.ai.processing;
     // Untuk iOS PWA berikan label yang lebih informatif saat starting
     else if (recordingState === "starting" && isIOSPWA) {
-      label = "Menghubungkan mikrofon...";
+      label = dict.transactions.ai.voiceConnectingMic;
     }
 
     return (
@@ -229,12 +231,12 @@ export default function VoiceInputButton({
           {isListening ? (
             <>
               <MicOff className="h-3.5 w-3.5" />
-              Tap untuk berhenti
+              {dict.transactions.ai.voiceTapToStop}
             </>
           ) : (
             <>
               <Mic className="h-3.5 w-3.5" />
-              Voice Input
+              {dict.transactions.ai.voiceInput}
             </>
           )}
         </Button>
@@ -247,15 +249,14 @@ export default function VoiceInputButton({
                 <button
                   type="button"
                   className="absolute top-1/2 right-1.5 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-amber-500 transition-colors hover:bg-surface-strong"
-                  aria-label="Informasi voice input iOS"
+                  aria-label={dict.transactions.ai.voiceIosInfo}
                 >
                   <Info className="h-3.5 w-3.5" />
                 </button>
               </TooltipTrigger>
               <TooltipContent className="max-w-64 text-xs" side="bottom">
                 <p>
-                  Voice input di mode PWA (Add to Home Screen) iOS mungkin
-                  membutuhkan izin ulang. Jika gagal, coba buka di Safari biasa.
+                  {dict.transactions.ai.voiceIosTooltip}
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -266,7 +267,7 @@ export default function VoiceInputButton({
       {/* Transcript live */}
       {isListening && transcript.length > 0 && (
         <p className="max-w-full wrap-break-word px-1 text-[11px] italic leading-tight text-muted-foreground">
-          Mendengar: {transcript}
+          {dict.transactions.ai.voiceListeningPrefix}{transcript}
         </p>
       )}
 
@@ -276,10 +277,9 @@ export default function VoiceInputButton({
           <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
           <div className="leading-snug">
             <span>{error}</span>
-            {(error.includes("Pengaturan") || error.includes("Safari")) && (
+            {(error.includes("Pengaturan") || error.includes("Safari") || error.includes("Settings")) && (
               <span className="block mt-1 text-amber-600 dark:text-amber-500">
-                Atau gunakan Safari biasa untuk fitur voice input yang lebih
-                stabil.
+                {dict.transactions.ai.voiceIosSafariFallback}
               </span>
             )}
           </div>

@@ -6,6 +6,7 @@ import { RekeningSelect } from "@/components/common/rekening-select";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 
 export type HutangLunasFormProps = {
   hutang: Hutang;
@@ -24,7 +25,10 @@ export function HutangLunasForm({
   onSubmit,
   isLoading,
 }: HutangLunasFormProps) {
+  const { dict } = useTranslation();
   const { formatRupiah } = useSystemPreferences();
+
+  const [payoffPrefix, payoffSuffix] = dict.debts.payoffDescription.split("{amount}");
 
   return (
     <div
@@ -32,25 +36,25 @@ export function HutangLunasForm({
       className="space-y-3 border-t border-hairline bg-surface-soft/60 p-4"
     >
       <div>
-        <p className="text-sm font-semibold text-foreground">Pelunasan</p>
+        <p className="text-sm font-semibold text-foreground">{dict.debts.payoff}</p>
         <p className="text-xs text-muted-foreground">
-          Catat pelunasan penuh sebesar{" "}
+          {payoffPrefix}
           <span className="font-mono text-foreground">
             {formatRupiah(Number(hutang.sisa_tagihan))}
           </span>
-          .
+          {payoffSuffix ?? ""}
         </p>
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs">Dari / Ke Rekening</Label>
+        <Label className="text-xs">{dict.debts.installment.walletLabel}</Label>
         <RekeningSelect
           rekening={rekening}
           value={rekeningId}
           onValueChange={onRekeningChange}
-          placeholder="Tanpa rekening"
+          placeholder={dict.debts.installment.noWallet}
           includeNone={true}
-          noneLabel="Tanpa rekening"
+          noneLabel={dict.debts.installment.noWallet}
           className="h-11 text-sm"
         />
       </div>
@@ -62,7 +66,7 @@ export function HutangLunasForm({
           disabled={isLoading}
           className="h-11 rounded-full bg-primary px-5 text-white hover:bg-primary-active"
         >
-          Lunaskan
+          {dict.debts.payoffSubmit}
         </Button>
       </div>
     </div>

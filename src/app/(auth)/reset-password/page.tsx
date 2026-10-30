@@ -7,23 +7,27 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, Lock, Eye, EyeOff } from "lucide-react";
+import { useTranslation } from "@/i18n/use-translation";
 
 export default function ResetPasswordPage() {
+  const { dict } = useTranslation();
   const [state, formAction, isPending] = useActionState(updatePassword, null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     if (state?.error) {
-      toast.error("Gagal", { description: state.error });
+      toast.error(dict.toast.error, { description: state.error });
     }
-  }, [state]);
+  }, [state, dict]);
 
   return (
     <div className="bg-card dark:bg-surface-dark-elevated border border-border dark:border-white/10 rounded-card p-8">
-      <h2 className="text-xl font-normal text-foreground mb-1">Reset Password</h2>
+      <h2 className="text-xl font-normal text-foreground mb-1">
+        {dict.auth.resetPassword.title}
+      </h2>
       <p className="text-muted-foreground text-sm mb-6">
-        Buat password baru untuk akun Anda.
+        {dict.auth.resetPassword.subtitle}
       </p>
 
       <form action={formAction} method="POST" className="space-y-4">
@@ -32,7 +36,7 @@ export default function ResetPasswordPage() {
             htmlFor="password"
             className="text-muted-foreground text-sm font-medium"
           >
-            Password Baru
+            {dict.auth.resetPassword.passwordLabel}
           </Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
@@ -40,7 +44,7 @@ export default function ResetPasswordPage() {
               id="password"
               name="password"
               type={showPassword ? "text" : "password"}
-              placeholder="Minimal 8 karakter"
+              placeholder={dict.auth.resetPassword.passwordPlaceholder}
               required
               minLength={8}
               className="pl-10 pr-10 bg-background dark:bg-surface-dark border-border dark:border-white/15 text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
@@ -64,7 +68,7 @@ export default function ResetPasswordPage() {
             htmlFor="confirmPassword"
             className="text-muted-foreground text-sm font-medium"
           >
-            Konfirmasi Password Baru
+            {dict.auth.resetPassword.confirmPasswordLabel}
           </Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
@@ -72,7 +76,7 @@ export default function ResetPasswordPage() {
               id="confirmPassword"
               name="confirmPassword"
               type={showConfirm ? "text" : "password"}
-              placeholder="Ulangi password baru"
+              placeholder={dict.auth.resetPassword.confirmPasswordPlaceholder}
               required
               minLength={8}
               className="pl-10 pr-10 bg-background dark:bg-surface-dark border-border dark:border-white/15 text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
@@ -99,10 +103,10 @@ export default function ResetPasswordPage() {
           {isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Menyimpan...
+              {dict.auth.resetPassword.submitting}
             </>
           ) : (
-            "Simpan Password Baru"
+            dict.auth.resetPassword.submit
           )}
         </Button>
       </form>

@@ -7,6 +7,7 @@ import { UmumTab } from "./umum-tab";
 import { KeamananTab } from "./keamanan-tab";
 import type { ConnectedAccount } from "./connected-account-section";
 import { PageHeader } from "@/components/common";
+import { useTranslation } from "@/i18n/use-translation";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -27,14 +28,7 @@ type Props = {
   connectedAccounts: ConnectedAccount[];
 };
 
-// ─── Nav config ───────────────────────────────────────────────────────────────
-
-const TABS = [
-  { id: "umum", label: "General", icon: Settings },
-  { id: "keamanan", label: "Security", icon: ShieldCheck },
-] as const;
-
-type TabId = (typeof TABS)[number]["id"];
+type TabId = "umum" | "keamanan";
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
@@ -43,7 +37,13 @@ export default function SettingsPageClient({
   preferences,
   connectedAccounts,
 }: Props) {
+  const { dict } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabId>("umum");
+
+  const tabs = [
+    { id: "umum" as const, label: dict.settings.tabs.general, icon: Settings },
+    { id: "keamanan" as const, label: dict.settings.tabs.security, icon: ShieldCheck },
+  ];
 
   function renderContent() {
     switch (activeTab) {
@@ -64,18 +64,18 @@ export default function SettingsPageClient({
     <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Page title */}
       <PageHeader
-        title="Settings"
-        subtitle="Kelola akun, preferensi, dan keamanan aplikasi CatatZ."
+        title={dict.settings.title}
+        subtitle={dict.settings.subtitle}
       />
 
       {/* Layout: sidebar on md+, tab buttons on mobile */}
       <div className="flex flex-col gap-6 md:flex-row md:gap-8">
         {/* ── Sidebar nav (md+) ── */}
         <nav
-          aria-label="Pengaturan navigasi"
+          aria-label={dict.settings.navAriaLabel}
           className="hidden md:flex md:flex-col md:w-48 md:shrink-0 gap-0.5"
         >
-          {TABS.map(({ id, label, icon: Icon }) => (
+          {tabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               id={`settings-nav-${id}`}
@@ -99,7 +99,7 @@ export default function SettingsPageClient({
             role="tablist"
             className="flex items-center gap-1 rounded-[8px] bg-surface-strong p-1 w-full"
           >
-            {TABS.map(({ id, label, icon: Icon }) => (
+            {tabs.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
                 role="tab"

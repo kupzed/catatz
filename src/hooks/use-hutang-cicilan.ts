@@ -9,6 +9,7 @@ import {
   updateCicilan,
 } from "@/actions/hutang-action";
 import { currentTime, todayISODate } from "@/lib/utils";
+import { useTranslation } from "@/i18n/use-translation";
 import type { Hutang, HutangCicilan } from "@/types/hutang";
 import type { Rekening } from "@/types/rekening";
 
@@ -60,6 +61,7 @@ export type UseHutangCicilanReturn = {
 export function useHutangCicilan({
   onHutangUpdated,
 }: UseHutangCicilanParams): UseHutangCicilanReturn {
+  const { dict } = useTranslation();
   const [cicilanData, setCicilanData] = useState<CicilanData>({});
   const [loadingCicilan, setLoadingCicilan] = useState<string | null>(null);
   const [editingCicilanId, setEditingCicilanId] = useState<string | null>(null);
@@ -71,7 +73,7 @@ export function useHutangCicilan({
     const nominal = Number(data.nominal ?? "0");
 
     if (!nominal || nominal <= 0) {
-      return toast.error("Masukkan nominal cicilan");
+      return toast.error(dict.errors.validation.mustBePositive);
     }
 
     setLoadingCicilan(h.id);
@@ -92,9 +94,9 @@ export function useHutangCicilan({
         ...prev,
         [h.id]: { nominal: "", rekening_id: "" },
       }));
-      toast.success("Cicilan dicatat");
+      toast.success(dict.toast.installmentCreated);
     } else {
-      toast.error(res.error ?? "Gagal mencatat cicilan");
+      toast.error(res.error ?? dict.toast.saveFailed);
     }
 
     setLoadingCicilan(null);
@@ -114,7 +116,7 @@ export function useHutangCicilan({
   async function handleUpdateCicilan(h: Hutang, cicilan: HutangCicilan) {
     const nominal = Number(editCicilanDraft.nominal);
     if (!nominal || nominal <= 0) {
-      return toast.error("Masukkan nominal cicilan");
+      return toast.error(dict.errors.validation.mustBePositive);
     }
 
     setLoadingCicilan(h.id);
@@ -130,9 +132,9 @@ export function useHutangCicilan({
       onHutangUpdated(res.data);
       setEditingCicilanId(null);
       setEditCicilanDraft(emptyEditDraft());
-      toast.success("Cicilan diperbarui");
+      toast.success(dict.toast.installmentUpdated);
     } else {
-      toast.error(res.error ?? "Gagal memperbarui cicilan");
+      toast.error(res.error ?? dict.toast.updateFailed);
     }
 
     setLoadingCicilan(null);
@@ -142,9 +144,9 @@ export function useHutangCicilan({
     const res = await deleteCicilan(id);
     if (res.success && res.data) {
       onHutangUpdated(res.data);
-      toast.success("Cicilan dihapus");
+      toast.success(dict.toast.installmentDeleted);
     } else {
-      toast.error(res.error ?? "Gagal menghapus cicilan");
+      toast.error(res.error ?? dict.toast.deleteFailed);
     }
   }
 

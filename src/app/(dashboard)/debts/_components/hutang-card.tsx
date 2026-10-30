@@ -13,6 +13,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 import { percentage } from "@/lib/utils";
 
 export type HutangCardProps = {
@@ -23,6 +24,7 @@ export type HutangCardProps = {
 
 export function HutangCard({ hutang, onEdit, onDelete }: HutangCardProps) {
   const { formatRupiah } = useSystemPreferences();
+  const { dict } = useTranslation();
 
   // Hitung total pinjaman (pokok awal + pinjaman tambahan)
   const additionalPinjaman = (hutang.cicilan ?? [])
@@ -57,13 +59,13 @@ export function HutangCard({ hutang, onEdit, onDelete }: HutangCardProps) {
           </div>
 
           <p className="text-xs text-muted-foreground truncate max-w-md">
-            {hutang.catatan || (isPiutang ? "Pihak Piutang" : "Pihak Hutang")}
+            {hutang.catatan || (isPiutang ? dict.debts.receivableParty : dict.debts.debtParty)}
           </p>
 
           {totalPinjaman > 0 && (
             <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-muted-foreground">
-              <span>Pokok: {formatRupiah(totalPinjaman)}</span>
-              <span>· Terbayar: {formatRupiah(totalPembayaran)}</span>
+              <span>{dict.debts.principal}: {formatRupiah(totalPinjaman)}</span>
+              <span>· {dict.debts.paid}: {formatRupiah(totalPembayaran)}</span>
             </div>
           )}
         </Link>
@@ -74,7 +76,7 @@ export function HutangCard({ hutang, onEdit, onDelete }: HutangCardProps) {
             <Badge
               className="text-xs px-3 py-1 border-0 rounded-full font-semibold bg-semantic-up/10 text-semantic-up"
             >
-              ✓ Lunas
+              ✓ {dict.debts.status.paidOff}
             </Badge>
           ) : (
             <>
@@ -93,9 +95,9 @@ export function HutangCard({ hutang, onEdit, onDelete }: HutangCardProps) {
               <p className="text-xs text-muted-foreground">
                 {sisaTagihan > 0
                   ? isPiutang
-                    ? "sisa piutang"
-                    : "sisa hutang"
-                  : "belum ada tagihan"}
+                    ? dict.debts.remainingReceivable
+                    : dict.debts.remainingDebt
+                  : dict.debts.noBillYet}
               </p>
             </>
           )}
@@ -106,7 +108,7 @@ export function HutangCard({ hutang, onEdit, onDelete }: HutangCardProps) {
       {totalPinjaman > 0 && (
         <div className="mt-3">
           <div className="flex justify-between text-[11px] text-muted-foreground mb-1">
-            <span>Terbayar {pct}%</span>
+            <span>{dict.debts.paidPercent.replace("{percent}", String(pct))}</span>
             <span className="font-mono">{formatRupiah(totalPembayaran)}</span>
           </div>
           <Progress value={Math.min(pct, 100)} className="h-1.5 [&>div]:bg-primary" />
@@ -119,7 +121,7 @@ export function HutangCard({ hutang, onEdit, onDelete }: HutangCardProps) {
           href={`/debts/${hutang.id}`}
           className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-active transition-colors"
         >
-          Buka Detail
+          {dict.debts.openDetail}
           <ChevronRight className="h-3.5 w-3.5" />
         </Link>
 
@@ -132,21 +134,21 @@ export function HutangCard({ hutang, onEdit, onDelete }: HutangCardProps) {
               e.preventDefault();
               onEdit(hutang);
             }}
-            aria-label={`Edit ${hutang.nama_entitas}`}
+            aria-label={`${dict.common.edit} ${hutang.nama_entitas}`}
           >
             <Pencil className="h-3.5 w-3.5" />
           </Button>
 
           <ConfirmDialog
-            title="Hapus Catatan?"
-            description="Menghapus kontak ini juga akan menghapus semua riwayat transaksi dan mengembalikan saldo rekening terkait."
+            title={dict.debts.deleteConfirmTitle}
+            description={dict.debts.deleteCardConfirmDescription}
             onConfirm={() => onDelete(hutang.id)}
           >
             <Button
               size="icon"
               variant="ghost"
               className="h-8 w-8 rounded-full text-semantic-down hover:bg-semantic-down/10"
-              aria-label={`Hapus ${hutang.nama_entitas}`}
+              aria-label={`${dict.common.delete} ${hutang.nama_entitas}`}
             >
               <Trash2 className="h-3.5 w-3.5" />
             </Button>

@@ -4,12 +4,14 @@ import { useState } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/i18n/use-translation";
 import {
   pwaInstallAcceptedEvent,
   usePWAInstall,
 } from "@/hooks/use-pwa-install";
 
 export function InstallBanner() {
+  const { dict } = useTranslation();
   const {
     isInstallable,
     isInstalled,
@@ -30,7 +32,7 @@ export function InstallBanner() {
     let successShown = false;
     const showSuccessToast = () => {
       successShown = true;
-      toast.success("CatatZ berhasil dipasang.");
+      toast.success(dict.pwa.install.installedSuccess);
     };
 
     try {
@@ -39,7 +41,7 @@ export function InstallBanner() {
     } catch (error) {
       window.removeEventListener(pwaInstallAcceptedEvent, showSuccessToast);
       console.error("[pwa] Install prompt failed", error);
-      toast.error("Gagal membuka prompt instalasi.");
+      toast.error(dict.pwa.install.installFailed);
     } finally {
       if (!successShown) {
         window.removeEventListener(pwaInstallAcceptedEvent, showSuccessToast);
@@ -60,7 +62,7 @@ export function InstallBanner() {
             aria-hidden="true"
             className="h-4 w-4 shrink-0 rounded-full"
           />
-          <span className="text-body font-normal">Pasang CatatZ di layar utama untuk akses lebih cepat!</span>
+          <span className="text-body font-normal">{dict.pwa.install.bannerDesc}</span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <Button
@@ -69,14 +71,14 @@ export function InstallBanner() {
             disabled={isPrompting}
             variant="default"
           >
-            {isPrompting ? "Membuka..." : "Pasang Sekarang"}
+            {isPrompting ? dict.common.loading : dict.pwa.install.installButton}
           </Button>
           <Button
             type="button"
             variant="ghost"
             onClick={dismissPrompt}
           >
-            Nanti
+            {dict.pwa.install.dismissButton}
           </Button>
         </div>
       </div>

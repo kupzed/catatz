@@ -5,6 +5,7 @@ import {
   getTransaksiNominalDisplay,
   getTransaksiDisplayName,
 } from "@/lib/transaksi-detail";
+import enDict from "@/i18n/dictionaries/en";
 
 describe("transaksi-detail pure helpers", () => {
   describe("filterSystemTags", () => {
@@ -102,9 +103,44 @@ describe("transaksi-detail pure helpers", () => {
       expect(result.colorClass).toBe("text-accent-yellow");
       expect(result.isNegative).toBe(false);
     });
+
+    it("formats labels using English dictionary when provided", () => {
+      expect(getTransaksiNominalDisplay({ tipe: "income" }, enDict).label).toBe("Income");
+      expect(getTransaksiNominalDisplay({ tipe: "expense" }, enDict).label).toBe("Expense");
+      expect(getTransaksiNominalDisplay({ tipe: "transfer" }, enDict).label).toBe("Transfer");
+      expect(
+        getTransaksiNominalDisplay(
+          { tipe: "correction", tags: ["correction_add"] },
+          enDict,
+        ).label,
+      ).toBe("Correction (Addition)");
+      expect(
+        getTransaksiNominalDisplay(
+          { tipe: "correction", tags: ["correction_sub"] },
+          enDict,
+        ).label,
+      ).toBe("Correction (Subtraction)");
+      expect(
+        getTransaksiNominalDisplay({ tipe: "correction" }, enDict).label,
+      ).toBe("Balance Correction");
+    });
   });
 
   describe("getTransaksiDisplayName", () => {
+    it("returns localized default type label in English when dict is provided", () => {
+      expect(
+        getTransaksiDisplayName({ tipe: "transfer", judul: null }, enDict),
+      ).toBe("Transfer");
+      expect(
+        getTransaksiDisplayName({ tipe: "correction", judul: null }, enDict),
+      ).toBe("Balance Correction");
+      expect(
+        getTransaksiDisplayName({ tipe: "expense", judul: null, catatan: null }, enDict),
+      ).toBe("Expense");
+      expect(
+        getTransaksiDisplayName({ tipe: "income", judul: "", catatan: " " }, enDict),
+      ).toBe("Income");
+    });
     it("returns judul if present and trimmed for income/expense", () => {
       expect(getTransaksiDisplayName({ tipe: "expense", judul: "  Beli Kopi  " })).toBe("Beli Kopi");
       expect(getTransaksiDisplayName({ tipe: "income", judul: "Gaji Kantor" })).toBe("Gaji Kantor");

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -18,6 +18,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "@/i18n/use-translation";
+import type { Dictionary } from "@/i18n/types";
 
 type Profile = {
   id: string;
@@ -32,22 +34,27 @@ type Props = {
   profile: Profile | null;
 };
 
-const schema = z
-  .object({
-    currentPassword: z.string().min(1, "Password lama harus diisi"),
-    newPassword: z.string().min(8, "Password minimal 8 karakter").max(100),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Konfirmasi password tidak cocok",
-    path: ["confirmPassword"],
-  })
-  .refine((data) => data.currentPassword !== data.newPassword, {
-    message: "Password baru tidak boleh sama dengan password lama",
-    path: ["newPassword"],
-  });
+const createPasswordSchema = (dict: Dictionary) =>
+  z
+    .object({
+      currentPassword: z.string().min(1, dict.settings.password.validation.currentRequired),
+      newPassword: z.string().min(8, dict.settings.password.validation.newMinLength).max(100),
+      confirmPassword: z.string(),
+    })
+    .refine((data) => data.newPassword === data.confirmPassword, {
+      message: dict.settings.password.validation.confirmMismatch,
+      path: ["confirmPassword"],
+    })
+    .refine((data) => data.currentPassword !== data.newPassword, {
+      message: dict.settings.password.validation.mustDiffer,
+      path: ["newPassword"],
+    });
 
-type FormValues = z.infer<typeof schema>;
+type FormValues = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};
 
 function SettingRow({
   label,
@@ -72,6 +79,7 @@ function SettingRow({
 }
 
 export function PasswordSection({ profile }: Props) {
+  const { dict } = useTranslation();
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -80,6 +88,8 @@ export function PasswordSection({ profile }: Props) {
   const isGoogleProvider = providers.includes("google");
   const isEmailProvider = providers.includes("email");
   const isGoogleOnly = isGoogleProvider && !isEmailProvider;
+
+  const schema = useMemo(() => createPasswordSchema(dict), [dict]);
 
   const {
     control,
@@ -104,31 +114,31 @@ export function PasswordSection({ profile }: Props) {
       newPassword: values.newPassword,
     });
     if (res.success) {
-      toast.success(res.message || "Password berhasil diperbarui");
+      toast.success(res.message || dict.settings.password.toasts.success);
       reset();
     } else {
-      toast.error(res.error || "Gagal memperbarui password");
+      toast.error(res.error || dict.settings.password.toasts.error);
     }
   };
 
   const getStrength = (pwd: string) => {
     if (!pwd || pwd.length < 8)
       return {
-        label: "Lemah",
+        label: dict.settings.password.strengthWeak,
         width: "w-1/3",
         color: "bg-semantic-down",
         textColor: "text-semantic-down",
       };
     if (pwd.length >= 12 && /[0-9]/.test(pwd) && /[^A-Za-z0-9]/.test(pwd)) {
       return {
-        label: "Kuat",
+        label: dict.settings.password.strengthStrong,
         width: "w-full",
         color: "bg-semantic-up",
         textColor: "text-semantic-up",
       };
     }
     return {
-      label: "Sedang",
+      label: dict.settings.password.strengthMedium,
       width: "w-2/3",
       color: "bg-[#f4b000]",
       textColor: "text-[#f4b000]",
@@ -140,13 +150,16 @@ export function PasswordSection({ profile }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Password & Authentication</CardTitle>
+        <CardTitle className="text-lg">{dict.settings.password.title}</CardTitle>
         <CardDescription>
-          Kelola metode login dan keamanan password akun.
+          {dict.settings.password.description}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-0">
-        <SettingRow label="Email Terdaftar" description="Email utama akun Anda">
+        <SettingRow
+          label={dict.settings.password.registeredEmailLabel}
+          description={dict.settings.password.registeredEmailDesc}
+        >
           <Input
             value={profile?.email || ""}
             readOnly
@@ -157,13 +170,13 @@ export function PasswordSection({ profile }: Props) {
         <Separator />
 
         <SettingRow
-          label="Metode Login Aktif"
-          description="Otentikasi yang terhubung"
+          label={dict.settings.password.activeMethodsLabel}
+          description={dict.settings.password.activeMethodsDesc}
         >
           <div className="flex flex-wrap gap-2">
             {isEmailProvider && (
               <Badge variant="outline" className="bg-muted/30">
-                Email & Password
+                {dict.settings.password.emailPasswordBadge}
               </Badge>
             )}
             {isGoogleProvider && (
@@ -171,12 +184,12 @@ export function PasswordSection({ profile }: Props) {
                 variant="outline"
                 className="bg-primary/10 text-primary border-primary/20"
               >
-                Akun Google
+                {dict.settings.password.googleBadge}
               </Badge>
             )}
             {!isEmailProvider && !isGoogleProvider && (
               <span className="text-sm text-muted-foreground">
-                Tidak diketahui
+                {dict.settings.password.unknownMethod}
               </span>
             )}
           </div>
@@ -189,12 +202,9 @@ export function PasswordSection({ profile }: Props) {
             <div className="flex gap-3 rounded-lg border border-amber-500/20 bg-amber-500/10 p-4 text-amber-600 dark:text-amber-400">
               <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
               <div className="space-y-1">
-                <p className="font-medium leading-none">Login via Google</p>
+                <p className="font-medium leading-none">{dict.settings.password.googleOnlyTitle}</p>
                 <p className="text-sm opacity-90 leading-relaxed mt-1.5">
-                  Anda mendaftar dan masuk menggunakan akun Google. Jika
-                  sewaktu-waktu Anda ingin login menggunakan password, Anda bisa
-                  mengaturnya melalui fitur <b>Lupa Password</b> di halaman
-                  depan.
+                  {dict.settings.password.googleOnlyDesc}
                 </p>
               </div>
             </div>
@@ -202,15 +212,15 @@ export function PasswordSection({ profile }: Props) {
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-0">
             <SettingRow
-              label="Password Lama"
-              description="Masukkan password saat ini"
+              label={dict.settings.password.currentPasswordLabel}
+              description={dict.settings.password.currentPasswordDesc}
             >
               <div className="space-y-2">
                 <div className="relative">
                   <Input
                     {...register("currentPassword")}
                     type={showCurrent ? "text" : "password"}
-                    placeholder="Masukkan password lama"
+                    placeholder={dict.settings.password.currentPasswordPlaceholder}
                     className="text-sm h-9 pr-9"
                   />
                   <button
@@ -235,13 +245,16 @@ export function PasswordSection({ profile }: Props) {
 
             <Separator />
 
-            <SettingRow label="Password Baru" description="Minimal 8 karakter">
+            <SettingRow
+              label={dict.settings.password.newPasswordLabel}
+              description={dict.settings.password.newPasswordDesc}
+            >
               <div className="space-y-2">
                 <div className="relative">
                   <Input
                     {...register("newPassword")}
                     type={showNew ? "text" : "password"}
-                    placeholder="Masukkan password baru"
+                    placeholder={dict.settings.password.newPasswordPlaceholder}
                     className="text-sm h-9 pr-9"
                   />
                   <button
@@ -265,7 +278,7 @@ export function PasswordSection({ profile }: Props) {
                 {newPasswordValue.length > 0 && (
                   <div className="space-y-1 mt-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">Kekuatan:</span>
+                      <span className="text-muted-foreground">{dict.settings.password.strengthLabel}</span>
                       <span
                         className={`font-medium ${strength.color.replace("bg-semantic-down", "text-semantic-down").replace("bg-semantic-up", "text-semantic-up").replace("bg-[#f4b000]", "text-[#f4b000]").replace("bg-red-500", "text-red-500").replace("bg-green-500", "text-green-500").replace("bg-yellow-500", "text-yellow-500")}`}
                       >
@@ -285,15 +298,15 @@ export function PasswordSection({ profile }: Props) {
             <Separator />
 
             <SettingRow
-              label="Konfirmasi Password"
-              description="Ketik ulang password baru"
+              label={dict.settings.password.confirmPasswordLabel}
+              description={dict.settings.password.confirmPasswordDesc}
             >
               <div className="space-y-2">
                 <div className="relative">
                   <Input
                     {...register("confirmPassword")}
                     type={showConfirm ? "text" : "password"}
-                    placeholder="Ketik ulang password"
+                    placeholder={dict.settings.password.confirmPasswordPlaceholder}
                     className="text-sm h-9 pr-9"
                   />
                   <button
@@ -324,7 +337,7 @@ export function PasswordSection({ profile }: Props) {
                 disabled={isSubmitting}
                 className="bg-primary hover:bg-primary-active text-white rounded-full h-11 px-5"
               >
-                {isSubmitting ? "Memperbarui..." : "Perbarui Password"}
+                {isSubmitting ? dict.settings.password.savingButton : dict.settings.password.saveButton}
               </Button>
             </div>
           </form>

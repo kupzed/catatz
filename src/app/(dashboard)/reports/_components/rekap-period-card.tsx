@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 
 export type RekapPeriodCardData = {
   startDate: string; // YYYY-MM-DD
@@ -83,7 +84,9 @@ export function RekapPeriodCard({
   jenis = "bulanan",
   onEdit,
 }: RekapPeriodCardProps) {
-  const formattedDates = formatPeriodLabel(period.startDate, period.endDate);
+  const { dict, locale } = useTranslation();
+  const rekapLocale = locale === "en" ? "en-US" : "id-ID";
+  const formattedDates = formatPeriodLabel(period.startDate, period.endDate, rekapLocale);
   const displayTitle = period.nama || period.label || formattedDates;
   const href = `/reports/detail?dari=${period.startDate}&sampai=${period.endDate}&jenis=${jenis}${
     period.id ? `&id=${period.id}` : ""
@@ -111,7 +114,7 @@ export function RekapPeriodCard({
                   variant="secondary"
                   className="rounded-full bg-primary/10 text-primary border-0 px-2 py-0.5 text-xs font-semibold shrink-0"
                 >
-                  Berjalan
+                  {dict.reports.card.active}
                 </Badge>
               )}
             </div>
@@ -133,7 +136,7 @@ export function RekapPeriodCard({
                   e.stopPropagation();
                   onEdit();
                 }}
-                aria-label={`Ubah periode ${displayTitle}`}
+                aria-label={dict.reports.card.editPeriod.replace("{title}", displayTitle)}
                 className="size-8 rounded-full hover:bg-surface-strong"
               >
                 <Pencil className="size-3.5 text-muted-foreground" />
@@ -149,42 +152,42 @@ export function RekapPeriodCard({
             // Mode Akumulasi Aktif
             <>
               <CardRow
-                label="Saldo Awal"
+                label={dict.reports.card.initialBalance}
                 value={period.saldo_awal ?? 0}
                 className="text-foreground"
               />
               <CardRow
-                label="Pengeluaran"
+                label={dict.reports.card.expense}
                 value={period.total_expense}
                 className="text-semantic-down"
               />
               <CardRow
-                label="Pemasukan"
+                label={dict.reports.card.income}
                 value={period.total_income}
                 className="text-semantic-up"
               />
               <CardRow
-                label="Selisih"
+                label={dict.reports.card.net}
                 value={period.net}
                 className={valueColor(period.net)}
                 signed
               />
               <CardRow
-                label="Hutang Piutang"
+                label={dict.reports.card.debtReceivable}
                 value={netHutangPiutang}
                 className={valueColor(netHutangPiutang)}
                 signed
               />
               {hasKoreksi && (
                 <CardRow
-                  label="Koreksi"
+                  label={dict.reports.card.correction}
                   value={period.koreksi!.net}
                   className={valueColor(period.koreksi!.net)}
                   signed
                 />
               )}
               <CardRow
-                label="Saldo Akhir"
+                label={dict.reports.card.endingBalance}
                 value={period.saldo_akhir ?? 0}
                 className="text-foreground font-bold"
               />
@@ -193,30 +196,30 @@ export function RekapPeriodCard({
             // Mode Akumulasi Nonaktif
             <>
               <CardRow
-                label="Pengeluaran"
+                label={dict.reports.card.expense}
                 value={period.total_expense}
                 className="text-semantic-down"
               />
               <CardRow
-                label="Pemasukan"
+                label={dict.reports.card.income}
                 value={period.total_income}
                 className="text-semantic-up"
               />
               <CardRow
-                label="Selisih"
+                label={dict.reports.card.net}
                 value={period.net}
                 className={valueColor(period.net)}
                 signed
               />
               <CardRow
-                label="Hutang Piutang"
+                label={dict.reports.card.debtReceivable}
                 value={netHutangPiutang}
                 className={valueColor(netHutangPiutang)}
                 signed
               />
               {hasKoreksi && (
                 <CardRow
-                  label="Koreksi"
+                  label={dict.reports.card.correction}
                   value={period.koreksi!.net}
                   className={valueColor(period.koreksi!.net)}
                   signed

@@ -77,7 +77,8 @@ Initial data diambil di Server Component dengan:
 - `transfer` wajib memiliki `rekening_tujuan`.
 - `rekening_id` dan `rekening_tujuan` tidak boleh sama untuk transfer.
 - `transfer` dan `correction` tidak boleh memiliki `judul` berdasarkan schema UI.
-- Server Action create/update memvalidasi payload dengan `transaksiSchema` agar proteksi tidak hanya bergantung pada UI.
+- Server Action create/update memvalidasi payload dengan `transaksiSchema` (atau `getTransaksiSchema(dict)` pada form) agar proteksi tidak hanya bergantung pada UI.
+- Semua elemen UI transaksi (label filter, placeholder, empty state, badges, drawer detail, dan dialog form) bersifat bilingual penuh (Bahasa Indonesia & English) via kamus `src/i18n/`.
 - Database juga memastikan `correction` tidak memiliki `judul`.
 - Trigger database otomatis mengubah saldo rekening untuk `income`, `expense`, dan `transfer`.
 - `correction` tidak diproses trigger dan ditangani manual oleh Server Action rekening/transaksi.

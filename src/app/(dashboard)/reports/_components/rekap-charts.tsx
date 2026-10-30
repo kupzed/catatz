@@ -13,8 +13,9 @@ import {
   YAxis,
 } from "recharts";
 import type { RekapBulanan, RekapKategori } from "@/actions/rekap-action";
-import { BULAN_NAMES } from "@/constants/rekap";
+import { getMonthNames } from "@/constants/rekap";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useTranslation } from "@/i18n/use-translation";
 
 export type RekapBarChartProps = {
   data: RekapBulanan[];
@@ -30,9 +31,11 @@ export function RekapBarChart({
   selectedBulan,
 }: RekapBarChartProps) {
   const { formatRupiah } = useSystemPreferences();
+  const { dict } = useTranslation();
+  const monthNames = getMonthNames(dict);
   const barData = data.map((item) => ({
     bulan: item.bulan,
-    name: BULAN_NAMES[item.bulan - 1],
+    name: monthNames[item.bulan - 1],
     Pemasukan: item.total_income,
     Pengeluaran: item.total_expense,
   }));
@@ -123,10 +126,12 @@ export type RekapDonutChartProps = {
 export function RekapDonutChart({
   data,
   totalExpense,
-  centerLabel = "Total Pengeluaran",
+  centerLabel,
   height = 260,
 }: RekapDonutChartProps) {
   const { formatRupiah } = useSystemPreferences();
+  const { dict } = useTranslation();
+  const label = centerLabel ?? dict.reports.detail.totalExpense;
   const computedTotal =
     totalExpense ?? data.reduce((sum, item) => sum + item.total, 0);
 
@@ -162,7 +167,7 @@ export function RekapDonutChart({
       </ResponsiveContainer>
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center px-4">
         <span className="text-xs font-medium text-muted-foreground">
-          {centerLabel}
+          {label}
         </span>
         <span className="font-mono text-base font-bold tracking-tight text-foreground sm:text-lg max-w-37.5 truncate">
           {formatRupiah(computedTotal)}

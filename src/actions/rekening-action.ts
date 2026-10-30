@@ -6,10 +6,13 @@ import type { ActionResult } from '@/types/general';
 import type { Rekening, RekeningFormValues, RekeningUsageCounts } from '@/types/rekening';
 import { currentTime } from '@/lib/utils';
 import {
-  rekeningCreateSchema,
-  rekeningEditSchema,
-  rekeningIdParamSchema,
+  getRekeningCreateSchema,
+  getRekeningEditSchema,
+  getRekeningIdParamSchema,
 } from '@/validations/rekening-validation';
+import { getActionLocale } from '@/i18n/get-locale';
+import { getDictionary } from '@/i18n/get-dictionary';
+import type { Locale } from '@/i18n/types';
 
 function emptyRekeningUsageCounts(): RekeningUsageCounts {
   return {
@@ -40,7 +43,37 @@ function incrementUsage(
   map[id].total += 1;
 }
 
-function formatRekeningUsageParts(usage: RekeningUsageCounts): string[] {
+function formatRekeningUsageParts(usage: RekeningUsageCounts, locale: Locale = 'id'): string[] {
+  if (locale === 'en') {
+    return [
+      usage.transaksi_masuk > 0
+        ? `${usage.transaksi_masuk} income transaction(s)`
+        : null,
+      usage.transaksi_keluar > 0
+        ? `${usage.transaksi_keluar} expense transaction(s)`
+        : null,
+      usage.transfer_keluar > 0
+        ? `${usage.transfer_keluar} outgoing transfer(s)`
+        : null,
+      usage.transfer_masuk > 0
+        ? `${usage.transfer_masuk} incoming transfer(s)`
+        : null,
+      usage.koreksi_saldo > 0
+        ? `${usage.koreksi_saldo} balance correction(s)`
+        : null,
+      usage.hutang > 0 ? `${usage.hutang} debt/receivable(s)` : null,
+      usage.hutang_cicilan > 0
+        ? `${usage.hutang_cicilan} installment(s)`
+        : null,
+      usage.recurring_asal > 0
+        ? `${usage.recurring_asal} recurring transaction(s)`
+        : null,
+      usage.recurring_tujuan > 0
+        ? `${usage.recurring_tujuan} recurring transfer(s)`
+        : null,
+    ].filter(Boolean) as string[];
+  }
+
   return [
     usage.transaksi_masuk > 0
       ? `${usage.transaksi_masuk} transaksi pemasukan`
@@ -70,9 +103,14 @@ function formatRekeningUsageParts(usage: RekeningUsageCounts): string[] {
   ].filter(Boolean) as string[];
 }
 
-function buildRekeningUsageError(usage: RekeningUsageCounts) {
-  const parts = formatRekeningUsageParts(usage);
+function buildRekeningUsageError(usage: RekeningUsageCounts, locale: Locale = 'id') {
+  const parts = formatRekeningUsageParts(usage, locale);
   const detail = parts.length > 0 ? ` (${parts.join(', ')})` : '';
+
+  if (locale === 'en') {
+    return `This wallet is still used by ${usage.total} financial record(s)${detail}. Delete related records before deleting this wallet.`;
+  }
+
   return `Rekening ini masih dipakai oleh ${usage.total} data keuangan${detail}. Hapus data terkait terlebih dahulu sebelum menghapus rekening.`;
 }
 
@@ -224,21 +262,25 @@ export async function getRekening(): Promise<Rekening[]> {
 export async function getRekeningById(
   id: string,
 ): Promise<ActionResult<{ rekening: Rekening; usage: RekeningUsageCounts }>> {
-  const parsedId = rekeningIdParamSchema.safeParse(id);
-  if (!parsedId.success) {
-    return {
-      success: false,
-      error: parsedId.error.issues[0]?.message ?? 'ID rekening tidak valid',
-    };
-  }
-
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
+
+  const parsedId = getRekeningIdParamSchema(dict).safeParse(id);
+  if (!parsedId.success) {
+    return {
+      success: false,
+      error:
+        parsedId.error.issues[0]?.message ??
+        dict.errors.validation.invalidWalletId,
+    };
+  }
 
   if (!user) {
-    return { success: false, error: 'Unauthorized' };
+    return { success: false, error: dict.errors.unauthorized };
   }
 
   const { data: rekening, error } = await supabase
@@ -251,7 +293,7 @@ export async function getRekeningById(
   if (error || !rekening) {
     return {
       success: false,
-      error: error?.message ?? 'Rekening tidak ditemukan',
+      error: error?.message ?? dict.actions.rekening.notFound,
     };
   }
 
@@ -259,7 +301,7 @@ export async function getRekeningById(
   if (!usageRes.success || !usageRes.data) {
     return {
       success: false,
-      error: usageRes.error ?? 'Gagal menghitung pemakaian rekening',
+      error: usageRes.error ?? dict.actions.rekening.usageCalculateError,
     };
   }
 
@@ -415,12 +457,19 @@ export async function getRekeningUsageCountsMap(): Promise<Record<string, Rekeni
 export async function createRekening(values: RekeningFormValues): Promise<ActionResult<Rekening>> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: 'Tidak terautentikasi' };
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
+
+  if (!user) return { success: false, error: dict.errors.unauthenticated };
 
   // Validasi schema server-side
-  const parsed = rekeningCreateSchema.safeParse(values);
+  const parsed = getRekeningCreateSchema(dict).safeParse(values);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? 'Data rekening tidak valid' };
+    return {
+      success: false,
+      error:
+        parsed.error.issues[0]?.message ?? dict.actions.rekening.invalidData,
+    };
   }
 
   const { data, error } = await supabase
@@ -446,12 +495,19 @@ export async function updateRekening(
 ): Promise<ActionResult<Rekening>> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: 'Tidak terautentikasi' };
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
+
+  if (!user) return { success: false, error: dict.errors.unauthenticated };
 
   // Validasi schema server-side (gunakan editSchema yang mengizinkan saldo_saat_ini)
-  const parsed = rekeningEditSchema.safeParse(values);
+  const parsed = getRekeningEditSchema(dict).safeParse(values);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? 'Data rekening tidak valid' };
+    return {
+      success: false,
+      error:
+        parsed.error.issues[0]?.message ?? dict.actions.rekening.invalidData,
+    };
   }
 
   // Jika user mengubah saldo_saat_ini → buat transaksi koreksi dengan tipe 'correction'
@@ -483,7 +539,12 @@ export async function updateRekening(
         tags: selisih > 0 ? ["correction_add"] : ["correction_sub"],
       });
 
-      if (insertError) return { success: false, error: `Gagal membuat koreksi: ${insertError.message}` };
+      if (insertError) {
+        return {
+          success: false,
+          error: `${dict.actions.rekening.correctionPrefix} ${insertError.message}`,
+        };
+      }
 
       // Langsung update saldo_saat_ini di rekening (trigger tidak memproses correction)
       const { error: saldoError } = await supabase
@@ -517,15 +578,24 @@ export async function updateRekening(
 export async function deleteRekening(id: string): Promise<ActionResult> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: 'Tidak terautentikasi' };
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
+
+  if (!user) return { success: false, error: dict.errors.unauthenticated };
 
   const usage = await getSingleRekeningUsageCounts(supabase, user.id, id);
   if (!usage.success || !usage.data) {
-    return { success: false, error: usage.error ?? 'Gagal memeriksa pemakaian rekening' };
+    return {
+      success: false,
+      error: usage.error ?? dict.actions.rekening.usageCheckError,
+    };
   }
 
   if (usage.data.total > 0) {
-    return { success: false, error: buildRekeningUsageError(usage.data) };
+    return {
+      success: false,
+      error: buildRekeningUsageError(usage.data, locale),
+    };
   }
 
   const { error } = await supabase

@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { getKategoriById } from "@/actions/kategori-action";
 import { getTransaksi, getKategori } from "@/actions/transaksi-action";
 import { getRekening } from "@/actions/rekening-action";
+import { getLocale } from "@/i18n/get-locale";
+import { getDictionary } from "@/i18n/get-dictionary";
 import { KategoriDetailClient } from "./_components/kategori-detail-client";
 
 type Props = {
@@ -11,18 +13,22 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const res = await getKategoriById(id);
+  const locale = await getLocale();
+  const [res, dict] = await Promise.all([
+    getKategoriById(id),
+    getDictionary(locale),
+  ]);
 
   if (!res.success || !res.data) {
     return {
-      title: "Detail Kategori",
-      description: "Detail kategori dan riwayat transaksi.",
+      title: dict.categories.detail.title,
+      description: dict.categories.detail.fallbackDescription,
     };
   }
 
   return {
-    title: `${res.data.kategori.nama} - Detail Kategori | CatatZ`,
-    description: `Riwayat dan catatan transaksi untuk kategori ${res.data.kategori.nama}.`,
+    title: `${res.data.kategori.nama} - ${dict.categories.detail.metaTitleSuffix}`,
+    description: `${dict.categories.detail.metaDescPrefix} ${res.data.kategori.nama}.`,
   };
 }
 

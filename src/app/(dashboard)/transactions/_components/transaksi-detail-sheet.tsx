@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
+import { useTranslation } from "@/i18n/use-translation";
 import { TransaksiDetailContent } from "./transaksi-detail-content";
 
 export type TransaksiDetailSheetProps = {
@@ -35,6 +36,7 @@ export function TransaksiDetailSheet({
   onCopy,
 }: TransaksiDetailSheetProps) {
   const isMobile = useIsMobile();
+  const { dict } = useTranslation();
 
   if (!transaksi) return null;
 
@@ -58,10 +60,10 @@ export function TransaksiDetailSheet({
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <SheetTitle className="text-lg font-semibold text-foreground">
-                Detail Transaksi
+                {dict.transactions.detail.title}
               </SheetTitle>
               <SheetDescription className="text-xs text-muted-foreground">
-                Informasi ringkas dan histori transaksi Anda.
+                {dict.transactions.detail.subtitle}
               </SheetDescription>
             </div>
             <SheetClose asChild>
@@ -69,7 +71,7 @@ export function TransaksiDetailSheet({
                 variant="ghost"
                 size="icon"
                 className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-surface-strong shrink-0 cursor-pointer"
-                aria-label="Tutup detail transaksi"
+                aria-label={dict.transactions.detail.closeDetail}
               >
                 <X className="h-5 w-5" />
               </Button>
@@ -88,13 +90,13 @@ export function TransaksiDetailSheet({
           <ConfirmDialog
             title={
               isCorrection
-                ? "Hapus Koreksi Saldo?"
-                : "Hapus Transaksi?"
+                ? dict.transactions.detail.deleteCorrectionConfirmTitle
+                : dict.transactions.detail.deleteConfirmTitle
             }
             description={
               isCorrection
-                ? "Koreksi saldo ini akan dihapus. Saldo rekening TIDAK akan otomatis dibalik."
-                : "Transaksi ini akan dihapus secara permanen."
+                ? dict.transactions.detail.deleteCorrectionConfirmDescription
+                : dict.transactions.detail.deleteConfirmDescription
             }
             onConfirm={() => onDelete(transaksi.id)}
           >
@@ -103,7 +105,7 @@ export function TransaksiDetailSheet({
               variant="ghost"
               size="icon"
               className="h-11 w-11 rounded-full bg-semantic-down/10 text-semantic-down hover:bg-semantic-down/20 shrink-0 cursor-pointer"
-              aria-label="Hapus transaksi"
+              aria-label={dict.transactions.detail.deleteAria}
               id="btn-delete-transaksi-sheet"
             >
               <Trash2 className="h-4 w-4" />
@@ -121,7 +123,7 @@ export function TransaksiDetailSheet({
               id="btn-copy-transaksi-sheet"
             >
               <Copy className="h-3.5 w-3.5" />
-              <span>Copy Transaksi</span>
+              <span>{dict.transactions.detail.copyButton}</span>
             </Button>
           )}
 
@@ -134,7 +136,7 @@ export function TransaksiDetailSheet({
             id="btn-edit-transaksi-sheet"
           >
             <Pencil className="h-3.5 w-3.5 shrink-0" />
-            <span className="truncate">Edit Transaksi</span>
+            <span className="truncate">{dict.transactions.detail.editButton}</span>
           </Button>
         </SheetFooter>
       </SheetContent>
