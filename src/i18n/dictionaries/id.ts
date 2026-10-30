@@ -65,6 +65,12 @@ const id: Dictionary = {
     confirmDescription: "Tindakan ini tidak dapat dibatalkan.",
     continue: "Ya, Lanjutkan",
   },
+  metadata: {
+    title: "CatatZ — Pencatatan Keuangan Pribadi",
+    description:
+      "Aplikasi pencatatan keuangan pribadi yang cepat, intuitif, dan cerdas. Catat pemasukan, pengeluaran, transfer, hutang, dan rekap keuangan Anda.",
+    keywords: "keuangan pribadi, pencatatan keuangan, budgeting, catatan hutang",
+  },
   auth: {
     tagline: "Pencatatan keuangan pribadi yang cerdas",
     metadataTitle: "Autentikasi",
@@ -1432,6 +1438,7 @@ const id: Dictionary = {
     deleteFailed: "Gagal menghapus",
   },
   pwa: {
+    offlineIndicator: "Tidak ada koneksi internet. Data baru membutuhkan koneksi.",
     offline: {
       title: "Anda Sedang Offline",
       description:

@@ -6,9 +6,13 @@ import { DictionaryProvider } from "@/i18n/client-provider";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { getLocale } from "@/i18n/get-locale";
 
-export const metadata: Metadata = {
-  title: "Autentikasi",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const dict = await getDictionary(locale);
+  return {
+    title: dict.auth.metadataTitle,
+  };
+}
 
 export default async function AuthLayout({ children }: { children: ReactNode }) {
   const locale = await getLocale();

@@ -26,21 +26,24 @@ CatatZ memiliki manifest, app icons, iOS metadata, install UX, service worker Se
 
 `public/manifest.json` berisi:
 
-- `name`: CatatZ
+- `name`: CatatZ — Personal Finance Tracker
 - `short_name`: CatatZ
+- `description`: Fast and smart personal finance tracking
 - `start_url`: `/transactions`
 - `scope`: `/`
 - `display`: `standalone`
 - `orientation`: `portrait-primary`
-- `lang`: `id-ID`
+- `lang`: `en`
 - `categories`: finance, productivity
 - Icon any dan maskable dari 32 sampai 512 px.
-- Shortcuts untuk tambah transaksi, rekap, dan rekening.
+- Shortcuts: Add Transaction (`/transactions?new=true`), Reports (`/reports`), Wallets (`/wallets`).
 
 ## Metadata App
 
 `src/app/layout.tsx` mengatur:
 
+- Dynamic `<html lang={locale}>` sesuai preferensi user (`id` / `en`).
+- Localized `generateMetadata()`: `title`, `description`, `keywords` per bahasa.
 - `manifest: "/manifest.json"`
 - `appleWebApp`
 - icons dan apple touch icon

@@ -65,6 +65,11 @@ export interface Dictionary {
     confirmDescription: string;
     continue: string;
   };
+  metadata: {
+    title: string;
+    description: string;
+    keywords: string;
+  };
   auth: {
     tagline: string;
     metadataTitle: string;
@@ -1355,6 +1360,7 @@ export interface Dictionary {
     deleteFailed: string;
   };
   pwa: {
+    offlineIndicator: string;
     offline: {
       title: string;
       description: string;

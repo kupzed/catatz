@@ -74,6 +74,14 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
   },
   webpack: (config, { dev }) => {
+    config.snapshot = {
+      ...config.snapshot,
+      immutablePaths: [
+        ...(config.snapshot?.immutablePaths || []),
+        /[\\/]\.codegraph($|[\\/])/,
+      ],
+    };
+
     if (!dev) {
       config.optimization = {
         ...config.optimization,

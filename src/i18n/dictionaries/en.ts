@@ -65,6 +65,12 @@ const en: Dictionary = {
     confirmDescription: "This action cannot be undone.",
     continue: "Yes, Continue",
   },
+  metadata: {
+    title: "CatatZ — Personal Finance Tracker",
+    description:
+      "Fast, intuitive, and smart personal finance tracking app. Track your income, expenses, transfers, debts, and financial reports.",
+    keywords: "personal finance, expense tracker, budgeting, debt tracker",
+  },
   auth: {
     tagline: "Smart personal finance tracker",
     metadataTitle: "Authentication",
@@ -1427,6 +1433,7 @@ const en: Dictionary = {
     deleteFailed: "Failed to delete",
   },
   pwa: {
+    offlineIndicator: "No internet connection. New data requires connection.",
     offline: {
       title: "You Are Currently Offline",
       description:
