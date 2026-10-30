@@ -909,6 +909,7 @@ const en: Dictionary = {
       deleteConfirmDesc:
         "This custom period will be deleted. Transaction history within it remains safe and will not be deleted.",
       deleteButton: "Delete",
+      deleteAria: "Delete custom period",
       cancelButton: "Cancel",
       createSubmit: "Create Period",
       editSubmit: "Save Changes",
@@ -1446,11 +1447,22 @@ const en: Dictionary = {
     },
     install: {
       bannerTitle: "Install CatatZ App",
-      bannerDesc:
-        "Quick access and offline mode right from your home screen.",
+      bannerDesc: "Add CatatZ to your home screen for quick access!",
       installButton: "Install Now",
+      dismissButton: "Later",
       installedSuccess: "CatatZ installed successfully.",
       installFailed: "Failed to open installation prompt.",
+    },
+    iosGuide: {
+      openButton: "Open CatatZ install guide",
+      title: "Add to Home Screen",
+      description:
+        "Enjoy CatatZ like a native app, without installing from the App Store.",
+      previewCaption: "Example location of the Share button in iPhone Safari.",
+      step1: "Tap the Share button, the box icon with an upward arrow.",
+      step2: 'Select "Add to Home Screen".',
+      step3: 'Tap "Add" in the top right corner.',
+      understoodButton: "I Understand",
     },
   },
   notFound: {

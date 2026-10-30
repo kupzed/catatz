@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { type ReactNode } from "react";
 import { Share } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/i18n/use-translation";
 import {
   Sheet,
   SheetClose,
@@ -88,21 +89,6 @@ function CheckIcon() {
   );
 }
 
-const steps = [
-  {
-    icon: <ShareIcon />,
-    text: "Ketuk tombol Share, ikon kotak dengan panah ke atas.",
-  },
-  {
-    icon: <AddToHomeIcon />,
-    text: 'Pilih "Add to Home Screen" atau "Tambahkan ke Layar Utama".',
-  },
-  {
-    icon: <CheckIcon />,
-    text: 'Ketuk "Add" atau "Tambahkan" di pojok kanan atas.',
-  },
-] satisfies Array<{ icon: ReactNode; text: string }>;
-
 function getGuideSeen() {
   if (typeof window === "undefined") {
     return false;
@@ -112,9 +98,25 @@ function getGuideSeen() {
 }
 
 export function IOSInstallGuide() {
+  const { dict } = useTranslation();
   const { isIOSSafari, isInstalled } = usePWAInstall();
   const [isOpen, setIsOpen] = useState(false);
   const [hasSeenGuide, setHasSeenGuide] = useState(false);
+
+  const steps = [
+    {
+      icon: <ShareIcon />,
+      text: dict.pwa.iosGuide.step1,
+    },
+    {
+      icon: <AddToHomeIcon />,
+      text: dict.pwa.iosGuide.step2,
+    },
+    {
+      icon: <CheckIcon />,
+      text: dict.pwa.iosGuide.step3,
+    },
+  ] satisfies Array<{ icon: ReactNode; text: string }>;
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -160,7 +162,7 @@ export function IOSInstallGuide() {
         type="button"
         size="icon"
         variant="default"
-        aria-label="Buka panduan pasang CatatZ"
+        aria-label={dict.pwa.iosGuide.openButton}
         onClick={() => setIsOpen(true)}
         className="fixed right-4 bottom-16 z-50 h-10 w-10 shadow-lg shadow-primary/20"
       >
@@ -176,10 +178,9 @@ export function IOSInstallGuide() {
           className="max-h-[92vh] overflow-y-auto rounded-t-card"
         >
           <SheetHeader>
-            <SheetTitle>Tambahkan ke Layar Utama</SheetTitle>
+            <SheetTitle>{dict.pwa.iosGuide.title}</SheetTitle>
             <SheetDescription>
-              Nikmati CatatZ seperti aplikasi native, tanpa install dari App
-              Store.
+              {dict.pwa.iosGuide.description}
             </SheetDescription>
           </SheetHeader>
 
@@ -204,7 +205,7 @@ export function IOSInstallGuide() {
                 </div>
               </div>
               <p className="mt-3 text-center text-xs font-medium text-muted-foreground">
-                Contoh posisi tombol Share di Safari iPhone.
+                {dict.pwa.iosGuide.previewCaption}
               </p>
             </div>
 
@@ -233,7 +234,7 @@ export function IOSInstallGuide() {
                 onClick={handleUnderstood}
                 className="w-full"
               >
-                Mengerti
+                {dict.pwa.iosGuide.understoodButton}
               </Button>
             </SheetClose>
           </SheetFooter>

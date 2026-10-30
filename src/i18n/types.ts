@@ -879,6 +879,7 @@ export interface Dictionary {
       deleteConfirmTitle: string;
       deleteConfirmDesc: string;
       deleteButton: string;
+      deleteAria: string;
       cancelButton: string;
       createSubmit: string;
       editSubmit: string;
@@ -1374,8 +1375,19 @@ export interface Dictionary {
       bannerTitle: string;
       bannerDesc: string;
       installButton: string;
+      dismissButton: string;
       installedSuccess: string;
       installFailed: string;
+    };
+    iosGuide: {
+      openButton: string;
+      title: string;
+      description: string;
+      previewCaption: string;
+      step1: string;
+      step2: string;
+      step3: string;
+      understoodButton: string;
     };
   };
   notFound: {

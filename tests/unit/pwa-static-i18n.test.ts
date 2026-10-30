@@ -56,6 +56,12 @@ describe("PWA Manifest & Static Assets Localization (Fase 20)", () => {
     expect(enDict.pwa.offlineIndicator).toBe(
       "No internet connection. New data requires connection.",
     );
+
+    expect(idDict.pwa.install.dismissButton).toBe("Nanti");
+    expect(enDict.pwa.install.dismissButton).toBe("Later");
+
+    expect(idDict.pwa.iosGuide.title).toBe("Tambahkan ke Layar Utama");
+    expect(enDict.pwa.iosGuide.title).toBe("Add to Home Screen");
   });
 });
 

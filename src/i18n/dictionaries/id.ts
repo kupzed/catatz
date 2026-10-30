@@ -909,6 +909,7 @@ const id: Dictionary = {
       deleteConfirmDesc:
         "Periode kustom ini akan dihapus. Riwayat transaksi di dalamnya tetap aman dan tidak akan terhapus.",
       deleteButton: "Hapus",
+      deleteAria: "Hapus periode kustom",
       cancelButton: "Batal",
       createSubmit: "Buat Periode",
       editSubmit: "Simpan Perubahan",
@@ -1451,11 +1452,22 @@ const id: Dictionary = {
     },
     install: {
       bannerTitle: "Pasang Aplikasi CatatZ",
-      bannerDesc:
-        "Akses cepat dan fitur offline langsung dari layar utama perangkat Anda.",
+      bannerDesc: "Pasang CatatZ di layar utama untuk akses lebih cepat!",
       installButton: "Pasang Sekarang",
+      dismissButton: "Nanti",
       installedSuccess: "CatatZ berhasil dipasang.",
       installFailed: "Gagal membuka prompt instalasi.",
+    },
+    iosGuide: {
+      openButton: "Buka panduan pasang CatatZ",
+      title: "Tambahkan ke Layar Utama",
+      description:
+        "Nikmati CatatZ seperti aplikasi native, tanpa install dari App Store.",
+      previewCaption: "Contoh posisi tombol Share di Safari iPhone.",
+      step1: "Ketuk tombol Share, ikon kotak dengan panah ke atas.",
+      step2: 'Pilih "Add to Home Screen" atau "Tambahkan ke Layar Utama".',
+      step3: 'Ketuk "Add" atau "Tambahkan" di pojok kanan atas.',
+      understoodButton: "Saya Mengerti",
     },
   },
   notFound: {

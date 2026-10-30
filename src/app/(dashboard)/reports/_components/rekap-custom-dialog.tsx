@@ -233,7 +233,7 @@ export function RekapCustomDialog({
                     type="button"
                     variant="ghost"
                     size="sm"
-                    aria-label="Hapus periode kustom"
+                    aria-label={dict.reports.customDialog.deleteAria}
                     disabled={isSubmitting || isDeleting}
                     className="h-11 min-h-11 rounded-full px-4 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:hover:bg-rose-950/20 gap-2 w-full sm:w-auto"
                   >

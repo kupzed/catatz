@@ -122,7 +122,7 @@ export function RekapCustomTab({ settings }: RekapCustomTabProps) {
       .catch((err) => {
         if (!ignore) {
           console.error("Gagal memuat rekap custom:", err);
-          toast.error("Gagal memuat data periode kustom");
+          toast.error(dict.reports.toasts.loadCustomFailed);
           setPeriods([]);
           setItems([]);
           setIsLoading(false);
@@ -132,7 +132,7 @@ export function RekapCustomTab({ settings }: RekapCustomTabProps) {
     return () => {
       ignore = true;
     };
-  }, [fetchCustomPeriodData]);
+  }, [fetchCustomPeriodData, dict.reports.toasts.loadCustomFailed]);
 
   // Reload callback setelah mutasi dialog (tambah, edit, hapus)
   const reloadData = useCallback(() => {
@@ -144,12 +144,12 @@ export function RekapCustomTab({ settings }: RekapCustomTabProps) {
       })
       .catch((err) => {
         console.error("Gagal memuat rekap custom:", err);
-        toast.error("Gagal memuat data periode kustom");
+        toast.error(dict.reports.toasts.loadCustomFailed);
       })
       .finally(() => {
         setIsLoading(false);
       });
-  }, [fetchCustomPeriodData]);
+  }, [fetchCustomPeriodData, dict.reports.toasts.loadCustomFailed]);
 
   // Handler membuka dialog tambah
   const handleOpenAdd = () => {
