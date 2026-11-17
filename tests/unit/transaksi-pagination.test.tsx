@@ -115,4 +115,30 @@ describe("TransaksiPagination Component", () => {
     expect(screen.getByText("…")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Halaman 20" })).toBeInTheDocument();
   });
+
+  it("uses balanced h-9 control sizes with data-size='sm' on SelectTrigger and data-size='icon-sm' on page buttons", () => {
+    render(
+      <TransaksiPagination
+        currentPage={2}
+        totalPages={5}
+        pageSize={50}
+        totalItems={250}
+        onPageChange={vi.fn()}
+        onPageSizeChange={vi.fn()}
+      />
+    );
+
+    const rowsSelect = screen.getByRole("combobox", {
+      name: /pilih jumlah baris per halaman/i,
+    });
+    expect(rowsSelect).toHaveAttribute("data-size", "sm");
+
+    const activePageBtn = screen.getByRole("button", { name: "Halaman 2" });
+    expect(activePageBtn).toHaveAttribute("aria-current", "page");
+    expect(activePageBtn).toHaveAttribute("data-size", "icon-sm");
+
+    const inactivePageBtn = screen.getByRole("button", { name: "Halaman 3" });
+    expect(inactivePageBtn).not.toHaveAttribute("aria-current");
+    expect(inactivePageBtn).toHaveAttribute("data-size", "icon-sm");
+  });
 });

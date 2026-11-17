@@ -262,6 +262,10 @@ Setiap halaman dashboard mengikuti struktur konsisten berikut:
 <Input type="time" value={value} onChange={onChange} />
 ```
 
+### Pagination
+- `TransaksiPagination` dipakai konsisten di `/transactions`, `/wallets/[id]`, dan `/categories/[id]` tanpa wrapper margin ekstra.
+- Seluruh kontrol interaktif (`SelectTrigger size="sm"`, tombol Prev/Next `size="sm"`, indikator halaman mobile, dan tombol angka halaman `size="icon-sm"`) diseragamkan pada tinggi `h-9` (36px), shape `rounded-full`, dan angka `font-mono`.
+
 ## Aturan Form
 
 - Setiap form wajib memiliki validasi.
