@@ -12,7 +12,7 @@ Fitur laporan/rekap menampilkan ringkasan pemasukan, pengeluaran, detail bulanan
 
 - `/reports`
 - `/reports/detail?dari=YYYY-MM-DD&sampai=YYYY-MM-DD&jenis=bulanan|custom[&id=uuid]` (Detail rekap periode)
-- Export data berada di `/settings` tab `Export Data`.
+- Export laporan transaksi (PDF, XLSX, CSV) diakses dari tombol **Export** di header halaman `/reports` melalui dialog `RekapExportDialog` (terpisah dari Export Data Akun JSON di `/settings`).
 
 ## Lokasi File
 
@@ -43,9 +43,9 @@ Fitur laporan/rekap menampilkan ringkasan pemasukan, pengeluaran, detail bulanan
 - Rekap period & settings actions: `src/actions/rekap-period-action.ts`
 - Rekap balance action: `src/actions/rekap-saldo-action.ts`
 - Export actions: `src/actions/export-action.ts`
+- Export dialog: `src/app/(dashboard)/reports/_components/rekap-export-dialog.tsx`
 - PDF generator: `src/lib/pdf-generator.ts`
 - Spreadsheet generator: `src/lib/spreadsheet-generator.ts`
-- Export section: `src/app/(dashboard)/settings/_components/export-section.tsx`
 
 ## Data Source
 
@@ -60,7 +60,7 @@ Rekap initial data:
 Export data:
 
 - `getExportData(filter)`
-- `getExportCount()`
+- `getExportCount(filter)`
 
 ## Tabel Database Terkait
 
@@ -116,7 +116,9 @@ Export data:
 
 ## UI Behavior
 
-- Shell baru rekap (`RekapPageClient`) menampilkan `PageHeader` dengan judul "Rekap Keuangan" dan tombol pengaturan (tap target 44px, `size-11`, `rounded-full`) dengan `aria-label="Pengaturan Rekap"` di pojok kanan atas.
+- Shell rekap (`RekapPageClient`) menampilkan `PageHeader` dengan judul "Rekap Keuangan", tombol **Export** berbentuk pill (`rounded-full h-11`) untuk membuka `RekapExportDialog`, dan tombol pengaturan (tap target 44px, `size-11`, `rounded-full`) dengan `aria-label="Pengaturan Rekap"` di pojok kanan atas.
+- Dialog export laporan (`RekapExportDialog`):
+  - Menyediakan filter opsional `Dari Tanggal` dan `Sampai Tanggal` serta tombol reset tanggal, menghitung jumlah transaksi siap export secara dinamis via `getExportCount(filter)`, dan memicu unduhan PDF, XLSX, atau CSV via dynamic import `pdf-generator.ts` dan `spreadsheet-generator.ts`.
 - Navigasi tab utama: "Realtime", "Bulanan", dan "Custom".
 - Tab aktif disinkronkan ke URL query parameter `?tab=` via `router.replace(..., { scroll: false })` (default: `realtime`) agar navigasi kembali dari halaman detail tetap berada pada tab yang sama.
 - Dialog pengaturan rekap (`RekapSettingsDialog`):

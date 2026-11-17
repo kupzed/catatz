@@ -6,7 +6,7 @@ Status: **Production (Aktif)**.
 
 ## Deskripsi
 
-Settings mengelola profil, avatar, preferensi sistem, akun Google terhubung, password, sesi aktif, logout, hapus akun, dan export data.
+Settings mengelola profil, avatar, preferensi sistem, akun Google terhubung, password, sesi aktif, logout, hapus akun, dan **Export Data Akun (Backup JSON)**. Export laporan keuangan (PDF/XLSX/CSV) berada di halaman `/reports`.
 
 ## Route
 
@@ -35,7 +35,7 @@ Settings mengelola profil, avatar, preferensi sistem, akun Google terhubung, pas
 
 | Tab | Fungsi |
 |---|---|
-| `Umum` | Update profil/avatar, preferensi sistem, akun Google terhubung, dan export data. |
+| `Umum` | Update profil/avatar, preferensi sistem, akun Google terhubung, dan export data akun (JSON). |
 | `Keamanan` | Ganti password, lihat sesi aktif, logout, dan hapus akun. |
 
 ## Data Source
@@ -52,7 +52,7 @@ Settings page mengambil user dan profile dari Supabase server client:
 - `profiles`
 - `user_preferences`
 - Storage bucket `avatars`
-- `transaksi`, `kategori`, `rekening` untuk export PDF, XLSX, dan CSV
+- `profiles`, `user_preferences`, `rekening`, `kategori`, `transaksi`, `hutang`, `hutang_cicilan`, `budget`, `rekap_periode_custom` untuk Export Data Akun (JSON)
 
 ## Server Action Terkait
 
@@ -64,8 +64,8 @@ Settings page mengambil user dan profile dari Supabase server client:
 - `changePassword`
 - `linkGoogleIdentity`
 - `unlinkGoogleIdentity`
-- `getExportData`
-- `getExportCount`
+- `getAccountExportSummary`
+- `getAccountExportData`
 
 ## Business Rules
 
@@ -85,10 +85,8 @@ Settings page mengambil user dan profile dari Supabase server client:
 - Format waktu mendukung `24h` dan `12h`; value database tetap disimpan sebagai `HH:mm`.
 - Preferensi bahasa mendukung `'id'` (Bahasa Indonesia) dan `'en'` (English); disimpan di `user_preferences.language`.
 - `default_landing_page` dipakai oleh route root `/` untuk menentukan redirect dashboard user.
-- Export file tidak berjalan jika tidak ada transaksi pada filter aktif.
-- Export PDF/XLSX/CSV mengikuti preferensi tanggal, waktu, format angka, dan opsi desimal user.
-- Export XLSX berisi sheet `Ringkasan` dan `Transaksi`; nominal memakai numeric cell dengan `numFmt`.
-- Export CSV berisi baris transaksi dengan delimiter koma; nominal ditulis sebagai teks angka tanpa simbol mata uang agar mudah diproses ulang.
+- Export Data Akun menghasilkan file backup JSON UTF-8 berisi profil, preferensi, rekening, kategori milik user, transaksi, hutang/piutang beserta cicilan, budget, dan periode rekap custom, tanpa menyertakan sesi aktif, password, atau token keamanan.
+- Export laporan transaksi (PDF, XLSX, CSV) telah dipindahkan ke dialog Export di halaman `/reports` agar terpisah dari backup data akun.
 
 ## UI Behavior
 
@@ -96,7 +94,7 @@ Settings page mengambil user dan profile dari Supabase server client:
 - Mobile memakai tab strip horizontal.
 - Upload avatar menampilkan preview lokal sebelum hasil upload.
 - Akun Terhubung menampilkan status Google dan toast hasil callback `google-linked` / error.
-- Export data menampilkan jumlah transaksi siap export.
+- Export Data Akun menampilkan ringkasan jumlah data per entitas (rekening, kategori, transaksi, hutang & piutang, budget, periode custom) dan tautan menuju `/reports` untuk export laporan PDF/XLSX/CSV.
 - Theme memakai `next-themes`.
 - System Preference menyimpan perubahan secara optimistic, menyinkronkan `SystemPreferenceProvider`, lalu refresh server boundary setelah action sukses.
 - Perubahan pilihan bahasa pada selector `Bahasa / Language` seketika memperbarui konteks `DictionaryProvider` dan merender ulang seluruh komponen UI ke bahasa terpilih.

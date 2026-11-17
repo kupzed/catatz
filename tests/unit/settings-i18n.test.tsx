@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DictionaryProvider } from "@/i18n/client-provider";
 import id from "@/i18n/dictionaries/id";
@@ -8,6 +8,7 @@ import { SystemPreferenceSection } from "@/app/(dashboard)/settings/_components/
 import { PasswordSection } from "@/app/(dashboard)/settings/_components/password-section";
 import { LogoutSection } from "@/app/(dashboard)/settings/_components/logout-section";
 import { DeleteAccountSection } from "@/app/(dashboard)/settings/_components/delete-account-section";
+import { ExportSection } from "@/app/(dashboard)/settings/_components/export-section";
 import { DEFAULT_USER_PREFERENCES } from "@/lib/user-preferences";
 import { SystemPreferenceProvider } from "@/providers/system-preference-provider";
 
@@ -95,6 +96,65 @@ vi.mock("@/actions/export-action", () => ({
         cutoff_day: 1,
         akumulasi_saldo: false,
         language: "id",
+      },
+    },
+  }),
+  getAccountExportSummary: vi.fn().mockResolvedValue({
+    success: true,
+    data: {
+      walletsCount: 3,
+      categoriesCount: 8,
+      transactionsCount: 42,
+      debtsCount: 2,
+      budgetsCount: 1,
+      customPeriodsCount: 4,
+    },
+  }),
+  getAccountExportData: vi.fn().mockResolvedValue({
+    success: true,
+    data: {
+      metadata: {
+        app: "CatatZ",
+        schemaVersion: "1.0",
+        exportedAt: "2026-11-17T09:00:00.000Z",
+      },
+      account: {
+        id: "user-123",
+        email: "user@example.com",
+        name: "John Doe",
+        avatar_url: null,
+        currency: "IDR",
+        locale: "id-ID",
+        created_at: "2026-01-15T08:00:00Z",
+        updated_at: null,
+      },
+      preferences: {
+        theme: "system",
+        currency: "IDR",
+        date_format: "id-ID",
+        number_format: "id-ID",
+        default_landing_page: "/transactions",
+        show_decimal_places: false,
+        time_format: "24h",
+        cutoff_day: 1,
+        akumulasi_saldo: false,
+        language: "id",
+      },
+      data: {
+        rekening: [],
+        kategori: [],
+        transaksi: [],
+        hutang: [],
+        budget: [],
+        rekap_periode_custom: [],
+      },
+      summary: {
+        walletsCount: 0,
+        categoriesCount: 0,
+        transactionsCount: 0,
+        debtsCount: 0,
+        budgetsCount: 0,
+        customPeriodsCount: 0,
       },
     },
   }),
@@ -264,6 +324,62 @@ describe("settings-i18n", () => {
       expect(screen.getAllByText(en.settings.deleteAccount.title).length).toBeGreaterThan(0);
       expect(screen.getByText(en.settings.deleteAccount.rowDesc)).toBeInTheDocument();
       expect(screen.getByRole("button", { name: en.settings.deleteAccount.deleteButton })).toBeInTheDocument();
+    });
+  });
+
+  describe("ExportSection (Account Data Export)", () => {
+    it("renders account data export card and summary in Indonesian", async () => {
+      render(
+        <SystemPreferenceProvider initialPreferences={DEFAULT_USER_PREFERENCES}>
+          <DictionaryProvider locale="id" dict={id}>
+            <ExportSection />
+          </DictionaryProvider>
+        </SystemPreferenceProvider>,
+      );
+
+      expect(screen.getByText(id.settings.export.accountTitle)).toBeInTheDocument();
+      expect(screen.getByText(id.settings.export.accountDescription)).toBeInTheDocument();
+      expect(screen.getByText(id.settings.export.summaryTitle)).toBeInTheDocument();
+      expect(screen.getByText(id.settings.export.reportsHintTitle)).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: id.settings.export.reportsLinkLabel })).toHaveAttribute(
+        "href",
+        "/reports",
+      );
+      expect(
+        screen.getByRole("button", { name: id.settings.export.exportAccountButton }),
+      ).toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(screen.getByText("42")).toBeInTheDocument();
+      });
+    });
+
+    it("renders account data export card and summary in English", async () => {
+      render(
+        <SystemPreferenceProvider
+          initialPreferences={{ ...DEFAULT_USER_PREFERENCES, language: "en" }}
+        >
+          <DictionaryProvider locale="en" dict={en}>
+            <ExportSection />
+          </DictionaryProvider>
+        </SystemPreferenceProvider>,
+      );
+
+      expect(screen.getByText(en.settings.export.accountTitle)).toBeInTheDocument();
+      expect(screen.getByText(en.settings.export.accountDescription)).toBeInTheDocument();
+      expect(screen.getByText(en.settings.export.summaryTitle)).toBeInTheDocument();
+      expect(screen.getByText(en.settings.export.reportsHintTitle)).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: en.settings.export.reportsLinkLabel })).toHaveAttribute(
+        "href",
+        "/reports",
+      );
+      expect(
+        screen.getByRole("button", { name: en.settings.export.exportAccountButton }),
+      ).toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(screen.getByText("42")).toBeInTheDocument();
+      });
     });
   });
 });
