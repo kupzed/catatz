@@ -4,6 +4,7 @@ import { rekapDetailQuerySchema } from "@/validations/rekap-validation";
 import { ProporsiSaldoChart } from "@/app/(dashboard)/reports/detail/_components/proporsi-saldo-chart";
 import { RekapDetailClient } from "@/app/(dashboard)/reports/detail/_components/rekap-detail-client";
 import { RekapDetailBreakdown } from "@/app/(dashboard)/reports/detail/_components/rekap-detail-breakdown";
+import { useBreadcrumbStore } from "@/stores/breadcrumb-store";
 import type { RekapDetailRange } from "@/actions/rekap-action";
 
 const mockDetailBase: RekapDetailRange = {
@@ -172,6 +173,7 @@ describe("ProporsiSaldoChart", () => {
 describe("RekapDetailClient", () => {
   afterEach(() => {
     cleanup();
+    useBreadcrumbStore.setState({ customTitle: null, path: null });
   });
 
   it("renders back button to ?tab=bulanan and period label for bulanan", () => {
@@ -188,6 +190,7 @@ describe("RekapDetailClient", () => {
     expect(screen.getByText("Siklus Bulanan")).toBeInTheDocument();
     expect(screen.getByText("30 hari")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "01 Jun - 30 Jun 2026" })).toBeInTheDocument();
+    expect(useBreadcrumbStore.getState().customTitle).toBe("01 Jun - 30 Jun 2026");
   });
 
   it("renders back button to ?tab=custom and custom name when provided", () => {
@@ -205,6 +208,7 @@ describe("RekapDetailClient", () => {
     expect(screen.getByText("Periode Custom")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Liburan Musim Panas" })).toBeInTheDocument();
     expect(screen.getByText("01 Jun - 30 Jun 2026")).toBeInTheDocument();
+    expect(useBreadcrumbStore.getState().customTitle).toBe("Liburan Musim Panas");
   });
 
   it("hides koreksi and hutang_piutang rows when there is no activity", () => {

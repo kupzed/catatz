@@ -137,8 +137,8 @@ Export data:
   - Validasi parameter kueri secara asinkron di Server Component (`searchParams`) menggunakan Zod schema `rekapDetailQuerySchema` (`dari`, `sampai`, `jenis: 'bulanan' | 'custom'`, `id?: uuid`), me-redirect ke `notFound()` jika parameter tidak valid atau rentang tanggal terbalik.
   - Untuk `jenis === 'custom'` dengan parameter `id`, mengambil nama periode via `getCustomPeriod(id)`. Jika periode kustom tidak ditemukan di database, memicu `notFound()`.
   - Mengambil data ringkasan via `getRekapDetailByRange(dari, sampai)`.
-  - Tombol kembali menuju tab asal (`/reports?tab=${jenis}`) berbentuk pill (`rounded-full`) dengan tap target minimum 44px.
-  - Label periode terformat (`formatPeriodLabel`), nama kustom (bila ada), dan badge jenis periode.
+  - Tombol kembali menuju tab asal (`/reports?tab=${jenis}`) berbentuk ghost pill di atas judul, selaras dengan pola halaman detail kategori & rekening.
+  - Title browser (`generateMetadata`), top-nav breadcrumb (`useSetBreadcrumbTitle` via `DashboardBreadcrumb`), dan judul utama (`h1`) menampilkan label periode terformat (`formatPeriodLabel`) atau nama kustom periode secara dinamis, disertai badge jenis periode, jumlah hari, dan rentang tanggal.
   - Tiga kartu ringkasan utama: Total Pengeluaran (rata-rata/hari), Total Pemasukan (rata-rata/hari), dan Selisih Utama (Pemasukan dikurangi Pengeluaran).
   - Kartu Rincian Finansial Periode:
     - Pengeluaran & rata-rata pengeluaran per hari (`text-semantic-down font-mono`).

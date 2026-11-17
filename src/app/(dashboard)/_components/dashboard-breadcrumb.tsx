@@ -41,11 +41,9 @@ export default function DashboardBreadcrumb() {
           const prevSegment = index > 0 ? segments[index - 1] : "";
           const isLast = index === segments.length - 1;
 
-          let label = routeNames[segment];
+          let label = isLast && customTitle ? customTitle : routeNames[segment];
           if (!label) {
-            if (isLast && customTitle) {
-              label = customTitle;
-            } else if (isUuid && prevSegment === "wallets") {
+            if (isUuid && prevSegment === "wallets") {
               label = dict.breadcrumb.detailWallets;
             } else if (isUuid && prevSegment === "transactions") {
               label = dict.breadcrumb.detailTransactions;

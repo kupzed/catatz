@@ -4,26 +4,18 @@ import { getRekapDetailByRange } from '@/actions/rekap-action';
 import { getCustomPeriod, getRekapSettings } from '@/actions/rekap-period-action';
 import { getSaldoPeriodeList } from '@/actions/rekap-saldo-action';
 import { DEFAULT_REKAP_SETTINGS, rekapDetailQuerySchema } from '@/validations/rekap-validation';
+import { formatPeriodLabel } from '@/lib/rekap-period';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { getLocale } from '@/i18n/get-locale';
 import { RekapDetailClient } from './_components/rekap-detail-client';
-
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = await getLocale();
-  const dict = await getDictionary(locale);
-  return {
-    title: dict.reports.detail.title,
-    description: dict.reports.detail.description,
-  };
-};
 
 type RekapDetailPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default async function RekapDetailPage(props: RekapDetailPageProps) {
-  const resolvedSearchParams = await props.searchParams;
-
+function parseRekapDetailQuery(
+  resolvedSearchParams: Record<string, string | string[] | undefined>,
+) {
   const rawDari = Array.isArray(resolvedSearchParams.dari)
     ? resolvedSearchParams.dari[0]
     : resolvedSearchParams.dari;
@@ -37,12 +29,47 @@ export default async function RekapDetailPage(props: RekapDetailPageProps) {
     ? resolvedSearchParams.id[0]
     : resolvedSearchParams.id;
 
-  const parseResult = rekapDetailQuerySchema.safeParse({
+  return rekapDetailQuerySchema.safeParse({
     dari: rawDari,
     sampai: rawSampai,
     jenis: rawJenis,
     id: rawId,
   });
+}
+
+export async function generateMetadata(props: RekapDetailPageProps): Promise<Metadata> {
+  const [resolvedSearchParams, locale] = await Promise.all([
+    props.searchParams,
+    getLocale(),
+  ]);
+  const dict = await getDictionary(locale);
+  const parseResult = parseRekapDetailQuery(resolvedSearchParams);
+
+  if (!parseResult.success) {
+    return {
+      title: dict.reports.detail.title,
+      description: dict.reports.detail.description,
+    };
+  }
+
+  const { dari, sampai, jenis, id } = parseResult.data;
+  const customRes = jenis === 'custom' && id ? await getCustomPeriod(id) : null;
+  const rekapLocale = locale === 'en' ? 'en-US' : 'id-ID';
+  const formattedPeriod = formatPeriodLabel(dari, sampai, rekapLocale);
+  const periodTitle =
+    jenis === 'custom' && customRes?.success && customRes.data
+      ? customRes.data.nama
+      : formattedPeriod;
+
+  return {
+    title: `${periodTitle} - ${dict.reports.detail.title}`,
+    description: dict.reports.detail.description,
+  };
+}
+
+export default async function RekapDetailPage(props: RekapDetailPageProps) {
+  const resolvedSearchParams = await props.searchParams;
+  const parseResult = parseRekapDetailQuery(resolvedSearchParams);
 
   if (!parseResult.success) {
     notFound();
