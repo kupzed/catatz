@@ -625,16 +625,14 @@ export function KategoriDetailClient({
 
         {/* Pagination */}
         {tipeFiltered.length > 0 && (
-          <div className="pt-2">
-            <TransaksiPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={tipeFiltered.length}
-              pageSize={pageSize}
-              onPageChange={handlePageChange}
-              onPageSizeChange={handlePageSizeChange}
-            />
-          </div>
+          <TransaksiPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={tipeFiltered.length}
+            pageSize={pageSize}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
         )}
       </div>
 

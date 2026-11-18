@@ -75,6 +75,58 @@ function firstRelation<T>(relation: RelationOne<T> | undefined) {
   return relation ?? null;
 }
 
+async function getAuthenticatedExportContext() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const locale = await getActionLocale(supabase, user?.id);
+  const dict = await getDictionary(locale);
+
+  if (!user) {
+    return { error: dict.errors.unauthenticated } as const;
+  }
+
+  return { supabase, user, dict } as const;
+}
+
+export type AccountExportSummary = {
+  walletsCount: number;
+  categoriesCount: number;
+  transactionsCount: number;
+  debtsCount: number;
+  budgetsCount: number;
+  customPeriodsCount: number;
+};
+
+export type AccountBackupPayload = {
+  metadata: {
+    app: "CatatZ";
+    schemaVersion: "1.0";
+    exportedAt: string;
+  };
+  account: {
+    id: string;
+    email: string;
+    name: string | null;
+    avatar_url: string | null;
+    currency: string | null;
+    locale: string | null;
+    created_at: string | null;
+    updated_at: string | null;
+  };
+  preferences: UserPreferences;
+  data: {
+    rekening: Record<string, unknown>[];
+    kategori: Record<string, unknown>[];
+    transaksi: Record<string, unknown>[];
+    hutang: Record<string, unknown>[];
+    budget: Record<string, unknown>[];
+    rekap_periode_custom: Record<string, unknown>[];
+  };
+  summary: AccountExportSummary;
+};
+
 export async function getExportData(filter?: {
   dari?: string;
   sampai?: string;
@@ -86,14 +138,9 @@ export async function getExportData(filter?: {
     preferences: UserPreferences;
   }>
 > {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const locale = await getActionLocale(supabase, user?.id);
-  const dict = await getDictionary(locale);
-
-  if (!user) return { success: false, error: dict.errors.unauthenticated };
+  const ctx = await getAuthenticatedExportContext();
+  if ("error" in ctx) return { success: false, error: ctx.error };
+  const { supabase, user, dict } = ctx;
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -300,24 +347,228 @@ export async function getExportData(filter?: {
   return { success: true, data: { transaksi, summary, userName, preferences } };
 }
 
-export async function getExportCount(): Promise<
-  ActionResult<{ count: number }>
-> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const locale = await getActionLocale(supabase, user?.id);
-  const dict = await getDictionary(locale);
+export async function getExportCount(filter?: {
+  dari?: string;
+  sampai?: string;
+}): Promise<ActionResult<{ count: number }>> {
+  const ctx = await getAuthenticatedExportContext();
+  if ("error" in ctx) return { success: false, error: ctx.error };
+  const { supabase, user } = ctx;
 
-  if (!user) return { success: false, error: dict.errors.unauthenticated };
-
-  const { count, error } = await supabase
+  let query = supabase
     .from("transaksi")
     .select("*", { count: "exact", head: true })
     .eq("user_id", user.id);
 
+  if (filter?.dari) {
+    query = query.gte("tanggal", filter.dari);
+  }
+  if (filter?.sampai) {
+    query = query.lte("tanggal", filter.sampai);
+  }
+
+  const { count, error } = await query;
+
   if (error) return { success: false, error: error.message };
 
   return { success: true, data: { count: count ?? 0 } };
+}
+
+export async function getAccountExportSummary(): Promise<
+  ActionResult<AccountExportSummary>
+> {
+  const ctx = await getAuthenticatedExportContext();
+  if ("error" in ctx) return { success: false, error: ctx.error };
+  const { supabase, user } = ctx;
+
+  const [
+    walletsRes,
+    categoriesRes,
+    transactionsRes,
+    debtsRes,
+    budgetsRes,
+    customPeriodsRes,
+  ] = await Promise.all([
+    supabase
+      .from("rekening")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id),
+    supabase
+      .from("kategori")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id),
+    supabase
+      .from("transaksi")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id),
+    supabase
+      .from("hutang")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id),
+    supabase
+      .from("budget")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id),
+    supabase
+      .from("rekap_periode_custom")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id),
+  ]);
+
+  const firstError =
+    walletsRes.error ??
+    categoriesRes.error ??
+    transactionsRes.error ??
+    debtsRes.error ??
+    budgetsRes.error ??
+    customPeriodsRes.error;
+
+  if (firstError) {
+    return { success: false, error: firstError.message };
+  }
+
+  return {
+    success: true,
+    data: {
+      walletsCount: walletsRes.count ?? 0,
+      categoriesCount: categoriesRes.count ?? 0,
+      transactionsCount: transactionsRes.count ?? 0,
+      debtsCount: debtsRes.count ?? 0,
+      budgetsCount: budgetsRes.count ?? 0,
+      customPeriodsCount: customPeriodsRes.count ?? 0,
+    },
+  };
+}
+
+export async function getAccountExportData(): Promise<
+  ActionResult<AccountBackupPayload>
+> {
+  const ctx = await getAuthenticatedExportContext();
+  if ("error" in ctx) return { success: false, error: ctx.error };
+  const { supabase, user, dict } = ctx;
+
+  const [{ data: profile, error: profileError }, { data: preferenceRow, error: prefError }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select("id, name, avatar_url, currency, locale, created_at, updated_at")
+        .eq("id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("user_preferences")
+        .select(USER_PREFERENCE_SELECT)
+        .eq("user_id", user.id)
+        .maybeSingle(),
+    ]);
+
+  if (profileError) {
+    return { success: false, error: profileError.message };
+  }
+  if (prefError) {
+    return { success: false, error: prefError.message };
+  }
+
+  const preferences = preferenceRow
+    ? normalizeUserPreferences(preferenceRow)
+    : DEFAULT_USER_PREFERENCES;
+
+  try {
+    const [rekening, kategori, transaksi, hutang, budget, rekap_periode_custom] =
+      await Promise.all([
+        fetchAllRows<Record<string, unknown>>(
+          supabase
+            .from("rekening")
+            .select("*")
+            .eq("user_id", user.id)
+            .order("urutan", { ascending: true })
+            .order("created_at", { ascending: true }),
+        ),
+        fetchAllRows<Record<string, unknown>>(
+          supabase
+            .from("kategori")
+            .select("*")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: true }),
+        ),
+        fetchAllRows<Record<string, unknown>>(
+          supabase
+            .from("transaksi")
+            .select("*")
+            .eq("user_id", user.id)
+            .order("tanggal", { ascending: true })
+            .order("waktu", { ascending: true }),
+        ),
+        fetchAllRows<Record<string, unknown>>(
+          supabase
+            .from("hutang")
+            .select("*, cicilan:hutang_cicilan(*)")
+            .eq("user_id", user.id)
+            .order("tanggal_mulai", { ascending: true }),
+        ),
+        fetchAllRows<Record<string, unknown>>(
+          supabase
+            .from("budget")
+            .select("*")
+            .eq("user_id", user.id)
+            .order("tahun", { ascending: true })
+            .order("bulan", { ascending: true }),
+        ),
+        fetchAllRows<Record<string, unknown>>(
+          supabase
+            .from("rekap_periode_custom")
+            .select("*")
+            .eq("user_id", user.id)
+            .order("tanggal_mulai", { ascending: true }),
+        ),
+      ]);
+
+    const payload: AccountBackupPayload = {
+      metadata: {
+        app: "CatatZ",
+        schemaVersion: "1.0",
+        exportedAt: new Date().toISOString(),
+      },
+      account: {
+        id: user.id,
+        email: user.email ?? "",
+        name:
+          profile?.name ??
+          (typeof user.user_metadata?.name === "string"
+            ? user.user_metadata.name
+            : null),
+        avatar_url: profile?.avatar_url ?? null,
+        currency: profile?.currency ?? null,
+        locale: profile?.locale ?? null,
+        created_at: profile?.created_at ?? user.created_at ?? null,
+        updated_at: profile?.updated_at ?? null,
+      },
+      preferences,
+      data: {
+        rekening,
+        kategori,
+        transaksi,
+        hutang,
+        budget,
+        rekap_periode_custom,
+      },
+      summary: {
+        walletsCount: rekening.length,
+        categoriesCount: kategori.length,
+        transactionsCount: transaksi.length,
+        debtsCount: hutang.length,
+        budgetsCount: budget.length,
+        customPeriodsCount: rekap_periode_custom.length,
+      },
+    };
+
+    return { success: true, data: payload };
+  } catch (err) {
+    return {
+      success: false,
+      error:
+        err instanceof Error
+          ? err.message
+          : dict.settings.export.accountToasts.fetchFailed,
+    };
+  }
 }

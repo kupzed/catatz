@@ -2,11 +2,12 @@
 
 import { useState, useSyncExternalStore } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { SlidersHorizontal } from "lucide-react";
+import { Download, SlidersHorizontal } from "lucide-react";
 import { PageHeader } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useTranslation } from "@/i18n/use-translation";
+import { RekapExportDialog } from "./rekap-export-dialog";
 import { RekapSettingsDialog } from "./rekap-settings-dialog";
 import { RekapRealtimeTab } from "./rekap-realtime-tab";
 import { RekapBulananTab } from "./rekap-bulanan-tab";
@@ -42,6 +43,7 @@ export default function RekapPageClient({
   const searchParams = useSearchParams();
 
   const [settings, setSettings] = useState<RekapSettings>(initialSettings);
+  const [isExportOpen, setIsExportOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const isHydrated = useSyncExternalStore(emptySubscribe, () => true, () => false);
 
@@ -76,21 +78,33 @@ export default function RekapPageClient({
       data-hydrated={isHydrated ? "true" : undefined}
       className="mx-auto w-full max-w-5xl space-y-6"
     >
-      {/* Header dengan tombol pengaturan 44px di pojok kanan atas */}
+      {/* Header dengan tombol export dan pengaturan di pojok kanan atas */}
       <PageHeader
         title={dict.reports.title}
         subtitle={dict.reports.subtitle}
         action={
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => setIsSettingsOpen(true)}
-            aria-label={dict.reports.settings.title}
-            className="size-11 min-h-11 min-w-11 rounded-full border-hairline hover:bg-surface-strong"
-          >
-            <SlidersHorizontal className="size-5 text-foreground" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsExportOpen(true)}
+              aria-label={dict.reports.export.buttonLabel}
+              className="h-11 rounded-full border-hairline px-4 gap-2 text-sm font-medium hover:bg-surface-strong"
+            >
+              <Download className="size-4 shrink-0 text-foreground" />
+              <span>{dict.common.export}</span>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => setIsSettingsOpen(true)}
+              aria-label={dict.reports.settings.title}
+              className="size-11 min-h-11 min-w-11 rounded-full border-hairline hover:bg-surface-strong"
+            >
+              <SlidersHorizontal className="size-5 text-foreground" />
+            </Button>
+          </div>
         }
       />
 
@@ -121,6 +135,12 @@ export default function RekapPageClient({
           <RekapCustomTab settings={settings} />
         </TabsContent>
       </Tabs>
+
+      {/* Modal Dialog Export Laporan */}
+      <RekapExportDialog
+        open={isExportOpen}
+        onOpenChange={setIsExportOpen}
+      />
 
       {/* Modal Dialog Pengaturan Rekap */}
       <RekapSettingsDialog

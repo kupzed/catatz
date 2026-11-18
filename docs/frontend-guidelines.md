@@ -262,6 +262,10 @@ Setiap halaman dashboard mengikuti struktur konsisten berikut:
 <Input type="time" value={value} onChange={onChange} />
 ```
 
+### Pagination
+- `TransaksiPagination` dipakai konsisten di `/transactions`, `/wallets/[id]`, dan `/categories/[id]` tanpa wrapper margin ekstra.
+- Seluruh kontrol interaktif (`SelectTrigger size="sm"`, tombol Prev/Next `size="sm"`, indikator halaman mobile, dan tombol angka halaman `size="icon-sm"`) diseragamkan pada tinggi `h-9` (36px), shape `rounded-full`, dan angka `font-mono`.
+
 ## Aturan Form
 
 - Setiap form wajib memiliki validasi.
@@ -302,6 +306,7 @@ Gunakan `Skeleton` untuk loading route/data yang membutuhkan waktu.
 - Main content memperhitungkan `env(safe-area-inset-bottom)`.
 - Drawer mobile memberi padding `safe-area-inset-top`, `safe-area-inset-bottom`, dan inset horizontal sesuai sisi drawer agar header/footer tidak masuk ke area sistem perangkat.
 - Dialog ditempatkan di tengah area viewport yang tersisa setelah safe area. Frame dialog memakai `overflow-hidden`, sedangkan konten form memakai scroll container internal dengan `100dvh`, batas tinggi dinamis, `overscroll-contain`, dan momentum scrolling iOS agar header/footer dialog tidak tertahan saat form digulir cepat.
+- Overlay modal dan drawer (`DialogOverlay`, `SheetOverlay`, `AlertDialogOverlay`) menggunakan transparansi murni (`bg-black/40 dark:bg-black/60`) tanpa `backdrop-blur` agar konten di belakang tetap terlihat tanpa mengganggu keterbacaan.
 - Banner PWA yang dipasang di atas viewport wajib mengonsumsi `safe-area-inset-top` dan inset horizontal agar CTA tidak bertabrakan dengan status bar atau notch.
 - Settings memakai sidebar nav desktop dan tab strip mobile.
 
