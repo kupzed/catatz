@@ -74,6 +74,39 @@ vi.mock("@/actions/rekap-saldo-action", () => ({
   getSaldoPeriodeList: vi.fn().mockResolvedValue({ success: true, data: [] }),
 }));
 
+vi.mock("@/actions/export-action", () => ({
+  getExportCount: vi.fn().mockResolvedValue({ success: true, data: { count: 42 } }),
+  getExportData: vi.fn().mockResolvedValue({
+    success: true,
+    data: {
+      transaksi: [],
+      summary: {
+        total_income: 0,
+        total_expense: 0,
+        net: 0,
+        count_income: 0,
+        count_expense: 0,
+        count_transfer: 0,
+        periode: "Semua Waktu",
+        kategori_breakdown: [],
+      },
+      userName: "Test User",
+      preferences: {
+        theme: "system",
+        currency: "IDR",
+        date_format: "id-ID",
+        number_format: "id-ID",
+        default_landing_page: "/transactions",
+        show_decimal_places: false,
+        time_format: "24h",
+        cutoff_day: 1,
+        akumulasi_saldo: false,
+        language: "id",
+      },
+    },
+  }),
+}));
+
 describe("RekapPageClient & RekapSettingsDialog", () => {
   afterEach(() => {
     cleanup();
@@ -81,15 +114,38 @@ describe("RekapPageClient & RekapSettingsDialog", () => {
     mockSearchParamTab = null;
   });
 
-  it("renders page header with title and 44px settings button", () => {
+  it("renders page header with export and 44px settings button", () => {
     render(<RekapPageClient />);
 
     expect(screen.getByRole("heading", { name: "Rekap Keuangan" })).toBeInTheDocument();
+
+    const exportButton = screen.getByRole("button", { name: "Export Laporan" });
+    expect(exportButton).toBeInTheDocument();
+    expect(exportButton.className).toContain("rounded-full");
 
     const settingsButton = screen.getByRole("button", { name: "Pengaturan Rekap" });
     expect(settingsButton).toBeInTheDocument();
     expect(settingsButton.className).toContain("size-11");
     expect(settingsButton.className).toContain("rounded-full");
+  });
+
+  it("opens export report dialog when export button is clicked", async () => {
+    render(<RekapPageClient />);
+
+    const exportButton = screen.getByRole("button", { name: "Export Laporan" });
+    fireEvent.click(exportButton);
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Export Laporan Keuangan" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Dari Tanggal")).toBeInTheDocument();
+    expect(screen.getByLabelText("Sampai Tanggal")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Export PDF" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Export XLSX" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Export CSV" })).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText("42")).toBeInTheDocument();
+    });
   });
 
   it("renders tabs Realtime, Bulanan, and Custom, defaulting to Realtime", () => {

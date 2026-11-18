@@ -572,9 +572,34 @@ Catatan: action ini memformat tanggal/waktu transaksi dan periode sesuai prefere
 
 ### `getExportCount`
 
-Deskripsi: menghitung jumlah transaksi user untuk tab export.
+Deskripsi: menghitung jumlah transaksi user untuk dialog export laporan di `/reports`, mendukung filter rentang tanggal opsional.
+
+Input:
+
+```ts
+filter?: {
+  dari?: string;
+  sampai?: string;
+}
+```
 
 Tabel: `transaksi`.
+
+### `getAccountExportSummary`
+
+Deskripsi: menghitung jumlah ringkasan entitas milik user (`walletsCount`, `categoriesCount`, `transactionsCount`, `debtsCount`, `budgetsCount`, `customPeriodsCount`) untuk kartu **Export Data Akun** di `/settings`.
+
+Output: `ActionResult<AccountExportSummary>`.
+
+Tabel: `rekening`, `kategori`, `transaksi`, `hutang`, `budget`, `rekap_periode_custom`.
+
+### `getAccountExportData`
+
+Deskripsi: mengambil payload backup lengkap data akun milik user (`metadata`, `account`, `preferences`, `data`, dan `summary`) untuk diunduh sebagai file JSON dari `/settings`. Query dibatasi ketat dengan `user_id` milik user aktif dan tidak menyertakan `user_sessions`, password, atau token keamanan.
+
+Output: `ActionResult<AccountBackupPayload>`.
+
+Tabel: `profiles`, `user_preferences`, `rekening`, `kategori`, `transaksi`, `hutang`, `hutang_cicilan`, `budget`, `rekap_periode_custom`.
 
 ## Profile Actions
 

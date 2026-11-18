@@ -979,6 +979,31 @@ const en: Dictionary = {
     export: {
       excelButton: "Download Excel",
       pdfButton: "Download PDF",
+      buttonLabel: "Export Report",
+      title: "Export Financial Report",
+      description:
+        "Download your financial transaction reports in PDF, XLSX, or CSV format.",
+      fromDateLabel: "From Date",
+      toDateLabel: "To Date",
+      resetFilter: "Reset Dates",
+      emptyFilterNote: "Leave blank to export all transactions.",
+      readyCount: "{count} transactions ready to export",
+      periodLabel: "Period:",
+      allTime: "All time",
+      periodStartFallback: "Beginning",
+      periodEndFallback: "Now",
+      formatNote:
+        "PDF and XLSX include financial summaries. CSV contains detailed transactions for data import.",
+      generating: "Generating...",
+      exportPdf: "Export PDF",
+      exportExcel: "Export XLSX",
+      exportCsv: "Export CSV",
+      toasts: {
+        fetchFailed: "Failed to retrieve report data",
+        noTransactions: "No transactions to export",
+        success: "{format} created successfully - {count} transactions",
+        error: "Failed to create {format}",
+      },
     },
   },
   settings: {
@@ -1179,6 +1204,28 @@ const en: Dictionary = {
         noTransactions: "No transactions to export",
         success: "{format} created successfully - {count} transactions",
         error: "Failed to create {format}",
+      },
+      accountTitle: "Export Account Data",
+      accountDescription:
+        "Download a complete backup of your CatatZ account data (profile, preferences, wallets, categories, transactions, debts, budgets, and custom periods) in a single JSON file.",
+      summaryTitle: "Account Data Included in Backup",
+      walletsLabel: "Wallets",
+      categoriesLabel: "Categories",
+      transactionsLabel: "Transactions",
+      debtsLabel: "Debts & Receivables",
+      budgetsLabel: "Budgets",
+      customPeriodsLabel: "Custom Periods",
+      reportsHintTitle: "Need Report Exports (PDF, XLSX, CSV)?",
+      reportsHintDescription:
+        "Transaction report exports with date range filters are now available on the Reports page.",
+      reportsLinkLabel: "Open Reports Page",
+      accountFormatNote:
+        "UTF-8 JSON format excluding active sessions, passwords, and security tokens.",
+      exportAccountButton: "Export Account Data (JSON)",
+      accountToasts: {
+        fetchFailed: "Failed to retrieve account summary or data",
+        success: "Account data backup downloaded successfully",
+        error: "Failed to generate account data backup file",
       },
     },
     deleteAccount: {

@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSystemPreferences } from "@/providers/system-preference-provider";
+import { useSetBreadcrumbTitle } from "@/providers/breadcrumb-title-provider";
 import { useTranslation } from "@/i18n/use-translation";
 import { ProporsiSaldoChart } from "./proporsi-saldo-chart";
 import { RekapDetailBreakdown } from "./rekap-detail-breakdown";
@@ -53,7 +54,7 @@ function MetricRow({
   const { formatRupiah } = useSystemPreferences();
 
   return (
-    <div className="flex items-center justify-between gap-4 border-b border-hairline py-3.5 last:border-b-0">
+    <div className="flex items-center justify-between gap-4 border-b border-hairline py-3 last:border-b-0">
       <div className="min-w-0">
         <span className="text-sm font-medium text-muted-foreground">{label}</span>
         {note && <p className="text-xs text-muted-foreground/75">{note}</p>}
@@ -85,6 +86,9 @@ export function RekapDetailClient({
   const formattedPeriod = formatPeriodLabel(detail.startDate, detail.endDate, rekapLocale);
   const displayTitle = jenis === "custom" && customName ? customName : formattedPeriod;
 
+  // Set topnav breadcrumb title mengikuti periode aktif atau nama periode custom
+  useSetBreadcrumbTitle(displayTitle);
+
   // D8: Net Hutang Piutang = (hutang_baru + cicilan_piutang) - (piutang_baru + cicilan_hutang)
   const hutangPiutangNet =
     detail.hutang_piutang.hutang_baru +
@@ -98,19 +102,17 @@ export function RekapDetailClient({
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
-      {/* Header & Navigasi Kembali */}
-      <div className="space-y-4">
-        <div>
-          <Link
-            href={`/reports?tab=${jenis}`}
-            className="inline-flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full"
+      {/* Top Navigation & Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1.5">
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 -ml-2 text-muted-foreground hover:text-foreground rounded-full h-8 px-2.5 w-fit"
           >
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-10 min-h-11 rounded-full border-hairline px-4 gap-2 text-sm font-medium hover:bg-surface-strong transition-colors"
-            >
-              <ArrowLeft className="size-4 shrink-0" />
+            <Link href={`/reports?tab=${jenis}`}>
+              <ArrowLeft className="h-4 w-4 shrink-0" />
               <span>
                 {dict.reports.detail.backTo.replace(
                   "{tab}",
@@ -119,13 +121,14 @@ export function RekapDetailClient({
                     : dict.reports.tabs.monthly,
                 )}
               </span>
-            </Button>
-          </Link>
-        </div>
+            </Link>
+          </Button>
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h1 className="text-2xl sm:text-[32px] font-normal tracking-[-0.4px] text-foreground">
+              {displayTitle}
+            </h1>
+            <div className="flex items-center gap-1.5 flex-wrap">
               <Badge
                 variant="secondary"
                 className="rounded-full bg-surface-strong px-2.5 py-0.5 text-xs font-medium text-muted-foreground border-none"
@@ -134,35 +137,38 @@ export function RekapDetailClient({
                   ? dict.reports.detail.customPeriodBadge
                   : dict.reports.detail.monthlyCycleBadge}
               </Badge>
-              <span className="font-mono text-xs text-muted-foreground">
+              <Badge
+                variant="outline"
+                className="rounded-full border-hairline bg-card px-2.5 py-0.5 font-mono text-xs font-normal text-muted-foreground"
+              >
                 {detail.daysInPeriod} {dict.reports.detail.days}
-              </span>
+              </Badge>
+              {jenis === "custom" && customName && (
+                <Badge
+                  variant="outline"
+                  className="rounded-full border-hairline bg-surface-soft px-2.5 py-0.5 font-mono text-xs font-normal text-muted-foreground"
+                >
+                  {formattedPeriod}
+                </Badge>
+              )}
             </div>
-            <h1 className="mt-1 text-[28px] sm:text-[32px] font-normal tracking-[-0.4px] text-foreground">
-              {displayTitle}
-            </h1>
-            {jenis === "custom" && customName && (
-              <p className="font-mono text-sm text-muted-foreground mt-0.5">
-                {formattedPeriod}
-              </p>
-            )}
           </div>
         </div>
       </div>
 
       {/* Tiga Kartu Sorotan Utama */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {/* Kartu Pengeluaran */}
-        <Card className="rounded-card border border-hairline bg-card p-5">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-xs font-semibold uppercase tracking-wider">
+        <Card className="rounded-card border border-hairline bg-card p-4 sm:p-5 transition-colors">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {dict.reports.detail.totalExpense}
             </span>
-            <span className="rounded-full bg-semantic-down/10 p-1.5 text-semantic-down">
+            <span className="h-7 w-7 rounded-full bg-semantic-down/10 flex items-center justify-center shrink-0 text-semantic-down">
               <ArrowDownRight className="size-4" />
             </span>
           </div>
-          <p className="mt-3 font-mono text-2xl font-bold tracking-tight text-semantic-down">
+          <p className="font-mono text-xl sm:text-2xl font-semibold tracking-tight text-semantic-down truncate">
             {formatRupiah(detail.total_expense)}
           </p>
           <p className="mt-1 font-mono text-xs text-muted-foreground">
@@ -174,16 +180,16 @@ export function RekapDetailClient({
         </Card>
 
         {/* Kartu Pemasukan */}
-        <Card className="rounded-card border border-hairline bg-card p-5">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-xs font-semibold uppercase tracking-wider">
+        <Card className="rounded-card border border-hairline bg-card p-4 sm:p-5 transition-colors">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {dict.reports.detail.totalIncome}
             </span>
-            <span className="rounded-full bg-semantic-up/10 p-1.5 text-semantic-up">
+            <span className="h-7 w-7 rounded-full bg-semantic-up/10 flex items-center justify-center shrink-0 text-semantic-up">
               <ArrowUpRight className="size-4" />
             </span>
           </div>
-          <p className="mt-3 font-mono text-2xl font-bold tracking-tight text-semantic-up">
+          <p className="font-mono text-xl sm:text-2xl font-semibold tracking-tight text-semantic-up truncate">
             {formatRupiah(detail.total_income)}
           </p>
           <p className="mt-1 font-mono text-xs text-muted-foreground">
@@ -195,18 +201,18 @@ export function RekapDetailClient({
         </Card>
 
         {/* Kartu Selisih */}
-        <Card className="rounded-card border border-hairline bg-card p-5">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-xs font-semibold uppercase tracking-wider">
+        <Card className="rounded-card border border-hairline bg-card p-4 sm:p-5 transition-colors">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {dict.reports.detail.netMain}
             </span>
-            <span className="rounded-full bg-surface-strong p-1.5 text-muted-foreground">
+            <span className="h-7 w-7 rounded-full bg-surface-strong flex items-center justify-center shrink-0 text-muted-foreground">
               <Scale className="size-4" />
             </span>
           </div>
           <p
             className={cn(
-              "mt-3 font-mono text-2xl font-bold tracking-tight",
+              "font-mono text-xl sm:text-2xl font-semibold tracking-tight truncate",
               valueColor(detail.net),
             )}
           >
@@ -219,15 +225,15 @@ export function RekapDetailClient({
       </div>
 
       {/* Grid 2 Kolom: Rincian Lengkap & Grafik Proporsi Saldo */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
         {/* Rincian Metrik Finansial Lengkap */}
-        <Card className="rounded-card border border-hairline bg-card">
-          <CardHeader className="p-6 pb-2">
+        <Card className="flex h-full flex-col rounded-card border border-hairline bg-card">
+          <CardHeader className="p-5 sm:p-6 pb-3 border-b border-hairline">
             <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
               {dict.reports.detail.financialBreakdownTitle}
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6 pt-0">
+          <CardContent className="flex-1 p-5 sm:p-6 pt-2">
             <div className="divide-y divide-hairline">
               <MetricRow
                 label={dict.reports.card.expense}

@@ -946,6 +946,29 @@ export interface Dictionary {
     export: {
       excelButton: string;
       pdfButton: string;
+      buttonLabel: string;
+      title: string;
+      description: string;
+      fromDateLabel: string;
+      toDateLabel: string;
+      resetFilter: string;
+      emptyFilterNote: string;
+      readyCount: string;
+      periodLabel: string;
+      allTime: string;
+      periodStartFallback: string;
+      periodEndFallback: string;
+      formatNote: string;
+      generating: string;
+      exportPdf: string;
+      exportExcel: string;
+      exportCsv: string;
+      toasts: {
+        fetchFailed: string;
+        noTransactions: string;
+        success: string;
+        error: string;
+      };
     };
   };
   settings: {
@@ -1134,6 +1157,25 @@ export interface Dictionary {
       toasts: {
         fetchFailed: string;
         noTransactions: string;
+        success: string;
+        error: string;
+      };
+      accountTitle: string;
+      accountDescription: string;
+      summaryTitle: string;
+      walletsLabel: string;
+      categoriesLabel: string;
+      transactionsLabel: string;
+      debtsLabel: string;
+      budgetsLabel: string;
+      customPeriodsLabel: string;
+      reportsHintTitle: string;
+      reportsHintDescription: string;
+      reportsLinkLabel: string;
+      accountFormatNote: string;
+      exportAccountButton: string;
+      accountToasts: {
+        fetchFailed: string;
         success: string;
         error: string;
       };
