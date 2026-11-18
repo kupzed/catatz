@@ -548,7 +548,7 @@ export function TransaksiFilterSheet({
         </div>
 
         {/* Fixed Footer dengan safe-area padding untuk home indicator bar di iOS */}
-        <SheetFooter className="px-5 sm:px-6 py-4 border-t border-hairline bg-card/95 backdrop-blur-sm shrink-0 flex flex-row items-center justify-between gap-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <SheetFooter className="px-5 sm:px-6 py-4 border-t border-hairline bg-card shrink-0 flex flex-row items-center justify-between gap-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <Button
             type="button"
             variant="outline"

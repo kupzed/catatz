@@ -118,20 +118,20 @@ export function ProporsiSaldoChart({
   }, [dict.reports.summary.remainingBalance, dict.reports.summary.totalExpense, isDefisit, sisaSaldo, totalDanaMasuk, totalExpense]);
 
   return (
-    <Card className="rounded-card border border-hairline bg-card">
-      <CardHeader className="p-6 pb-2">
-        <div className="flex items-center justify-between">
+    <Card className="flex h-full flex-col justify-between rounded-card border border-hairline bg-card">
+      <CardHeader className="p-5 sm:p-6 pb-3 border-b border-hairline">
+        <div className="flex items-center justify-between gap-2">
           <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             {dict.reports.detail.proportionExpenseVsBalance}
           </CardTitle>
           {isDefisit && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-semantic-down/10 px-2.5 py-0.5 text-xs font-semibold text-semantic-down">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-semantic-down/10 px-2.5 py-0.5 text-xs font-semibold text-semantic-down">
               <AlertTriangle className="size-3" /> {dict.reports.detail.deficitBadge}
             </span>
           )}
         </div>
       </CardHeader>
-      <CardContent className="p-6 pt-0 space-y-5">
+      <CardContent className="flex flex-1 flex-col justify-between p-5 sm:p-6 pt-4 space-y-5">
         {/* Visual Bar Chart ke Atas */}
         <div className="h-60 w-full pt-2">
           <ResponsiveContainer width="100%" height="100%">
@@ -182,35 +182,35 @@ export function ProporsiSaldoChart({
 
         {/* Legend Persentase & Nominal */}
         <div className="grid grid-cols-2 gap-3 pt-1">
-          <div className="rounded-input border border-hairline bg-surface-soft p-3">
+          <div className="min-w-0 rounded-input border border-hairline bg-surface-soft p-3">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span className="size-2 rounded-full bg-semantic-down" />
-              <span>{dict.reports.summary.totalExpense}</span>
+              <span className="size-2 shrink-0 rounded-full bg-semantic-down" />
+              <span className="truncate">{dict.reports.summary.totalExpense}</span>
             </div>
-            <div className="mt-1 flex items-baseline justify-between gap-2">
-              <span className="font-mono text-sm font-semibold text-foreground">
+            <div className="mt-1 flex items-baseline justify-between gap-2 min-w-0">
+              <span className="min-w-0 truncate font-mono text-sm font-semibold text-foreground">
                 {formatRupiah(totalExpense)}
               </span>
-              <span className="font-mono text-xs text-muted-foreground">
+              <span className="shrink-0 font-mono text-xs text-muted-foreground">
                 {persenExpense}%
               </span>
             </div>
           </div>
 
-          <div className="rounded-input border border-hairline bg-surface-soft p-3">
+          <div className="min-w-0 rounded-input border border-hairline bg-surface-soft p-3">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span className="size-2 rounded-full bg-primary" />
-              <span>{dict.reports.summary.remainingBalance}</span>
+              <span className="size-2 shrink-0 rounded-full bg-primary" />
+              <span className="truncate">{dict.reports.summary.remainingBalance}</span>
             </div>
-            <div className="mt-1 flex items-baseline justify-between gap-2">
+            <div className="mt-1 flex items-baseline justify-between gap-2 min-w-0">
               <span
-                className={`font-mono text-sm font-semibold ${
+                className={`min-w-0 truncate font-mono text-sm font-semibold ${
                   isDefisit ? "text-semantic-down" : "text-foreground"
                 }`}
               >
                 {isDefisit ? `-${formatRupiah(Math.abs(sisaSaldo))}` : formatRupiah(sisaSaldo)}
               </span>
-              <span className="font-mono text-xs text-muted-foreground">
+              <span className="shrink-0 font-mono text-xs text-muted-foreground">
                 {persenSisa}%
               </span>
             </div>

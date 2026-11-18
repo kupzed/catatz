@@ -155,11 +155,11 @@ function BreakdownRows({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <h3 className="text-sm font-semibold text-muted-foreground">
           {title}
         </h3>
-        <span className="text-xs font-mono text-muted-foreground">
+        <span className="shrink-0 rounded-full bg-surface-strong px-2.5 py-0.5 text-xs font-mono text-muted-foreground">
           {mode === "kategori"
             ? dict.reports.realtime.categoryCount.replace("{count}", String(items.length))
             : dict.reports.realtime.titleCount.replace("{count}", String(items.length))}
@@ -293,7 +293,7 @@ export function RekapDetailBreakdown({ detail }: RekapDetailBreakdownProps) {
   return (
     <Card className="rounded-card border border-hairline bg-card">
       <Tabs value={mode} onValueChange={handleModeChange} className="w-full">
-        <CardHeader className="p-6 pb-2">
+        <CardHeader className="p-5 sm:p-6 pb-4 border-b border-hairline">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface-strong text-primary">
@@ -357,8 +357,8 @@ export function RekapDetailBreakdown({ detail }: RekapDetailBreakdownProps) {
                   className={cn(
                     "rounded-full px-3 py-1 text-xs font-semibold transition-colors",
                     donutType === "expense"
-                      ? "bg-card text-semantic-down shadow-sm"
-                      : "text-muted-foreground hover:text-foreground",
+                      ? "bg-card text-semantic-down border border-hairline"
+                      : "border border-transparent text-muted-foreground hover:text-foreground",
                   )}
                 >
                   {dict.reports.detail.expenseButton}
@@ -369,8 +369,8 @@ export function RekapDetailBreakdown({ detail }: RekapDetailBreakdownProps) {
                   className={cn(
                     "rounded-full px-3 py-1 text-xs font-semibold transition-colors",
                     donutType === "income"
-                      ? "bg-card text-semantic-up shadow-sm"
-                      : "text-muted-foreground hover:text-foreground",
+                      ? "bg-card text-semantic-up border border-hairline"
+                      : "border border-transparent text-muted-foreground hover:text-foreground",
                   )}
                 >
                   {dict.reports.detail.incomeButton}

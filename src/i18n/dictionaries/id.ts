@@ -981,6 +981,31 @@ const id: Dictionary = {
     export: {
       excelButton: "Unduh Excel",
       pdfButton: "Unduh PDF",
+      buttonLabel: "Export Laporan",
+      title: "Export Laporan Keuangan",
+      description:
+        "Unduh laporan transaksi keuangan Anda dalam format PDF, XLSX, atau CSV.",
+      fromDateLabel: "Dari Tanggal",
+      toDateLabel: "Sampai Tanggal",
+      resetFilter: "Reset Tanggal",
+      emptyFilterNote: "Kosongkan untuk export semua transaksi.",
+      readyCount: "{count} transaksi siap diexport",
+      periodLabel: "Periode:",
+      allTime: "Semua waktu",
+      periodStartFallback: "Awal",
+      periodEndFallback: "Sekarang",
+      formatNote:
+        "PDF dan XLSX berisi ringkasan keuangan. CSV berisi rincian transaksi untuk import data.",
+      generating: "Membuat...",
+      exportPdf: "Export PDF",
+      exportExcel: "Export XLSX",
+      exportCsv: "Export CSV",
+      toasts: {
+        fetchFailed: "Gagal mengambil data laporan",
+        noTransactions: "Tidak ada transaksi untuk diexport",
+        success: "{format} berhasil dibuat - {count} transaksi",
+        error: "Gagal membuat {format}",
+      },
     },
   },
   settings: {
@@ -1183,6 +1208,28 @@ const id: Dictionary = {
         noTransactions: "Tidak ada transaksi untuk diexport",
         success: "{format} berhasil dibuat - {count} transaksi",
         error: "Gagal membuat {format}",
+      },
+      accountTitle: "Export Data Akun",
+      accountDescription:
+        "Unduh salinan lengkap data akun CatatZ Anda (profil, preferensi, rekening, kategori, transaksi, hutang/piutang, budget, dan periode kustom) dalam satu file JSON.",
+      summaryTitle: "Cakupan Data Akun Siap Backup",
+      walletsLabel: "Rekening",
+      categoriesLabel: "Kategori",
+      transactionsLabel: "Transaksi",
+      debtsLabel: "Hutang & Piutang",
+      budgetsLabel: "Budget",
+      customPeriodsLabel: "Periode Custom",
+      reportsHintTitle: "Butuh Export Laporan (PDF, XLSX, CSV)?",
+      reportsHintDescription:
+        "Fitur export laporan transaksi berdasarkan rentang tanggal kini tersedia di halaman Rekap.",
+      reportsLinkLabel: "Buka Halaman Rekap",
+      accountFormatNote:
+        "Format JSON UTF-8 tanpa sesi aktif, kata sandi, atau token keamanan.",
+      exportAccountButton: "Export Data Akun (JSON)",
+      accountToasts: {
+        fetchFailed: "Gagal mengambil ringkasan atau data akun",
+        success: "Backup data akun berhasil diunduh",
+        error: "Gagal membuat file backup data akun",
       },
     },
     deleteAccount: {
